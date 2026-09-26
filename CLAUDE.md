@@ -28,7 +28,7 @@ Every change goes round the same loop, and each round leaves something that make
 3. **Build** on a `feature/<short-name>` branch from `main`, one change per branch.
 4. **Prove.** Checks pass, screenshots looked at, and the bot on seeds 1–3 for economy changes.
 5. **Ship.** A PR from `.github/pull_request_template.md`; the owner squash-merges; `main` publishes.
-6. **Learn.** A bug that reached players gets the check that would have caught it. A change that sets a rule gets a record in `docs/decisions/`.
+6. **Learn.** A bug that reached players gets the check that would have caught it. A change that sets a rule gets a record in `docs/decisions/`. After each merge, a short look back at the session that built it goes in `docs/LESSONS.md`, and a lesson that would have saved real time or credits changes the playbook that allowed it.
 
 Playbooks for each part are in `.claude/skills/`: `feature` (issue to merged PR, and splitting a big feature across several sessions), `balance` (measuring with the bot), `release` (history and save fixtures) and `steward` (getting a PR to green and merging parts). How each system works is in `docs/SYSTEMS.md`. Keep these notes and that file true: a PR that changes how something works updates them in the same PR.
 
@@ -122,7 +122,11 @@ How each system works is in `docs/SYSTEMS.md`: levels and the Masterplan, routes
     - `SIMX` exposes functions to the checks, and a part's checks go in `tools/checks/<part>.mjs`;
     - new upgrades go in the part's file with `Object.assign(UPG,{...})`.
   - `terminalFaults` (part of `layoutFaults`) checks that every desk, kiosk, lane, passport desk, e-gate, carousel and queue sits in its hall.
-  - **Departures** (`43-departures.js`): `enterLandside`, `updateCheckin` (desks and kiosks), `finishCheckin`, `enterSecurity` and `updateSecurity` (lanes and fast track).
+  - **Departures** (`43-departures.js`, checks in `tools/checks/departures.mjs`): its places (`deskX`, `laneX`, the queues' `qSlot`, `secSlot`…) live there too.
+    - **Check-in:** four islands (`IX`) of two desks back to back, each with its own queue. `R.ciQ` holds every check-in queue in joining order, with `p.isl` naming it: an island, the kiosks (`CI_K`) or bag drop (`CI_B`). `enterLandside` joins the quickest; a party stays together.
+    - **Bag drop** (upgrade `bagdrop`, in the Self-service plan): counters that take 40% of a check-in, staffed and rostered like desks (`OWN.drops`, `WAGE.drops`, `dropsOpen`). Kiosk passengers with bags go on to it, and online check-in then covers passengers with bags, who go straight there. `finishCheckin(p,x)` puts each bag on `R.belt` at its desk or counter.
+    - **Security:** `enterSecurity` sends passengers through a boarding-pass gate into the hall, then `R.secQ` (`p.famL` marks families and those who need help, who have as many lanes as their share of the queue, at least one when two lanes are open). A lane divests (`divestT`), then the passenger walks through the scanner (`scan`) to repack. 1 bag in 12 is searched at a table for 2 min, 1 in 30 with CT scanners (upgrade `ctscan`, plan `t_ct`, which also makes trays 25% quicker). `clearSec` marks the passenger `cleared` and hands them to `airside`.
+    - `R.dep` (`DEP()`) keeps the search queue and the family lane count, and starts afresh when a load replaces `R.lanes`. `DEP_LOG` counts what the checks read.
 
   - **Arrivals** (`44-arrivals.js`):
     - **Immigration.** `R.arrQ` holds everyone queuing, in two queues: the passport desks' (`arrSlot`) and the e-gates' (`p.eg`, `egSlot`). E-gate passports (`p.elig`) join the e-gates' unless the desks would be quicker; e-gates take only those, and desks help with it when theirs is empty. Rostering still counts all of `R.arrQ`.
@@ -131,7 +135,12 @@ How each system works is in `docs/SYSTEMS.md`: levels and the Masterplan, routes
     - **Meeters** (`R.meet`) wait at the barrier with signs for flights landed or due within 30 min and walk off with their passenger. They're drawn only, use their own generator (`meetRnd`) and don't run headless.
     - `drawArrivals` (`TERM_DRAW`) draws the passport desks with officers, e-gates, customs, the arrivals hall and the taxi rank; `TERM_PANEL.arr` shows today's immigration and customs (`R.arrSt`, reset daily).
 
-  - **Baggage** (`45-baggage.js`): `updateBelt` takes checked bags to the baggage hall, where they count as ready for the hold (`F.bagsIn`); `updateReclaimBelt` brings arriving bags to the carousel (`A.reclaim`).
+  - **Baggage** (`45-baggage.js`, Terminal › Baggage). Bags are counts per flight at each stage (`F.bg`, `A.bg`, the queues in `R.bag`); only a sample is drawn.
+    - `updateBelt`: checked bags go from the belt through screening (one in 20 to the search room), the sorter (`bagsys` sets its speed) and make-up to tug trains, which take them through the tunnel to the stand, where they count as ready for the hold (`F.bagsIn`).
+    - Make-up positions go to flights earliest departure first. Other flights' bags wait in the early bag store, or circle the sorter and take its capacity; when that's full, the sorter backs up.
+    - A flight that's ready to go after its departure time waits five minutes (`BAG_GRACE`) for bags on their way, then leaves behind those that haven't reached a tug (`leaveBags`): `F.checkedTotal` drops, and each costs a courier and some rating (`bags`), counted in `G.bagMiss` and the day's report.
+    - Transfer bags (`A.xb`, set in `newFlight`) come off first and go through screening and the sorter to their next flight, so tight connections can miss.
+    - `updateReclaimBelt`: arriving bags go by tug to the hall and onto the flight's carousel (`A.car`, from `carOf`, which `carX`/`carY` follow), up to 45 bags a carousel. The board shows ON BELT n, or BAGS LATE while another flight's bags fill the carousel.
 
   - **Market place** (`46-market.js`): `airside` decides between a shop and the gate, with `toShop`, `toGate` and the shop steps.
 

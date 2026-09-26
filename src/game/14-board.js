@@ -19,7 +19,7 @@ function renderBoard(){
   $('#brows').innerHTML=G.stands.map((s,i)=>s.built?`<div class="brow${R.sel===i?' sel':''}" data-stand="${i}"><span class="flaps" data-f="std"></span><span class="flaps" data-f="flt"></span><span class="to"><span class="flaps" data-f="dest"></span><span class="city" data-f="city"></span></span><span class="flaps" data-f="gate"></span><span class="flaps st" data-f="st"></span></div>`:'').join('');
   $$('.brow').forEach(r=>{const q=f=>r.querySelector(`[data-f="${f}"]`);mkFlaps(q('std'),5);mkFlaps(q('flt'),6);mkFlaps(q('dest'),3);mkFlaps(q('gate'),2);mkFlaps(q('st'),10);r._q=q});
 }
-function arrStatus(F){const A=F.arr;if(!A.started)return F.landed?'LANDED':'EXPECTED';if(A.onboard>0)return 'DEPLANING';if(!A.done)return A.sent<A.bags||A.reclaim>0||R.pax.some(p=>p.A===A&&p.state==='reclaim')?'BAGGAGE':'ARRIVED';return 'COMPLETE'}
+function arrStatus(F){const A=F.arr;if(!A.started)return F.landed?'LANDED':'EXPECTED';if(A.onboard>0)return 'DEPLANING';if(!A.done)return bagStatus(A)||(A.sent<A.bags||A.reclaim>0||R.pax.some(p=>p.A===A&&p.state==='reclaim')?'BAGGAGE':'ARRIVED');return 'COMPLETE'}
 const trnIds=()=>sortedLines().filter(L=>serves(L,'air')).map(L=>L.id);
 function nextDep(L){const f=lineFreq(L);if(!f)return null;const h=60/f;let o=0;for(const ch of L.id)o=(o*7+ch.charCodeAt(0))%97;o=o%h;return Math.ceil((G.clock-o)/h)*h+o}
 function updateBoard(){

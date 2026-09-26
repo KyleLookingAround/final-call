@@ -60,3 +60,12 @@ When several branches were built side by side (the `feature` playbook's "Splitti
 ## Done
 
 Green checks, no conflicts, and every review thread answered. The owner merges with Squash and merge; confirm the Pages run afterwards.
+
+## After merging: look back at the session
+
+Every merged PR gets a short look back at the session that built it, so the next one costs less. Keep it to a few minutes.
+
+1. **Numbers.** From the session's record (`get_session`): what it cost, how much of its context it used, and when it started. From the PR: when it opened and merged, how many pushes came after it opened, and any red CI runs.
+2. **Friction.** What slowed it or needed someone else. Look at what it got stuck on, what the PR says it left undone or saw fail once, and what the merge needed: conflicts, scope fixes, a rebalance.
+3. **Record it** in `docs/LESSONS.md`: one entry per PR, a line per lesson.
+4. **Act on it** when a lesson would have saved real time or credits, or it comes up a second time. Change the playbook, brief, check or tool that would have prevented it, in the same PR as the entry. Otherwise the entry is enough.
