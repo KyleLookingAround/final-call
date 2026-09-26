@@ -36,16 +36,6 @@ function drawRooms(){
   if(isBuilding('pier:B'))hatchLabel(cx,cy,bprog('pier:B'),'BUILDING '+n);
   else mono(G.level>=PIER.lvl?`${n} · ${money(PIER.cost)}`:`${n} · needs ${LEVELS[PIER.lvl].name}`,cx,cy,'#4A535D',11,'center');
 }
-// a shop unit, turned to face its concourse; its words are kept the right way up
-function drawShopUnit(j){
-  const s=G.shops[j],a=((SHOP_A[j]%360)+360)%360;ctx.save();ctx.translate(SHOP_X[j],SHOP_Y[j]);ctx.rotate(a*Math.PI/180);
-  if(s){const t=SHOPS[s.type];ctx.fillStyle='#242A31';ctx.fillRect(0,0,118,40);ctx.fillStyle=t.col;ctx.fillRect(0,38,118,3);
-    if(a>90&&a<=270){ctx.translate(118,40);ctx.rotate(Math.PI)}
-    ctx.font='700 11px "Saira Condensed","Arial Narrow",sans-serif';ctx.fillStyle=t.col;ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.fillText(t.name.toUpperCase(),7,16);
-    mono(`Lv ${s.lvl+1} · ${money(s.earned||0)}`,7,30,'#909AA4',8.5)}
-  else{ctx.strokeStyle='#343C45';ctx.lineWidth=1;ctx.setLineDash([3,3]);ctx.strokeRect(.5,.5,117,39);ctx.setLineDash([]);if(a>90&&a<=270){ctx.translate(118,40);ctx.rotate(Math.PI)}mono('UNIT TO LET',59,24,'#4A535D',8.5,'center')}
-  ctx.restore();
-}
 function shopHit(j,x,y){const a=SHOP_A[j]*Math.PI/180,c=Math.cos(a),s=Math.sin(a),dx=x-SHOP_X[j],dy=y-SHOP_Y[j],u=dx*c+dy*s,v=dy*c-dx*s;return u>=0&&u<=118&&v>=0&&v<=40}
 // a 2D layout's apron furniture: taxi lines, roads, the control tower and names painted on the ground
 function drawPlanApron(){

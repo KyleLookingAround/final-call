@@ -203,9 +203,9 @@ const layoutDrains=i=>G.layoutNext&&i>=LAYOUTS[G.layoutNext].stands.length;
 const AT_STAND=new Set(['gate','toGate','bridge','aisle','sitting','dAisle','dBridge']),IN_PLANE=new Set(['bridge','aisle','sitting','dAisle','dBridge']);
 function switchLayout(id){
   const oXF=XF.map(t=>({...t})),old=STAND.slice(),from=LAY.name;
-  for(const p of R.pax)p.roomId=p.room!=null&&ROOMS[p.room]?ROOMS[p.room].id:null; // rooms are numbered afresh for each layout
+  const rid=R.pax.map(p=>p.room!=null&&ROOMS[p.room]?ROOMS[p.room].id:null); // rooms are numbered afresh for each layout
   G.layout=id;G.layoutNext=null;G.layoutAt=null;applyLayout(id);
-  for(const p of R.pax){p.room=p.roomId!=null?ROOM_ID[p.roomId]??ROOM_MAIN():p.room;delete p.roomId}
+  R.pax.forEach((p,k)=>{p.room=rid[k]!=null?ROOM_ID[rid[k]]??ROOM_MAIN():p.room});
   // stands and shop units the new layout doesn't have are sold at their resale value
   let refund=0;
   G.stands.forEach((st,i)=>{if(i>=STAND_X.length&&st.built){refund+=Math.round((old[i]?old[i].cost:0)*0.4);G.stands[i]={built:false,ac:null,method:'random',rear:false,route:'mixed'}}});

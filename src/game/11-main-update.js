@@ -17,11 +17,12 @@ function update(dt){
   updateArrivals(dt,D);
   let dead=false;
   for(const p of R.pax){
-    if(p.state==='bridge'||p.state==='aisle'||p.state==='dAisle'||p.state==='dBridge')moveTo(p,p.tx,p.ty,260,dt);
-    else if(p.state==='sitting'){if(moveTo(p,p.tx,p.ty,140,dt))p.dead=true}
+    const s=p.state; // read once: passengers come in many shapes, so each read of a field is slow
+    if(s==='bridge'||s==='aisle'||s==='dAisle'||s==='dBridge')moveTo(p,p.tx,p.ty,260,dt);
+    else if(s==='sitting'){if(moveTo(p,p.tx,p.ty,140,dt))p.dead=true}
     if(p.dead)dead=true;
   }
-  if(dead)R.pax=R.pax.filter(p=>!p.dead);
+  if(dead){const P=R.pax;let n=0;for(const p of P)if(!p.dead)P[n++]=p;P.length=n} // in place, keeping the order
   if(!R.sim){for(const f of R.floaters)f.t+=dt;R.floaters=R.floaters.filter(f=>f.t<(f.big?2.2:1))}
 }
 

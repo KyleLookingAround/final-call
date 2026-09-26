@@ -21,8 +21,9 @@ export default async function({open,ok,saveText}){
       let strand={i};if(i>=0){const F=R.st[i].F;G.clock=Math.floor(G.clock/1440)*1440+1440+60+0.5;R.lastMin=Math.floor(G.clock);F.std=G.clock-61;R.fx.storm=G.clock+30;
         for(const j of S.SIDX)if(j!==i&&R.st[j].F)R.st[j].F.stranded=true;for(const m of R.rwy.q)m.F.stranded=true;
         S.hotelStranded();const n=G.hotelStays.filter(s=>s[0]==='strand').length;strand={i,booked:F.booked,n,city:G.hotelBook.city-city0,paid:Math.round(cash0-G.cash),flag:!!F.stranded};S.hotelStranded();strand.again=G.hotelStays.filter(s=>s[0]==='strand').length}
-      R.sim=false;return {over,peak,rooms:S.hotelRooms(),away,late:late.length,lateOk,early:early.length,earlyOk,crew,strand}});
-    ok('hotel: never more guests than rooms, and a full hotel turns guests away',r.over===0&&r.peak===r.rooms&&r.away>0,`peak ${r.peak}/${r.rooms}, ${r.away} turned away`+(errs.length?' '+errs[0]:''));
+      R.sim=false;return {over,peak,rooms:S.hotelRooms(),hold:Math.min(S.hotelRooms()>>2,Math.ceil(G.crews.length/3)),away,late:late.length,lateOk,early:early.length,earlyOk,crew,strand}});
+    // rooms kept back for crews (crewHold) count as full for paying guests
+    ok('hotel: never more guests than rooms, and a full hotel turns guests away',r.over===0&&r.peak>=r.rooms-r.hold&&r.away>0,`peak ${r.peak}/${r.rooms} with up to ${r.hold} kept for crews, ${r.away} turned away`+(errs.length?' '+errs[0]:''));
     ok('hotel: crews resting at the hotel are ready sooner',r.crew.hotel<r.crew.none&&r.crew.none===720,JSON.stringify(r.crew));
     const s=r.strand;ok('hotel: stranded passengers get rooms, and the rest go to city hotels',s.flag&&s.n===Math.min(40,s.booked)&&s.city===s.booked-s.n&&s.paid>0&&s.again===s.n,JSON.stringify(s));
     ok('hotel: late arrivals walk through the walkway to the lobby',r.late>=5&&r.lateOk===r.late,`${r.lateOk}/${r.late}`);
