@@ -34,7 +34,7 @@ function tapAt(px,py){
   if(R.view==='region'){regionTap(wx,wy);return}
   if(R.view==='world'){worldTap(wx,wy);return}
   if(wy<AF_Y){setTab('ground');return}
-  if(wy>764&&wx<340&&(airKind('tram')||R.tram.x!=null)){setTab('region');return}
+  if(wy>764+LAND_DY&&wx<340&&(airKind('tram')||R.tram.x!=null)){setTab('region');return}
   if(wy>LAND_B+2){R.sSub='landside';setTab('sales');return}
   if(wy<SEC_Y){
     if(SHOP_X.some((x,j)=>shopOpen(j)&&shopHit(j,wx,wy))){goTo('sales','.shopcard');return}

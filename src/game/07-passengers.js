@@ -9,19 +9,19 @@ function spawn(p){
   if(tk==='bus'){p.state='bus';R.busQ.push(p);return}
   let x=null,y=0;
   if(rnd()<0.42*(R.reg?R.reg.parkMul:1)){const b=parkCar();if(b>=0){const q=BAY(b);x=q.x;y=q.y;earn(carFee(p.F),'landside',q.x,q.y-8,'#9FC2E0')}else R.lotFull=G.clock}
-  if(x==null){x=40+rnd()*260;y=648+rnd()*12}
+  if(x==null){x=40+rnd()*260;y=648+LAND_DY+rnd()*12}
   walkIn(p,x,y);
 }
 function spawnParty(list){const L=list[0];spawn(L);for(let k=1;k<list.length;k++){const p=list[k];if(L.state==='train'){p.state='train';R.platform.push(p)}else if(L.state==='tram'){p.state='tram';R.tramQ.push(p)}else if(L.state==='bus'){p.state='bus';R.busQ.push(p)}else walkIn(p,L.x+(k%2?6:-6)*Math.ceil(k/2),L.y+(k%2?3:-2))}}
-function walkIn(p,x,y){p.x=x;p.y=y;p.state='walkIn';p.tx=DOOR.x+(rnd()-0.5)*22;p.ty=DOOR.y-6;R.pax.push(p)}
+function walkIn(p,x,y){p.x=x;p.y=y;p.state='walkIn';p.tx=DOOR.x+(rnd()-0.5)*22;p.ty=DOOR.y-6;p.room=hallId('out');route(p,hallId('ci'));R.pax.push(p)} // in through the check-in hall's doors
 function enterLandside(p){if(p.online)enterSecurity(p);else{p.state='queue';R.ciQ.push(p)}}
 function updateTrain(dt){
   if(!G.lv.rail)return;const T=R.train,ft=vehFreq('train');
-  if(!ft&&R.platform.length){R.platform.forEach(p=>walkIn(p,40+rnd()*260,648+rnd()*12));R.platform=[]}
+  if(!ft&&R.platform.length){R.platform.forEach(p=>walkIn(p,40+rnd()*260,648+LAND_DY+rnd()*12));R.platform=[]}
   if(T.state==='away'){if(!ft)return;T.t-=dt;if(T.t<=0){T.state='in';T.t=0;const L=vehLine('train');T.col=L?shade(L.col,L.mode==='hsr'?0.85:0.62):'#3E6A8C';T.cars=L?(L.mode==='hsr'?3:2)+(L.cars||0):3;T.nose=L&&L.mode==='hsr'}}
   else if(T.state==='in'){T.t+=dt;const k=Math.min(1,T.t/1.2);T.x=-300+330*(1-Math.pow(1-k,2));if(k>=1){T.state='dwell';T.t=1.4;
-    const n=R.platform.length;R.platform.forEach(p=>walkIn(p,T.x+20+rnd()*230,712));R.platform=[]}}
-  else if(T.state==='dwell'){T.t-=dt;if(T.t<=0&&syncKind('train')&&walkersTo(704)&&(T.extra=(T.extra||0)+dt)<3)T.t=0.05;if(T.t<=0){T.state='out';T.t=0;T.extra=0}}
+    const n=R.platform.length;R.platform.forEach(p=>walkIn(p,T.x+20+rnd()*230,712+LAND_DY));R.platform=[]}}
+  else if(T.state==='dwell'){T.t-=dt;if(T.t<=0&&syncKind('train')&&walkersTo(704+LAND_DY)&&(T.extra=(T.extra||0)+dt)<3)T.t=0.05;if(T.t<=0){T.state='out';T.t=0;T.extra=0}}
   else if(T.state==='out'){T.t+=dt;const k=Math.min(1,T.t/1.2);T.x=30-330*k*k;if(k>=1){T.state='away';T.t=Math.max(1.5,60/Math.max(1,vehFreq('train'))-3.8);T.x=null}}
 }
 function updateRunway(dt,D){
@@ -41,12 +41,12 @@ function enterSecurity(p){
   } else {p.state='secQ';R.secQ.push(p)}
 }
 function finishCheckin(p,x){
-  if(p.checked){if(G.lv.bagfee>0)earn(p.F.ac.fare*0.5,'bags',x,535,'#D9A066',p.F);R.belt.push({x,F:p.F})}
+  if(p.checked){if(G.lv.bagfee>0)earn(p.F.ac.fare*0.5,'bags',x,691,'#D9A066',p.F);R.belt.push({x,F:p.F})}
   enterSecurity(p);
 }
-// after security (or off a connecting flight, in that stand's room): to a shop, or to the gate
+// after security (into the market place), or off a connecting flight (in that stand's room): to a shop, or to the gate
 function airside(p,x,room){
-  p.x=x;p.y=516;p.room=room??ROOM_MAIN();
+  if(room==null){p.x=x;p.y=SEC_LINE-8;p.room=hallId('mkt')}else{p.x=x;p.y=516;p.room=room}
   const F=p.F,left=F.std-G.clock,built=[];G.shops.forEach((s,j)=>{if(s&&shopOpen(j))built.push(j)});
   if(p.leader){const L=p.leader;if((L.state==='toShop'||L.state==='shop')&&G.shops[L.shop]&&left>15){p.state='toShop';p.shop=L.shop;
     {const t=clamp(L.su+(rnd()-0.5)*16,0,116);shopPt(L.shop,t,47+(rnd()-0.5)*4);p.tx=WP.x;p.ty=WP.y;p.su=t}
@@ -84,28 +84,28 @@ function updateLandside(dt,D){
   for(let i=0;i<8;i++){
     const d=R.desks[i]||(R.desks[i]={p:null,t:0});
     if(i<D.desks&&R.ciQ.length)take(d,()=>R.ciQ.shift(),'desk',q=>D.checkin*(q.leader?0.4:1)*(q.type==='prm'?1.5:1));
-    if(d.p) serve(d,deskX(i),541,dt,p=>finishCheckin(p,deskX(i)),deskX(i)+4,549);
+    if(d.p) serve(d,deskX(i),707,dt,p=>finishCheckin(p,deskX(i)),deskX(i)+4,715);
   }
   for(let i=0;i<4;i++){
     const k=R.kiosks[i]||(R.kiosks[i]={p:null,t:0});
     if(i<D.kiosks)take(k,()=>{const n=Math.min(14,R.ciQ.length);for(let j=0;j<n;j++)if(!R.ciQ[j].checked)return R.ciQ.splice(j,1)[0];return null},'desk',D.kiosk);
-    if(k.p) serve(k,kioskX(i),541,dt,p=>finishCheckin(p,kioskX(i)),kioskX(i)+3,549);
+    if(k.p) serve(k,kioskX(i),707,dt,p=>finishCheckin(p,kioskX(i)),kioskX(i)+3,715);
   }
   R.ciQ.forEach((p,i)=>{p.wait+=dt;const s=ciSlot(i);moveTo(p,s.x,s.y,70*p.spd,dt)});
   for(let i=0;i<8;i++){
     const L=R.lanes[i]||(R.lanes[i]={p:null,t:0});
     if(i<D.lanes&&R.secQ.length)take(L,()=>R.secQ.shift(),'sec',D.sec);
-    if(L.p) serve(L,laneX(i),534,dt,p=>airside(p,laneX(i)),laneX(i),544);
+    if(L.p) serve(L,laneX(i),SEC_LINE+12,dt,p=>airside(p,laneX(i)),laneX(i),SEC_LINE+22);
   }
-  if(D.ft){const L=R.ftL;if(R.ftQ.length)take(L,()=>R.ftQ.shift(),'sec',D.sec*0.6);if(L.p)serve(L,FT_X,534,dt,p=>airside(p,FT_X),FT_X,544)}
+  if(D.ft){const L=R.ftL;if(R.ftQ.length)take(L,()=>R.ftQ.shift(),'sec',D.sec*0.6);if(L.p)serve(L,FT_X,SEC_LINE+12,dt,p=>airside(p,FT_X),FT_X,SEC_LINE+22)}
   else if(R.ftQ.length){while(R.ftQ.length){const p=R.ftQ.shift();p.state='secQ';R.secQ.push(p)}}
   R.secQ.forEach((p,i)=>{p.wait+=dt;const s=secSlot(i);moveTo(p,s.x,s.y,75*p.spd,dt)});
   R.ftQ.forEach((p,i)=>{p.wait+=dt;const s=ftSlot(i);moveTo(p,s.x,s.y,75*p.spd,dt)});
   const beltV=80*(1+0.3*G.lv.bagsys);
-  for(const b of R.belt){b.x+=beltV*dt;if(b.x>=478){b.F.bagsIn++;b.done=true}}
+  for(const b of R.belt){b.x+=beltV*dt;if(b.x>=BAG_HALL[0]){b.F.bagsIn++;b.done=true}}
   if(R.belt.some(b=>b.done)) R.belt=R.belt.filter(b=>!b.done);
   for(const p of R.pax){
-    if(p.state==='walkIn'){if(moveTo(p,p.tx,p.ty,110*p.spd,dt))enterLandside(p)}
+    if(p.state==='walkIn'){if(walk(p,110*p.spd,dt))enterLandside(p)}
     else if(p.state==='toShop'){if(!G.shops[p.shop])toGate(p);else if(walk(p,D.cwalk*p.spd*walkMul(p),dt)){p.state='shop';p.t=SHOPS[G.shops[p.shop].type].dwell;p.t0=p.t}}
     else if(p.state==='shop'){
       const F=p.F,hurry=F.plane.state==='boarding'&&G.clock>=F.std-12;

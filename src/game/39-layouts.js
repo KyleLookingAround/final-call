@@ -177,7 +177,7 @@ function applyLayout(id){
   fill(STAND_AFTER,L.stands.map((s,i)=>s.after!=null?s.after:(o=>o>0?STAND_ORDER[o-1]:-1)(STAND_ORDER.indexOf(i))));
   fill(SHOP_X,L.shops.map(s=>s[0]));fill(SHOP_NAME,L.shops.map(s=>s[1]));fill(SHOP_PH,L.shops.map(s=>s[2]||1));
   fill(SHOP_Y,L.shops.map(s=>s[4]??452));fill(SHOP_A,L.shops.map(s=>s[5]||0));
-  fill(XF,L.stands.map(standXf));buildRooms(L);AF_Y=L.top||0;Y0=AF_Y-180;placeBadges();
+  fill(XF,L.stands.map(standXf));ROOM_DOORS=[...(L.doors||[]),...TERM_DOORS];buildRooms({...L,rooms:[...L.rooms,...TERM_ROOMS],doors:ROOM_DOORS});AF_Y=L.top||0;Y0=AF_Y-180;placeBadges();
 }
 
 const busMul=i=>STAND_KIND[i]!=='remote'?1:!G.lounges&&(R.fx.rain>G.clock||R.fx.snow>G.clock)?1.4:2.2; // buses outpace walkers, less so in bad weather; mobile lounges don't mind it
@@ -203,7 +203,9 @@ const layoutDrains=i=>G.layoutNext&&i>=LAYOUTS[G.layoutNext].stands.length;
 const AT_STAND=new Set(['gate','toGate','bridge','aisle','sitting','dAisle','dBridge']),IN_PLANE=new Set(['bridge','aisle','sitting','dAisle','dBridge']);
 function switchLayout(id){
   const oXF=XF.map(t=>({...t})),old=STAND.slice(),from=LAY.name;
+  for(const p of R.pax)p.roomId=p.room!=null&&ROOMS[p.room]?ROOMS[p.room].id:null; // rooms are numbered afresh for each layout
   G.layout=id;G.layoutNext=null;G.layoutAt=null;applyLayout(id);
+  for(const p of R.pax){p.room=p.roomId!=null?ROOM_ID[p.roomId]??ROOM_MAIN():p.room;delete p.roomId}
   // stands and shop units the new layout doesn't have are sold at their resale value
   let refund=0;
   G.stands.forEach((st,i)=>{if(i>=STAND_X.length&&st.built){refund+=Math.round((old[i]?old[i].cost:0)*0.4);G.stands[i]={built:false,ac:null,method:'random',rear:false,route:'mixed'}}});

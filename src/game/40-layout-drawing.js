@@ -19,9 +19,9 @@ function drawTower(x,y){ctx.fillStyle='#39414A';ctx.fillRect(x-7,y,14,200);ctx.f
 function polyPath(P){ctx.beginPath();P.forEach(([x,y],k)=>k?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath()}
 function drawRooms(){
   const shut=r=>r.ph===2&&!G.pierB;
-  for(const r of ROOMS){if(shut(r))continue;ctx.fillStyle=r.col||'#1C2228';polyPath(r.poly);ctx.fill()}
-  const doors=LAY.doors||[];ctx.strokeStyle='#4E5964';ctx.lineWidth=3;ctx.lineCap='square';ctx.beginPath();
-  for(const r of ROOMS){if(shut(r))continue;const P=r.poly;
+  for(const r of ROOMS){if(!roomOn(r)||r.open)continue;ctx.fillStyle=r.col||'#1C2228';polyPath(r.poly);ctx.fill()}
+  const doors=ROOM_DOORS;ctx.strokeStyle='#4E5964';ctx.lineWidth=3;ctx.lineCap='square';ctx.beginPath();
+  for(const r of ROOMS){if(!roomOn(r)||r.open)continue;const P=r.poly;
     for(let k=0;k<P.length;k++){const [x1,y1]=P[k],[x2,y2]=P[(k+1)%P.length],len=Math.hypot(x2-x1,y2-y1),ux=(x2-x1)/len,uy=(y2-y1)/len;
       const cuts=[];for(const d of doors){const t=(d[2]-x1)*ux+(d[3]-y1)*uy,off=Math.abs((d[2]-x1)*uy-(d[3]-y1)*ux);if(off<3&&t>-40&&t<len+40)cuts.push([t-(d[4]||34),t+(d[4]||34)])}
       cuts.sort((a,b)=>a[0]-b[0]);let t0=0;

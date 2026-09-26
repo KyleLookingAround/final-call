@@ -108,8 +108,9 @@ function layoutFaults(id){
   applyLayout(id);
   const geos=[geom(AIRCRAFT[3]),geom(AIRCRAFT[6])],planes=SIDX.map(i=>geos.flatMap(g=>planePieces(i,g)));
   ROOMS.forEach(r=>{const P=r.poly,n=P.length;let sgn=0;for(let k=0;k<n;k++){const [a,b]=P[k],[c,d]=P[(k+1)%n],[e,f]=P[(k+2)%n],cr=Math.sign((c-a)*(f-d)-(d-b)*(e-c));if(cr&&sgn&&cr!==sgn){bad.push(`room ${r.id} isn't convex`);break}if(cr)sgn=cr}
-    if(r.id!=='main'&&!ROUTE[ROOM_ID[r.id]][ROOM_ID.main])bad.push(`room ${r.id} can't be reached`)});
-  for(const [a,b,x,y] of L.doors||[])for(const r of [a,b])if(ROOM_ID[r]==null||edgeDist(ROOMS[ROOM_ID[r]].poly,x,y)>3)bad.push(`doorway ${a}–${b} isn't on the wall of ${r}`);
+    const root=r.land?'out':'main';if(r.id!==root&&!ROUTE[ROOM_ID[r.id]][ROOM_ID[root]])bad.push(`room ${r.id} can't be reached`)}); // landside halls from outside, airside ones from the concourse
+  bad.push(...terminalFaults());
+  for(const [a,b,x,y] of ROOM_DOORS)for(const r of [a,b])if(ROOM_ID[r]==null||edgeDist(ROOMS[ROOM_ID[r]].poly,x,y)>3)bad.push(`doorway ${a}–${b} isn't on the wall of ${r}`);
   for(const [a,b,pa,pb] of L.links||[])for(const [r,[x,y]] of [[a,pa],[b,pb]])if(ROOM_ID[r]==null||!inPoly(ROOMS[ROOM_ID[r]].poly,x,y))bad.push(`the link ${a}–${b} has no station in ${r}`);
   SIDX.forEach(i=>{
     for(let j=i+1;j<SIDX.length;j++)if(planes[i].some(A=>planes[j].some(B=>convexOverlap(A,B))))bad.push(`${GATES[i]} and ${GATES[j]} touch`);
