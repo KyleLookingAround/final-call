@@ -1,0 +1,26 @@
+name: Feature
+description: Something new for players, or a change to how something works
+labels: [enhancement]
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: What the player gets
+      description: The player's goal or problem, in a sentence or two.
+    validations:
+      required: true
+  - type: textarea
+    id: shows
+    attributes:
+      label: What it looks like
+      description: What changes on the map, the board or the gates (not text events), on phones and large screens.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options: [Airport and terminal, Gates and fleet, Routes and world map, Region and transport, Lowmere, Airline operations, Records and challenges, Masterplan and levels, Phone layout, Settings and help, Other]
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else
+      description: When it should unlock, what it should cost, ideas you've ruled out.
