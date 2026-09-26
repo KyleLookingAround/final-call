@@ -28,7 +28,7 @@ Every change goes round the same loop, and each round leaves something that make
 3. **Build** on a `feature/<short-name>` branch from `main`, one change per branch.
 4. **Prove.** Checks pass, screenshots looked at, and the bot on seeds 1–3 for economy changes.
 5. **Ship.** A PR from `.github/pull_request_template.md`; the owner squash-merges; `main` publishes.
-6. **Learn.** A bug that reached players gets the check that would have caught it. A change that sets a rule gets a record in `docs/decisions/`.
+6. **Learn.** A bug that reached players gets the check that would have caught it. A change that sets a rule gets a record in `docs/decisions/`. After each merge, a short look back at the session that built it goes in `docs/LESSONS.md`, and a lesson that would have saved real time or credits changes the playbook that allowed it.
 
 Playbooks for each part are in `.claude/skills/`: `feature` (issue to merged PR, and splitting a big feature across several sessions), `balance` (measuring with the bot), `release` (history and save fixtures) and `steward` (getting a PR to green and merging parts). How each system works is in `docs/SYSTEMS.md`. Keep these notes and that file true: a PR that changes how something works updates them in the same PR.
 
