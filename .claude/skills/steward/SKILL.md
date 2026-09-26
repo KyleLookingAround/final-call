@@ -24,15 +24,16 @@ description: Drive a Final Call pull request to green and merged - reading CI fa
 
 ## Stacked PRs
 
-When one PR builds on another and the lower one is squash-merged:
+When one PR builds on another and the lower one is squash-merged, GitHub deletes the lower branch and points this PR at `main`. Move this branch's own commits onto `main`:
 
 ```
 git fetch origin main
-git rebase --onto origin/main origin/<lower-branch> <this-branch>
+git checkout <this-branch>
+git rebase --onto origin/main HEAD~<n>   # n = this PR's own commits, from its Commits tab
 git push --force-with-lease
 ```
 
-Then change the PR's base to `main`. Only force-push branches you created; on anyone else's, merge `main` in instead.
+Check that the PR's diff now shows only its own changes, and change its base to `main` if it still points at the old branch. Only force-push branches you created; on anyone else's, merge `main` in instead.
 
 ## Before every push
 
