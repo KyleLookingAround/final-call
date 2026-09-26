@@ -1,0 +1,21 @@
+name: Balance
+description: Something feels too slow, too fast, too cheap or too hard
+labels: [balance]
+body:
+  - type: textarea
+    id: feel
+    attributes:
+      label: What feels off
+      description: For example "Regional Airport takes too long", or "fares at +25% cost nothing".
+    validations:
+      required: true
+  - type: input
+    id: when
+    attributes:
+      label: When in the game
+      description: The level, or roughly how many game days in.
+  - type: textarea
+    id: change
+    attributes:
+      label: What would feel right
+      description: Optional. The bot measures changes against the level baselines, so a target helps (for example "City Airport by about hour 90").

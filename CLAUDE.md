@@ -18,6 +18,19 @@ Final Call is an airport management game in one HTML page, made of a canvas plus
 2. If this session can't push to `main`, push a branch and open a PR with a plain title and description. The owner merges it with **Squash and merge**. The "Checks" workflow runs on PRs.
 3. After pushing, confirm the run finished (`gh run list --limit 3` / `gh run watch`, if `gh` is available). The site is at `https://<owner>.github.io/<repo>/`.
 
+## How we work
+
+Every change goes round the same loop, and each round leaves something that makes the next one safer: a check, a save, a note.
+
+1. **Issue.** Work starts from a GitHub issue (Feature, Bug or Balance template). Ideas and priorities live in `docs/ROADMAP.md`; the owner decides what moves up.
+2. **Spec.** Anything a player would notice as new gets a one-page spec from `docs/specs/TEMPLATE.md`, approved by the owner before building.
+3. **Build** on a `feature/<short-name>` branch from `main`, one change per branch.
+4. **Prove.** Checks pass, screenshots looked at, and the bot on seeds 1–3 for economy changes.
+5. **Ship.** A PR from `.github/pull_request_template.md`; the owner squash-merges; `main` publishes.
+6. **Learn.** A bug that reached players gets the check that would have caught it. A change that sets a rule gets a record in `docs/decisions/`.
+
+Playbooks for each part are in `.claude/skills/`: `feature` (issue to merged PR), `balance` (measuring with the bot), `release` (history and save fixtures) and `steward` (getting a PR to green). Keep these notes true: a PR that changes how something works updates them in the same PR.
+
 ## Build and test
 
 - `npm run build`: builds `dist/index.html` and `build/test.html`, which has `window.__sim` exposed. It needs no dependencies. It fails, naming the file and line, on a syntax error, a top-level name declared twice, a `</script>` inside the game, duplicate top-level function names or a lost marker.
