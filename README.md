@@ -11,6 +11,7 @@ npm run build          # dist/index.html, the whole game in one page (no depende
 npm install            # Playwright, used for the checks
 npm run check          # crash, save, layout, touch and guided-start checks (about 1–2 min)
 npm run bot -- 1150    # bot plays 1,150 game hours and reports when each level was reached
+npm run preview        # remakes the link-preview image and home-screen icon in src/public/
 ```
 
 Open `dist/index.html` in a browser to play the local build. Progress saves in the browser. On claude.ai the game also saves to your account, but the GitHub Pages copy saves on the device only.

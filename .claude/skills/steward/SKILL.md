@@ -8,7 +8,7 @@ description: Drive a Final Call pull request to green and merged - reading CI fa
 ## Checks workflow (`checks.yml`)
 
 - It runs `npm run check` on every PR. Failure screenshots are in the `check-failures` artifact; `screenshots` is kept on every run.
-- Every page is seeded, so a failure repeats locally: `npm run check -- <group>` (`sim`, `rules`, `saves`, `layout`, `sheet`, `tour`, `shots`).
+- Every page is seeded, so a failure repeats locally: `npm run check -- <group>` (`sim`, `rules`, `saves`, `layout`, `sheet`, `tour`, `shots`, `share`).
 - A line number from an error in the built page: `node tools/where.mjs <line>`.
 - Fix the cause. Never skip, weaken or delete a check to get green, and never push an empty commit to re-run CI.
 

@@ -2,13 +2,23 @@
 //   dist/index.html  - the page GitHub Pages publishes
 //   build/test.html  - the same page with window.__sim exposed, for the checks and the bot
 // Plain Node, no dependencies.
-import {writeFileSync,mkdirSync} from 'node:fs';
+import {copyFileSync,existsSync,mkdirSync,readFileSync,readdirSync,writeFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
 import {join} from 'node:path';
 import {Script} from 'node:vm';
 import {root,shell as readShell,parts as readParts,joinGame,page,locate} from './sources.mjs';
 
-const shell=readShell(),parts=readParts();
+const parts=readParts();
 const fail=m=>{console.error('build: '+m);process.exit(1)};
+
+// link previews: the address the page is published at (set by the Pages workflow, else package.json "homepage"),
+// the icon inlined so the page stays one file, and the preview image's hash so chat apps refetch it when it changes
+const pub=join(root,'src/public');
+const site=(process.env.SITE_URL||JSON.parse(readFileSync(join(root,'package.json'),'utf8')).homepage||'').replace(/\/*$/,'/').replace(/^\/$/,'');
+for(const m of readShell().matchAll(/%SITE%([\w.-]+)/g))if(!existsSync(join(pub,m[1])))fail(`src/shell.html links to ${m[1]}, which isn't in src/public (npm run preview makes it)`);
+const shell=readShell().replaceAll('%SITE%',site)
+  .replace('%ICON%','data:image/svg+xml,'+encodeURIComponent(readFileSync(join(pub,'icon.svg'),'utf8').trim()))
+  .replace('%PREVIEW%',createHash('sha256').update(readFileSync(join(pub,'preview.jpg'))).digest('hex').slice(0,8));
 const parse=(code,filename,where=l=>`${filename}:${l}`)=>{try{new Script(code,{filename})}catch(e){
   const l=+((e.stack||'').split('\n')[0].match(/:(\d+)$/)||[])[1];fail(`${e.message} at ${l?where(l):filename}`)}};
 if(!shell.includes('/*GAME*/'))fail('src/shell.html has lost its /*GAME*/ marker');
@@ -34,6 +44,7 @@ const SIM='window.__sim={get G(){return G},set G(v){G=v},R,update,buyUpgrade,buy
 
 mkdirSync(join(root,'dist'),{recursive:true});
 writeFileSync(join(root,'dist/index.html'),page(shell,game));
+for(const f of readdirSync(pub))copyFileSync(join(pub,f),join(root,'dist',f));
 mkdirSync(join(root,'build'),{recursive:true});
 writeFileSync(join(root,'build/test.html'),page(shell,game.replace('/*SIM_HOOK*/',()=>SIM)));
 console.log(`built dist/index.html (${Math.round(page(shell,game).length/1024)} KB) from ${parts.length} files, and build/test.html`);
