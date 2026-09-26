@@ -75,9 +75,13 @@ function drawBridge(i){
   const g=S.geo||geom(AIRCRAFT[0]),e=S.ext,nose=XF[i].nose;
   // the bridge runs from its root on the building to a rotunda, then reaches out to the front door as it extends
   const rx=nose?-118:-120,ry=nose?FACE_Y:TERM_Y,cornerY=nose?g.fd.y:g.fd.y+20,dx=g.fd.x-3,tx=rx+(dx-rx)*e,ty=cornerY+(g.fd.y-cornerY)*e;
-  ctx.save();standCtx(i);ctx.lineJoin='round';ctx.lineCap='butt';
+  ctx.lineJoin='round';ctx.lineCap='butt';
+  if(XF[i].face){const P=(S.P||paths(i,g)).bridge.pts,[a,b,c]=P,x=b[0]+(c[0]-b[0])*e,y=b[1]+(c[1]-b[1])*e; // root, rotunda, door
+    for(const [w,col] of [[14,'#46505A'],[10,'#2A3037']]){ctx.strokeStyle=col;ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);if(e>0.02)ctx.lineTo(x,y);ctx.stroke()}
+    ctx.fillStyle='#46505A';ctx.beginPath();ctx.arc(b[0],b[1],8.5,0,Math.PI*2);ctx.fill();ctx.fillStyle='#2A3037';ctx.beginPath();ctx.arc(b[0],b[1],5.5,0,Math.PI*2);ctx.fill();ctx.save();standCtx(i)}
+  else{ctx.save();standCtx(i);
   for(const [w,c] of [[14,'#46505A'],[10,'#2A3037']]){ctx.strokeStyle=c;ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(rx,ry);ctx.lineTo(rx,cornerY);if(e>0.02)ctx.lineTo(tx,ty);ctx.stroke()}
-  ctx.fillStyle='#46505A';ctx.beginPath();ctx.arc(rx,cornerY,8.5,0,Math.PI*2);ctx.fill();ctx.fillStyle='#2A3037';ctx.beginPath();ctx.arc(rx,cornerY,5.5,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#46505A';ctx.beginPath();ctx.arc(rx,cornerY,8.5,0,Math.PI*2);ctx.fill();ctx.fillStyle='#2A3037';ctx.beginPath();ctx.arc(rx,cornerY,5.5,0,Math.PI*2);ctx.fill();}
   const F=S.F;
   if(F&&F.rear&&e>0.5){ctx.fillStyle='#7F8A94';ctx.fillRect(g.rd.x-15,g.rd.y-5,13,10);ctx.strokeStyle='#4A545E';ctx.lineWidth=1;for(let k=1;k<4;k++){ctx.beginPath();ctx.moveTo(g.rd.x-15+k*3.3,g.rd.y-5);ctx.lineTo(g.rd.x-15+k*3.3,g.rd.y+5);ctx.stroke()}}
   ctx.restore();
@@ -143,7 +147,8 @@ function drawTerminal(D){
     ctx.fillStyle=open?'#39414A':'#1F242A';ctx.fillRect(lx+6,527,6,14);if(open){ctx.fillStyle='#FFC72C';ctx.fillRect(lx+7,543,4,4)}}
   if(D.ft){ctx.fillStyle='#F5D08A';ctx.fillRect(FT_X-6,SEC_Y-3,3,9);ctx.fillRect(FT_X+3,SEC_Y-3,3,9);ctx.fillStyle='#FFC72C';ctx.fillRect(FT_X+7,543,4,4)}
   ctx.fillStyle='#FFC72C';for(const i of SIDX)if(G.stands[i].built){const F=R.st[i].F;
-    if(XF[i].nose){toW(i,-118,FACE_Y-6);ctx.fillRect(WP.x-2.5,WP.y-2.5,5,5);if(F&&F.rear){toW(i,-150,FACE_Y-6);ctx.fillRect(WP.x-2.5,WP.y-2.5,5,5)}}
+    const bg=busGate(i);if(bg){ctx.fillRect(bg[0]-2.5,bg[1]+bg[2]*4-2.5,5,5)}
+    else if(XF[i].nose){faceW(i,-118,FACE_Y-6);ctx.fillRect(WP.x-2.5,WP.y-2.5,5,5);if(F&&F.rear){faceW(i,-150,FACE_Y-6);ctx.fillRect(WP.x-2.5,WP.y-2.5,5,5)}}
     else{ctx.fillRect(STAND_X[i]-112,450,5,5);if(F&&F.rear)ctx.fillRect(STAND_X[i]-62,450,5,5)}}
   mono('PASSPORT CONTROL',492,531,'#56606A',8.5);
   for(let i=0;i<8;i++){const b=boothPos(i),open=i<D.officers;ctx.fillStyle=open?'#6A7580':i<OWN.officers()?'#3A424B':'#262C32';ctx.fillRect(b.x-2,b.y-4,6,9);if(open){ctx.fillStyle='#FFC72C';ctx.fillRect(b.x+6,b.y-2,5,5)}}

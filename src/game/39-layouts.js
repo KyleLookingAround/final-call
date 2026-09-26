@@ -5,43 +5,96 @@
 // price, build minutes and level of the n-th stand bought, following Classic's ladder and carrying on past eight
 const LADDER=[[0,0,0],[400,30,0],[3000,60,1],[12000,90,3],[80000,120,4],[150000,150,4],[300000,180,6],[500000,210,6],[700000,240,7],[900000,270,7],[1200000,300,8],[1500000,330,8]];
 const lad=(x,g,n,o={})=>{const s={x,g,cost:LADDER[n][0],build:LADDER[n][1],lvl:LADDER[n][2],...o};if(!s.pier)delete s.pier;return s};
+// the refreshed Classic's parts, shared by the layouts built on it: the main concourse, a second stretch that opens with
+// Pier B (ending at x), and the pier itself
+const CLP={
+  rooms:x=>[{id:'main',poly:[[8,TERM_Y],[1240,TERM_Y],[1240,SEC_Y],[8,SEC_Y]]},{id:'pier',ph:2,poly:[[1760,-190],[1870,-190],[1870,TERM_Y],[1760,TERM_Y]]},
+    {id:'east',ph:2,poly:[[1240,TERM_Y],[x,TERM_Y],[x,SEC_Y],[1240,SEC_Y]]}],
+  doors:[['main','east',1240,484,38],['east','pier',1815,TERM_Y,55]],
+  stands:()=>[
+    {x:170,y:TERM_Y,h:180,g:'A1',cost:0,build:0,lvl:0},{x:470,y:TERM_Y,h:180,g:'A2',cost:400,build:30,lvl:0},{x:770,y:TERM_Y,h:180,g:'A3',cost:3000,build:60,lvl:1},{x:1070,y:TERM_Y,h:180,g:'A4',cost:12000,build:90,lvl:3},
+    {x:1760,y:290,h:90,g:'B1',cost:80000,build:120,lvl:4,pier:1,room:'pier'},{x:1760,y:-10,h:90,g:'B2',cost:150000,build:150,lvl:4,pier:1,room:'pier'},
+    {x:1870,y:290,h:270,g:'B3',cost:300000,build:180,lvl:6,pier:1,room:'pier'},{x:1870,y:-10,h:270,g:'B4',cost:500000,build:210,lvl:6,pier:1,room:'pier'}],
+  shops:()=>[[30,'A1',1,1,452],[330,'A2',1,1,452],[630,'A3',1,1,452],[930,'A4',1,1,452],[1250,'B1',2,1,452,0,'east'],[1385,'B2',2,1,452,0,'east'],[1520,'B3',2,1,452,0,'east'],[1895,'B4',2,1,452,0,'east']],
+  track:[[360,515],[1815,515],[1815,-160]], // the people mover, once bought
+  decor:x=>[{t:'taxi',pts:[[0,-110],[x,-110]]},{t:'tower',x:620,y:-200},{t:'label',x:1815,y:-210,text:'PIER B'}],
+};
+// A pier (finger) from (x,y) on a room's wall, heading h, L long and w wide, with stands at [distance along it, side]
+// (side 1 is on the right looking out along the pier, side 0 is at its tip); its room, the doorway into it, and the stands
+function pierParts(id,from,x,y,h,L,w,at){
+  const a=h*Math.PI/180,dx=Math.sin(a),dy=-Math.cos(a),rx=-dy,ry=dx,R2=v=>Math.round(v*10)/10,tip=at.some(([,side])=>!side),L0=tip?L-70:L;
+  const box=(d0,d1,hw)=>[[R2(x-rx*hw+dx*d0),R2(y-ry*hw+dy*d0)],[R2(x-rx*hw+dx*d1),R2(y-ry*hw+dy*d1)],[R2(x+rx*hw+dx*d1),R2(y+ry*hw+dy*d1)],[R2(x+rx*hw+dx*d0),R2(y+ry*hw+dy*d0)]];
+  const rooms=[{id,poly:box(0,L0,w/2)}],doors=[[from,id,x,y,w/2]];
+  if(tip){rooms.push({id:id+'h',poly:box(L0,L,165)});doors.push([id,id+'h',R2(x+dx*L0),R2(y+dy*L0),w/2])} // a wider head for the stand at the tip
+  const stands=at.map(([d,side])=>side?{x:R2(x+dx*d+rx*side*w/2),y:R2(y+dy*d+ry*side*w/2),h:(h+(side>0?270:90))%360,room:id}
+    :{x:R2(x+dx*L),y:R2(y+dy*L),h:(h+180)%360,room:id+'h'}); // side 0: at the tip, nose to the pier's end
+  return {rooms,doors,stands};
+}
+// A curved concourse (Kansai, Tempelhof): stands fanned round the outside of an arc with centre (cx,cy) and face radius R,
+// one corridor segment thick deep and w degrees wide per stand, its outer wall square to its stand, with a shop unit on its
+// inner wall (pull[k] draws shoppers); the first four segments open at once, the rest with the second phase. A join
+// leads from the end of the main concourse at x=1240.
+function arcParts(cx,cy,R,thick,w,bears,pull){
+  const P=(b,r)=>{const a=b*Math.PI/180;return [Math.round((cx+r*Math.sin(a))*10)/10,Math.round((cy-r*Math.cos(a))*10)/10]};
+  const rooms=[],doors=[],stands=[],shops=[];
+  bears.forEach((b,k)=>{const id='arc'+k,b0=b-w/2,b1=b+w/2;
+    rooms.push({id,ph:k<4?1:2,walk:1.25,poly:[P(b0,R-thick),P(b0,R),P(b1,R),P(b1,R-thick)]});
+    if(k){const [x1,y1]=P(b0,R),[x2,y2]=P(b0,R-thick);doors.push(['arc'+(k-1),id,(x1+x2)/2,(y1+y2)/2,thick/2+2])}
+    const [ax,ay]=P(b,R*Math.cos(w/2*Math.PI/180));stands.push({x:ax,y:ay,h:b+180,room:id}); // on the segment's straight outer wall
+    const [mx,my]=P(b,R-thick+2),ar=(b+180)*Math.PI/180;shops.push([Math.round(mx-59*Math.cos(ar)),k<4?'A'+(k+1):'B'+(k-3),k<4?1:2,pull[k],Math.round(my-59*Math.sin(ar)),b+180,id]);
+  });
+  const [ox,oy]=P(bears[0]-w/2,R),[ix,iy]=P(bears[0]-w/2,R-thick);
+  rooms.push({id:'join',poly:[[1240,TERM_Y],[ox,oy],[ix,iy],[1240,SEC_Y]]});
+  doors.push(['main','join',1240,484,38],['join','arc0',(ox+ix)/2,(oy+iy)/2,thick/2+2]);
+  return {rooms,doors,stands,shops,ring:(r,b0,b1)=>[...Array(13)].map((_,k)=>P(b0+(b1-b0)*k/12,r))};
+}
+// the hall's piers: centre [length, first and second stand distances], sides likewise, the map's width and top
+const HP={hall:[1500,2320],c:[1000,450,760],s:[1250,900,900],W:3900,top:-1000};
+// the herringbone: first stand's height, the gap between stands, how far planes lean, and how far they sit back
+const HB={y0:280,step:260,lean:30,back:70};
 const LAYOUTS={
   // today's airport, a little more real: planes park nose-in, and Pier B is a pier out onto the apron
-  classic:{name:'Classic',W:2460,top:-280,
-    rooms:[{id:'main',poly:[[8,TERM_Y],[1240,TERM_Y],[1240,SEC_Y],[8,SEC_Y]]},{id:'pier',ph:2,poly:[[1760,-190],[1870,-190],[1870,TERM_Y],[1760,TERM_Y]]},
-      {id:'east',ph:2,poly:[[1240,TERM_Y],[2030,TERM_Y],[2030,SEC_Y],[1240,SEC_Y]]}],
-    doors:[['main','east',1240,484,38],['east','pier',1815,TERM_Y,55]],
-    stands:[
-      {x:170,y:TERM_Y,h:180,g:'A1',cost:0,build:0,lvl:0},{x:470,y:TERM_Y,h:180,g:'A2',cost:400,build:30,lvl:0},{x:770,y:TERM_Y,h:180,g:'A3',cost:3000,build:60,lvl:1},{x:1070,y:TERM_Y,h:180,g:'A4',cost:12000,build:90,lvl:3},
-      {x:1760,y:290,h:90,g:'B1',cost:80000,build:120,lvl:4,pier:1,room:'pier'},{x:1760,y:-10,h:90,g:'B2',cost:150000,build:150,lvl:4,pier:1,room:'pier'},
-      {x:1870,y:290,h:270,g:'B3',cost:300000,build:180,lvl:6,pier:1,room:'pier'},{x:1870,y:-10,h:270,g:'B4',cost:500000,build:210,lvl:6,pier:1,room:'pier'}],
-    shops:[[30,'A1',1,1,452],[330,'A2',1,1,452],[630,'A3',1,1,452],[930,'A4',1,1,452],[1250,'B1',2,1,452,0,'east'],[1385,'B2',2,1,452,0,'east'],[1520,'B3',2,1,452,0,'east'],[1895,'B4',2,1,452,0,'east']],
-    track:[[360,515],[1815,515],[1815,-160]], // the people mover, once bought
-    decor:[{t:'taxi',pts:[[0,-110],[1700,-110]]},{t:'tower',x:620,y:-200},{t:'label',x:1815,y:-210,text:'PIER B'}]},
-  remote:{name:'Remote apron',plan:'l_remote',lvl:5,pts:1,cost:15000,build:180,W:3800,conc1:2440,upk:200,
+  classic:{name:'Classic',W:2460,top:-280,rooms:CLP.rooms(2030),doors:CLP.doors,stands:CLP.stands(),shops:CLP.shops(),track:CLP.track,decor:CLP.decor(1700)},
+  // Classic plus a row of remote stands out on the apron, reached by bus from gates at the end of the concourse
+  remote:{name:'Remote apron',plan:'l_remote',lvl:5,pts:1,cost:15000,build:180,W:3700,top:-280,upk:200,
     from:'the remote stands at London Stansted and Luton',
     up:'Four remote stands for short-haul planes from level 6, at 60% of the price of pier stands.',down:'Buses cost money to run, make boarding slower, more so in rain and snow, and cost a little rating. Remote stands don\'t count as gates for your airport\'s level.',
-    stands:[lad(170,'A1',0),lad(470,'A2',1),lad(770,'A3',2),lad(1070,'A4',3),
-      lad(2700,'B1',4,{pier:1,after:3}),lad(3000,'B2',5,{pier:1}),lad(3300,'B3',6,{pier:1}),lad(3600,'B4',7,{pier:1}),
-      {x:1400,dy:-110,g:'R1',cost:48000,build:60,lvl:6,kind:'remote',after:3},{x:1700,dy:-110,g:'R2',cost:90000,build:80,lvl:6,kind:'remote'},
-      {x:2000,dy:-110,g:'R3',cost:180000,build:100,lvl:8,kind:'remote'},{x:2300,dy:-110,g:'R4',cost:300000,build:120,lvl:8,kind:'remote'}],
-    shops:[[192,'A1'],[492,'A2'],[792,'A3'],[1092,'A4'],[2722,'B1',2],[3022,'B2',2],[3322,'B3',2],[3622,'B4',2]]},
-  stagger:{name:'Staggered apron',plan:'l_stagger',lvl:3,pts:1,cost:40000,build:360,W:2870,
-    from:'nose-in stands set at two depths, as at many regional airports',
-    up:'Ten stands on bridges, with arrivals taxiing in between them.',down:'Back-row bridges are longer, so boarding starts later there.',
-    stands:[160,440,720,1000,1280,1560,1840,2120,2400,2680].map((x,k)=>lad(x,(k<4?'A':'B')+(k<4?k+1:k-3),k,{dy:k%2?-110:0,pier:k>=4?1:0})),
-    shops:[160,440,720,1000,1280,1560,1840,2120,2400,2680].map((x,k)=>[x+22,(k<4?'A':'B')+(k<4?k+1:k-3),k>=4?2:1])},
-  curve:{name:'Curved front',plan:'l_curve',lvl:4,pts:2,cost:120000,build:480,W:2810,conc1:1650,walk:1.25,rep:0.3,hall:[1140,1640],
-    from:'curved terminals such as Osaka Kansai, with a control tower in the middle',
+    rooms:CLP.rooms(2600),doors:CLP.doors,
+    stands:[...CLP.stands(),...[[2560,2090,'R1',48000,60,6],[2860,2230,'R2',90000,80,6],[3160,2370,'R3',180000,100,8],[3460,2510,'R4',300000,120,8]].map(([x,gx,g,cost,build,lvl],k)=>
+      ({x,y:400,h:180,g,cost,build,lvl,kind:'remote',pier:1,room:'east',gate:[gx,TERM_Y,1],road:[[gx,432],[x+100,432]],...(k?{}:{after:3})}))],
+    shops:CLP.shops(),track:CLP.track,
+    decor:[...CLP.decor(3600),{t:'road',pts:[[2050,432],[3600,432]],w:22},{t:'label',x:3010,y:-70,text:'REMOTE APRON'}]},
+  // a herringbone pier: planes park at an angle down both sides, their bridges square to the pier
+  stagger:{name:'Staggered apron',plan:'l_stagger',lvl:3,pts:1,cost:40000,build:360,W:2560,top:-620,
+    from:'the angled stands along the piers of many regional airports',
+    up:'Ten stands: planes park at an angle down both sides of Pier B, so more of them fit along it.',down:'The far end of the pier is a long walk.',
+    rooms:[...CLP.rooms(2160).filter(r=>r.id!=='pier'),{id:'pier',ph:2,poly:[[1760,-410],[1870,-410],[1870,TERM_Y],[1760,TERM_Y]]}],doors:CLP.doors,
+    stands:[...CLP.stands().slice(0,4),...[0,1,2].flatMap(k=>[{x:1760,y:HB.y0-k*HB.step,h:90,lean:HB.lean,back:HB.back},{x:1870,y:HB.y0-k*HB.step,h:270,lean:-HB.lean,back:HB.back}])
+      .map((s,k)=>({...lad(0,'',k+4),...s,g:'B'+(k+1),pier:1,room:'pier'}))],
+    shops:[...CLP.shops(),[1640,'B5',2,1,452,0,'east'],[2020,'B6',2,1,452,0,'east']],track:[[360,515],[1815,515],[1815,-380]],
+    decor:[{t:'taxi',pts:[[0,-110],[1560,-110]]},{t:'tower',x:620,y:-200},{t:'label',x:1815,y:-430,text:'PIER B'}]},
+  // one long curved building with planes fanned round its outside, and moving walkways along it
+  curve:(()=>{const A=arcParts(2389,1434,1500,110,12,[-42,-30,-18,-6,6,18,30,42],[1,1,1.2,1.2,1.2,1.2,1,1]);return {name:'Curved front',plan:'l_curve',lvl:4,pts:2,cost:120000,build:480,W:3800,top:-640,rep:0.3,
+    from:'the curved terminals of Osaka Kansai and Berlin Tempelhof, with a control tower at the centre',
     up:'Moving walkways along the curve: boarding starts sooner, fewer late passengers, and a rating bonus.',down:'No extra stands.',
-    stands:[[160,-80,'A1'],[440,-40,'A2'],[720,-12,'A3'],[1000,0,'A4'],[1780,0,'B1'],[2060,-12,'B2'],[2340,-40,'B3'],[2620,-80,'B4']].map(([x,dy,g],k)=>lad(x,g,k,{dy,pier:k>=4?1:0})),
-    shops:[[182,'A1'],[462,'A2'],[742,'A3'],[1022,'A4'],[1150,'Hall',1,1.2],[1273,'Hall',1,1.2],[1396,'Hall',1,1.2],[1519,'Hall',1,1.2],[1802,'B1',2],[2082,'B2',2],[2362,'B3',2],[2642,'B4',2]]},
-  hall:{name:'Hall and finger pier',plan:'l_hall',lvl:5,pts:2,cost:300000,build:600,W:3370,conc1:1650,hall:[1140,1640],
+    rooms:[CLP.rooms(0)[0],...A.rooms],doors:A.doors,
+    stands:A.stands.map((s,k)=>({...lad(0,'',k),...s,g:(k<4?'A':'B')+(k<4?k+1:k-3),...(k>=4?{pier:1}:{})})),
+    shops:[[30,'A1',1,1,452],[330,'A2',1,1,452],[630,'A3',1,1,452],[930,'A4',1,1,452],...A.shops],
+    decor:[{t:'taxi',pts:A.ring(2080,-64,64)},{t:'tower',x:2389,y:120}]}})(),
+  // piers fanning out from a central hall of shops, joined to the main concourse by a short link; each pier leaves a wall
+  // square to it
+  hall:(()=>{const [x0,x1]=HP.hall,cx=(x0+x1)/2,C=pierParts('pc','hall',cx,275.5,0,HP.c[0],110,[[HP.c[1],-1],[HP.c[1],1],[HP.c[2],-1],[HP.c[2],1]]),
+      Lp=pierParts('pl','hall',x0+47.5,357.75,300,HP.s[0],110,[[HP.s[1],1],[HP.s[2],-1],[0,0]]),Rp=pierParts('pr','hall',x1-47.5,357.75,60,HP.s[0],110,[[HP.s[1],-1],[HP.s[2],1],[0,0]]);
+    return {name:'Hall and finger pier',plan:'l_hall',lvl:5,pts:2,cost:300000,build:600,W:HP.W,top:HP.top,
     from:'the central hall and piers of Amsterdam Schiphol',
-    up:'Ten stands, and shops gathered in a central hall where passengers spend most.',down:'Long walks to the far end of the pier.',
-    stands:[160,440,720,1000,1780,2060,2340,2620,2900,3180].map((x,k)=>lad(x,(k<4?'A':'B')+(k<4?k+1:k-3),k,{pier:k>=4?1:0})),
-    shops:[[182,'A1'],[462,'A2'],[742,'A3'],[1022,'A4'],[1150,'Hall',1,1.3],[1273,'Hall',1,1.3],[1396,'Hall',1,1.3],[1519,'Hall',1,1.3],
-      ...[1780,2060,2340,2620,2900,3180].map((x,k)=>[x+22,'B'+(k+1),2])]},
+    up:'Ten stands, and shops gathered in a central hall where passengers spend most.',down:'Long walks to the far end of the piers.',
+    rooms:[CLP.rooms(0)[0],{id:'link',poly:[[1240,TERM_Y],[x0,TERM_Y],[x0,SEC_Y],[1240,SEC_Y]]},{id:'hall',poly:[[x0,SEC_Y],[x0,440],[x0+95,275.5],[x1-95,275.5],[x1,440],[x1,SEC_Y]],col:'#20272E'},
+      ...C.rooms,...Lp.rooms.map(r=>({...r,ph:2})),...Rp.rooms.map(r=>({...r,ph:2}))],
+    doors:[['main','link',1240,484,38],['link','hall',x0,484,38],...C.doors,...Lp.doors,...Rp.doors],
+    stands:[...C.stands,...Lp.stands,...Rp.stands].map((s,k)=>({...lad(0,'',k),...s,g:(k<4?'A':'B')+(k<4?k+1:k-3),...(k>=4?{pier:1}:{})})),
+    shops:[[30,'A1',1,1,452],[330,'A2',1,1,452],[630,'A3',1,1,452],[930,'A4',1,1,452],
+      ...[0,1,2,3].map(k=>[x0+150+k*123,'Hall',1,1.3,300,0,'hall']),...[0,1,2,3,4,5].map(k=>[x0+20+k*123,'B'+(k+1),2,1,420,0,'hall'])],
+    decor:[{t:'tower',x:cx,y:HP.top+100}]}})(),
   sat:{name:'Satellite',plan:'l_sat',lvl:7,pts:3,cost:1200000,build:960,W:4410,gap:[1232,1600],hall:[2740,3240],mover:1.8,upk:2500,
     from:'the satellites at London Stansted and Munich Terminal 2',p2:'Satellite',
     up:'Twelve stands, a built-in people mover, big duty-free and lounge space, and quicker transfers.',down:'Every walk to the satellite is long, and it costs the most to run after Starfish.',
@@ -71,7 +124,7 @@ function applyLayout(id){
   fill(STAND_AFTER,L.stands.map((s,i)=>s.after!=null?s.after:(o=>o>0?STAND_ORDER[o-1]:-1)(STAND_ORDER.indexOf(i))));
   fill(SHOP_X,L.shops.map(s=>s[0]));fill(SHOP_NAME,L.shops.map(s=>s[1]));fill(SHOP_PH,L.shops.map(s=>s[2]||1));
   fill(SHOP_Y,L.shops.map(s=>s[4]??452));fill(SHOP_A,L.shops.map(s=>s[5]||0));
-  fill(XF,L.stands.map(standXf));buildRooms(L);AF_Y=L.top||0;Y0=AF_Y-180;
+  fill(XF,L.stands.map(standXf));buildRooms(L);AF_Y=L.top||0;Y0=AF_Y-180;placeBadges();
 }
 
 const busMul=i=>STAND_KIND[i]!=='remote'?1:R.fx.rain>G.clock||R.fx.snow>G.clock?1.4:2.2; // buses outpace walkers, less so in bad weather
@@ -152,7 +205,7 @@ function layoutPanel(){
     const lost=me?0:G.stands.filter((s,i)=>s.built&&i>=L.stands.length).length,lostS=me?0:G.shops.filter((s,j)=>s&&j>=L.shops.length).length;
     const btn=me?'<button class="buy" disabled>Current</button>':G.layoutNext===id?'<button class="buy" disabled>Opens 03:00</button>':bld?'<button class="buy" disabled>Building</button>':
       (building||G.layoutNext)?'<button class="buy" disabled>Wait</button>':`<button class="buy" data-layout="${id}" data-cost="${L.cost}">${money(L.cost)}</button>`;
-    const walk=L.walk?`walks ${Math.round((L.walk-1)*100)}% quicker`:L.mover?'people mover':'';
+    const walk=L.walk?`walks ${Math.round((L.walk-1)*100)}% quicker`:(L.rooms||[]).some(r=>r.walk)?'moving walkways':L.mover?'people mover':'';
     h+=`<div class="stand laycard" id="layout-${id}"><div class="sh"><div><span class="gate">${me?'●':'○'}</span><span class="rt">${L.name}</span></div>${btn}</div>${layoutPlan(L)}
       <div class="rd">${L.stands.length} stands${L.stands.some(s=>s.kind==='remote')?` (${L.stands.filter(s=>s.kind==='remote').length} remote)`:''} · ${L.shops.length} shop units${walk?' · '+walk:''}${L.upk?` · ${money(L.upk)}/h to run`:''}${me?'':` · ${Math.round(buildMins(L.build)/60*10)/10} h to build`}</div>
       <div class="rd"><b>+</b> ${L.up}</div><div class="rd"><b>−</b> ${L.down}</div>${L.from?`<div class="rd">Inspired by ${L.from}.</div>`:''}

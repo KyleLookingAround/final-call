@@ -26,6 +26,13 @@ function paths(i,g){
   if(!XF[i].nose)return {bridge:P([[-120,TERM_Y+2],[-120,g.fd.y+20],[g.fd.x-3,g.fd.y]]),
     rear:P([[-70,TERM_Y+2],[-g.fw-16,g.rd.y+12],[-g.fw-3,g.rd.y]]),
     cart:P([[114,TERM_Y],[114,g.holdY+16],[g.fw+12,g.holdY]])};
+  const bg=busGate(i);
+  if(bg){const lead=[[bg[0],bg[1]],...(LAY.stands[i].road||[])],T=(x,y)=>[wx(i,x,y),wy(i,x,y)];
+    return {bridge:mkPath([...lead,T(-g.fw-40,g.fd.y),T(g.fd.x-3,g.fd.y)]),rear:mkPath([...lead,T(-g.fw-40,g.rd.y),T(-g.fw-3,g.rd.y)]),
+      cart:P([[118,FACE_Y],[118,g.holdY+16],[g.fw+12,g.holdY]])}}
+  if(XF[i].face){const F=(x,y)=>{faceW(i,x,y);return [WP.x,WP.y]},T=(x,y)=>[wx(i,x,y),wy(i,x,y)];
+    return {bridge:mkPath([F(-118,FACE_Y),T(g.fd.x-60,g.fd.y),T(g.fd.x-3,g.fd.y)]),rear:mkPath([F(-150,FACE_Y),T(-g.fw-40,g.rd.y+12),T(-g.fw-3,g.rd.y)]),
+      cart:mkPath([F(118,FACE_Y),T(118,g.holdY+16),T(g.fw+12,g.holdY)])}}
   return {bridge:P([[-118,FACE_Y],[-118,g.fd.y],[g.fd.x-3,g.fd.y]]),
     rear:P([[-150,FACE_Y],[-150,g.rd.y+12],[-g.fw-3,g.rd.y]]),
     cart:P([[118,FACE_Y],[118,g.holdY+16],[g.fw+12,g.holdY]])};
@@ -58,7 +65,7 @@ const deskX=i=>32+i*26, kioskX=i=>230+i*17, laneX=i=>304+i*20, FT_X=462;
 function ciSlot(i){if(i>=165)return slot(14+(i%4)*3,562+(i%7)*3);const per=33,r=Math.floor(i/per),k=i%per;return slot(r%2===0?24+k*8:24+(per-1-k)*8,553+r*12)}
 function secSlot(i){if(i>=85)return slot(296+(i%3)*3,604);const per=17,r=Math.floor(i/per),k=i%per;return slot(r%2===0?302+k*8:302+(per-1-k)*8,553+r*12)}
 const ftSlot=i=>slot(FT_X,Math.min(606,553+i*8));
-function spotPos(i,j){if(!XF[i].nose)return {x:STAND_X[i]-138+(j%16)*9,y:456+Math.floor(j/16)*8.5};toW(i,-150+(j%16)*9,FACE_Y-10-Math.floor(j/16)*8.5);return {x:WP.x,y:WP.y}}
+function spotPos(i,j){if(!XF[i].nose)return {x:STAND_X[i]-138+(j%16)*9,y:456+Math.floor(j/16)*8.5};const bg=busGate(i);if(bg)return {x:bg[0]-70+(j%16)*9,y:bg[1]+bg[2]*(10+Math.floor(j/16)*8.5)};faceW(i,-150+(j%16)*9,FACE_Y-10-Math.floor(j/16)*8.5);return {x:WP.x,y:WP.y}}
 const shopX=j=>SHOP_X[j];
 const standOpen=i=>i<STAND.length&&(!STAND[i].pier||G.pierB),shopOpen=j=>j<SHOP_X.length&&(SHOP_PH[j]<2||G.pierB);
 

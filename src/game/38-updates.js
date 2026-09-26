@@ -1,6 +1,10 @@
 /* ================= WHAT'S NEW: every version's new features, shown after an update and from Settings or Help ================= */
 // Newest first. Add an entry with each release; the checks make sure the newest one matches docs/HISTORY.md.
 const UPDATES=[
+  {v:24,title:'Real airport shapes',points:[
+    'Remote apron, Staggered apron, Curved front, and Hall and finger pier now look like real airports.',
+    'Buses drive out to remote stands, planes park at an angle down the herringbone pier, and piers fan out from a hall of shops like Schiphol.',
+    'The Satellite and Starfish follow.']},
   {v:23,title:'Classic, made real',points:[
     'Planes park nose-in with short jet bridges, as at real airports, and push back when they leave.',
     'Pier B is a real pier out onto the apron, with gates on both sides.',

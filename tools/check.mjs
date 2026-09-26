@@ -106,7 +106,7 @@ if(!only||only==='rules'){
       const G0=S.G,built=G0.stands.filter(s=>s.built).length;S.switchLayout('remote');const a=S.G.stands.filter(s=>s.built).length,w=S.W;
       S.SIDX.forEach(i=>{S.G.stands[i].built=true});const cash=S.G.cash;S.switchLayout('curve');const b=S.G.stands.filter(s=>s.built).length,sold=S.G.cash-cash;
       S.switchLayout('classic');
-      t('rules: rebuilding keeps gates and shops, and sells what the new layout has no room for',a===built&&w===3800&&b===8&&sold>0&&S.G.layout==='classic',`kept ${a}/${built}, then ${b} of 12 with ${Math.round(sold)} back`)}
+      t('rules: rebuilding keeps gates and shops, and sells what the new layout has no room for',a===built&&w===S.LAYOUTS.remote.W&&b===8&&sold>0&&S.G.layout==='classic',`kept ${a}/${built}, then ${b} of 12 with ${Math.round(sold)} back`)}
     {const v=S.UPDATES.map(u=>u.v);t('rules: What\'s new versions run newest first and match the history',v.every((x,i)=>i===0||x<v[i-1])&&v[0]===HIST_TOP,`newest ${v[0]}, history ${HIST_TOP}`)}
     {const s1=JSON.stringify(S.G);S.resetAll(JSON.parse(s1));const g2=S.G,g1=JSON.parse(s1);
       bad=Object.keys(g1).filter(k=>k!=='savedAt'&&JSON.stringify(g1[k])!==JSON.stringify(g2[k])); // savedAt is when it was last saved
