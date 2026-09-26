@@ -122,7 +122,11 @@ How each system works is in `docs/SYSTEMS.md`: levels and the Masterplan, routes
     - `SIMX` exposes functions to the checks, and a part's checks go in `tools/checks/<part>.mjs`;
     - new upgrades go in the part's file with `Object.assign(UPG,{...})`.
   - `terminalFaults` (part of `layoutFaults`) checks that every desk, kiosk, lane, passport desk, e-gate, carousel and queue sits in its hall.
-  - **Departures** (`43-departures.js`): `enterLandside`, `updateCheckin` (desks and kiosks), `finishCheckin`, `enterSecurity` and `updateSecurity` (lanes and fast track).
+  - **Departures** (`43-departures.js`, checks in `tools/checks/departures.mjs`): its places (`deskX`, `laneX`, the queues' `qSlot`, `secSlot`…) live there too.
+    - **Check-in:** four islands (`IX`) of two desks back to back, each with its own queue. `R.ciQ` holds every check-in queue in joining order, with `p.isl` naming it: an island, the kiosks (`CI_K`) or bag drop (`CI_B`). `enterLandside` joins the quickest; a party stays together.
+    - **Bag drop** (upgrade `bagdrop`, in the Self-service plan): counters that take 40% of a check-in, staffed and rostered like desks (`OWN.drops`, `WAGE.drops`, `dropsOpen`). Kiosk passengers with bags go on to it, and online check-in then covers passengers with bags, who go straight there. `finishCheckin(p,x)` puts each bag on `R.belt` at its desk or counter.
+    - **Security:** `enterSecurity` sends passengers through a boarding-pass gate into the hall, then `R.secQ` (`p.famL` marks families and those who need help, who have as many lanes as their share of the queue, at least one when two lanes are open). A lane divests (`divestT`), then the passenger walks through the scanner (`scan`) to repack. 1 bag in 12 is searched at a table for 2 min, 1 in 30 with CT scanners (upgrade `ctscan`, plan `t_ct`, which also makes trays 25% quicker). `clearSec` marks the passenger `cleared` and hands them to `airside`.
+    - `R.dep` (`DEP()`) keeps the search queue and the family lane count, and starts afresh when a load replaces `R.lanes`. `DEP_LOG` counts what the checks read.
 
   - **Arrivals** (`44-arrivals.js`): `updateImmigration` (passport desks and e-gates), `afterControl`, `exitTarget`, and the steps from the concourse to the way out.
 

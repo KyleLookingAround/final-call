@@ -60,10 +60,7 @@ const boothPos=i=>({x:724+i*14,y:SEC_LINE}),egatePos=i=>({x:846+i*12,y:SEC_LINE}
 const SLOT={x:0,y:0},slot=(x,y)=>{SLOT.x=x;SLOT.y=y;return SLOT};
 // the queues sit where they always did against their desks and lanes, so each takes as long to walk as before
 function arrSlot(i){if(i>=168)return slot(1196+(i%4)*3,536);const per=30,r=Math.floor(i/per),k=i%per;return slot(r%2===0?738+k*8:738+(per-1-k)*8,584-r*10)}
-const deskX=i=>32+i*26, kioskX=i=>230+i*17, laneX=i=>304+i*20, FT_X=462;
-function ciSlot(i){if(i>=165)return slot(14+(i%4)*3,730+(i%7)*3);const per=33,r=Math.floor(i/per),k=i%per;return slot(r%2===0?24+k*8:24+(per-1-k)*8,719+r*10)}
-function secSlot(i){if(i>=85)return slot(296+(i%3)*3,676);const per=17,r=Math.floor(i/per),k=i%per;return slot(r%2===0?302+k*8:302+(per-1-k)*8,631+r*10)}
-const ftSlot=i=>slot(FT_X,Math.min(676,631+i*8));
+// check-in and security’s places (desks, kiosks, bag drop, lanes and their queues) are in 43-departures.js
 function spotPos(i,j){const bg=busGate(i);if(bg)return {x:bg[0]-70+(j%16)*9,y:bg[1]+bg[2]*(10+Math.floor(j/16)*8.5)};faceW(i,-150+(j%16)*9,FACE_Y-10-Math.floor(j/16)*8.5);return {x:WP.x,y:WP.y}}
 const shopX=j=>SHOP_X[j];
 const standOpen=i=>i<STAND.length&&(!STAND[i].pier||G.pierB),shopOpen=j=>j<SHOP_X.length&&(SHOP_PH[j]<2||G.pierB);
