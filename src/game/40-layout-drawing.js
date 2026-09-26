@@ -2,6 +2,7 @@
 // a remote stand: a bus road from the gate to the plane, stairs at both doors, and buses where the passengers are
 function drawBusStand(i){
   const S=R.st[i];if(!G.stands[i].built)return;
+  if(XF[i].nose){drawBusRoad(i);return}
   const sx=STAND_X[i],g=S.geo||geom(AIRCRAFT[0],STAND_DY[i]),F=S.F;
   ctx.strokeStyle='rgba(255,199,44,.35)';ctx.lineWidth=1.5;ctx.setLineDash([6,5]);ctx.beginPath();
   ctx.moveTo(sx-120,TERM_Y);ctx.lineTo(sx-120,g.fd.y+20);ctx.lineTo(sx+g.fd.x-10,g.fd.y);ctx.stroke();ctx.setLineDash([]);
@@ -14,8 +15,19 @@ function drawBusStand(i){
     ctx.fillStyle='#E6E1D6';rrect(q[0]-5,q[1]-12,10,24,3);ctx.fill();ctx.fillStyle='#5CC8FF';ctx.fillRect(q[0]-3.5,q[1]-9,7,4);ctx.fillStyle='#39414A';ctx.fillRect(q[0]-3.5,q[1]-3,7,10)}};
   if(F)for(const door of DOORS){const path=door?F.P.rear:F.P.bridge;if(S.bridge[door].length)bus(path,S.bridge[door]);if(S.dBridge[door].length)bus(path,S.dBridge[door])}
 }
+// a 2D remote stand: its road from the bus gate, stairs at the doors, and buses where the passengers are
+function drawBusRoad(i){
+  const S=R.st[i],F=S.F,g=S.geo||geom(AIRCRAFT[0]),P=F?F.P:paths(i,g),pts=P.bridge.pts;
+  ctx.strokeStyle='rgba(255,199,44,.35)';ctx.lineWidth=1.5;ctx.setLineDash([6,5]);ctx.beginPath();pts.forEach(([x,y],k)=>k?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();ctx.setLineDash([]);
+  if(F&&S.ext>0.5){ctx.save();standCtx(i);ctx.fillStyle='#7F8A94';ctx.strokeStyle='#4A545E';ctx.lineWidth=1;
+    for(const [dx,dy] of [[g.fd.x,g.fd.y],...(F.rear?[[g.rd.x,g.rd.y]]:[])]){ctx.fillRect(dx-15,dy-5,13,10);for(let k=1;k<4;k++){ctx.beginPath();ctx.moveTo(dx-15+k*3.3,dy-5);ctx.lineTo(dx-15+k*3.3,dy+5);ctx.stroke()}}ctx.restore()}
+  const bus=(path,list)=>{const L=list.slice().sort((a,b)=>a.s-b.s);for(let k=0;k<L.length;k+=20){const grp=L.slice(k,k+20),s=grp.reduce((a,p)=>a+p.s,0)/grp.length,q=ptAt(path,s),q2=ptAt(path,Math.min(path.len,s+4));
+    ctx.save();ctx.translate(q[0],q[1]);ctx.rotate(Math.atan2(q2[1]-q[1],q2[0]-q[0])+Math.PI/2);ctx.fillStyle='#E6E1D6';rrect(-5,-12,10,24,3);ctx.fill();ctx.fillStyle='#5CC8FF';ctx.fillRect(-3.5,-9,7,4);ctx.fillStyle='#39414A';ctx.fillRect(-3.5,-3,7,10);ctx.restore()}};
+  if(F)for(const door of DOORS){const path=door?F.P.rear:F.P.bridge;if(S.bridge[door].length)bus(path,S.bridge[door]);if(S.dBridge[door].length)bus(path,S.dBridge[door])}
+}
 // under the stands: halls, the star, the tower and the remote apron's road
 function drawLayoutApron(){
+  if(ROOMS)return; // 2D layouts draw their own (drawPlanApron)
   const id=G.layout;
   if(id==='remote'){ctx.strokeStyle='rgba(255,199,44,.25)';ctx.lineWidth=10;ctx.beginPath();ctx.moveTo(LAND_R+20,TERM_Y-14);ctx.lineTo(LAY.conc1-20,TERM_Y-14);ctx.stroke();
     ctx.font='800 20px "Saira Condensed","Arial Narrow",sans-serif';ctx.fillStyle='rgba(255,199,44,.14)';ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.fillText('REMOTE APRON',LAND_R+30,TERM_Y-26)}
@@ -33,6 +45,7 @@ function drawTower(x,y){ctx.fillStyle='#39414A';ctx.fillRect(x-7,y,14,200);ctx.f
   ctx.fillStyle='rgba(92,200,255,.55)';ctx.fillRect(x-17,y-18,34,10);ctx.fillStyle='#5A646E';ctx.fillRect(x-1,y-40,2,18)}
 // over the terminal: hall names, and the satellite's people mover
 function drawLayoutTerminal(){
+  if(ROOMS)return;
   const id=G.layout;
   if(LAY.hall&&id!=='sat'){const [a,b]=LAY.hall;mono(id==='star'?'STAR HALL':'CENTRAL HALL',(a+b)/2,517,'#56606A',9,'center')}
   if(id==='sat'){const [a,b]=LAY.gap;ctx.fillStyle='#101316';ctx.fillRect(a,TERM_Y,b-a,SEC_Y-TERM_Y);ctx.fillStyle='#2A3037';ctx.fillRect(a,480,b-a,8);

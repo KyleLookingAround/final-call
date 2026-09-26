@@ -7,11 +7,15 @@
 const FACE_Y=22;
 const XF=STAND_X.map(x=>({ox:x,oy:0,c:1,s:0,nose:false})); // per stand: {ox,oy,c,s,nose}; applyLayout fills it
 const exact=v=>Math.abs(v)<1e-12?0:Math.abs(Math.abs(v)-1)<1e-12?Math.sign(v):v;
+// A stand with a lean (herringbone) turns its plane by that many degrees and sets it back by 'back' from the face, while its
+// bridge root and lounge stay square to the wall: those use the face frame, XF[i].face.
 function standXf(s){
   if(s.h==null)return {ox:s.x,oy:0,c:1,s:0,nose:false};
-  const a=s.h*Math.PI/180,c=exact(Math.cos(a)),sn=exact(Math.sin(a));
-  return {ox:s.x+FACE_Y*sn,oy:s.y-FACE_Y*c,c,s:sn,nose:true};
+  const f=(h,back)=>{const a=h*Math.PI/180,c=exact(Math.cos(a)),sn=exact(Math.sin(a)),d=FACE_Y-back;return {ox:s.x+d*sn,oy:s.y-d*c,c,s:sn,nose:true}};
+  const T=f(s.h+(s.lean||0),s.lean?s.back||0:0);if(s.lean)T.face=f(s.h,0);return T;
 }
+// face-frame coordinates (the wall a stand's bridge and lounge are square to) to the world
+function faceW(i,lx,ly){const T=XF[i].face||XF[i];WP.x=T.ox+(lx*T.c-ly*T.s);WP.y=T.oy+(lx*T.s+ly*T.c);return WP}
 // plane-local to world, into one shared point that callers read straight away
 const WP={x:0,y:0};
 function toW(i,lx,ly){const T=XF[i];WP.x=T.ox+(lx*T.c-ly*T.s);WP.y=T.oy+(lx*T.s+ly*T.c);return WP}
@@ -27,8 +31,20 @@ function standBox(i){
   for(const [a,b] of [[x,y],[x+w,y],[x,y+h],[x+w,y+h]]){toW(i,a,b);x0=Math.min(x0,WP.x);y0=Math.min(y0,WP.y);x1=Math.max(x1,WP.x);y1=Math.max(y1,WP.y)}
   return [x0,y0,x1-x0,y1-y0];
 }
-// where a nose-in stand's information card sits: beyond the tail, or where the layout says
-function badgeAt(i){const [,ay,,ah]=standArea(i),b=LAY.stands[i]&&LAY.stands[i].badge;return b?toW(i,b[0],b[1]):toW(i,0,ay+ah+34)}
+// where a nose-in stand's information card sits: the first of a few places (beyond the tail, then beside the plane) that
+// covers no plane or building, worked out once per layout by placeBadges
+const BADGE=[];
+function badgeAt(i){const b=BADGE[i];if(b){WP.x=b[0];WP.y=b[1];return WP}const [,ay,,ah]=standArea(i);return toW(i,0,ay+ah+34)}
+function planePieces(i,g){return [[-g.fw,g.top-64,g.fw,g.end+48],[-(g.fw+g.span),g.wingY,g.fw+g.span,g.wingY+g.span*0.55+11],[-(g.fw*0.8+14),g.end+10,g.fw*0.8+14,g.end+40]]
+  .map(([a,b,c,d])=>[[a,b],[c,b],[c,d],[a,d]].map(([x,y])=>{toW(i,x,y);return [WP.x,WP.y]}))}
+const cardAt=(x,y)=>[[x-48,y-30],[x+48,y-30],[x+48,y+30],[x-48,y+30]];
+function placeBadges(){
+  BADGE.length=0;if(!ROOMS)return;const geos=[geom(AIRCRAFT[3]),geom(AIRCRAFT[6])],planes=SIDX.map(i=>geos.flatMap(g=>planePieces(i,g)));
+  for(const i of SIDX){const [,ay,,ah]=standArea(i);let pick=null;
+    for(const [lx,ly] of [[0,ay+ah+34],[230,300],[-230,300],[230,120],[-230,120],[0,ay+ah+100]]){toW(i,lx,ly);const x=WP.x,y=WP.y,card=cardAt(x,y);
+      if(x<48||x>W-48||y<AF_Y+40)continue;if(SIDX.some(j=>planes[j].some(A=>convexOverlap(A,card)))||ROOMS.some(r=>convexOverlap(card,r.poly)))continue;pick=[x,y];break}
+    BADGE[i]=pick}
+}
 function standHit(i,x,y){toL(i,x,y);if(!XF[i].nose)return Math.abs(WP.x)<150&&y>=0&&y<SEC_Y;const [ax,ay,w,h]=standArea(i);return WP.x>=ax&&WP.x<=ax+w&&WP.y>=ay-40&&WP.y<=ay+h}
 
 // Airside rooms: convex floors joined by doorways. Inside a room passengers walk straight to where they're going;
@@ -39,11 +55,18 @@ function buildRooms(L){
   STAND_ROOM.length=0;SHOP_ROOM.length=0;
   if(!L.rooms){ROOMS=null;ROUTE=null;ROOM_ID={};return}
   ROOMS=L.rooms;ROOM_ID={};ROOMS.forEach((r,k)=>ROOM_ID[r.id]=k);
-  // for every pair of rooms, the doorway to walk to first: a breadth-first search back from each destination
-  const n=ROOMS.length,doors=(L.doors||[]).map(([a,b,x,y])=>[ROOM_ID[a],ROOM_ID[b],x,y]);
+  // for every pair of rooms, the doorway to walk to first: the shortest walk from the middle of one room to the middle of the
+  // other, through doorways (worked out once per layout)
+  const n=ROOMS.length,doors=(L.doors||[]).map(([a,b,x,y])=>[ROOM_ID[a],ROOM_ID[b],x,y]),mid=ROOMS.map(r=>[r.poly.reduce((a,p)=>a+p[0],0)/r.poly.length,r.poly.reduce((a,p)=>a+p[1],0)/r.poly.length]);
+  const d2=(x1,y1,x2,y2)=>Math.hypot(x2-x1,y2-y1);
   ROUTE=[...Array(n)].map(()=>new Array(n).fill(null));
-  for(let to=0;to<n;to++){const seen=new Set([to]),q=[to];
-    while(q.length){const r=q.shift();for(const [a,b,x,y] of doors){for(const [u,v] of [[a,b],[b,a]])if(v===r&&!seen.has(u)){seen.add(u);ROUTE[u][to]=[x,y,v];q.push(u)}}}}
+  for(let to=0;to<n;to++){
+    const far=doors.map(([a,b,x,y])=>a===to||b===to?d2(x,y,...mid[to]):Infinity); // how far each doorway is from the destination
+    for(let k=0;k<doors.length;k++)for(const [m,[a,b,x,y]] of doors.entries())for(const [i,[a2,b2,x2,y2]] of doors.entries())
+      if(i!==m&&(a2===a||a2===b||b2===a||b2===b)&&far[i]+d2(x,y,x2,y2)<far[m])far[m]=far[i]+d2(x,y,x2,y2);
+    for(let r=0;r<n;r++){if(r===to)continue;let best=null,bd=Infinity;
+      for(const [m,[a,b,x,y]] of doors.entries()){if(a!==r&&b!==r)continue;const v=d2(...mid[r],x,y)+far[m];if(v<bd){bd=v;best=[x,y,a===r?b:a]}}
+      ROUTE[r][to]=best}}
   L.stands.forEach((s,i)=>STAND_ROOM[i]=ROOM_ID[s.room||'main']??0);
   L.shops.forEach((s,j)=>SHOP_ROOM[j]=ROOM_ID[s[6]||'main']??0);
 }
@@ -62,6 +85,9 @@ function walk(p,v,dt){
   if(w){if(moveTo(p,w[p.wi],w[p.wi+1],v,dt)){p.room=w[p.wi+2];p.wi+=3;if(p.wi>=w.length)p.way=null}return false}
   return moveTo(p,p.tx,p.ty,v,dt);
 }
+// a 2D remote stand: passengers wait by its bus gate in the terminal ([x, y, 1 if the lounge is below the gate else -1])
+// and ride a bus along its road out to the stairs
+const busGate=i=>XF[i].nose&&STAND_KIND[i]==='remote'?LAY.stands[i].gate:null;
 const roomWalk=p=>ROOMS&&p.room!=null&&ROOMS[p.room].walk||1;
 function inPoly(P,x,y){let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){const [xi,yi]=P[i],[xj,yj]=P[j];if((yi>y)!==(yj>y)&&x<(xj-xi)*(y-yi)/(yj-yi)+xi)c=!c}return c}
 // What's wrong with a 2D layout, if anything: planes touching each other or a building, lounges and shops outside
@@ -74,10 +100,7 @@ const edgeDist=(P,x,y)=>Math.min(...P.map(([x1,y1],k)=>{const [x2,y2]=P[(k+1)%P.
 function layoutFaults(id){
   const L=LAYOUTS[id],bad=[],keep=G.layout;if(!L.rooms)return bad;
   applyLayout(id);
-  const geos=[geom(AIRCRAFT[3]),geom(AIRCRAFT[6])];
-  const pieces=(i,g)=>[[-g.fw,g.top-64,g.fw,g.end+48],[-(g.fw+g.span),g.wingY,g.fw+g.span,g.wingY+g.span*0.55+11],[-(g.fw*0.8+14),g.end+10,g.fw*0.8+14,g.end+40]]
-    .map(([a,b,c,d])=>[[a,b],[c,b],[c,d],[a,d]].map(([x,y])=>{toW(i,x,y);return [WP.x,WP.y]}));
-  const planes=SIDX.map(i=>geos.flatMap(g=>pieces(i,g)));
+  const geos=[geom(AIRCRAFT[3]),geom(AIRCRAFT[6])],planes=SIDX.map(i=>geos.flatMap(g=>planePieces(i,g)));
   ROOMS.forEach(r=>{const P=r.poly,n=P.length;let sgn=0;for(let k=0;k<n;k++){const [a,b]=P[k],[c,d]=P[(k+1)%n],[e,f]=P[(k+2)%n],cr=Math.sign((c-a)*(f-d)-(d-b)*(e-c));if(cr&&sgn&&cr!==sgn){bad.push(`room ${r.id} isn't convex`);break}if(cr)sgn=cr}
     if(r.id!=='main'&&!ROUTE[ROOM_ID[r.id]][ROOM_ID.main])bad.push(`room ${r.id} can't be reached`)});
   for(const [a,b,x,y] of L.doors||[])for(const r of [a,b])if(ROOM_ID[r]==null||edgeDist(ROOMS[ROOM_ID[r]].poly,x,y)>3)bad.push(`doorway ${a}–${b} isn't on the wall of ${r}`);
@@ -86,9 +109,11 @@ function layoutFaults(id){
     ROOMS.forEach(r=>{if(planes[i].some(A=>convexOverlap(A,r.poly)))bad.push(`${GATES[i]} touches room ${r.id}`)});
     if(planes[i].some(A=>A.some(([x,y])=>x<0||x>W||y<AF_Y+40||y>SEC_Y)))bad.push(`${GATES[i]} is off the apron`);
     const room=ROOMS[STAND_ROOM[i]].poly;for(const j of [0,15,64,79]){const s=spotPos(i,j);if(!inPoly(room,s.x,s.y))bad.push(`${GATES[i]}'s lounge is outside its room`)}
-    toW(i,-118,FACE_Y);if(edgeDist(room,WP.x,WP.y)>3)bad.push(`${GATES[i]}'s bridge doesn't start on its room's wall`);
-    badgeAt(i);const bx=WP.x,by=WP.y,card=[[bx-48,by-30],[bx+48,by-30],[bx+48,by+30],[bx-48,by+30]];
-    if(SIDX.some(j=>j!==i&&planes[j].some(A=>convexOverlap(A,card)))||ROOMS.some(r=>convexOverlap(card,r.poly))||bx<48||bx>W-48)bad.push(`${GATES[i]}'s card covers something`);
+    const bg=busGate(i);if(bg){if(!inPoly(room,bg[0],bg[1]+bg[2]*4))bad.push(`${GATES[i]}'s bus gate isn't in its room`);const P=paths(i,geos[0]).bridge.pts;
+      for(let k=0;k+1<P.length;k++){const [x1,y1]=P[k],[x2,y2]=P[k+1],l=Math.hypot(x2-x1,y2-y1)||1,nx=-(y2-y1)/l*6,ny=(x2-x1)/l*6,seg=[[x1+nx,y1+ny],[x2+nx,y2+ny],[x2-nx,y2-ny],[x1-nx,y1-ny]];
+        SIDX.forEach(j=>{if(j!==i&&planes[j].some(A=>convexOverlap(A,seg)))bad.push(`${GATES[i]}'s bus road crosses ${GATES[j]}`)})}}
+    else{faceW(i,-118,FACE_Y);if(edgeDist(room,WP.x,WP.y)>3)bad.push(`${GATES[i]}'s bridge doesn't start on its room's wall`)}
+    if(!BADGE[i])bad.push(`${GATES[i]}'s card has nowhere clear to go`);
   });
   L.shops.forEach((s,j)=>{const room=ROOMS[SHOP_ROOM[j]].poly;for(const [t,e] of [[2,2],[116,2],[116,38],[2,38],[59,47]]){shopPt(j,t,e);if(!inPoly(room,WP.x,WP.y)){bad.push(`shop ${j} (${s[1]}) is outside its room`);break}}
     L.shops.forEach((o,k)=>{if(k>j&&o[4]===s[4]&&(o[5]||0)===(s[5]||0)&&Math.abs(o[0]-s[0])<120&&Math.abs((o[4]??452)-(s[4]??452))<40)bad.push(`shops ${j} and ${k} overlap`)})});

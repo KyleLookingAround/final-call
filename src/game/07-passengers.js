@@ -69,7 +69,7 @@ function toGate(p){
   const S=R.st[p.stand],j=S.spots.indexOf(null);
   if(j>=0){S.spots[j]=p;p.spot=j;const s=spotPos(p.stand,j);p.tx=s.x;p.ty=s.y}
   else if(!XF[p.stand].nose){p.spot=-1;p.tx=STAND_X[p.stand]-135+rnd()*130;p.ty=500+rnd()*12}
-  else{p.spot=-1;const a=rnd(),b=rnd();toW(p.stand,-147+a*130,FACE_Y-14-b*12);p.tx=WP.x;p.ty=WP.y}
+  else{p.spot=-1;const a=rnd(),b=rnd(),bg=busGate(p.stand);if(bg){p.tx=bg[0]-67+a*130;p.ty=bg[1]+bg[2]*(14+b*12)}else{faceW(p.stand,-147+a*130,FACE_Y-14-b*12);p.tx=WP.x;p.ty=WP.y}}
   p.state='toGate';route(p,STAND_ROOM[p.stand]);
 }
 function serve(sv,x,y,dt,done,wx,wy){
