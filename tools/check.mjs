@@ -87,7 +87,7 @@ if(!only||only==='rules'){
     {const ids=new Set(S.TECH.map(T=>T.id));bad=S.TECH.filter(T=>(T.r||[]).some(r=>!ids.has(r))).map(T=>T.id);
       const gids=new Set(S.GOALS.map(g=>g.id));
       t('rules: plan and goal ids are unique and prerequisites exist',ids.size===S.TECH.length&&gids.size===S.GOALS.length&&!bad.length,few(bad))}
-    {bad=[];for(const [id,L] of Object.entries(S.LAYOUTS)){const st=L.stands,sh=L.shops,names=new Set(st.map(x=>x.g)),seg=x=>!(L.gap&&x>L.gap[0]-4&&x<L.gap[1]+4);
+    {bad=[];for(const [id,L] of Object.entries(S.LAYOUTS)){if(L.rooms){bad.push(...S.layoutFaults(id).map(f=>id+': '+f));continue}const st=L.stands,sh=L.shops,names=new Set(st.map(x=>x.g)),seg=x=>!(L.gap&&x>L.gap[0]-4&&x<L.gap[1]+4);
       if(names.size!==st.length||st.length>12||sh.length>20)bad.push(id+': names or counts');
       const order=L.order||st.map((x,i)=>i);if(order.length!==st.length||new Set(order).size!==st.length)bad.push(id+': buying order');
       st.forEach((a,i)=>{if(a.x<140||a.x>L.W-140||110-64+(a.dy||0)<-100)bad.push(`${id} ${a.g}: off the apron`);
@@ -205,13 +205,14 @@ if(!only||only==='layouts'){
 if(!only||only==='news'){
   // an older save opens the card on load; after closing it, a reload doesn't
   const {ctx,page,errs}=await open(undefined,saveText(newest),false,{news:true});
-  const a=await page.evaluate(()=>({open:!document.querySelector('#news').hidden,fresh:document.querySelectorAll('#newsList details[open]').length,all:document.querySelectorAll('#newsList details').length}));
+  // saves from before What's new count as version 21, so every version since opens as new
+  const a=await page.evaluate(()=>({open:!document.querySelector('#news').hidden,fresh:document.querySelectorAll('#newsList details[open]').length,want:__sim.UPDATES.filter(u=>u.v>21).length,all:document.querySelectorAll('#newsList details').length}));
   await page.click('#news [data-newsclose]');await page.waitForTimeout(200);
   await page.reload();await page.waitForTimeout(900);
   const b=await page.evaluate(()=>!document.querySelector('#news').hidden);
   await page.evaluate(()=>{__sim.R.oSub='settings';__sim.setTab('office')});await page.click('[data-news]');await page.waitForTimeout(200);
   const c=await page.evaluate(()=>({open:!document.querySelector('#news').hidden,all:document.querySelectorAll('#newsList details').length}));
-  ok('news: opens once after an update, and from Settings with every version',a.open&&a.fresh===1&&!b&&c.open&&c.all===a.all&&!errs.length,JSON.stringify({first:a,again:b,settings:c})+(errs.length?' '+errs[0]:''));
+  ok('news: opens once after an update, and from Settings with every version',a.open&&a.fresh===a.want&&!b&&c.open&&c.all===a.all&&!errs.length,JSON.stringify({first:a,again:b,settings:c})+(errs.length?' '+errs[0]:''));
   await ctx.close();
   const n=await open(undefined,null,false,{news:true});
   const d=await n.page.evaluate(()=>new Promise(r=>setTimeout(()=>r(!document.querySelector('#news').hidden),700)));

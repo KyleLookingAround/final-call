@@ -2,12 +2,12 @@
 const DOORS=[0,1],FRONT=[0]; // reused so the loops below don't make new arrays every step
 function updateStand(i,dt,D){
   const S=R.st[i],st=G.stands[i];
-  if(S.out){S.out.t+=dt;const k=Math.min(1,S.out.t/2.6);S.out.offY=-230*k*k;S.out.alpha=1-k;if(k>=1)S.out=null}
+  if(S.out){S.out.t+=dt;const k=Math.min(1,S.out.t/2.6);S.out.offY=(XF[i].nose?230:-230)*k*k;S.out.alpha=1-k;if(k>=1)S.out=null}
   if(!S.F){if((S.hold||0)>0)S.hold-=dt;else if(st.built){S.idleT=(S.idleT||0)+dt;S.F=allocFlight(i);if(S.F)S.idleT=0}if(!S.F){S.ext=clamp(S.ext-dt*1.6,0,1);return}}
   const F=S.F,pl=F.plane,g=F.geo;
   if(pl.state==='wait'){if(!F.rwyReq){F.rwyReq=true;R.rwy.q.push({type:'arr',F,stand:i})}pl.state='approach'}
   else if(pl.state==='approach'){if(F.landed&&!S.out){pl.state='inbound';pl.t=0}}
-  else if(pl.state==='inbound'){pl.t+=dt;const k=Math.min(1,pl.t/D.tow);pl.offY=-200*Math.pow(1-k,3);pl.alpha=Math.min(1,k*3);if(k>=1){pl.alpha=1;pl.state='deplaning';pl.offY=0;F.arr.started=G.clock}}
+  else if(pl.state==='inbound'){pl.t+=dt;const k=Math.min(1,pl.t/D.tow);pl.offY=(XF[i].nose?220:-200)*Math.pow(1-k,3);pl.alpha=Math.min(1,k*3);if(k>=1){pl.alpha=1;pl.state='deplaning';pl.offY=0;F.arr.started=G.clock}}
   else if(pl.state==='deplaning'){if(F.arr.onboard<=0){pl.state='turnaround';pl.t=D.clean}}
   else if(pl.state==='turnaround'){if(F.willFault&&!F.faultFired){F.faultFired=true;techFault(i,F)}pl.t-=dt;if(pl.t<=0){pl.state='boarding';F.boardStart=G.clock;chime()}}
   else if(pl.state==='boarding'){
