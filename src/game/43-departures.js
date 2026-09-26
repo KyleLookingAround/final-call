@@ -56,10 +56,10 @@ TERM_MINUTE.push(()=>{
 });
 
 /* ---------- check-in ---------- */
-PAX_STEP.walkIn=(p,dt)=>{if(walk(p,110*p.spd,dt))enterLandside(p)};
+PAX_STEP.walkIn=(p,dt,D)=>{if(walk(p,110*p.spd,dt))enterLandside(p,D)};
 function joinCi(p,q){p.state='queue';p.isl=q;R.ciQ.push(p);CIN[q]++}
-function enterLandside(p){
-  const D=derived();
+function enterLandside(p,D){
+  D=D||derived();
   if(p.checked&&!p.online&&G.lv.bagdrop&&rnd()<D.online)p.online=true; // with bag drop, passengers with bags check in online too
   if(p.online){if(p.checked&&dropsOpen())joinCi(p,CI_B);else if(p.checked)joinCi(p,bestIsland(D));else enterSecurity(p);return}
   const L=p.leader;if(L&&L.state==='queue'&&(L.isl<CI_K?islOpen(L.isl,D):L.isl===CI_K&&D.kiosks&&(!p.checked||dropsOpen()))){joinCi(p,L.isl);return} // stay with the party
@@ -114,10 +114,10 @@ PAX_STEP.bpGate=(p,dt)=>{if(moveTo(p,p.tx,p.ty,80*p.spd,dt)){p.state='bpTap';p.t
 PAX_STEP.bpTap=(p,dt)=>{p.t-=dt;if(p.t>0)return;p.room=hallId('sec');
   if(p.fast&&G.lv.fasttrack){p.state='ftQ';R.ftQ.push(p)}else{p.state='secQ';p.famL=p.type==='fam'||p.type==='prm';R.secQ.push(p)}};
 // family lanes (the first d.fam) take families and those who need help first, then anyone; the others never take them.
-// A free lane calls whoever is nearest among the front dozen, as a marshal would. With one lane open there are no family lanes.
+// A free lane calls whoever is nearest in the front row, which runs beneath the lanes, as a marshal would. With one lane open there are no family lanes.
 function pickSec(fam,isFam,x){const Q=R.secQ;let j=-1;
   if(fam&&isFam)j=Q.findIndex(p=>p.famL);
-  if(j<0){let bd=1e9;for(let k=0,n=0;k<Q.length&&n<12;k++){const p=Q[k];if(fam&&p.famL)continue;n++;const d=Math.abs(p.x-x);if(d<bd){bd=d;j=k}}}
+  if(j<0){let bd=1e9;for(let k=0,n=0;k<Q.length&&n<19;k++){const p=Q[k];if(fam&&p.famL)continue;n++;const d=Math.abs(p.x-x);if(d<bd){bd=d;j=k}}}
   return j<0?null:Q.splice(j,1)[0]}
 const divestT=(D,m)=>D.sec*m*(ctOn()?0.75:1);
 function afterDivest(p,i){ // the tray goes through the scanner as the passenger walks through the arch, to repack
@@ -126,7 +126,7 @@ function afterDivest(p,i){ // the tray goes through the scanner as the passenger
 }
 const hurry=p=>p.F.plane.state==='boarding'&&G.clock>=p.F.std-12;
 function clearSec(p){p.cleared=true;p.srch=false;airside(p,p.sl<8?laneX(p.sl):FT_X)}
-PAX_STEP.scan=(p,dt)=>{if(moveTo(p,p.tx,p.ty,45*p.spd,dt)){p.state='repack';p.t=0.3+0.4*divestT(derived(),1)}};
+PAX_STEP.scan=(p,dt,D)=>{if(moveTo(p,p.tx,p.ty,45*p.spd,dt)){p.state='repack';p.t=0.3+0.4*divestT(D,1)}};
 PAX_STEP.repack=(p,dt)=>{p.t-=dt;if(p.t>0)return;if(p.srch&&!hurry(p)){p.state='srchQ';DEP().sq.push(p)}else clearSec(p)};
 PAX_STEP.secOut=(p,dt)=>{if(moveTo(p,p.tx,p.ty,80*p.spd,dt))clearSec(p)};
 function updateSecurity(dt,D){
@@ -147,7 +147,7 @@ function updateSecurity(dt,D){
     if(T.p) serve(T,s.x-11,s.y,dt,p=>{p.state='secOut';p.tx=(p.sl<8?laneX(p.sl):FT_X)-5;p.ty=603},s.x-11,s.y+7);
   }
   let m=0,f=0;
-  for(const p of R.secQ){p.wait+=dt;const s=fam&&p.famL?famSlot(f++):secSlot(m++);moveTo(p,s.x,s.y,75*p.spd,dt)}
+  for(const p of R.secQ){p.wait+=dt;const s=fam&&p.famL?famSlot(f++):secSlot(m++);moveTo(p,s.x,s.y,150*p.spd,dt)}
   R.ftQ.forEach((p,i)=>{p.wait+=dt;const s=ftSlot(i);moveTo(p,s.x,s.y,75*p.spd,dt)});
   d.sq.forEach((p,i)=>{const s=srchSlot(i);moveTo(p,s.x,s.y,70*p.spd,dt)});
 }
