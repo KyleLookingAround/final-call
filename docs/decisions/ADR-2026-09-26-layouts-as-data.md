@@ -2,7 +2,7 @@
 
 ## Status
 
-Approved
+Superseded in part by [ADR-2026-09-26-stand-frames-and-rooms](ADR-2026-09-26-stand-frames-and-rooms.md): planes now park at any angle. Layouts are still data.
 
 ## Context
 
