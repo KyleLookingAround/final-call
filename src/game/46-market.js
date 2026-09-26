@@ -72,9 +72,12 @@ function mktPlan(){
 const ACT_OF=p=>p.kid?'play':p.type==='fam'?'playB':p.type==='grp'?'food':p.type==='work'?(p.rand<0.6?'charge':'window'):null;
 function pickAct(p){const a=ACT_OF(p);if(a)return a;const r=rnd();return r<0.4?'window':r<0.72?'food':r<0.9?'seats':'wc'}
 
-/* ---------- who is where: each shop's and each market spot's occupants, gathered once a step ---------- */
+/* ---------- who is where: each shop's and each market spot's occupants ---------- */
+// Gathered at most once a step, and only when someone has left a spot since (nextAct, toGate and leaveShop set R.occOut)
+// or the layout has changed: a spot someone leaves frees up at the next step, and a spot taken is added in freeSpot, so
+// the lists are the same as gathering them at every step
 function occ(){
-  if(!R.occ||R.occStep!==R.step){R.occStep=R.step;const o=R.occ={};
+  if(!R.occ||R.occOut&&R.occStep!==R.step||R.occLay!==G.layout){R.occOut=false;R.occStep=R.step;R.occLay=G.layout;const o=R.occ={};
     for(const p of R.pax){const k=p.state==='shop'||p.state==='toShop'?'s'+p.shop:p.state==='mkt'||p.state==='toMkt'?p.act:null;if(k&&p.sl>=0)(o[k]||(o[k]=[])).push(p.sl)}}
   return R.occ;
 }
@@ -98,7 +101,7 @@ function airside(p,x,room){
 // what next: the gate once it's called; otherwise a shop, or somewhere to wait in the market place. Anyone through
 // security after their gate is called may still stop at one shop on the way, as they did before gate calls.
 function nextAct(p,first){
-  p.sl=-1;const called=isCalled(p.F);
+  p.sl=-1;R.occOut=true;const called=isCalled(p.F);
   if(called&&!first){toGate(p);return}
   const L=p.leader;
   if(L&&(L.state==='toShop'||L.state==='shop')&&G.shops[L.shop]){const s=freeSpot('s'+L.shop,shopCap(L.shop));if(s>=0){toShop(p,L.shop,s);return}}
@@ -130,7 +133,7 @@ function goAct(p,a){
   route(p,hallId('mkt'));
 }
 function toGate(p){
-  p.sl=-1;const S=R.st[p.stand],j=S.spots.indexOf(null);
+  p.sl=-1;R.occOut=true;const S=R.st[p.stand],j=S.spots.indexOf(null);
   if(j>=0){S.spots[j]=p;p.spot=j;const s=spotPos(p.stand,j);p.tx=s.x;p.ty=s.y}
   else{p.spot=-1;const a=rnd(),b=rnd(),bg=busGate(p.stand);if(bg){p.tx=bg[0]-67+a*130;p.ty=bg[1]+bg[2]*(14+b*12)}else{faceW(p.stand,-147+a*130,FACE_Y-14-b*12);p.tx=WP.x;p.ty=WP.y}}
   p.state='toGate';route(p,STAND_ROOM[p.stand]);
@@ -170,7 +173,7 @@ PAX_STEP.shop=(p,dt)=>{
 function leaveShop(p){
   const s=G.shops[p.shop];
   if(s){const F=p.F,frac=clamp(1-Math.max(0,p.t)/p.t0,0.3,1),v=SHOPS[s.type].spend*(LAY.shopBonus&&LAY.shopBonus[SHOPS[s.type].id]||1)*Math.pow(1.25,s.lvl)*(1+0.6*F.ac.tier)*frac*(G.lv.mall?1.4:1);s.earned=(s.earned||0)+v;earn(v,'shops',p.x,p.y-6,'#F5D08A',F)}
-  p.nv=(p.nv||0)+1;p.state='outShop';p.sl=-1;shopPt(p.shop,p.su,47);p.tx=WP.x;p.ty=WP.y;
+  p.nv=(p.nv||0)+1;p.state='outShop';p.sl=-1;R.occOut=true;shopPt(p.shop,p.su,47);p.tx=WP.x;p.ty=WP.y;
 }
 PAX_STEP.outShop=(p,dt)=>{if(moveTo(p,p.tx,p.ty,60*p.spd,dt))nextAct(p,false)};
 PAX_STEP.toMkt=(p,dt,D)=>{if(isCalled(p.F)){toGate(p);return}if(walk(p,D.cwalk*p.spd*walkMul(p),dt)){p.state='mkt';p.t=6+rnd()*10}};
@@ -183,7 +186,8 @@ PAX_STEP.mkt=(p,dt)=>{
 PAX_STEP.toGate=(p,dt,D)=>{if(walk(p,D.cwalk*p.spd*walkMul(p),dt)){p.state='gate';PAX_STEP.gate(p,0)}};
 // at the gate: anyone standing takes a seat as soon as one frees up
 PAX_STEP.gate=(p,dt)=>{
-  if(p.spot<0){const S=R.st[p.stand],j=S.spots.indexOf(null);if(j>=0){S.spots[j]=p;p.spot=j;const s=spotPos(p.stand,j);p.tx=s.x;p.ty=s.y}}
+  // seats only fill while passengers move (boarding frees them earlier in the step), so once a lounge is full nobody else looks this step
+  if(p.spot<0){const S=R.st[p.stand];if(S.fullAt!==R.step){const j=S.spots.indexOf(null);if(j>=0){S.spots[j]=p;p.spot=j;const s=spotPos(p.stand,j);p.tx=s.x;p.ty=s.y}else S.fullAt=R.step}}
   if(p.x!==p.tx||p.y!==p.ty)moveTo(p,p.tx,p.ty,50*p.spd,dt);
 };
 
