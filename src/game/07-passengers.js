@@ -44,22 +44,33 @@ function finishCheckin(p,x){
   if(p.checked){if(G.lv.bagfee>0)earn(p.F.ac.fare*0.5,'bags',x,535,'#D9A066',p.F);R.belt.push({x,F:p.F})}
   enterSecurity(p);
 }
-function airside(p,x){
-  p.x=x;p.y=516;
+// after security (or off a connecting flight, in that stand's room): to a shop, or to the gate
+function airside(p,x,room){
+  p.x=x;p.y=516;p.room=room??ROOM_MAIN();
   const F=p.F,left=F.std-G.clock,built=[];G.shops.forEach((s,j)=>{if(s&&shopOpen(j))built.push(j)});
-  if(p.leader){const L=p.leader;if((L.state==='toShop'||L.state==='shop')&&G.shops[L.shop]&&left>15){p.state='toShop';p.shop=L.shop;p.tx=clamp(L.tx+(rnd()-0.5)*16,shopX(L.shop),shopX(L.shop)+116);p.ty=499+(rnd()-0.5)*4;return}toGate(p);return}
+  if(p.leader){const L=p.leader;if((L.state==='toShop'||L.state==='shop')&&G.shops[L.shop]&&left>15){p.state='toShop';p.shop=L.shop;
+    if(!ROOMS){p.tx=clamp(L.tx+(rnd()-0.5)*16,shopX(L.shop),shopX(L.shop)+116);p.ty=499+(rnd()-0.5)*4}
+    else{const t=clamp(L.su+(rnd()-0.5)*16,0,116);shopPt(L.shop,t,47+(rnd()-0.5)*4);p.tx=WP.x;p.ty=WP.y;p.su=t}
+    route(p,SHOP_ROOM[L.shop]);return}toGate(p);return}
   if(left>15&&built.length){
     for(let k=built.length-1;k>0;k--){const j=Math.floor(rnd()*(k+1));[built[k],built[j]]=[built[j],built[k]]}
-    if(p.biz||p.prio){const L=built.find(j=>SHOPS[G.shops[j].type].vip);if(L!=null&&rnd()<0.9){p.state='toShop';p.shop=L;p.tx=shopX(L)+8+rnd()*100;p.ty=499;return}}
-    for(const j of built){const sh=SHOPS[G.shops[j].type];if(sh.vip)continue;if(rnd()<Math.min(0.95,sh.pull*SHOP_PULL[j]*PTYPE[p.type||'lei'].shop*(p.type==='grp'&&sh.id==='bar'?2.5:1)*(1+0.3*((p.psize||1)-1)))){p.state='toShop';p.shop=j;p.tx=shopX(j)+8+rnd()*100;p.ty=499;return}}
+    if(p.biz||p.prio){const L=built.find(j=>SHOPS[G.shops[j].type].vip);if(L!=null&&rnd()<0.9){p.state='toShop';p.shop=L;toShop(p,L);return}}
+    for(const j of built){const sh=SHOPS[G.shops[j].type];if(sh.vip)continue;if(rnd()<Math.min(0.95,sh.pull*SHOP_PULL[j]*PTYPE[p.type||'lei'].shop*(p.type==='grp'&&sh.id==='bar'?2.5:1)*(1+0.3*((p.psize||1)-1)))){p.state='toShop';p.shop=j;toShop(p,j);return}}
   }
   toGate(p);
+}
+// a place along shop j's front: t along it, e out from its back wall (47 is just outside)
+function shopPt(j,t,e){const a=SHOP_A[j]*Math.PI/180,c=exact(Math.cos(a)),s=exact(Math.sin(a));WP.x=SHOP_X[j]+t*c-e*s;WP.y=SHOP_Y[j]+t*s+e*c;return WP}
+function toShop(p,j){
+  if(!ROOMS){p.tx=shopX(j)+8+rnd()*100;p.ty=499;return}
+  const t=8+rnd()*100;shopPt(j,t,47);p.tx=WP.x;p.ty=WP.y;p.su=t;route(p,SHOP_ROOM[j]);
 }
 function toGate(p){
   const S=R.st[p.stand],j=S.spots.indexOf(null);
   if(j>=0){S.spots[j]=p;p.spot=j;const s=spotPos(p.stand,j);p.tx=s.x;p.ty=s.y}
-  else{p.spot=-1;p.tx=STAND_X[p.stand]-135+rnd()*130;p.ty=500+rnd()*12}
-  p.state='toGate';
+  else if(!XF[p.stand].nose){p.spot=-1;p.tx=STAND_X[p.stand]-135+rnd()*130;p.ty=500+rnd()*12}
+  else{p.spot=-1;const a=rnd(),b=rnd();toW(p.stand,-147+a*130,FACE_Y-14-b*12);p.tx=WP.x;p.ty=WP.y}
+  p.state='toGate';route(p,STAND_ROOM[p.stand]);
 }
 function serve(sv,x,y,dt,done,wx,wy){
   const p=sv.p;
@@ -71,7 +82,7 @@ function take(sv,pick,state,t){
   if(sv.p&&sv.n)return;const q=pick();if(!q)return;q.state=state;if(typeof t==='function')t=t(q);
   if(!sv.p){sv.p=q;sv.t=t}else{sv.n=q;sv.tn=t}
 }
-const walkMul=p=>(Math.abs(p.tx-p.x)>300?Math.max(G.lv.mover?2.5:1,LAY.mover||1):1)*(LAY.walk||1)*(p.xferred&&LAY.xfer||1);
+const walkMul=p=>(p.way||Math.abs(p.tx-p.x)>300?Math.max(G.lv.mover?2.5:1,LAY.mover||1):1)*(LAY.walk||1)*(p.xferred&&LAY.xfer||1)*roomWalk(p);
 function updateLandside(dt,D){
   for(let i=0;i<8;i++){
     const d=R.desks[i]||(R.desks[i]={p:null,t:0});
@@ -98,7 +109,7 @@ function updateLandside(dt,D){
   if(R.belt.some(b=>b.done)) R.belt=R.belt.filter(b=>!b.done);
   for(const p of R.pax){
     if(p.state==='walkIn'){if(moveTo(p,p.tx,p.ty,110*p.spd,dt))enterLandside(p)}
-    else if(p.state==='toShop'){if(!G.shops[p.shop])toGate(p);else if(moveTo(p,p.tx,p.ty,D.cwalk*p.spd*walkMul(p),dt)){p.state='shop';p.t=SHOPS[G.shops[p.shop].type].dwell;p.t0=p.t}}
+    else if(p.state==='toShop'){if(!G.shops[p.shop])toGate(p);else if(walk(p,D.cwalk*p.spd*walkMul(p),dt)){p.state='shop';p.t=SHOPS[G.shops[p.shop].type].dwell;p.t0=p.t}}
     else if(p.state==='shop'){
       const F=p.F,hurry=F.plane.state==='boarding'&&G.clock>=F.std-12;
       p.t-=dt;
@@ -108,7 +119,7 @@ function updateLandside(dt,D){
         toGate(p);
       }
     }
-    else if(p.state==='toGate'){if(moveTo(p,p.tx,p.ty,D.cwalk*p.spd*walkMul(p),dt))p.state='gate'}
+    else if(p.state==='toGate'){if(walk(p,D.cwalk*p.spd*walkMul(p),dt))p.state='gate'}
   }
 }
 

@@ -52,6 +52,7 @@ const LAYOUTS={
 LAYOUTS.classic.cost=20000;LAYOUTS.classic.build=240;LAYOUTS.classic.up='Today\'s airport: eight stands on bridges in a straight line.';LAYOUTS.classic.down='Long walks to the far end of Pier B.';
 let LAY=LAYOUTS.classic; // the current layout
 const STAND_KIND=['bridge','bridge','bridge','bridge','bridge','bridge','bridge','bridge'],SHOP_PULL=[1,1,1,1,1,1,1,1]; // remote stands board by bus; hall units draw more shoppers
+const SHOP_Y=[],SHOP_A=[]; // shop units: top edge and angle (degrees; 0 faces the concourse below it)
 const p2name=()=>LAY.p2||'Pier B';
 const fill=(a,v)=>{a.length=0;a.push(...v);return a};
 function applyLayout(id){
@@ -62,6 +63,8 @@ function applyLayout(id){
   fill(SIDX,L.stands.map((s,i)=>i));fill(STAND_ORDER,L.order||SIDX);
   fill(STAND_AFTER,L.stands.map((s,i)=>s.after!=null?s.after:(o=>o>0?STAND_ORDER[o-1]:-1)(STAND_ORDER.indexOf(i))));
   fill(SHOP_X,L.shops.map(s=>s[0]));fill(SHOP_NAME,L.shops.map(s=>s[1]));fill(SHOP_PH,L.shops.map(s=>s[2]||1));
+  fill(SHOP_Y,L.shops.map(s=>s[4]??452));fill(SHOP_A,L.shops.map(s=>s[5]||0));
+  fill(XF,L.stands.map(standXf));buildRooms(L);AF_Y=L.top||0;Y0=AF_Y-180;
 }
 
 const busMul=i=>STAND_KIND[i]!=='remote'?1:R.fx.rain>G.clock||R.fx.snow>G.clock?1.4:2.2; // buses outpace walkers, less so in bad weather

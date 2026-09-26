@@ -12,7 +12,7 @@ function focus(i,z){
   if(R.view==='region'){regionFocus(i==='all'?'all':'air');return}
   if(R.view==='world'){worldFocus('all');return}
   const c=R.cam;if(z!=null)c.z=z;const k=viewK();
-  if(i==='all'){c.z=zMin();c.tx=0;c.ty=Y0}else{c.tx=STAND_X[i]-R.sw/k/2+60;c.ty=H-R.sh/k}
+  if(i==='all'){c.z=zMin();c.tx=0;c.ty=Y0}else if(!XF[i].nose){c.tx=STAND_X[i]-R.sw/k/2+60;c.ty=H-R.sh/k}else{const b=standBox(i);c.tx=b[0]+b[2]/2-R.sw/k/2;c.ty=b[1]+b[3]/2-R.sh/k/2}
   const k2=viewK(),vw=R.sw/k2,vh=R.sh/k2;c.tx=vw>=W?(W-vw)/2:clamp(c.tx,0,W-vw);c.ty=vh>=Y1-Y0?Y0+(Y1-Y0-vh)/2:clamp(c.ty,Y0,Y1-vh);
 }
 function camStep(dt){const c=R.cam;if(c.tx==null)return;const a=1-Math.pow(0.001,dt);c.x+=(c.tx-c.x)*a;c.y+=(c.ty-c.y)*a;clampCam();if(Math.abs(c.x-c.tx)<0.5&&Math.abs(c.y-c.ty)<0.5)c.tx=null}
@@ -33,12 +33,12 @@ function tapAt(px,py){
   const k=viewK(),wx=R.cam.x+px/k,wy=R.cam.y+py/k;
   if(R.view==='region'){regionTap(wx,wy);return}
   if(R.view==='world'){worldTap(wx,wy);return}
-  if(wy<0){setTab('ground');return}
+  if(wy<AF_Y){setTab('ground');return}
   if(wy>764&&wx<340&&(airKind('tram')||R.tram.x!=null)){setTab('region');return}
   if(wy>LAND_B+2){R.sSub='landside';setTab('sales');return}
   if(wy<SEC_Y){
-    if(wy>TERM_Y&&SHOP_X.some((x,j)=>wx>=x&&wx<=x+118&&shopOpen(j))){goTo('sales','.shopcard');return}
-    const i=STAND_X.findIndex(sx=>Math.abs(wx-sx)<150);if(i<0)return;
+    if(ROOMS?SHOP_X.some((x,j)=>shopOpen(j)&&shopHit(j,wx,wy)):wy>TERM_Y&&SHOP_X.some((x,j)=>wx>=x&&wx<=x+118&&shopOpen(j))){goTo('sales','.shopcard');return}
+    const i=SIDX.findIndex(i=>standHit(i,wx,wy));if(i<0)return;
     selectStand(i,true);if(i===0)R.tourTap=true;
   } else if(wx<LAND_R)setTab('terminal');else{R.sSub='landside';setTab('sales')}
 }
