@@ -1,9 +1,9 @@
 /* ---------- events ---------- */
 function scheduleEvent(plot){
   const d=devAt(plot);if(!d||!d.ev)return;if((G.evq||[]).some(e=>e.plot===plot))return;
-  const E=EVT[d.ev],off=E.every[0]+Math.random()*(E.every[1]-E.every[0]),day=Math.floor(G.clock/1440)+Math.max(1,Math.round(off));
+  const E=EVT[d.ev],off=E.every[0]+rnd()*(E.every[1]-E.every[0]),day=Math.floor(G.clock/1440)+Math.max(1,Math.round(off));
   let at=day*1440+pickOf(E.times);if(at<G.clock+300)at+=1440;
-  const att=Math.round((E.att[0]+Math.random()*(E.att[1]-E.att[0]))*(1+(R.reg?R.reg.tour:0)*0.004)/100)*100;
+  const att=Math.round((E.att[0]+rnd()*(E.att[1]-E.att[0]))*(1+(R.reg?R.reg.tour:0)*0.004)/100)*100;
   let name='';
   if(d.ev==='match')name=`Harbourgate FC v ${pickOf(TEAMS)}`;else if(d.ev==='cruise')name=pickOf(SHIPS);else if(d.ev==='concert')name=pickOf(ARTISTS);else if(d.ev==='conference')name=pickOf(CONFS);else name=pickOf(FILMS);
   (G.evq||(G.evq=[])).push({type:d.ev,plot,at,att,name,dem:0,car:0,warned:false});
@@ -21,7 +21,7 @@ function updateEvents(dt){
       if(e.type==='conference'){levy*=(devOn('hotels')?1.5:1)*(1+0.1*G.lv.hotel)*(devOn('techcampus')?1.3:1)}
       earn(levy,'region');
       let head='';
-      if(e.type==='match'){const a=Math.floor(Math.random()*4),b=Math.floor(Math.random()*3);head=`Full time: ${e.name.replace(' v ',` ${a}–${b} `)}.`}
+      if(e.type==='match'){const a=Math.floor(rnd()*4),b=Math.floor(rnd()*3);head=`Full time: ${e.name.replace(' v ',` ${a}–${b} `)}.`}
       else if(e.type==='cruise')head=`${e.name} has sailed.`;else if(e.type==='concert')head=`${e.name} played to ${num(e.att)}.`;else if(e.type==='conference')head=`${e.name} has wrapped up.`;else head=`The premiere of ${e.name} is over.`;
       const pct=Math.round(f*100);
       let tail=pid==='air'?'Everyone walked straight from the terminal.':f>=0.75?`${pct}% got there and back easily.`:f>=0.5?`Only ${pct}% got there and back easily; the rest sat in traffic.`:`Chaos: just ${pct}% got there and back easily.`;

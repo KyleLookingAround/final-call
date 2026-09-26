@@ -16,6 +16,9 @@ for(const p of parts){
   if(!p.text.endsWith('\n'))fail(p.file+' must end with a newline');
   if(/<\/script/i.test(p.text))fail(p.file+' must not contain a closing script tag');
   parse(p.text,p.file); // each file is whole statements, so a slip is reported against the right file
+  // runs must repeat from a seed: game state takes its randomness from rnd() (00-random.js)
+  if(p.file!=='src/game/00-random.js')p.text.split('\n').forEach((l,i)=>{if(/Math\.random\(/.test(l)&&!/\/\/ cosmetic$/.test(l))
+    fail(`${p.file}:${i+1} uses Math.random(); use rnd() for anything that can change the game, or end the line with // cosmetic if it only affects sound or drawing`)});
 }
 const game=joinGame(parts);
 if(!game.includes('/*SIM_HOOK*/'))fail('src/game has lost its /*SIM_HOOK*/ marker');
@@ -27,7 +30,7 @@ const dup=[...new Set(names.filter(([n],i)=>names.findIndex(([o])=>o===n)!==i).m
 if(dup.length)fail('duplicate top-level functions: '+dup.map(n=>`${n} in ${names.filter(([o])=>o===n).map(([,f])=>f).join(' and ')}`).join('; '));
 
 // what the checks and the bot can reach inside the game; add new functions here when a test needs them
-const SIM='window.__sim={get G(){return G},set G(v){G=v},R,update,buyUpgrade,buyStand,buyPier,buyAircraft,buy,capOf,upCost,upLocked,UPG,AIRCRAFT,AC_ORDER,LEVELS,STAND,PIER,METHODS,SHOPS,canBuild,isBuilding,buildSlots,sellValue,serviceCost,dailyPax,levelChecks,upkeepRate,wageBill,loanCap,derived,loadFactor,advise,resetAll,DEFAULT,shopUpCost,standOpen,save,advise,checkGoals,standBuyable,upBuyable,builtCount,shopValue,seasonOf,dayOf,fitsGate,TRIP,regionTick,orderLine,lineQuote,closeLine,setTab,draftTap,startDraft,renderPanel,netGeom,buildDev,MODES,DEV,PLOTS,PLACES,NODES,EDGES,modeLocked,serves,lineCode,linesAt,SUGGEST,update,STN_UP,setView,regionPanel,updateEvents,pol,POLICIES,news,scheduleEvent,has,research,TECH,techState,buyPoint,curGoal,GOALS,checkLevel,openPlan,closePlan,renderPlan,CITY,CITIES,routeLF,cityMarket,cityWill,pickRoute,openRoute,rsOf,promoteRoute,ROUTE_FEE,TIERBASE,worldTap,setView,consultCost,computeTransitRecs,evalRegion,managersTick,transportRecs,routeRecs,lineTweaks,rivShare,rivKeep,rivalDay,buyRival,rivMix,rivalPanel,routesPanel,dayTick,routeCard,crewState,crewTarget,hireCrew,nightChecks,farDelay,checkStamps,chalDay,checkChal,recordsPanel,tourStep,startTour,tourNext,cloudPut,CL,cloudNote,rivBuyCost};';
+const SIM='window.__sim={get G(){return G},set G(v){G=v},R,update,buyUpgrade,buyStand,buyPier,buyAircraft,buy,capOf,upCost,upLocked,UPG,AIRCRAFT,AC_ORDER,LEVELS,STAND,PIER,METHODS,SHOPS,canBuild,isBuilding,buildSlots,sellValue,serviceCost,dailyPax,levelChecks,upkeepRate,wageBill,loanCap,derived,loadFactor,advise,resetAll,DEFAULT,shopUpCost,standOpen,save,advise,checkGoals,standBuyable,upBuyable,builtCount,shopValue,seasonOf,dayOf,fitsGate,TRIP,regionTick,orderLine,lineQuote,closeLine,setTab,draftTap,startDraft,renderPanel,netGeom,buildDev,MODES,DEV,PLOTS,PLACES,NODES,EDGES,modeLocked,serves,lineCode,linesAt,SUGGEST,update,STN_UP,setView,regionPanel,updateEvents,pol,POLICIES,news,scheduleEvent,has,research,TECH,techState,buyPoint,curGoal,GOALS,checkLevel,openPlan,closePlan,renderPlan,CITY,CITIES,routeLF,cityMarket,cityWill,pickRoute,openRoute,rsOf,promoteRoute,ROUTE_FEE,TIERBASE,worldTap,setView,consultCost,computeTransitRecs,evalRegion,managersTick,transportRecs,routeRecs,lineTweaks,rivShare,rivKeep,rivalDay,buyRival,rivMix,rivalPanel,routesPanel,dayTick,routeCard,crewState,crewTarget,hireCrew,nightChecks,farDelay,checkStamps,chalDay,checkChal,recordsPanel,tourStep,startTour,tourNext,cloudPut,CL,cloudNote,rivBuyCost,rnd,seedRandom};';
 
 mkdirSync(join(root,'dist'),{recursive:true});
 writeFileSync(join(root,'dist/index.html'),page(shell,game));

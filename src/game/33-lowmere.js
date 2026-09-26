@@ -41,15 +41,15 @@ function rivalDay(){
   // Lowmere backs off where you win clearly, and grows where your flights are full or your service is weak
   for(const c of rts){const r=V.routes[c];if(!routeOpen(c)){r.w=0;continue}const sh=rivShare(c);r.w=sh>0.8?(r.w||0)+1:0;
     if(r.w>=4){r.w=0;if(r.f>1)r.f--;else{delete V.routes[c];V.cut=(V.cut||0)+1;if(!R.sim)toast(`Lowmere has stopped flying to ${CITY[c].name}. You won the route.`,null,null,'goal',8)}}}
-  if(!has('feat:slots')||Math.random()<0.5){
-    if(rts.length<maxR&&(rts.length<4||Math.random()<0.55)){
+  if(!has('feat:slots')||rnd()<0.5){
+    if(rts.length<maxR&&(rts.length<4||rnd()<0.55)){
       const cand=CITIES.filter(x=>x[2]<=tm&&!V.routes[x[0]]).map(x=>x[0]).sort((a,b)=>want(b)-want(a));
-      if(cand.length){const c=cand[Math.floor(Math.random()*Math.min(3,cand.length))];V.routes[c]={f:1,w:0};if(routeOpen(c)&&!R.sim)toast(`Lowmere now flies to ${CITY[c].name} as well.`,null,null,'',6)}
+      if(cand.length){const c=cand[Math.floor(rnd()*Math.min(3,cand.length))];V.routes[c]={f:1,w:0};if(routeOpen(c)&&!R.sim)toast(`Lowmere now flies to ${CITY[c].name} as well.`,null,null,'',6)}
     }else if(fl<maxF&&rts.length){
       const c=Object.keys(V.routes).sort((a,b)=>want(b)/(V.routes[b].f+1)-want(a)/(V.routes[a].f+1))[0];if(V.routes[c].f<8)V.routes[c].f++}
   }
   // now and then a three-day fare sale on one of your best routes
-  if(!Object.values(V.routes).some(r=>r.sale>G.clock)&&Math.random()<0.18){
+  if(!Object.values(V.routes).some(r=>r.sale>G.clock)&&rnd()<0.18){
     const tgt=Object.keys(V.routes).filter(routeOpen).sort((a,b)=>(rsOf(b).v-(rsOf(b).c||0))-(rsOf(a).v-(rsOf(a).c||0)))[0];
     if(tgt){V.routes[tgt].sale=G.clock+3*1440;toast(`Lowmere has cut fares to ${CITY[tgt].name} for three days.`,[{label:'Show route',fn:()=>{setView('world');R.wSel=tgt;R.rSub='mine';setTab('routes');showCard('route-'+tgt)}},{label:'OK',fn:()=>{}}],'rsale','warn',20)}}
   // how many travellers Lowmere carried, and your share of the routes you share

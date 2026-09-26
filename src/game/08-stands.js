@@ -109,7 +109,7 @@ function stepDeplaneBridges(i,D,dt){
     const br=S.dBridge[door];if(!br.length)continue;
     const F=br[0].F,path=door?F.P.rear:F.P.bridge;
     br.sort((a,b)=>a.s-b.s);let lead=-Infinity;
-    for(const p of br){p.s=Math.min(p.s,Math.max(p.s-D.walk*p.spd*dt,lead+SPACING,0));const q=ptAt(path,p.s);p.tx=q[0];p.ty=q[1];lead=p.s;if(p.s<=0.01){p.out=true;if(!(p.xfer&&connect(p))){p.state='toArr';p.tx=ARR_DOOR.x+(Math.random()-0.5)*6;p.ty=ARR_DOOR.y}}}
+    for(const p of br){p.s=Math.min(p.s,Math.max(p.s-D.walk*p.spd*dt,lead+SPACING,0));const q=ptAt(path,p.s);p.tx=q[0];p.ty=q[1];lead=p.s;if(p.s<=0.01){p.out=true;if(!(p.xfer&&connect(p))){p.state='toArr';p.tx=ARR_DOOR.x+(rnd()-0.5)*6;p.ty=ARR_DOOR.y}}}
     S.dBridge[door]=br.filter(p=>!p.out);
   }
 }
@@ -120,13 +120,13 @@ function connect(p){
   G.xfers=(G.xfers||0)+1;finishArrival(p);return true;
 }
 function afterControl(p){
-  if(p.checked){p.state='toReclaim';const a=Math.random()*Math.PI*2;p.tx=carX(p.stand)+Math.cos(a)*48;p.ty=carY(p.stand)+Math.sin(a)*15}
+  if(p.checked){p.state='toReclaim';const a=rnd()*Math.PI*2;p.tx=carX(p.stand)+Math.cos(a)*48;p.ty=carY(p.stand)+Math.sin(a)*15}
   else exitTarget(p);
 }
 function finishArrival(p){
   const A=p.A;p.dead=true;A.cleared++;A.waitSum+=p.wait;countPax(true);
   {const v=(A.fare||A.ac.fare*G.fare)*0.6*(p.biz?3:1);if(A.partner)earn(v*partnerCut(),'handling');else earn(v,'inbound')}
-  if(G.lv.hotel&&Math.random()<0.05*G.lv.hotel)earn(6*(1+0.3*A.ac.tier)*(devOn('hotels')?2:1),'landside',1360,540,'#9FC2E0');
+  if(G.lv.hotel&&rnd()<0.05*G.lv.hotel)earn(6*(1+0.3*A.ac.tier)*(devOn('hotels')?2:1),'landside',1360,540,'#9FC2E0');
   if(A.cleared>=A.n&&!A.done){
     A.done=true;const avg=A.waitSum/A.n,mins=G.clock-(A.started??G.clock),pat=patience();
     if(avg<8+pat)repAdj(0.8,'arrivals');else if(avg>18+pat)repAdj(-Math.min(4,(avg-18-pat)*0.2),'arrivals');

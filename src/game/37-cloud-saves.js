@@ -1,7 +1,7 @@
 /* ================= SAVES ACROSS DEVICES: on claude.ai the game also saves to the player's own private space ================= */
 const CL={on:false,ref:null,dev:null,last:0,lastClock:null,asking:false,hold:false,busy:false};
 function cloudBase(v){const k='final-call-cloud';try{if(v){localStorage.setItem(k,JSON.stringify(v));return v}return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return null}}
-function cloudDev(){let d=null;try{d=localStorage.getItem('final-call-device');if(!d){d=Math.random().toString(36).slice(2,10);localStorage.setItem('final-call-device',d)}}catch(e){d=d||'x'}return d}
+function cloudDev(){let d=null;try{d=localStorage.getItem('final-call-device');if(!d){d=Math.random().toString(36).slice(2,10);localStorage.setItem('final-call-device',d)}}catch(e){d=d||'x'}return d} // cosmetic
 async function cloudInit(){
   if(R.sim||!window.claude||typeof window.claude.use!=='function')return;
   let db=null,user=null;try{[db,user]=await Promise.all([window.claude.use('db'),window.claude.use('user')])}catch(e){}

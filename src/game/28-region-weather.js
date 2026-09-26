@@ -3,13 +3,13 @@
 const WX={fog:{col:'205,212,220',a:0.28,r:[170,240],spd:[3,5]},rain:{col:'120,150,185',a:0.22,r:[200,300],spd:[5,8]},snow:{col:'235,240,248',a:0.3,r:[200,280],spd:[3.5,6]},storm:{col:'70,80,105',a:0.42,r:[140,210],spd:[5,8]}};
 const WXW={Spring:{rain:4,fog:3,storm:2},Summer:{storm:4,rain:3,fog:1},Autumn:{fog:4,rain:4,storm:2},Winter:{snow:5,fog:3,storm:1,rain:1}};
 function spawnWeather(){
-  const sea=seasonOf(dayOf(G.clock)).name,w=WXW[sea];let tot=0;for(const k in w)tot+=w[k];let r=Math.random()*tot,type='rain';for(const k in w){r-=w[k];if(r<=0){type=k;break}}
-  const T=WX[type],rad=T.r[0]+Math.random()*(T.r[1]-T.r[0]),y=150+Math.random()*700,spd=T.spd[0]+Math.random()*(T.spd[1]-T.spd[0]),ang=Math.atan2(640-y,900+rad)+(Math.random()-0.5)*0.5;
-  (G.wx||(G.wx=[])).push({type,x:-rad,y,r:rad,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,seed:Math.random()*100});
+  const sea=seasonOf(dayOf(G.clock)).name,w=WXW[sea];let tot=0;for(const k in w)tot+=w[k];let r=rnd()*tot,type='rain';for(const k in w){r-=w[k];if(r<=0){type=k;break}}
+  const T=WX[type],rad=T.r[0]+rnd()*(T.r[1]-T.r[0]),y=150+rnd()*700,spd=T.spd[0]+rnd()*(T.spd[1]-T.spd[0]),ang=Math.atan2(640-y,900+rad)+(rnd()-0.5)*0.5;
+  (G.wx||(G.wx=[])).push({type,x:-rad,y,r:rad,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,seed:rnd()*100});
 }
 function wxAt(x,y){let best=null,bd=1;for(const c of (G.wx||[])){const d=Math.hypot(x-c.x,y-c.y)/c.r;if(d<bd){bd=d;best=c}}return best?{c:best,d:bd}:null}
 function updateWeather(dt){
-  if(!G.wx)G.wx=[];if(G.clock>=(G.wxNext||0)){G.wxNext=G.clock+180+Math.random()*240;if(G.flights>=3)spawnWeather()}
+  if(!G.wx)G.wx=[];if(G.clock>=(G.wxNext||0)){G.wxNext=G.clock+180+rnd()*240;if(G.flights>=3)spawnWeather()}
   for(const c of G.wx){c.x+=c.vx*dt;c.y+=c.vy*dt}
   G.wx=G.wx.filter(c=>c.x-c.r<RW+40&&c.y+c.r>-60&&c.y-c.r<RH+60);
   const at=wxAt(900,640);
@@ -23,7 +23,7 @@ function drawWeatherCells(k){
     for(let i=0;i<6;i++){const a=c.seed+i*1.1,ox=Math.cos(a)*c.r*0.35,oy=Math.sin(a*1.3)*c.r*0.25,rr=c.r*(0.55+0.1*Math.sin(a*2+t*0.2));const g=ctx.createRadialGradient(c.x+ox,c.y+oy,0,c.x+ox,c.y+oy,rr);g.addColorStop(0,`rgba(${T.col},${T.a})`);g.addColorStop(1,`rgba(${T.col},0)`);ctx.fillStyle=g;ctx.beginPath();ctx.arc(c.x+ox,c.y+oy,rr,0,Math.PI*2);ctx.fill()}
     if(c.type==='rain'||c.type==='storm'){ctx.strokeStyle='rgba(170,195,225,.35)';ctx.lineWidth=Math.max(1,0.8/k);ctx.beginPath();for(let i=0;i<40;i++){const px=c.x+((i*53.7+t*30)%(c.r*1.4))-c.r*0.7,py=c.y+((i*91.3+t*80)%(c.r*1.2))-c.r*0.6;ctx.moveTo(px,py);ctx.lineTo(px-3,py+9)}ctx.stroke()}
     if(c.type==='snow'){ctx.fillStyle='rgba(245,248,252,.7)';for(let i=0;i<50;i++){const px=c.x+((i*53.7+t*12)%(c.r*1.4))-c.r*0.7,py=c.y+((i*91.3+t*20)%(c.r*1.2))-c.r*0.6;ctx.fillRect(px,py,1.8,1.8)}}
-    if(c.type==='storm'&&Math.sin(t*3.7+c.seed)>0.985){ctx.strokeStyle='rgba(255,245,200,.9)';ctx.lineWidth=Math.max(1.5,1.5/k);ctx.beginPath();let px=c.x,py=c.y-c.r*0.4;ctx.moveTo(px,py);for(let j=0;j<5;j++){px+=(Math.random()-0.5)*30;py+=c.r*0.16;ctx.lineTo(px,py)}ctx.stroke()}
+    if(c.type==='storm'&&Math.sin(t*3.7+c.seed)>0.985){ctx.strokeStyle='rgba(255,245,200,.9)';ctx.lineWidth=Math.max(1.5,1.5/k);ctx.beginPath();let px=c.x,py=c.y-c.r*0.4;ctx.moveTo(px,py);for(let j=0;j<5;j++){px+=(Math.random()-0.5)*30;py+=c.r*0.16;ctx.lineTo(px,py)}ctx.stroke()} // cosmetic
     if(k>0.3)lblBg(c.type.toUpperCase(),c.x,c.y-c.r*0.6,c.type==='storm'?'#FFC72C':'#CDD4DA',9);
   }
 }
@@ -54,16 +54,16 @@ const syncKind=k=>Object.values(G.lines||{}).some(L=>L.sync&&serves(L,'air')&&ef
 function updateStopVehicles(dt){
   // trams
   const T=R.tram;const ft=vehFreq('tram');
-  if(!ft&&R.tramQ.length){R.tramQ.forEach(p=>walkIn(p,40+Math.random()*260,648+Math.random()*12));R.tramQ=[]}
+  if(!ft&&R.tramQ.length){R.tramQ.forEach(p=>walkIn(p,40+rnd()*260,648+rnd()*12));R.tramQ=[]}
   if(T.state==='away'){if(ft){T.t-=dt;if(T.t<=0){T.state='in';T.t=0;const L=vehLine('tram');T.secs=3+((L&&L.cars)||0);T.col=L?L.col:'#FF9F43'}}}
-  else if(T.state==='in'){T.t+=dt;const k=Math.min(1,T.t/1);T.x=-280+310*(1-Math.pow(1-k,2));if(k>=1){T.state='dwell';T.t=1;R.tramQ.forEach(p=>walkIn(p,T.x+10+Math.random()*200,792));R.tramQ=[]}}
+  else if(T.state==='in'){T.t+=dt;const k=Math.min(1,T.t/1);T.x=-280+310*(1-Math.pow(1-k,2));if(k>=1){T.state='dwell';T.t=1;R.tramQ.forEach(p=>walkIn(p,T.x+10+rnd()*200,792));R.tramQ=[]}}
   else if(T.state==='dwell'){T.t-=dt;if(T.t<=0&&syncKind('tram')&&walkersTo(789)&&(T.extra=(T.extra||0)+dt)<3)T.t=0.05;if(T.t<=0){T.state='out';T.t=0;T.extra=0}}
   else if(T.state==='out'){T.t+=dt;const k=Math.min(1,T.t/1);T.x=30-310*k*k;if(k>=1){T.state='away';T.t=Math.max(1.5,60/Math.max(ft,1)-3);T.x=null}}
   // buses, coaches and the water-bus shuttle
   const B=R.bus,fb=vehFreq('bus');
-  if(!fb&&R.busQ.length){R.busQ.forEach(p=>walkIn(p,40+Math.random()*260,648+Math.random()*12));R.busQ=[]}
-  if(B.state==='away'){if(fb){B.t-=dt;if(B.t<=0){B.state='in';B.t=0;const L=vehLine('bus'),m=L?L.mode:'bus',r=Math.random();B.kind=m==='coach'?'coach':m==='water'?'shuttle':r<0.3?'double':r<0.55+0.2*((L&&L.cars)||0)?'bendy':'single';B.col=L&&!replOn(L.id)?L.col:'#6BE39A';B.len={coach:40,shuttle:30,double:32,bendy:50,single:34}[B.kind]}}}
-  else if(B.state==='in'){B.t+=dt;const k=Math.min(1,B.t/1.4);B.x=LAND_R+60-(LAND_R+60-236)*(1-Math.pow(1-k,2));if(k>=1){B.state='dwell';B.t=0.9;R.busQ.forEach(p=>walkIn(p,B.x+Math.random()*B.len,640));R.busQ=[]}}
+  if(!fb&&R.busQ.length){R.busQ.forEach(p=>walkIn(p,40+rnd()*260,648+rnd()*12));R.busQ=[]}
+  if(B.state==='away'){if(fb){B.t-=dt;if(B.t<=0){B.state='in';B.t=0;const L=vehLine('bus'),m=L?L.mode:'bus',r=rnd();B.kind=m==='coach'?'coach':m==='water'?'shuttle':r<0.3?'double':r<0.55+0.2*((L&&L.cars)||0)?'bendy':'single';B.col=L&&!replOn(L.id)?L.col:'#6BE39A';B.len={coach:40,shuttle:30,double:32,bendy:50,single:34}[B.kind]}}}
+  else if(B.state==='in'){B.t+=dt;const k=Math.min(1,B.t/1.4);B.x=LAND_R+60-(LAND_R+60-236)*(1-Math.pow(1-k,2));if(k>=1){B.state='dwell';B.t=0.9;R.busQ.forEach(p=>walkIn(p,B.x+rnd()*B.len,640));R.busQ=[]}}
   else if(B.state==='dwell'){B.t-=dt;if(B.t<=0&&syncKind('bus')&&walkersTo(641)&&(B.extra=(B.extra||0)+dt)<3)B.t=0.05;if(B.t<=0){B.state='out';B.t=0;B.extra=0}}
   else if(B.state==='out'){B.t+=dt;const k=Math.min(1,B.t/0.8);B.x=236-300*k*k;if(k>=1){B.state='away';B.t=Math.max(1.2,60/Math.max(fb,1)-3);B.x=null}}
 }

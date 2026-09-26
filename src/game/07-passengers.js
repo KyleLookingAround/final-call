@@ -1,6 +1,6 @@
 /* ================= passengers: landside & airside ================= */
 function carFee(F){return carFeeBase()*(1+0.3*F.ac.tier)}
-function parkCar(){const cap=carCap();for(let b=0;b<cap;b++){if(R.lot[b]<=G.clock){R.lot[b]=G.clock+150+Math.random()*300;return b}}return -1}
+function parkCar(){const cap=carCap();for(let b=0;b<cap;b++){if(R.lot[b]<=G.clock){R.lot[b]=G.clock+150+rnd()*300;return b}}return -1}
 function spawn(p){
   if(p.type==='prm')p.spd=G.lv.assist?0.95+0.1*G.lv.assist:0.5;
   const tk=pickTransit();
@@ -8,19 +8,19 @@ function spawn(p){
   if(tk==='tram'){p.state='tram';R.tramQ.push(p);return}
   if(tk==='bus'){p.state='bus';R.busQ.push(p);return}
   let x=null,y=0;
-  if(Math.random()<0.42*(R.reg?R.reg.parkMul:1)){const b=parkCar();if(b>=0){const q=BAY(b);x=q.x;y=q.y;earn(carFee(p.F),'landside',q.x,q.y-8,'#9FC2E0')}else R.lotFull=G.clock}
-  if(x==null){x=40+Math.random()*260;y=648+Math.random()*12}
+  if(rnd()<0.42*(R.reg?R.reg.parkMul:1)){const b=parkCar();if(b>=0){const q=BAY(b);x=q.x;y=q.y;earn(carFee(p.F),'landside',q.x,q.y-8,'#9FC2E0')}else R.lotFull=G.clock}
+  if(x==null){x=40+rnd()*260;y=648+rnd()*12}
   walkIn(p,x,y);
 }
 function spawnParty(list){const L=list[0];spawn(L);for(let k=1;k<list.length;k++){const p=list[k];if(L.state==='train'){p.state='train';R.platform.push(p)}else if(L.state==='tram'){p.state='tram';R.tramQ.push(p)}else if(L.state==='bus'){p.state='bus';R.busQ.push(p)}else walkIn(p,L.x+(k%2?6:-6)*Math.ceil(k/2),L.y+(k%2?3:-2))}}
-function walkIn(p,x,y){p.x=x;p.y=y;p.state='walkIn';p.tx=DOOR.x+(Math.random()-0.5)*22;p.ty=DOOR.y-6;R.pax.push(p)}
+function walkIn(p,x,y){p.x=x;p.y=y;p.state='walkIn';p.tx=DOOR.x+(rnd()-0.5)*22;p.ty=DOOR.y-6;R.pax.push(p)}
 function enterLandside(p){if(p.online)enterSecurity(p);else{p.state='queue';R.ciQ.push(p)}}
 function updateTrain(dt){
   if(!G.lv.rail)return;const T=R.train,ft=vehFreq('train');
-  if(!ft&&R.platform.length){R.platform.forEach(p=>walkIn(p,40+Math.random()*260,648+Math.random()*12));R.platform=[]}
+  if(!ft&&R.platform.length){R.platform.forEach(p=>walkIn(p,40+rnd()*260,648+rnd()*12));R.platform=[]}
   if(T.state==='away'){if(!ft)return;T.t-=dt;if(T.t<=0){T.state='in';T.t=0;const L=vehLine('train');T.col=L?shade(L.col,L.mode==='hsr'?0.85:0.62):'#3E6A8C';T.cars=L?(L.mode==='hsr'?3:2)+(L.cars||0):3;T.nose=L&&L.mode==='hsr'}}
   else if(T.state==='in'){T.t+=dt;const k=Math.min(1,T.t/1.2);T.x=-300+330*(1-Math.pow(1-k,2));if(k>=1){T.state='dwell';T.t=1.4;
-    const n=R.platform.length;R.platform.forEach(p=>walkIn(p,T.x+20+Math.random()*230,712));R.platform=[]}}
+    const n=R.platform.length;R.platform.forEach(p=>walkIn(p,T.x+20+rnd()*230,712));R.platform=[]}}
   else if(T.state==='dwell'){T.t-=dt;if(T.t<=0&&syncKind('train')&&walkersTo(704)&&(T.extra=(T.extra||0)+dt)<3)T.t=0.05;if(T.t<=0){T.state='out';T.t=0;T.extra=0}}
   else if(T.state==='out'){T.t+=dt;const k=Math.min(1,T.t/1.2);T.x=30-330*k*k;if(k>=1){T.state='away';T.t=Math.max(1.5,60/Math.max(1,vehFreq('train'))-3.8);T.x=null}}
 }
@@ -35,7 +35,7 @@ function updateRunway(dt,D){
 function enterSecurity(p){
   const D=derived();
   const vip=p.biz||p.prio,ftW=R.ftQ.length*0.6,secW=R.secQ.length/Math.max(1,D.lanes);
-  if(D.ft&&(vip?ftW<=secW+2:R.ftQ.length<8&&Math.random()<D.ftBuy*PTYPE[p.type||'lei'].ft)){
+  if(D.ft&&(vip?ftW<=secW+2:R.ftQ.length<8&&rnd()<D.ftBuy*PTYPE[p.type||'lei'].ft)){
     if(!vip) earn(p.F.fare*0.6,'fast',null,null,null,p.F);
     p.fast=true;p.state='ftQ';R.ftQ.push(p);
   } else {p.state='secQ';R.secQ.push(p)}
@@ -47,18 +47,18 @@ function finishCheckin(p,x){
 function airside(p,x){
   p.x=x;p.y=516;
   const F=p.F,left=F.std-G.clock,built=[];G.shops.forEach((s,j)=>{if(s&&standOpen(j))built.push(j)});
-  if(p.leader){const L=p.leader;if((L.state==='toShop'||L.state==='shop')&&G.shops[L.shop]&&left>15){p.state='toShop';p.shop=L.shop;p.tx=clamp(L.tx+(Math.random()-0.5)*16,shopX(L.shop),shopX(L.shop)+116);p.ty=499+(Math.random()-0.5)*4;return}toGate(p);return}
+  if(p.leader){const L=p.leader;if((L.state==='toShop'||L.state==='shop')&&G.shops[L.shop]&&left>15){p.state='toShop';p.shop=L.shop;p.tx=clamp(L.tx+(rnd()-0.5)*16,shopX(L.shop),shopX(L.shop)+116);p.ty=499+(rnd()-0.5)*4;return}toGate(p);return}
   if(left>15&&built.length){
-    for(let k=built.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[built[k],built[j]]=[built[j],built[k]]}
-    if(p.biz||p.prio){const L=built.find(j=>SHOPS[G.shops[j].type].vip);if(L!=null&&Math.random()<0.9){p.state='toShop';p.shop=L;p.tx=shopX(L)+8+Math.random()*100;p.ty=499;return}}
-    for(const j of built){const sh=SHOPS[G.shops[j].type];if(sh.vip)continue;if(Math.random()<Math.min(0.95,sh.pull*PTYPE[p.type||'lei'].shop*(p.type==='grp'&&sh.id==='bar'?2.5:1)*(1+0.3*((p.psize||1)-1)))){p.state='toShop';p.shop=j;p.tx=shopX(j)+8+Math.random()*100;p.ty=499;return}}
+    for(let k=built.length-1;k>0;k--){const j=Math.floor(rnd()*(k+1));[built[k],built[j]]=[built[j],built[k]]}
+    if(p.biz||p.prio){const L=built.find(j=>SHOPS[G.shops[j].type].vip);if(L!=null&&rnd()<0.9){p.state='toShop';p.shop=L;p.tx=shopX(L)+8+rnd()*100;p.ty=499;return}}
+    for(const j of built){const sh=SHOPS[G.shops[j].type];if(sh.vip)continue;if(rnd()<Math.min(0.95,sh.pull*PTYPE[p.type||'lei'].shop*(p.type==='grp'&&sh.id==='bar'?2.5:1)*(1+0.3*((p.psize||1)-1)))){p.state='toShop';p.shop=j;p.tx=shopX(j)+8+rnd()*100;p.ty=499;return}}
   }
   toGate(p);
 }
 function toGate(p){
   const S=R.st[p.stand],j=S.spots.indexOf(null);
   if(j>=0){S.spots[j]=p;p.spot=j;const s=spotPos(p.stand,j);p.tx=s.x;p.ty=s.y}
-  else{p.spot=-1;p.tx=STAND_X[p.stand]-135+Math.random()*130;p.ty=500+Math.random()*12}
+  else{p.spot=-1;p.tx=STAND_X[p.stand]-135+rnd()*130;p.ty=500+rnd()*12}
   p.state='toGate';
 }
 function serve(sv,x,y,dt,done,wx,wy){

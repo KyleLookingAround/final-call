@@ -51,8 +51,8 @@ function chalDay(){
   const C=G.chal||(G.chal={wk:-1,list:[],snap:null,sets:0});const wk=Math.floor((G.day-1)/7);if(wk===C.wk)return;
   const prev=C.snap,days=Math.max(1,G.day-(C.start||1)),n=C.wk<0?Math.max(1,G.day-1):days,snap={};
   const pool=CH_POOL.filter(p=>!p.need||p.need()),pick=[];
-  while(pick.length<3&&pool.length){pick.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0])}
-  C.list=pick.map(p=>{let c=null;if(p.city){const cs=Object.keys(G.routes||{}).filter(k=>CITY[k]&&rsOf(k).tn>5).sort(()=>Math.random()-0.5);c=cs[0];if(!c)return null}
+  while(pick.length<3&&pool.length){pick.push(pool.splice(Math.floor(rnd()*pool.length),1)[0])}
+  C.list=pick.map(p=>{let c=null;if(p.city){const cs=Object.keys(G.routes||{}).filter(k=>CITY[k]&&rsOf(k).tn>5).sort(()=>rnd()-0.5);c=cs[0];if(!c)return null}
     const now=p.city?p.m(c):p.m(),before=prev&&prev[p.id+(c||'')]!=null?prev[p.id+(c||'')]:null,per=before!=null?(now-before)/n:now/Math.max(1,G.day-1);
     const goal=Math.max(p.min,Math.round(per*7*(p.city?1.15:1.12)/10)*10);return {id:p.id,c,goal,base:now,done:0}}).filter(Boolean);
   for(const p of CH_POOL){if(p.city)for(const k of Object.keys(G.routes||{}))snap[p.id+k]=p.m(k);else snap[p.id]=p.m()}

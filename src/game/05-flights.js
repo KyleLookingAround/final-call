@@ -1,10 +1,10 @@
 /* ================= flights ================= */
 function seatPax(g,k,extra){const col=k%g.cols;return Object.assign({row:Math.floor(k/g.cols),col,ct:g.colCt[col],ais:g.colA[col],side:g.colS[col]+2*g.colA[col]},extra)}
-function shuffled(n){const a=[...Array(n).keys()];for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
+function shuffled(n){const a=[...Array(n).keys()];for(let k=a.length-1;k>0;k--){const j=Math.floor(rnd()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
 function pickPartner(i){
   const c=AC_ORDER.filter(t=>!AIRCRAFT[t].freighter&&AIRCRAFT[t].lvl<=G.level&&fitsGate(t,i));let tot=0;const w=c.map(t=>{const x=1+AIRCRAFT[t].lvl*1.4;tot+=x;return x});
-  let r=Math.random()*tot,t=c[0];for(let k=0;k<c.length;k++){r-=w[k];if(r<=0){t=c[k];break}}
-  const pa=PARTNERS[Math.floor(Math.random()*PARTNERS.length)];return {type:t,name:pa[0],code:pa[1],col:pa[2]};
+  let r=rnd()*tot,t=c[0];for(let k=0;k<c.length;k++){r-=w[k];if(r<=0){t=c[k];break}}
+  const pa=PARTNERS[Math.floor(rnd()*PARTNERS.length)];return {type:t,name:pa[0],code:pa[1],col:pa[2]};
 }
 const nightWin=()=>{const h=(G.clock/60)%24;return h>=23.5||h<5.5};
 function curfewSoon(){if(!pol('curfew'))return false;const h=(G.clock/60)%24;return nightWin()||(h<23.5&&(23.5-h)*60<90)}
@@ -21,23 +21,23 @@ function fleetTick(){for(const f of G.fleet)if(!f.sold&&f.st==='away'&&G.clock>=
 const PTYPE={work:{carry:0.92,checked:0.12,spd:[1,1.35],shop:0.6,ft:3,prio:0.12},lei:{spd:[0.7,1.2],shop:1.15,ft:1,prio:0},fam:{carry:0.5,checked:0.9,spd:[0.64,0.86],shop:1.4,ft:0.5,prio:0},grp:{carry:0.85,checked:0.35,spd:[0.8,1.2],shop:1.3,ft:0.3,prio:0},prm:{carry:0.3,checked:0.85,spd:[0.46,0.52],shop:0.8,ft:0,prio:0}};
 function buildManifest(geo,seatsN,booked,bRows,C,D,i,split){
   const b=C?C.biz:0.35,grpP=C&&GROUP_CITIES.has(C.code)?0.16:0.03,famP=(C&&C.sea==='summer'&&seaIdx()===1?0.26:0.15)*(1-b),cols=geo.cols,bizN=bRows*cols,taken=new Uint8Array(seatsN),out=[];
-  const run=(n,from,to)=>{if(to<=from)return [];for(let tr=0;tr<10;tr++){const k=from+Math.floor(Math.random()*(to-from)),r=[];for(let j=k;j<to&&r.length<n;j++){if(taken[j])break;r.push(j)}if(r.length===n)return r}const r=[];for(let j=from;j<to&&r.length<n;j++)if(!taken[j])r.push(j);return r};
+  const run=(n,from,to)=>{if(to<=from)return [];for(let tr=0;tr<10;tr++){const k=from+Math.floor(rnd()*(to-from)),r=[];for(let j=k;j<to&&r.length<n;j++){if(taken[j])break;r.push(j)}if(r.length===n)return r}const r=[];for(let j=from;j<to&&r.length<n;j++)if(!taken[j])r.push(j);return r};
   let left=booked,pid=0;
   while(left>0){
-    const x=Math.random();let type,n;
+    const x=rnd();let type,n;
     if(x<0.025){type='prm';n=1}else if(x<0.025+b*0.85){type='work';n=1}
-    else{const y=Math.random();if(y<grpP){type='grp';n=4+Math.floor(Math.random()*4)}else if(y<grpP+famP){type='fam';n=Math.random()<0.5?3:4}else{type='lei';n=Math.random()<0.55?2:1}}
+    else{const y=rnd();if(y<grpP){type='grp';n=4+Math.floor(rnd()*4)}else if(y<grpP+famP){type='fam';n=rnd()<0.5?3:4}else{type='lei';n=rnd()<0.55?2:1}}
     n=Math.min(n,left);let st=type==='work'?run(1,0,bizN):[];if(st.length<n)st=run(n,bizN,seatsN);if(st.length<n)st=run(n,0,seatsN);if(!st.length)break;
-    st.forEach(k=>taken[k]=1);pid++;const T=PTYPE[type],lspd=T.spd[0]+Math.random()*(T.spd[1]-T.spd[0]);let lead=null;
+    st.forEach(k=>taken[k]=1);pid++;const T=PTYPE[type],lspd=T.spd[0]+rnd()*(T.spd[1]-T.spd[0]);let lead=null;
     st.forEach((k,m)=>{const p=seatPax(geo,k,{stand:i});p.lane=p.row>=split?1:0;
-      const biz=p.row<bRows,kid=type==='fam'&&m>=2,carry=kid?false:Math.random()<(biz?0.9:T.carry??D.carryP),checked=kid?false:Math.random()<clamp(T.checked??(carry?0.2:0.75),0.02,0.95);
-      Object.assign(p,{type,party:pid,kid,biz,prio:!biz&&!kid&&Math.random()<D.prioP+T.prio,carry,checked,online:!checked&&Math.random()<D.online,fast:false,spd:(type==='fam'||type==='grp')?lspd*(0.95+Math.random()*0.1):lspd,rand:Math.random(),wait:0,x:0,y:0,tx:0,ty:0,state:'new',spot:-1});
+      const biz=p.row<bRows,kid=type==='fam'&&m>=2,carry=kid?false:rnd()<(biz?0.9:T.carry??D.carryP),checked=kid?false:rnd()<clamp(T.checked??(carry?0.2:0.75),0.02,0.95);
+      Object.assign(p,{type,party:pid,kid,biz,prio:!biz&&!kid&&rnd()<D.prioP+T.prio,carry,checked,online:!checked&&rnd()<D.online,fast:false,spd:(type==='fam'||type==='grp')?lspd*(0.95+rnd()*0.1):lspd,rand:rnd(),wait:0,x:0,y:0,tx:0,ty:0,state:'new',spot:-1});
       p.psize=st.length;if(lead){p.leader=lead;p.rand=lead.rand}else lead=p;out.push(p)});
     left-=st.length;
   }
   // parties arrive together: shuffle whole parties, keeping members next to each other
   const parties=[];for(const p of out){const q=parties[parties.length-1];if(q&&q[0].party===p.party)q.push(p);else parties.push([p])}
-  for(let k=parties.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[parties[k],parties[j]]=[parties[j],parties[k]]}
+  for(let k=parties.length-1;k>0;k--){const j=Math.floor(rnd()*(k+1));[parties[k],parties[j]]=[parties[j],parties[k]]}
   return parties.flat().reverse();
 }
 function newFlight(i,src){
@@ -47,20 +47,20 @@ function newFlight(i,src){
   const rear=st.rear&&ac.tier>=1,geo=geom(ac),cols=geo.cols,seatsN=ac.rows*cols,P=paths(i,geo);
   // where it flies: your planes follow the dispatcher, partners fly their own schedules
   let dc=partner?null:pickRoute(ac);
-  if(!dc){const pool=CITIES.filter(c=>c[2]<=ac.tier&&c[2]>=ac.tier-1&&c[0]!==G.lastDest);dc=pool[Math.floor(Math.random()*pool.length)][0]}
+  if(!dc){const pool=CITIES.filter(c=>c[2]<=ac.tier&&c[2]>=ac.tier-1&&c[0]!==G.lastDest);dc=pool[Math.floor(rnd()*pool.length)][0]}
   const C=CITY[dc],dest=[C.code,C.name];G.lastDest=C.code;
   const FR=!!ac.freighter,lf=partner?paxLF(dc,1):routeLF(dc,seatsN),booked=FR?0:Math.max(4,Math.round(seatsN*lf));
   S.geo=geo;S.P=P;
   const split=rear?Math.ceil(ac.rows/2):ac.rows,bRows=G.lv.business?(cols===4?2:3):0;
   const manifest=FR?[]:buildManifest(geo,seatsN,booked,bRows,C,D,i,split);
   const lastC=fl&&fl.last&&CITY[fl.last[0]]?fl.last:null;
-  const from=lastC||(()=>{const pool=CITIES.filter(c=>c[2]<=ac.tier&&c[0]!==C.code);const c=pool[Math.floor(Math.random()*pool.length)];return [c[0],c[1]]})(),FC=CITY[from[0]];
+  const from=lastC||(()=>{const pool=CITIES.filter(c=>c[2]<=ac.tier&&c[0]!==C.code);const c=pool[Math.floor(rnd()*pool.length)];return [c[0],c[1]]})(),FC=CITY[from[0]];
   if(fl){fl.last=dest;fl.lastTier=ac.tier;fl.st='gate';fl.gate=i}
   // inbound leg: the aircraft lands full of passengers from its last destination
   const inN=FR?0:Math.max(4,Math.round(seatsN*clamp(paxLF(from[0],1)*0.95,0.1,1)));
   const occIn=new Int8Array(seatsN).fill(-1),fb=FC?FC.biz:0.35;
-  const arrPax=shuffled(seatsN).slice(0,inN).map(k=>{occIn[k]=1;const p=seatPax(geo,k,{inbound:true,stand:i});p.lane=p.row>=split?1:0;const r=Math.random(),type=r<0.03?'prm':r<0.03+fb*0.85?'work':r<0.8?'lei':'fam';
-    return Object.assign(p,{type,biz:p.row<bRows,carry:Math.random()<(type==='work'?0.9:0.7),checked:Math.random()<(type==='work'?0.15:type==='fam'||type==='prm'?0.85:0.5),elig:Math.random()<0.6,spd:type==='prm'?(G.lv.assist?0.95+0.1*G.lv.assist:0.5):type==='work'?1+Math.random()*0.3:0.7+Math.random()*0.5,wait:0,x:0,y:0,tx:0,ty:0,state:'seatedIn'})});
+  const arrPax=shuffled(seatsN).slice(0,inN).map(k=>{occIn[k]=1;const p=seatPax(geo,k,{inbound:true,stand:i});p.lane=p.row>=split?1:0;const r=rnd(),type=r<0.03?'prm':r<0.03+fb*0.85?'work':r<0.8?'lei':'fam';
+    return Object.assign(p,{type,biz:p.row<bRows,carry:rnd()<(type==='work'?0.9:0.7),checked:rnd()<(type==='work'?0.15:type==='fam'||type==='prm'?0.85:0.5),elig:rnd()<0.6,spd:type==='prm'?(G.lv.assist?0.95+0.1*G.lv.assist:0.5):type==='work'?1+rnd()*0.3:0.7+rnd()*0.5,wait:0,x:0,y:0,tx:0,ty:0,state:'seatedIn'})});
   arrPax.sort((a,b)=>(a.lane?ac.rows-1-a.row:a.row)-(b.lane?ac.rows-1-b.row:b.row));
   const arrNo=G.flightNo++;
   const F={i,ac,fleetIdx:partner?-1:src.fleet,partner,liv:partner?partner.col:null,geo,P,rear,bRows,seatsN,booked,split,manifest,occ:new Int8Array(seatsN).fill(-1),seated:0,rev:0,bags:0,shuffles:0,
@@ -74,16 +74,16 @@ function newFlight(i,src){
   if(!partner&&!FR){const rs=rsOf(C.code);rs.s+=seatsN}
   const cands=SIDX.filter(k=>k!==i&&R.st[k].F&&R.st[k].F.manifest.length>8&&R.st[k].F.std-G.clock>45&&!R.st[k].F.xferCancelled);
   if(cands.length){
-    const F2=R.st[cands[Math.floor(Math.random()*cands.length)]].F,n=Math.min(Math.round(inN*0.18),F2.manifest.length-6,20);
-    for(let j=0;j<n;j++){const p=arrPax[Math.floor(Math.random()*arrPax.length)];if(p.xfer)continue;const k=F2.manifest.findIndex(q=>!q.leader&&q.type!=='fam'&&q.type!=='grp');if(k<0)break;const q=F2.manifest.splice(k,1)[0];
+    const F2=R.st[cands[Math.floor(rnd()*cands.length)]].F,n=Math.min(Math.round(inN*0.18),F2.manifest.length-6,20);
+    for(let j=0;j<n;j++){const p=arrPax[Math.floor(rnd()*arrPax.length)];if(p.xfer)continue;const k=F2.manifest.findIndex(q=>!q.leader&&q.type!=='fam'&&q.type!=='grp');if(k<0)break;const q=F2.manifest.splice(k,1)[0];
       if(q.checked){q.checked=false;F2.checkedTotal--}p.xfer=q;p.checked=false;F2.xferWait=(F2.xferWait||0)+1;F.arr.xferN=(F.arr.xferN||0)+1}
     F.arr.bags=arrPax.filter(p=>p.checked).length;
   }
   if(FR){const fill=clamp(0.55+0.08*G.lv.cargo+(devOn('logistics')?0.2:0)+(R.reg?R.reg.jobs*0.004:0),0.3,1);F.cargo=Math.round(ac.cargo*fill);F.arr.bags=Math.round(ac.cargo*fill*0.85);F.freighter=true;F.std=Math.ceil((G.clock+30+D.clean+(F.cargo+F.arr.bags)*0.35)/5)*5}
   else F.cargo=Math.round(seatsN*0.06*G.lv.cargo);
   F.checkedTotal+=F.cargo;F.bagsIn=F.cargo;
-  F.willFault=!partner&&Math.random()<faultRisk(fl.wear||0);
-  if(booked>8&&G.flights>2&&Math.random()<0.12){const k=manifest.findIndex(q=>!q.leader&&q.type!=='fam'&&q.type!=='grp'&&q.type!=='prm');if(k>=0){F.straggler=manifest.splice(k,1)[0];F.stragglerAt=F.std+2+Math.random()*6}}
+  F.willFault=!partner&&rnd()<faultRisk(fl.wear||0);
+  if(booked>8&&G.flights>2&&rnd()<0.12){const k=manifest.findIndex(q=>!q.leader&&q.type!=='fam'&&q.type!=='grp'&&q.type!=='prm');if(k>=0){F.straggler=manifest.splice(k,1)[0];F.stragglerAt=F.std+2+rnd()*6}}
   return F;
 }
 function laneInfo(p){const F=p.F,laneRows=p.lane?F.ac.rows-F.split:F.split,dist=p.lane?F.ac.rows-1-p.row:p.row;return {laneRows,ord:laneRows-1-dist}}

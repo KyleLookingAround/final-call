@@ -28,15 +28,20 @@ Final Call is an airport management game in one HTML page, made of a canvas plus
   - layout from 320 to 2560 px, portrait and landscape;
   - phone sheet dragging with touch;
   - the full-screen drawer;
-  - the guided start.
-  
-  Run `npm run check -- layout` to run one group.
+  - the guided start;
+  - `rules`: the same seed plays the same game, cheaper fares fill more seats and keep more travellers from Lowmere, costs rise with level, planes lose value with wear, levels ask for more each time, plan and goal ids are sound, and loading a save twice changes nothing;
+  - `shots`: phone, tablet and desktop screenshots of the airport, world and region in `build/shots/`. CI keeps them as the "screenshots" artifact on every PR.
+
+  Run `npm run check -- rules` to run one group. Every page in the checks is seeded, so a failure repeats when you run it again. When you change a rule on purpose, update its check in the same PR; add a check when you add a rule.
 - Playwright is pinned to 1.56.1, whose Chromium (build 1194) the web image already has. If Chromium is missing, run `npx playwright install chromium`, or set `CHROMIUM_PATH` to an existing Chromium binary. Change the pin only together with the lock file.
-- For economy or progression changes, run `npm run bot -- 1150`. It takes 3–4 minutes, so run it in the background: `nohup npm run bot -- 1150 > build/bot.log 2>&1 &`. The last lines are `LVLAT {level: game hour}` and `ERR [...]`.
-- For UI changes, look at the result. Write a small Playwright script in `build/` (git-ignored) that opens `build/test.html` at phone (390×844, `hasTouch`, `isMobile`), tablet (768×1024) and desktop (1440×900) sizes, then screenshots it and reads the images.
-- Seed a save through `localStorage['final-call-save-v2']` in an init script. `tools/saves/*.json` and `build/saves/L<n>.json` (written by the bot) are ready-made airports at each level.
+- For economy or progression changes, run the bot on seeds 1, 2 and 3: `npm run bot -- 1150 --seed 2` (the default seed is 1). Each run takes 3–4 minutes, so run them in the background, side by side: `nohup npm run bot -- 1150 --seed 2 > build/bot-2.log 2>&1 &`. The last lines are `SEED`, `LVLAT {level: game hour}`, `ERR [...]` and a table against `tools/baseline.json`. The same seed and code always give the same run, so run the same seeds before and after a change to see its effect. The "Balance" workflow does this on PRs that touch `src/game/` or the bot, and puts the tables in the run's summary.
+- For UI changes, look at the result. `npm run check -- shots` covers the three main views; for anything else, write a small Playwright script in `build/` (git-ignored) that opens `build/test.html` at phone (390×844, `hasTouch`, `isMobile`), tablet (768×1024) and desktop (1440×900) sizes, then screenshots it and reads the images.
+- Seed a save through `localStorage['final-call-save-v2']` in an init script, and the random seed through `window.__seed`. `tools/saves/*.json` and `build/saves/L<n>.json` (written by the bot) are ready-made airports at each level.
+- `tools/saves/` keeps saves from every version that changed what gets saved (`v<version>-L<level>.json`). When a release adds saved fields, add saves made with it from `build/saves/`, so old saves keep being tested for good.
 
 ### Balance baselines (bot, 1150 game hours)
+
+`tools/baseline.json` holds these ranges; the bot and the Balance workflow read them from there. Change both together, and only for a balance change the owner asked for.
 
 | Level reached | Game hour |
 | --- | --- |
@@ -54,6 +59,7 @@ The game is one strict IIFE, split into files in `src/game/`. The build joins th
 
 | Files | What's in them |
 | --- | --- |
+| `00-random` | `rnd()`, the seeded random generator the simulation uses |
 | `01-constants` to `04-geometry` | Constants and level data, the Masterplan (`TECH`), state (`G`, `R`, `DEFAULT`), airport geometry |
 | `05-flights` to `11-main-update` | Flights, sound, passengers, stands, construction/levels/days, events and toasts, `update()` |
 | `12-drawing` to `14-board` | Drawing the airport, the camera, the departures board |
@@ -88,6 +94,7 @@ Some functions sit where they were first written rather than where their name su
   - no DOM work and no saving;
   - toasts resolve to their last choice.
 - Everything reachable from `update()` must work that way.
+- **Randomness.** Anything that can change the game state uses `rnd()`, never `Math.random()`, so a seed repeats a run exactly. Only sound, the board's flaps, weather drawing and the device id use `Math.random()`, and the build rejects it on any line that doesn't end with `// cosmetic`.
 - Tests reach functions through `window.__sim`. Its list is in `tools/build.mjs`; add to it when a test needs something new.
 
 ### UI

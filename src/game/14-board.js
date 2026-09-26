@@ -2,7 +2,7 @@
 const FL_CH='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';const FLAPS=new Set();
 function mkFlaps(el,n){el.innerHTML='';el._cells=[];for(let i=0;i<n;i++){const s=document.createElement('span');s.className='fl';s.textContent=' ';el.appendChild(s);el._cells.push({el:s,target:' ',left:0})}el._val=null}
 function setFlaps(el,text){text=String(text).toUpperCase().padEnd(el._cells.length).slice(0,el._cells.length);if(el._val===text)return;el._val=text;el._cells.forEach((c,i)=>{const ch=text[i];if(c.target!==ch){c.target=ch;c.left=REDUCED?0:3+(i%5);if(!c.left)c.el.textContent=ch===' '?' ':ch}});FLAPS.add(el)}
-setInterval(()=>{for(const el of FLAPS){let busy=false;for(const c of el._cells){if(c.left>0){c.left--;c.el.textContent=c.left?FL_CH[Math.floor(Math.random()*FL_CH.length)]:(c.target===' '?' ':c.target);busy=true}}if(!busy)FLAPS.delete(el)}},55);
+setInterval(()=>{for(const el of FLAPS){let busy=false;for(const c of el._cells){if(c.left>0){c.left--;c.el.textContent=c.left?FL_CH[Math.floor(Math.random()*FL_CH.length)]:(c.target===' '?' ':c.target);busy=true}}if(!busy)FLAPS.delete(el)}},55); // cosmetic
 function statusText(F){
   const pl=F.plane;
   if(F.freighter){if(pl.state==='boarding')return F.fault>0?'TECH DELAY':F.crewWait&&!F.crew?'CREW DELAY':G.clock>F.std?'DELAYED':'LOADING';return pl.state==='closing'?'CLOSED':'CARGO'}

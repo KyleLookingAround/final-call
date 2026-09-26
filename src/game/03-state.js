@@ -82,7 +82,7 @@ const routeOp=(ac,c)=>ac.op*(0.35+0.65*TRIP[CITY[c].tier]/TRIP[ac.tier]);
 function pickRoute(ac){
   let best=null,bs=-1e18;const seats=ac.rows*ac.blocks.reduce((x,y)=>x+y,0);
   for(const c in (G.routes||{})){const C=CITY[c];if(!C||C.tier>ac.tier)continue;
-    const sc=ac.freighter?-TRIP[C.tier]*(0.8+Math.random()*0.4):(seats*routeLF(c,seats)*cityFare(c)*G.fare-routeOp(ac,c)*fuelMul())/(TRIP[C.tier]+45)*(0.92+Math.random()*0.16);
+    const sc=ac.freighter?-TRIP[C.tier]*(0.8+rnd()*0.4):(seats*routeLF(c,seats)*cityFare(c)*G.fare-routeOp(ac,c)*fuelMul())/(TRIP[C.tier]+45)*(0.92+rnd()*0.16);
     if(sc>bs){bs=sc;best=c}}
   return best;
 }
