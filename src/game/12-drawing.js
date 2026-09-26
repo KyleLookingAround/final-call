@@ -92,17 +92,13 @@ function drawBridge(i){
   }
 }
 function drawTerminal(D){
-  drawRooms();
-  ctx.fillStyle='#191D22';ctx.fillRect(8,SEC_Y,LAND_R-8,LAND_B-SEC_Y);
+  drawRooms();drawTerminalHalls(D);
   const ciW=R.ciQ.length*D.checkin/(D.desks+D.kiosks*0.6),seW=R.secQ.length*D.sec/D.lanes,tint=w=>w>15?'rgba(255,122,138,.11)':w>8?'rgba(255,199,44,.07)':null;
-  let tc=tint(ciW);if(tc){ctx.fillStyle=tc;ctx.fillRect(8,SEC_Y+22,284,LAND_B-SEC_Y-22)}
-  tc=tint(seW);if(tc){ctx.fillStyle=tc;ctx.fillRect(292,SEC_Y+22,182,LAND_B-SEC_Y-22)}
-  tc=tint(R.arrQ.length*D.passT/(D.officers+D.egates*1.6));if(tc){ctx.fillStyle=tc;ctx.fillRect(476,SEC_Y+2,266,LAND_B-SEC_Y-2)}
+  let tc=tint(ciW);if(tc){ctx.fillStyle=tc;ctx.fillRect(8,680,552,LAND_B-680)}
+  tc=tint(seW);if(tc){ctx.fillStyle=tc;ctx.fillRect(8,SEC_LINE,552,80)}
+  tc=tint(R.arrQ.length*D.passT/(D.officers+D.egates*1.6));if(tc){ctx.fillStyle=tc;ctx.fillRect(700,SEC_Y,540,SEC_LINE-SEC_Y)}
   ctx.fillStyle='#101316';ctx.fillRect(0,LAND_B+2,W,H-LAND_B-2);
-  // hotel beside the arrivals hall
-  if(G.lv.hotel){const x0=1262,w=210;ctx.fillStyle='#232A31';ctx.fillRect(x0,530,w,78);ctx.fillStyle='#2F363E';ctx.fillRect(x0,530,w,6);
-    for(let r=0;r<4;r++)for(let c=0;c<12;c++){const lit=(r*12+c)%5<G.lv.hotel;ctx.fillStyle=lit?'rgba(255,214,150,.75)':'#1A1F24';ctx.fillRect(x0+10+c*16,544+r*15,8,7)}
-    sign(x0,516,'AIRPORT HOTEL')}
+  drawHotel();
   for(const i of SIDX){
     if(!standOpen(i))continue;
     ctx.fillStyle=G.stands[i].built?'#252C33':'#1F242A';
@@ -111,29 +107,22 @@ function drawTerminal(D){
   for(let i=0;i<SHOP_X.length;i++)if(shopOpen(i))drawShopUnit(i);
   if(G.lv.mover&&G.pierB&&LAY.track){const P=LAY.trackP||(LAY.trackP=mkPath(LAY.track)),t=(performance.now()/1000*0.12)%2,q=ptAt(P,(t<1?t:2-t)*P.len);
     ctx.strokeStyle='#2A3037';ctx.lineWidth=3;ctx.beginPath();LAY.track.forEach(([x,y],k)=>k?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();ctx.fillStyle='#5CC8FF';rrect(q[0]-12,q[1]-5,24,10,3);ctx.fill()}
-  ctx.strokeStyle='#4E5964';ctx.lineWidth=3;ctx.lineCap='square';
-  ctx.beginPath();let x=8;
-  ctx.moveTo(8,TERM_Y);ctx.lineTo(8,LAND_B);ctx.lineTo(140,LAND_B);ctx.moveTo(172,LAND_B);ctx.lineTo(LAND_R,LAND_B);ctx.lineTo(LAND_R,596);ctx.moveTo(LAND_R,560);ctx.lineTo(LAND_R,SEC_Y);
-  const sg=[];for(let i=0;i<8;i++)if(i<D.lanes)sg.push([laneX(i)-5,laneX(i)+5]);if(D.ft)sg.push([FT_X-5,FT_X+5]);
-  sg.push([480,494]);sg.sort((a,b)=>a[0]-b[0]);x=8;for(const [a,b] of sg){ctx.moveTo(x,SEC_Y);ctx.lineTo(a,SEC_Y);x=b}ctx.moveTo(x,SEC_Y);ctx.lineTo(LAND_R,SEC_Y);
-  ctx.moveTo(474,SEC_Y);ctx.lineTo(474,LAND_B);ctx.stroke();
-  ctx.lineWidth=1;ctx.strokeStyle='#39414A';ctx.setLineDash([3,4]);ctx.beginPath();ctx.moveTo(292,SEC_Y+26);ctx.lineTo(292,LAND_B-4);ctx.stroke();ctx.setLineDash([]);
-  ctx.fillStyle='#2A3037';ctx.fillRect(16,524,462,4);
-  ctx.fillStyle='#D9A066';for(const b of R.belt)ctx.fillRect(b.x-2,523.5,4,4);
-  for(let i=0;i<8;i++){const open=i<D.desks,own=i<OWN.desks(),x0=deskX(i)-8;ctx.fillStyle=open?'#6A7580':own?'#3A424B':'#262C32';ctx.fillRect(x0,533,16,4);if(open){ctx.fillStyle='#FFC72C';ctx.fillRect(x0+5.5,527.5,5,5)}}
-  for(let i=0;i<4;i++){const open=i<D.kiosks,x0=kioskX(i)-4;ctx.fillStyle=open?'#5CC8FF':'#262C32';ctx.fillRect(x0,530,8,6)}
-  for(let i=0;i<8;i++){const lx=laneX(i),open=i<D.lanes,own=i<OWN.lanes(),closed=i===D.lanes&&R.fx.sick>G.clock;
-    ctx.fillStyle=open?'#8C97A1':closed?'#7A3A42':own?'#3A424B':'#262C32';ctx.fillRect(lx-6,SEC_Y-3,3,9);ctx.fillRect(lx+3,SEC_Y-3,3,9);
-    ctx.fillStyle=open?'#39414A':'#1F242A';ctx.fillRect(lx+6,527,6,14);if(open){ctx.fillStyle='#FFC72C';ctx.fillRect(lx+7,543,4,4)}}
-  if(D.ft){ctx.fillStyle='#F5D08A';ctx.fillRect(FT_X-6,SEC_Y-3,3,9);ctx.fillRect(FT_X+3,SEC_Y-3,3,9);ctx.fillStyle='#FFC72C';ctx.fillRect(FT_X+7,543,4,4)}
+  // check-in: the belt behind the desks, an agent at each open desk; kiosks beside them
+  ctx.fillStyle='#D9A066';for(const b of R.belt)ctx.fillRect(b.x-2,684.5,4,4);
+  for(let i=0;i<8;i++){const open=i<D.desks,own=i<OWN.desks(),x0=deskX(i)-8;ctx.fillStyle=open?'#6A7580':own?'#3A424B':'#262C32';ctx.fillRect(x0,695,16,4);if(open){ctx.fillStyle='#FFC72C';ctx.fillRect(x0+5.5,689.5,5,5)}}
+  for(let i=0;i<4;i++){const open=i<D.kiosks,x0=kioskX(i)-4;ctx.fillStyle=open?'#5CC8FF':'#262C32';ctx.fillRect(x0,694,8,6)}
+  // security: each lane's scanner stands in the wall to the market place, the fast track lane at the end
+  const inWall=(x,w,y)=>{ctx.fillStyle='#191D22';ctx.fillRect(x-w,y-2,2*w,4)};
+  for(let i=0;i<8;i++){const lx=laneX(i),open=i<D.lanes,own=i<OWN.lanes(),closed=i===D.lanes&&R.fx.sick>G.clock;if(open)inWall(lx,5,SEC_LINE);
+    ctx.fillStyle=open?'#8C97A1':closed?'#7A3A42':own?'#3A424B':'#262C32';ctx.fillRect(lx-7,SEC_LINE-4,3,10);ctx.fillRect(lx+4,SEC_LINE-4,3,10);
+    ctx.fillStyle=open?'#39414A':'#1F242A';ctx.fillRect(lx+8,SEC_LINE+3,6,16);if(open){ctx.fillStyle='#FFC72C';ctx.fillRect(lx+9,SEC_LINE+21,4,4)}}
+  if(D.ft){inWall(FT_X,5,SEC_LINE);ctx.fillStyle='#F5D08A';ctx.fillRect(FT_X-7,SEC_LINE-4,3,10);ctx.fillRect(FT_X+4,SEC_LINE-4,3,10);ctx.fillStyle='#FFC72C';ctx.fillRect(FT_X+9,SEC_LINE+21,4,4)}
   ctx.fillStyle='#FFC72C';for(const i of SIDX)if(G.stands[i].built){const F=R.st[i].F;
     const bg=busGate(i);if(bg){ctx.fillRect(bg[0]-2.5,bg[1]+bg[2]*4-2.5,5,5)}
     else{faceW(i,-118,FACE_Y-6);ctx.fillRect(WP.x-2.5,WP.y-2.5,5,5);if(F&&F.rear){faceW(i,-150,FACE_Y-6);ctx.fillRect(WP.x-2.5,WP.y-2.5,5,5)}}}
-  mono('PASSPORT CONTROL',492,531,'#56606A',8.5);
-  for(let i=0;i<8;i++){const b=boothPos(i),open=i<D.officers;ctx.fillStyle=open?'#6A7580':i<OWN.officers()?'#3A424B':'#262C32';ctx.fillRect(b.x-2,b.y-4,6,9);if(open){ctx.fillStyle='#FFC72C';ctx.fillRect(b.x+6,b.y-2,5,5)}}
-  for(let i=0;i<8;i++){const e=egatePos(i),open=i<D.egates;ctx.fillStyle=open?'#5CC8FF':'#262C32';ctx.fillRect(e.x-2,e.y-3,4,7);ctx.fillRect(e.x+4,e.y-3,4,7)}
-  ctx.strokeStyle='#39414A';ctx.lineWidth=1;ctx.setLineDash([3,4]);ctx.beginPath();ctx.moveTo(744,SEC_Y+6);ctx.lineTo(744,LAND_B-6);ctx.stroke();ctx.setLineDash([]);
-  mono('BAGGAGE RECLAIM',758,540,'#56606A',8.5);
+  // passport desks and e-gates in the wall between immigration and reclaim
+  for(let i=0;i<8;i++){const b=boothPos(i),open=i<D.officers;if(open)inWall(b.x,6,b.y);ctx.fillStyle=open?'#6A7580':i<OWN.officers()?'#3A424B':'#262C32';ctx.fillRect(b.x-9,b.y-3,5,9);if(open){ctx.fillStyle='#FFC72C';ctx.fillRect(b.x-9,b.y+7,5,5)}}
+  for(let i=0;i<8;i++){const e=egatePos(i),open=i<D.egates;if(open)inWall(e.x,4,e.y);ctx.fillStyle=open?'#5CC8FF':'#262C32';ctx.fillRect(e.x-6,e.y-4,3,9);ctx.fillRect(e.x+3,e.y-4,3,9)}
   for(const i of SIDX){if(!G.stands[i].built)continue;
     const cx=carX(i),cy=carY(i),F=R.st[i].F,A=F&&F.arr;
     ctx.strokeStyle='#39414A';ctx.lineWidth=6;rrect(cx-40,cy-10,80,20,10);ctx.stroke();
@@ -141,6 +130,7 @@ function drawTerminal(D){
     ctx.fillStyle='#D9A066';for(let k=0;k<bags;k++){const a=(k/20+performance.now()/9000)%1,t=a*2*Math.PI;ctx.fillRect(cx+Math.cos(t)*40-2,cy+Math.sin(t)*10-2,4,4)}
     mono(GATES[i],cx,cy+3,'#909AA4',9,'center');
   }
+  for(const f of TERM_DRAW)f(D);
 }
 function paxColor(p){
   if(p.state==='walkIn'||p.state==='queue'||p.state==='desk'||p.state==='secQ'||p.state==='ftQ'||p.state==='sec'||p.state==='new')return p.fast||p.biz?'#F5D08A':LAND_C;
@@ -235,8 +225,9 @@ function drawAirfield(d){
   mono(`RUNWAY · ${arrs.length} holding to land · ${deps.length} waiting to take off`,30,Y0+19,R.rwy.q.length>=3?'#FF7A8A':'#909AA4',9.5);
   ctx.restore();
 }
-function drawLandside(D){
+function drawLandside(D){ // outside: the road, station and stops sit LAND_DY lower than they were drawn before the halls
   ctx.fillStyle='#15191D';ctx.fillRect(0,H,W,Y1-H);
+  ctx.save();ctx.translate(0,LAND_DY);
   ctx.fillStyle='#0F1215';ctx.fillRect(0,642,W,22);ctx.strokeStyle='rgba(236,232,223,.25)';ctx.lineWidth=1;ctx.setLineDash([10,10]);ctx.beginPath();ctx.moveTo(0,653);ctx.lineTo(W,653);ctx.stroke();ctx.setLineDash([]);
   if(G.lv.rail){
     ctx.fillStyle='#262C33';ctx.fillRect(16,696,300,16);ctx.fillStyle='#FFC72C';ctx.fillRect(16,711,300,1.5);
@@ -246,11 +237,12 @@ function drawLandside(D){
     sign(16,676,'RAILWAY STATION');mono(!vehFreq('train')&&T.state==='away'?'no trains running · build a rail line on the Region tab':T.state==='away'?`next train ${Math.ceil(T.t)} min · ${R.platform.length} aboard`:'train in',110,686,'#909AA4',9);
   } else if(isBuilding('up:rail'))hatch(16,676,302,86,bprog('up:rail'),'BUILDING STATION');
   else {ctx.strokeStyle='#2B3238';ctx.lineWidth=1.5;ctx.setLineDash([6,6]);ctx.strokeRect(16,676,302,86);ctx.setLineDash([]);mono('RAILWAY STATION · FOR SALE',167,724,'#4A535D',10,'center')}
+  drawStopVehicles();
+  ctx.restore();
   const cap=carCap();let occ=0;
   for(let b=0;b<cap;b++){const q=BAY(b);ctx.strokeStyle='#262C32';ctx.lineWidth=1;ctx.strokeRect(q.x-4.5+.5,q.y-7+.5,9,14);
     if(R.lot[b]>G.clock){occ++;ctx.fillStyle=['#6E7883','#8C97A1','#5C6670','#A7A296','#4F6478'][b%5];rrect(q.x-3.5,q.y-6,7,12,2);ctx.fill()}}
-  drawStopVehicles();
-  sign(334,668,'CAR PARK');mono(`${occ}/${cap} spaces`,390,678,occ>=cap?'#FF7A8A':'#909AA4',9);
+  sign(334,668+LAND_DY,'CAR PARK');mono(`${occ}/${cap} spaces`,390,678+LAND_DY,occ>=cap?'#FF7A8A':'#909AA4',9);
 }
 function darkness(){const h=(G.clock/60)%24;if(h<5||h>=21)return 0.5;if(h<7)return 0.5*(7-h)/2;if(h>=19)return 0.5*(h-19)/2;return 0}
 function draw(){
@@ -281,15 +273,15 @@ function draw(){
   drawPax(vx0,vx1);
   for(const i of SIDX){if(G.stands[i].built)gateBadge(i)}
   const ciWait=R.ciQ.length*D.checkin/(D.desks+D.kiosks*0.6),secWait=R.secQ.length*D.sec/D.lanes;
-  sign(141,622,'ENTRANCE');
-  let w=sign(16,622,'CHECK-IN');mono(`${R.ciQ.length} · ~${Math.round(ciWait)}m`,16+w+5,631,ciWait>12?'#FF7A8A':'#909AA4',9);
-  w=sign(300,622,'SECURITY');mono(`${R.secQ.length+R.ftQ.length} · ~${Math.round(secWait)} min`,300+w+5,631,secWait>12?'#FF7A8A':'#909AA4',9);
-  const arW=R.arrQ.length*D.passT/(D.officers+D.egates*1.6);w=sign(492,622,'ARRIVALS');mono(`${R.arrQ.length} at passports · ~${Math.round(arW)} min`,492+w+5,631,arW>12?'#FF7A8A':'#909AA4',9);
-  sign(1180,622,'EXIT →');
+  // each queue's length and wait, signed in its hall; the doors in and out on the forecourt
+  sign(190,LAND_B+6,'ENTRANCE ↑');sign(946,LAND_B+6,'EXIT ↓');
+  let w=sign(16,LAND_B+6,'CHECK-IN');mono(`${R.ciQ.length} · ~${Math.round(ciWait)} min`,16+w+5,LAND_B+15,ciWait>12?'#FF7A8A':'#909AA4',9);
+  w=sign(16,SEC_LINE+4,'SECURITY');mono(`${R.secQ.length+R.ftQ.length} · ~${Math.round(secWait)} min`,16+w+5,SEC_LINE+13,secWait>12?'#FF7A8A':'#909AA4',9);
+  const arW=R.arrQ.length*D.passT/(D.officers+D.egates*1.6);w=sign(708,SEC_Y+4,'PASSPORTS');mono(`${R.arrQ.length} waiting · ~${Math.round(arW)} min`,708+w+5,SEC_Y+13,arW>12?'#FF7A8A':'#909AA4',9);
   drawFog(0,Y0,W,TERM_Y-Y0+120,0.3);
   if(R.fx.rain>G.clock){const tt=performance.now()/1000,st=R.fx.storm>G.clock;ctx.fillStyle=`rgba(20,30,50,${st?0.22:0.1})`;ctx.fillRect(0,Y0,W,Y1-Y0);ctx.strokeStyle='rgba(170,195,225,.35)';ctx.lineWidth=1;ctx.beginPath();for(let i=0;i<220;i++){const px=(i*97.3+tt*60)%W,py=Y0+((i*53.1+tt*260)%(Y1-Y0));ctx.moveTo(px,py);ctx.lineTo(px-4,py+12)}ctx.stroke();
     if(st&&Math.sin(tt*3.1)>0.992){ctx.fillStyle='rgba(255,250,230,.25)';ctx.fillRect(0,Y0,W,Y1-Y0)}if(st)sign(W/2-80,AF_Y-12,'STORM · RUNWAY CLOSED','#FFC72C')}
-  if(R.fx.strike>G.clock){const tt=performance.now()/300;for(let k=0;k<9;k++){const px=70+k*20,py=634+Math.sin(tt+k)*1.5;ctx.fillStyle='#ECE8DF';ctx.beginPath();ctx.arc(px,py,2.6,0,Math.PI*2);ctx.fill();ctx.fillStyle='#E5484D';ctx.fillRect(px-5,py-14+Math.sin(tt*1.3+k),10,6);ctx.fillStyle='#8C97A1';ctx.fillRect(px-0.4,py-8,0.8,6)}sign(70,606,'ON STRIKE','#E5484D','#fff')}
+  if(R.fx.strike>G.clock){const tt=performance.now()/300;for(let k=0;k<9;k++){const px=320+k*20,py=740+Math.sin(tt+k)*1.5;ctx.fillStyle='#ECE8DF';ctx.beginPath();ctx.arc(px,py,2.6,0,Math.PI*2);ctx.fill();ctx.fillStyle='#E5484D';ctx.fillRect(px-5,py-14+Math.sin(tt*1.3+k),10,6);ctx.fillStyle='#8C97A1';ctx.fillRect(px-0.4,py-8,0.8,6)}sign(320,712,'ON STRIKE','#E5484D','#fff')}
   for(const f of R.floaters){
     if(f.x<vx0-60||f.x>vx1+60)continue;
     const life=f.big?2.2:1,a=1-f.t/life;

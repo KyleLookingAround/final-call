@@ -96,10 +96,10 @@ function renderPanel(){
         return `<div class="row${lock?' lockd':''}">${svg('seat')}<div><div class="rt">${m.name}</div><div class="rd">${lock?`Unlocks at ${lvlName(m.lvl)}.`:m.desc}${best?` Best a minute: <b>${best}</b>.`:''}</div></div>${own?`<button class="buy chipd" disabled>Owned</button>`:lock?`<button class="buy" disabled>Level ${m.lvl+1}</button>`:`<button class="buy" data-mbuy="${m.id}" data-cost="${m.cost}">${money(m.cost)}</button>`}</div>`}).join('');
     }
   } else if(G.tab==='terminal'){
-    const tsub=R.tSub||'dep';h+=segs('tSub',[['dep','Departures'],['arr','Arrivals'],['staff','Staff']]);
+    const tsub=R.tSub||'dep';h+=segs('tSub',TERM_SUBS);
     const auto=G.lv.roster&&G.auto,sRow=(t,ic,label)=>{const own=OWN[t](),n=staffed(t);return `<div class="row">${svg(ic)}<div><div class="rt">${label}</div><div class="rd">${money(WAGE[t]*(G.wageMul||1))} an hour each${auto?' · set by rostering':''}</div></div><div class="lever"><button data-staff="${t}:-1" ${auto||n<=1?'disabled':''} aria-label="Staff one fewer">−</button><output data-live="staff-${t}">${n}</output><button data-staff="${t}:1" ${auto||n>=own?'disabled':''} aria-label="Staff one more">+</button><span class="live">/ ${own}</span></div></div>`};
     if(tsub==='staff')h+=`<div class="sec">Staffing<span>wages ${money(wageBill())} an hour</span></div>`+sRow('desks','desk','Check-in desks')+sRow('lanes','lane','Security lanes')+sRow('officers','passport','Passport desks')+(G.lv.roster?`<div class="row">${svg('crew')}<div><div class="rt">Auto rostering</div><div class="rd">${auto?'Opens counters as queues grow and closes them when it’s quiet.':'Off. You choose how many counters are staffed.'}</div></div><button class="buy${auto?'':' ghost'}" data-auto="1">${auto?'On':'Off'}</button></div>`:'')+`<p class="note">Close counters at quiet times to save wages. Kiosks and e-gates cost nothing to run.</p>`;
-    h+=upSection('terminal',tsub==='dep'?['Check-in','Security']:tsub==='arr'?['Arrivals']:['Concourse','Staff']);
+    h+=upSection('terminal',TERM_SECS[tsub]||[]);h+=(TERM_PANEL[tsub]||[]).map(f=>f()).join('');
   } else if(G.tab==='sales'&&(R.sSub||'prices')==='shops'){
     h+=segs('sSub',[['prices','Prices'],['shops','Shops'],['landside','Landside']]);
     h+=`<p class="note">Passengers with 15+ minutes to spare may stop at a shop. Long-haul flyers spend more.</p>`;
@@ -113,12 +113,13 @@ function renderPanel(){
       }
       h+=`</div>`;
     });
+    h+=(TERM_PANEL['sales:shops']||[]).map(f=>f()).join('');
   } else if(G.tab==='ground'){
     const showProj=Object.keys(UPG).some(k=>UPG[k].sec==='Landmark projects'&&has('up:'+k)),showLay=G.layout!=='classic'||Object.keys(LAYOUTS).some(id=>id!=='classic'&&has('lay:'+id));
     const at=[['ops','Operations'],...(showProj?[['build','Projects']]:[]),...(showLay?[['layout','Layout']]:[])],asub=at.some(t=>t[0]===R.aSub)?R.aSub:'ops';if(at.length>1)h+=segs('aSub',at);
     h+=asub==='layout'?layoutPanel():asub==='ops'?`<p class="note">Planes wait for every bag and passenger. Buildings cost <b>${money(upkeepRate())}</b>/h to run.</p>`+upSection('ground',['Gates','Apron','Runway','Engineering']):upSection('ground',['Landmark projects']);
   } else if(G.tab==='sales'&&R.sSub==='landside'){
-    h+=segs('sSub',[['prices','Prices'],['shops','Shops'],['landside','Landside']])+upSection('sales',['Landside']);
+    h+=segs('sSub',[['prices','Prices'],['shops','Shops'],['landside','Landside']])+upSection('sales',['Landside']);h+=(TERM_PANEL['sales:landside']||[]).map(f=>f()).join('');
   } else if(G.tab==='sales'){
     h+=segs('sSub',[['prices','Prices'],['shops','Shops'],['landside','Landside']]);
     const lf=loadFactor();
@@ -306,6 +307,7 @@ $('#panel').addEventListener('pointerdown',()=>{R.panelPtr=performance.now()},{p
 $('#panel').addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b||b.disabled&&!b.dataset.look)return;const d=b.dataset;
   if(recsClick(d)){refreshUI();return}
+  if(TERM_CLICK.some(f=>f(d,b))){refreshUI();return}
   if(layoutClick(d,b)){refreshUI();return}
   if(regionClick(d,b)){refreshUI();return}
   if(routesClick(d)){refreshUI();return}

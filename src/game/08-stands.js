@@ -119,7 +119,7 @@ function stepDeplaneBridges(i,D,dt){
     const br=S.dBridge[door];if(!br.length)continue;
     const F=br[0].F,path=door?F.P.rear:F.P.bridge;
     br.sort((a,b)=>a.s-b.s);let lead=-Infinity,out=false;
-    for(const p of br){p.s=Math.min(p.s,Math.max(p.s-D.walk*p.spd*busMul(i)*dt,lead+SPACING,0));const q=ptAt(path,p.s);p.tx=q[0];p.ty=q[1];lead=p.s;if(p.s<=0.01){p.out=true;out=true;if(!(p.xfer&&connect(p))){p.state='toArr';p.tx=ARR_DOOR.x+(rnd()-0.5)*6;p.ty=ARR_DOOR.y;p.room=STAND_ROOM[i];route(p,ROOM_MAIN())}}}
+    for(const p of br){p.s=Math.min(p.s,Math.max(p.s-D.walk*p.spd*busMul(i)*dt,lead+SPACING,0));const q=ptAt(path,p.s);p.tx=q[0];p.ty=q[1];lead=p.s;if(p.s<=0.01){p.out=true;out=true;if(!(p.xfer&&connect(p))){p.state='toArr';p.tx=ARR_DOOR.x+(rnd()-0.5)*6;p.ty=ARR_DOOR.y;p.room=STAND_ROOM[i];route(p,hallId('imm'))}}}
     if(out)S.dBridge[door]=br.filter(p=>!p.out);
   }
 }
@@ -129,43 +129,22 @@ function connect(p){
   F2.xferWait--;q.xferred=true;R.pax.push(q);airside(q,p.x,STAND_ROOM[p.stand]);q.x=p.x;q.y=p.y+4;
   G.xfers=(G.xfers||0)+1;finishArrival(p);return true;
 }
-function afterControl(p){
-  if(p.checked){p.state='toReclaim';const a=rnd()*Math.PI*2;p.tx=carX(p.stand)+Math.cos(a)*48;p.ty=carY(p.stand)+Math.sin(a)*15}
-  else exitTarget(p);
-}
 function finishArrival(p){
   const A=p.A;p.dead=true;A.cleared++;A.waitSum+=p.wait;countPax(true);
   {const v=(A.fare||A.ac.fare*G.fare)*0.6*(p.biz?3:1);if(A.partner)earn(v*partnerCut(),'handling');else earn(v,'inbound')}
-  if(G.lv.hotel&&rnd()<0.05*G.lv.hotel)earn(6*(1+0.3*A.ac.tier)*(devOn('hotels')?2:1),'landside',1360,540,'#9FC2E0');
+  hotelStay(A);
   if(A.cleared>=A.n&&!A.done){
     A.done=true;const avg=A.waitSum/A.n,mins=G.clock-(A.started??G.clock),pat=patience();
     if(avg<8+pat)repAdj(0.8,'arrivals');else if(avg>18+pat)repAdj(-Math.min(4,(avg-18-pat)*0.2),'arrivals');
     if(isNight()&&R.reg&&R.reg.share>0.08&&!Object.values(G.lines||{}).some(L=>L.night))repAdj(-Math.min(2.5,R.reg.share*8),'stranded');
     G.arrReports[A.stand]={tag:A.code+A.no,from:A.from,n:A.n,avg,mins:Math.round(mins),bags:A.bags};
-    floater(`${A.code}${A.no} CLEARED · ${Math.round(mins)} MIN`,1150,540,avg>18+pat?'#FF7A8A':'#9FC2E0',true);
+    floater(`${A.code}${A.no} CLEARED · ${Math.round(mins)} MIN`,970,738,avg>18+pat?'#FF7A8A':'#9FC2E0',true);
   }
 }
+// each part of the terminal moves its own arriving passengers: ARR_STEP[state](p,dt,D) (42-terminal.js)
 function updateArrivals(dt,D){
-  for(const b of R.arrBelt){b.t-=dt;if(b.t<=0){b.A.reclaim++;b.done=true}}
-  if(R.arrBelt.some(b=>b.done))R.arrBelt=R.arrBelt.filter(b=>!b.done);
-  for(let i=0;i<8;i++){
-    const B=R.booths[i]||(R.booths[i]={p:null,t:0});
-    if(i<D.officers&&R.arrQ.length)take(B,()=>R.arrQ.shift(),'passport',D.passT);
-    if(B.p){const bp=boothPos(i);serve(B,bp.x-7,bp.y,dt,afterControl,bp.x-15,bp.y)}
-  }
-  for(let i=0;i<8;i++){
-    const E=R.egates[i]||(R.egates[i]={p:null,t:0});
-    if(i<D.egates)take(E,()=>{const n=Math.min(14,R.arrQ.length);for(let j=0;j<n;j++)if(R.arrQ[j].elig)return R.arrQ.splice(j,1)[0];return null},'passport',D.egateT);
-    if(E.p){const ep=egatePos(i);serve(E,ep.x-6,ep.y,dt,afterControl,ep.x-13,ep.y)}
-  }
-  R.arrQ.forEach((p,i)=>{p.wait+=dt;const s=arrSlot(i);moveTo(p,s.x,s.y,75*p.spd,dt)});
-  for(const p of R.pax){
-    if(!p.inbound)continue;
-    if(p.state==='toArr'){if(walk(p,D.cwalk*p.spd*walkMul(p),dt)){p.state='arrQ';R.arrQ.push(p)}}
-    else if(p.state==='toReclaim'){p.wait+=dt;if(moveTo(p,p.tx,p.ty,80*p.spd,dt))p.state='reclaim'}
-    else if(p.state==='reclaim'){p.wait+=dt;if(p.A.reclaim>0){p.A.reclaim--;exitTarget(p)}}
-    else if(p.state==='exitW'){if(moveTo(p,p.tx,p.ty,80*p.spd,dt))finishArrival(p)}
-  }
+  updateReclaimBelt(dt);updateImmigration(dt,D);
+  for(const p of R.pax){if(!p.inbound)continue;const f=ARR_STEP[p.state];if(f)f(p,dt,D)}
 }
 function arrive(p,D){
   const F=p.F;p.pos=p.row;

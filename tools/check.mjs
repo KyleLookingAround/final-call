@@ -14,6 +14,7 @@
 //   news     What's new opens once for an older save and not again, never for a new game, and from Settings
 //   perf     how fast a level 9 airport simulates (against a calibration run, so machines compare), and how
 //            much of a phone's CPU the game uses at 8x with the CPU slowed 4x
+//   ...      and a group for each file in tools/checks/, named after it (terminal: the halls and the way through them)
 // Every page is seeded (window.__seed), so a failure repeats when you run it again.
 // Exit code 1 if anything fails. Screenshots of failures go to build/check/.
 import {chromium} from 'playwright';
@@ -339,6 +340,10 @@ if(!only||only==='share'){
   await page.close();
   ok('share: link preview',!bad.length,bad[0]||`${t.image} (${kb} KB)`);
 }
+// more groups, one file each in tools/checks/ (a group is named after its file): each exports a default async function
+// that gets the helpers above and reports through ok(name, pass, info)
+for(const f of readdirSync(join(root,'tools/checks')).filter(f=>f.endsWith('.mjs')).sort()){const g=f.slice(0,-4);
+  if(!only||only===g)await (await import(pathToFileURL(join(root,'tools/checks',f)).href)).default({open,ok,saveText,saves,newest,browser,root,out});}
 await browser.close();
 const failed=results.filter(r=>!r[1]).length;
 console.log(`\n${results.length-failed}/${results.length} passed`);

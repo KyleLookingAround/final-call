@@ -41,7 +41,7 @@ function fireEvent(){
   if(e==='fog')R.fx.fog=G.clock+45;
   else if(e==='snow')R.fx.snow=G.clock+90;
   else if(e==='rush')R.fx.rush=G.clock+90;
-  else if(e==='strike'){R.fx.strike=G.clock+45;floater('STAFF WALKOUT',150,600,'#FF7A8A',true)}
-  else if(e==='sick'){const cost=Math.round(30+G.lv.lanes*30);if(pol('agency')&&G.cash>=cost){spend(cost,'costs');floater(`AGENCY COVER ${money(cost)}`,380,515,'#FFC72C',true)}else{R.fx.sick=G.clock+40;floater('LANE CLOSED · STAFF SICK',380,515,'#FF7A8A',true)}}
+  else if(e==='strike'){R.fx.strike=G.clock+45;floater('STAFF WALKOUT',150,700,'#FF7A8A',true)}
+  else if(e==='sick'){const cost=Math.round(30+G.lv.lanes*30);if(pol('agency')&&G.cash>=cost){spend(cost,'costs');floater(`AGENCY COVER ${money(cost)}`,400,608,'#FFC72C',true)}else{R.fx.sick=G.clock+40;floater('LANE CLOSED · STAFF SICK',400,608,'#FF7A8A',true)}}
 }
 

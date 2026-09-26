@@ -54,17 +54,17 @@ const syncKind=k=>Object.values(G.lines||{}).some(L=>L.sync&&serves(L,'air')&&ef
 function updateStopVehicles(dt){
   // trams
   const T=R.tram;const ft=vehFreq('tram');
-  if(!ft&&R.tramQ.length){R.tramQ.forEach(p=>walkIn(p,40+rnd()*260,648+rnd()*12));R.tramQ=[]}
+  if(!ft&&R.tramQ.length){R.tramQ.forEach(p=>walkIn(p,40+rnd()*260,648+LAND_DY+rnd()*12));R.tramQ=[]}
   if(T.state==='away'){if(ft){T.t-=dt;if(T.t<=0){T.state='in';T.t=0;const L=vehLine('tram');T.secs=3+((L&&L.cars)||0);T.col=L?L.col:'#FF9F43'}}}
-  else if(T.state==='in'){T.t+=dt;const k=Math.min(1,T.t/1);T.x=-280+310*(1-Math.pow(1-k,2));if(k>=1){T.state='dwell';T.t=1;R.tramQ.forEach(p=>walkIn(p,T.x+10+rnd()*200,792));R.tramQ=[]}}
-  else if(T.state==='dwell'){T.t-=dt;if(T.t<=0&&syncKind('tram')&&walkersTo(789)&&(T.extra=(T.extra||0)+dt)<3)T.t=0.05;if(T.t<=0){T.state='out';T.t=0;T.extra=0}}
+  else if(T.state==='in'){T.t+=dt;const k=Math.min(1,T.t/1);T.x=-280+310*(1-Math.pow(1-k,2));if(k>=1){T.state='dwell';T.t=1;R.tramQ.forEach(p=>walkIn(p,T.x+10+rnd()*200,792+LAND_DY));R.tramQ=[]}}
+  else if(T.state==='dwell'){T.t-=dt;if(T.t<=0&&syncKind('tram')&&walkersTo(789+LAND_DY)&&(T.extra=(T.extra||0)+dt)<3)T.t=0.05;if(T.t<=0){T.state='out';T.t=0;T.extra=0}}
   else if(T.state==='out'){T.t+=dt;const k=Math.min(1,T.t/1);T.x=30-310*k*k;if(k>=1){T.state='away';T.t=Math.max(1.5,60/Math.max(ft,1)-3);T.x=null}}
   // buses, coaches and the water-bus shuttle
   const B=R.bus,fb=vehFreq('bus');
-  if(!fb&&R.busQ.length){R.busQ.forEach(p=>walkIn(p,40+rnd()*260,648+rnd()*12));R.busQ=[]}
+  if(!fb&&R.busQ.length){R.busQ.forEach(p=>walkIn(p,40+rnd()*260,648+LAND_DY+rnd()*12));R.busQ=[]}
   if(B.state==='away'){if(fb){B.t-=dt;if(B.t<=0){B.state='in';B.t=0;const L=vehLine('bus'),m=L?L.mode:'bus',r=rnd();B.kind=m==='coach'?'coach':m==='water'?'shuttle':r<0.3?'double':r<0.55+0.2*((L&&L.cars)||0)?'bendy':'single';B.col=L&&!replOn(L.id)?L.col:'#6BE39A';B.len={coach:40,shuttle:30,double:32,bendy:50,single:34}[B.kind]}}}
-  else if(B.state==='in'){B.t+=dt;const k=Math.min(1,B.t/1.4);B.x=LAND_R+60-(LAND_R+60-236)*(1-Math.pow(1-k,2));if(k>=1){B.state='dwell';B.t=0.9;R.busQ.forEach(p=>walkIn(p,B.x+rnd()*B.len,640));R.busQ=[]}}
-  else if(B.state==='dwell'){B.t-=dt;if(B.t<=0&&syncKind('bus')&&walkersTo(641)&&(B.extra=(B.extra||0)+dt)<3)B.t=0.05;if(B.t<=0){B.state='out';B.t=0;B.extra=0}}
+  else if(B.state==='in'){B.t+=dt;const k=Math.min(1,B.t/1.4);B.x=LAND_R+60-(LAND_R+60-236)*(1-Math.pow(1-k,2));if(k>=1){B.state='dwell';B.t=0.9;R.busQ.forEach(p=>walkIn(p,B.x+rnd()*B.len,640+LAND_DY));R.busQ=[]}}
+  else if(B.state==='dwell'){B.t-=dt;if(B.t<=0&&syncKind('bus')&&walkersTo(641+LAND_DY)&&(B.extra=(B.extra||0)+dt)<3)B.t=0.05;if(B.t<=0){B.state='out';B.t=0;B.extra=0}}
   else if(B.state==='out'){B.t+=dt;const k=Math.min(1,B.t/0.8);B.x=236-300*k*k;if(k>=1){B.state='away';B.t=Math.max(1.2,60/Math.max(fb,1)-3);B.x=null}}
 }
 function drawStopVehicles(){
