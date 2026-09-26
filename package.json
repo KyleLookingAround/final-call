@@ -3,12 +3,17 @@
   "private": true,
   "type": "module",
   "description": "Final Call: an airport management game in a single HTML page",
+  "homepage": "https://kylelookingaround.github.io/final-call/",
   "scripts": {
     "build": "node tools/build.mjs",
     "check": "node tools/build.mjs && node tools/check.mjs",
-    "bot": "node tools/build.mjs && node tools/run-bot.mjs"
+    "bot": "node tools/build.mjs && node tools/run-bot.mjs",
+    "preview": "node tools/build.mjs && node tools/preview-image.mjs"
   },
   "devDependencies": {
+    "@fontsource/hind": "5.3.0",
+    "@fontsource/ibm-plex-mono": "5.3.0",
+    "@fontsource/saira-condensed": "5.3.0",
     "playwright": "1.56.1"
   }
 }

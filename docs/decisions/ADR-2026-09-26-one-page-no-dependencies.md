@@ -52,6 +52,8 @@ Portability between the two hosts and zero upkeep matter more than framework con
 **Mitigations:**
 - Keep an eye on the size the build prints, and keep UI patterns in shared helpers (`segs()`, `renderPanel()`).
 
+**Exception:** link previews need a real image address, so `preview.jpg` and the home-screen icon are published next to the page from `src/public/`. The game never loads them, and the tab icon is inlined, so the page still works on its own.
+
 ## Related
 
 - [ADR-2026-09-26-source-in-numbered-files](ADR-2026-09-26-source-in-numbered-files.md)
