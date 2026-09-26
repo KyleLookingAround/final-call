@@ -136,7 +136,7 @@ Some functions sit where they were first written rather than where their name su
 
 ### Gating and settings
 
-- **Gating:** `has('kind:id')` (for example `up:desks`, `ac:3`, `rt:2`, `mode:hsr`, `feat:slots`) comes from approved Masterplan plans (`TECH`, 58 plans in 6 branches; the sixth is Layouts). Level unlocks come from `LEVELS`, which has 10 levels from Airfield to Airport of the Year.
+- **Gating:** `has('kind:id')` (for example `up:desks`, `ac:3`, `rt:2`, `mode:hsr`, `feat:slots`) comes from approved Masterplan plans (`TECH`, 60 plans in 6 branches; the sixth is Layouts). Level unlocks come from `LEVELS`, which has 10 levels from Airfield to Airport of the Year.
 - **Settings** live in `G.set`, read through `SET()`:
   - notifications: `tips`, `msgs`, `pops`, `goal`, `recs`, `badges`;
   - managers: `autoLines`, `autoFares`, `autoCrews`;
@@ -165,9 +165,10 @@ Some functions sit where they were first written rather than where their name su
   - There are 24 stamps; only earned ones are shown.
   - Each game week has 3 challenges, sized from last week. Each pays about 12% of a day's profit, and finishing all three gives a plan point while plans remain.
 - **Airport layouts.** `LAYOUTS` in `39-layouts.js` lists each layout's stands (x, how far back the plane sits `dy`, gate name, price, level, `pier` for the second phase, `kind:'remote'` for bus stands), its buying `order` and its shop units. `applyLayout` copies the current one into `STAND_X`, `STAND_DY`, `STAND`, `GATES`, `SIDX`, `STAND_ORDER`, `SHOP_X` and friends in place, so code that reads those follows the layout.
-  - **2D layouts** (Classic, Remote apron, Staggered apron, Curved front, and Hall and finger pier so far) also have `rooms` (convex floors), `doors` (`[roomA, roomB, x, y, half-width]`), `top` (how far up the runway moves) and `decor`. Their stands have a face point `x`,`y` and a heading `h` (where the nose points, degrees clockwise from north) and park nose-in; shop units add `y`, an angle and a room.
+  - **Every layout is 2D** and has `rooms` (convex floors), `doors` (`[roomA, roomB, x, y, half-width]`), `top` (how far up the runway moves) and `decor`. Their stands have a face point `x`,`y` and a heading `h` (where the nose points, degrees clockwise from north) and park nose-in; shop units add `y`, an angle and a room.
     - Helpers build the shapes: `CLP` (Classic's parts, shared with the Remote apron and Staggered apron), `pierParts` (a pier from a wall, with stands on either side and a wider head for a stand at its tip), `arcParts` (a curved concourse, one segment per stand).
     - A stand's `lean` (herringbone) turns its plane and `back` sets it back from the wall, while its bridge root and lounge stay square to the wall (the face frame, `faceW`).
+    - `links` join rooms by train or by a tunnel with moving walkways: `[roomA, roomB, [x,y] station in A, [x,y] station in B, 'train' or 'walkway']`. Riders wait for the next train (every `TRAIN_EVERY` minutes) and are drawn as its car.
     - A 2D remote stand has a bus `gate` (`[x, y, 1 or -1 for the lounge below or above it]`) in its room and a bus `road` out to the plane.
     - Each stand's information card goes to the first clear spot around its plane (`placeBadges`).
   - **Stand frames.** Each stand's frame (`XF[i]`) turns plane-local coordinates (x across, y along with the nose up, as `geom()` lays them out) into the world: use `toW(i,x,y)`, `wx`/`wy`, and `standCtx(i)` to draw in it. Old straight-line stands have 'tail' frames that give exactly the old numbers. Keep words upright: draw text at `toW` positions, not inside `standCtx`.

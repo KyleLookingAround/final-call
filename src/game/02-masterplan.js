@@ -7,6 +7,8 @@ const TECH=[
   {id:'l_hall',b:'lay',t:5,c:2,d:'Rebuild around a central shopping hall and a long finger pier.',n:'Hall and finger pier',u:['lay:hall']},
   {id:'l_sat',b:'lay',t:7,c:3,d:'Rebuild with a satellite and its own people mover.',n:'Satellite',u:['lay:sat']},
   {id:'l_star',b:'lay',t:9,c:3,d:'Rebuild around a star-shaped hall with the shortest walks.',n:'Starfish',u:['lay:star']},
+  {id:'l_round',b:'lay',t:6,c:2,d:'Rebuild around a round terminal, with satellites reached through tunnels.',n:'Round terminal',u:['lay:round']},
+  {id:'l_mid',b:'lay',t:9,c:3,d:'Rebuild with midfield concourses along an underground train.',n:'Midfield concourses',u:['lay:mid']},
   {id:'t_self',b:'term',t:1,c:1,d:'Passengers without hold bags skip the desks.',n:'Self-service',u:['up:kiosks','up:online']},
   {id:'t_border',b:'term',t:1,c:1,d:'Fast automatic passport gates for arrivals.',n:'E-gates',u:['up:egates']},
   {id:'t_fast',b:'term',t:1,c:1,d:'A paid lane that skips the security queue.',n:'Fast track',u:['up:fasttrack','up:ftsales']},

@@ -1,5 +1,5 @@
 /* ================= constants ================= */
-const NG=12,NU=20,H=640,SEATW=15,AISLE=16,CABIN_TOP=110,CABIN_MAX=250,TERM_Y=446,SEC_Y=522,LAND_B=614,LAND_R=1232,GAP=0.95,SPACING=8.5;
+const NG=16,NU=20,H=640,SEATW=15,AISLE=16,CABIN_TOP=110,CABIN_MAX=250,TERM_Y=446,SEC_Y=522,LAND_B=614,LAND_R=1232,GAP=0.95,SPACING=8.5;
 const SIDX=[0,1,2,3,4,5,6,7],STAND_ORDER=[0,1,2,3,4,5,6,7],STAND_AFTER=[-1,0,1,2,3,4,5,6]; // the current layout's stands, the order they're shown and bought in, and which stand each needs first
 // the airport's layout: these arrays hold the current layout's stands and shop units (39-layouts.js fills them in place)
 let W=2480; // world width
