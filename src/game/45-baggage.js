@@ -7,7 +7,7 @@
 // A flight that is ready to go leaves behind bags that haven't reached a tug: each costs a courier and some rating.
 // An arriving flight's bags go by tug from the stand to the hall and onto its carousel (A.reclaim). Transfer bags come
 // off first, and go through screening and the sorter to their next flight.
-const BAG_SCR=10,BAG_SEARCH=20,BAG_SEARCH_T=3,BAG_SORT=20,BAG_LOOP_T=8,BAG_TUG=30,BAG_TUGIN=25,TUG_V=260,CAR_CAP=45,CAR_FEED=18;
+const BAG_GRACE=5,BAG_SCR=10,BAG_SEARCH=20,BAG_SEARCH_T=3,BAG_SORT=20,BAG_LOOP_T=8,BAG_TUG=30,BAG_TUGIN=25,TUG_V=260,CAR_CAP=45,CAR_FEED=18;
 const bagMul=()=>1+0.35*G.lv.bagsys; // the Automated baggage system speeds the sorter, the belts and the carousels
 const bagCaps=()=>({scr:(1+G.lv.screen)*BAG_SCR,sort:BAG_SORT*bagMul(),loop:40*(1+G.lv.bagsys),pos:4+2*G.lv.makeup,ebs:150*G.lv.ebs,car:Math.min(8,4+G.lv.carousels,Math.max(1,builtCount()))}); // no more carousels than stands
 Object.assign(UPG,{
@@ -22,7 +22,7 @@ Object.assign(REPWHY,{bags:['bags left behind',['screen','makeup','ebs','bagsys'
 // runtime state: queues of [flight, count] groups, the search room, circling and stored totals, positions, tugs and carousels
 // (made afresh when a save loads, which rebuilds R.st and starts every stand's flights afresh)
 function bagRT(){return R.bag&&R.bag.st===R.st?R.bag:(R.bag={st:R.st,scr:[],sAcc:0,flag:0,srch:[],sort:[],oAcc:0,loop:0,ebs:0,pos:[],tugs:[],car:[],late:0})}
-const bgOf=F=>F.bg||(F.bg={loop:0,ebs:0,mk:0,mk0:0,tug:0,cut:false,pos:false,miss:0});
+const bgOf=F=>F.bg||(F.bg={loop:0,ebs:0,mk:0,mk0:0,tug:0,cut:false,pos:false,miss:0,rdy:null});
 const abOf=A=>A.bg||(A.bg={ap:0,ap0:0,hall:0,fed:0,acc:0,first:null,last:null,stall:0,xs:false});
 const bagLive=F=>R.st[F.i]&&R.st[F.i].F===F&&!(F.bg&&F.bg.cut); // still at its stand and taking bags
 function qPush(q,F,n){const t=q[q.length-1];if(t&&t[0]===F)t[1]+=n;else q.push([F,n])}
@@ -49,12 +49,14 @@ function updateBelt(dt){
     if(f.pos){if(!f.mk)f.mk0=G.clock;f.mk+=k}
     else{const e=Math.min(k,Math.max(0,C.ebs-B.ebs)),l=Math.min(k-e,Math.max(0,Math.floor(C.loop-B.loop)));f.ebs+=e;B.ebs+=e;f.loop+=l;B.loop+=l;k=e+l;if(!k)break} // full: the sorter backs up
     B.oAcc-=k;if((g[1]-=k)<=0)B.sort.shift()}
-  // flights at their stands: tugs leave with a full cart, the last bags, or bags that have waited (not long once boarding); bags that can't make a
-  // flight that's ready to go are left behind
+  // flights at their stands: tugs leave with a full cart, the last bags, or bags that have waited (not long once boarding,
+  // and at once when the flight is ready to go). A flight ready to go after its departure time waits BAG_GRACE minutes for
+  // bags still on their way, then leaves behind those that haven't reached a tug
   for(const i of SIDX){const F=R.st[i].F;if(!F||F.freighter)continue;const f=bgOf(F),pl=F.plane;
-    const going=pl.state==='boarding'||pl.state==='closing';
-    if(f.mk>0&&(f.mk>=BAG_TUG||G.clock-f.mk0>=(going?2:10)||going&&f.mk>=F.checkedTotal-F.bagsIn-f.tug)){B.tugs.push({F,i,n:f.mk,t:0,T:tugTime(i),out:1});f.tug+=f.mk;f.mk=0}
-    if(pl.state==='boarding'&&!f.cut&&G.clock>=F.std&&!F.manifest.length&&!F.straggler&&F.seated>=F.booked){const n=Math.round(F.checkedTotal-F.bagsIn-f.tug);if(n>0)leaveBags(F,n)}
+    const going=pl.state==='boarding'||pl.state==='closing',ready=pl.state==='boarding'&&G.clock>=F.std&&!F.manifest.length&&!F.straggler&&F.seated>=F.booked;
+    if(ready&&f.rdy==null)f.rdy=G.clock;
+    if(f.mk>0&&(f.mk>=BAG_TUG||ready||G.clock-f.mk0>=(going?2:10)||going&&f.mk>=F.checkedTotal-F.bagsIn-f.tug)){B.tugs.push({F,i,n:f.mk,t:0,T:tugTime(i),out:1});f.tug+=f.mk;f.mk=0}
+    if(ready&&!f.cut&&G.clock-f.rdy>=BAG_GRACE){const n=Math.round(F.checkedTotal-F.bagsIn-f.tug);if(n>0)leaveBags(F,n)}
     if(f.pos&&(going&&!f.mk&&F.checkedTotal-F.bagsIn-f.tug<=0&&!F.manifest.length||f.cut))dropPos(F)}
   for(const T of B.tugs)if(T.out){T.t+=dt;if(T.t>=T.T){T.done=true;T.F.bg.tug-=T.n;if(R.st[T.F.i].F===T.F)T.F.bagsIn+=T.n}}
 }

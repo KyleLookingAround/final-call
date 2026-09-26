@@ -7,7 +7,7 @@ export default async function({open,ok,saveText}){
     const first=new Map(),bad=[],arr=new Set(),board=new Set();let deps=0,missed=0,arrDone=0,maxSort=0;
     for(let k=0;k<480*10;k++){
       if(k===600)for(const i of S.SIDX){const F=R.st[i].F;if(F&&!F.freighter)for(let j=0;j<40;j++){R.belt.push({x:560,F});F.checkedTotal++}} // a rush of bags
-      if(k===620){const F=S.SIDX.map(i=>R.st[i].F).find(F=>F&&!F.freighter&&(F.plane.state==='turnaround'||F.plane.state==='boarding')&&F.checkedTotal>F.bagsIn+(F.bg?F.bg.tug:0)+5);
+      if(k===620){const q=S.bagRT().scr,at=F=>q.findLastIndex(g=>g[0]===F),F=S.SIDX.map(i=>R.st[i].F).filter(F=>F&&!F.freighter&&(F.plane.state==='turnaround'||F.plane.state==='boarding')&&F.checkedTotal>F.bagsIn+(F.bg?F.bg.tug:0)+5).sort((a,b)=>at(b)-at(a))[0];
         if(F){F.manifest.length=0;F.straggler=null;F.seated=F.booked;F.plane.state='boarding';F.std=G.clock}} // a flight that goes before its bags are through
       S.update(0.1);
       const B=S.bagRT();maxSort=Math.max(maxSort,B.sort.reduce((s,g)=>s+g[1],0)+B.scr.reduce((s,g)=>s+g[1],0));
@@ -41,7 +41,7 @@ export default async function({open,ok,saveText}){
     if(!F2){R.sim=false;return {none:true}}
     const cash=G.cash,miss=G.bagMiss||0,xin=S.bagRT().xin||0;
     F2.manifest.length=0;F2.straggler=null;F2.seated=F2.booked;F2.plane.state='boarding';F2.std=G.clock;
-    for(let k=0;k<20;k++)S.update(0.1);
+    for(let k=0;k<60;k++)S.update(0.1); // it waits five minutes for bags on their way
     R.sim=false;return {miss:(G.bagMiss||0)-miss,f2:F2.bg?F2.bg.miss:0,paid:cash-G.cash,xin:(S.bagRT().xin||0)-xin}});
   ok('baggage: a tight transfer misses its flight, and a courier takes it on',!t.none&&t.f2>=1&&t.miss>=1&&t.paid>0,JSON.stringify(t));
   await ctx.close();
