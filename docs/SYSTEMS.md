@@ -48,7 +48,7 @@ When the link is shared, chat apps and social sites show `src/public/preview.jpg
 - **Gating:** `has('kind:id')` (for example `up:desks`, `ac:3`, `rt:2`, `mode:hsr`, `feat:slots`) comes from approved Masterplan plans (`TECH`, 60 plans in 6 branches; the sixth is Layouts). Level unlocks come from `LEVELS`, which has 10 levels from Airfield to Airport of the Year.
 - **Settings** live in `G.set`, read through `SET()`:
   - notifications: `tips`, `msgs`, `pops`, `goal`, `recs`, `badges`;
-  - managers: `autoLines`, `autoFares`, `autoCrews`;
+  - managers: `autoLines`, `autoFares`, `autoCrews`, and `autoDuty` (the duty manager: hotel room prices);
   - weekly challenges: `chal`.
   - Toasts follow `msgs` unless they reply to a tap in the last 900 ms. Floaters follow `pops`.
 
