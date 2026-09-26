@@ -1,6 +1,6 @@
 # Final Call
 
-Final Call is an airport management game in one HTML page, made of a canvas plus HTML panels. The source is `src/game.js` and `src/shell.html`. `tools/build.mjs` joins them into `dist/index.html`. GitHub Actions publishes that page to GitHub Pages on every push to `main`.
+Final Call is an airport management game in one HTML page, made of a canvas plus HTML panels. The source is `src/game/*.js` (the game, in numbered files) and `src/shell.html` (CSS and HTML). `tools/build.mjs` joins them into `dist/index.html`. GitHub Actions publishes that page to GitHub Pages on every push to `main`.
 
 ## Commits, PRs and attribution (always)
 
@@ -20,8 +20,9 @@ Final Call is an airport management game in one HTML page, made of a canvas plus
 
 ## Build and test
 
-- `npm run build`: builds `dist/index.html` and `build/test.html`, which has `window.__sim` exposed. It needs no dependencies, and it fails on a lost marker, a `</script>` inside game.js, or duplicate top-level function names.
-- `npm install` once, then `npm run check`. It takes about 1–2 minutes with Playwright and Chromium, and covers:
+- `npm run build`: builds `dist/index.html` and `build/test.html`, which has `window.__sim` exposed. It needs no dependencies. It fails, naming the file and line, on a syntax error, a top-level name declared twice, a `</script>` inside the game, duplicate top-level function names or a lost marker.
+- `node tools/where.mjs <line>` turns a line number from an error in `dist/index.html` or `build/test.html` into `src/game/<file>:<line>`.
+- `npm install` once (web sessions do it at start-up through `.claude/hooks/session-start.sh`), then `npm run check`. It takes about 1–2 minutes with Playwright and Chromium, and covers:
   - headless sim;
   - every save in `tools/saves` loading and playing;
   - layout from 320 to 2560 px, portrait and landscape;
@@ -30,7 +31,7 @@ Final Call is an airport management game in one HTML page, made of a canvas plus
   - the guided start.
   
   Run `npm run check -- layout` to run one group.
-- If Chromium is missing, run `npx playwright install chromium`, or set `CHROMIUM_PATH` to an existing Chromium binary.
+- Playwright is pinned to 1.56.1, whose Chromium (build 1194) the web image already has. If Chromium is missing, run `npx playwright install chromium`, or set `CHROMIUM_PATH` to an existing Chromium binary. Change the pin only together with the lock file.
 - For economy or progression changes, run `npm run bot -- 1150`. It takes 3–4 minutes, so run it in the background: `nohup npm run bot -- 1150 > build/bot.log 2>&1 &`. The last lines are `LVLAT {level: game hour}` and `ERR [...]`.
 - For UI changes, look at the result. Write a small Playwright script in `build/` (git-ignored) that opens `build/test.html` at phone (390×844, `hasTouch`, `isMobile`), tablet (768×1024) and desktop (1440×900) sizes, then screenshots it and reads the images.
 - Seed a save through `localStorage['final-call-save-v2']` in an init script. `tools/saves/*.json` and `build/saves/L<n>.json` (written by the bot) are ready-made airports at each level.
@@ -49,38 +50,20 @@ With these baselines there are no errors. If the bot ignores Lowmere, its share 
 
 ## How the code is organised
 
-`src/game.js` is one IIFE. Search for the section banners `/* ================= … ================= */`, in this order:
-- constants
-- Masterplan
-- state
-- geometry
-- flights
-- sound
-- passengers
-- stands
-- construction/levels/days
-- events & toasts
-- main update
-- drawing
-- camera
-- board
-- panel
-- advisor
-- help/keys/speed
-- Masterplan UI
-- bottom sheet (phones)
-- full screen
-- layout
-- save
-- boot
-- REGION
-- ROUTES
-- managers and recommendations
-- LOWMERE
-- AIRLINE OPERATIONS
-- RECORDS, STAMPS AND WEEKLY CHALLENGES
-- GUIDED FIRST HOUR
-- SAVES ACROSS DEVICES
+The game is one strict IIFE, split into files in `src/game/`. The build joins them in file-name order, so they share one scope: any file can use what another declares at the top level, and order only matters for code that runs at load time (`99-start.js` runs last and starts the game). Keep a new system in its own file, numbered before `99-start.js`.
+
+| Files | What's in them |
+| --- | --- |
+| `01-constants` to `04-geometry` | Constants and level data, the Masterplan (`TECH`), state (`G`, `R`, `DEFAULT`), airport geometry |
+| `05-flights` to `11-main-update` | Flights, sound, passengers, stands, construction/levels/days, events and toasts, `update()` |
+| `12-drawing` to `14-board` | Drawing the airport, the camera, the departures board |
+| `15-panel` to `21-layout` | Side panel, advisor, help/keys/speed, Masterplan UI, phone bottom sheet, full screen, layout |
+| `22-save`, `23-boot` | Saving and migrating (`resetAll`), boot and the frame loop |
+| `24-region-places` to `30-region-ui` | The region: places and stations, helpers, the journey network, events and line building, weather, map drawing, the Region tab |
+| `31-routes` to `37-cloud-saves` | Routes and the world map, managers and recommendations, Lowmere, airline operations, records/stamps/challenges, guided start, saves across devices |
+| `99-start` | The `/*SIM_HOOK*/` marker and the call that starts the game |
+
+Some functions sit where they were first written rather than where their name suggests (`pickRoute` is in `03-state.js`), so search `src/game/` by name.
 
 `src/shell.html` holds the CSS, the HTML skeleton and a `/*GAME*/` placeholder inside the only `<script>`.
 
