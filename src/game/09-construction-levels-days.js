@@ -56,7 +56,7 @@ function dayTick(){
   }
   if(s&&s.flights>=3)G.otp=G.otp==null?s.ontime/s.flights:G.otp*0.6+0.4*s.ontime/s.flights;
   recordsDay(s);
-  G.day=d;G.dstat={pax:0,arr:0,flights:0,ontime:0,rev:0,cost:0,rep0:G.rep};regionDay();rivalDay();chalDay();
+  G.day=d;G.dstat={pax:0,arr:0,flights:0,ontime:0,rev:0,cost:0,rep0:G.rep};regionDay();rivalDay();chalDay();for(const f of TERM_DAY)f();
   const sea=seasonOf(d),prev=seasonOf(d-1);
   if(sea!==prev)toast(sea.name==='Winter'?'Winter: ski and winter-sun routes are busiest. Expect snow; de-icing pads keep turnarounds moving.':sea.name==='Summer'?'Summer holidays: beach cities and families fill flights. Ski routes go quiet.':`${sea.name} is here.`,null,null,'',9);
 }

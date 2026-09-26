@@ -98,10 +98,7 @@ function drawTerminal(D){
   tc=tint(seW);if(tc){ctx.fillStyle=tc;ctx.fillRect(8,SEC_LINE,552,80)}
   tc=tint(R.arrQ.length*D.passT/(D.officers+D.egates*1.6));if(tc){ctx.fillStyle=tc;ctx.fillRect(700,SEC_Y,540,SEC_LINE-SEC_Y)}
   ctx.fillStyle='#101316';ctx.fillRect(0,LAND_B+2,W,H-LAND_B-2);
-  // the hotel beside the arrivals hall, its lobby joined to it by a walkway
-  if(G.lv.hotel){const x0=1262,w=210;ctx.fillStyle='#232A31';ctx.fillRect(x0,600,w,90);ctx.fillStyle='#2F363E';ctx.fillRect(x0,600,w,6);
-    for(let r=0;r<4;r++)for(let c=0;c<12;c++){const lit=(r*12+c)%5<G.lv.hotel;ctx.fillStyle=lit?'rgba(255,214,150,.75)':'#1A1F24';ctx.fillRect(x0+10+c*16,614+r*17,8,8)}
-    sign(x0,586,'AIRPORT HOTEL')}
+  drawHotel();
   for(const i of SIDX){
     if(!standOpen(i))continue;
     ctx.fillStyle=G.stands[i].built?'#252C33':'#1F242A';
@@ -133,6 +130,7 @@ function drawTerminal(D){
     ctx.fillStyle='#D9A066';for(let k=0;k<bags;k++){const a=(k/20+performance.now()/9000)%1,t=a*2*Math.PI;ctx.fillRect(cx+Math.cos(t)*40-2,cy+Math.sin(t)*10-2,4,4)}
     mono(GATES[i],cx,cy+3,'#909AA4',9,'center');
   }
+  for(const f of TERM_DRAW)f(D);
 }
 function paxColor(p){
   if(p.state==='walkIn'||p.state==='queue'||p.state==='desk'||p.state==='secQ'||p.state==='ftQ'||p.state==='sec'||p.state==='new')return p.fast||p.biz?'#F5D08A':LAND_C;

@@ -131,14 +131,6 @@ function pickTransit(){
   for(const [id,s] of r.airSh){if(x<s){const L=G.lines[id];if(!L||lineFreq(L)<=0)return null;const k=effKind(L);if(k==='train'&&!G.lv.rail)return null;return k}x-=s}
   return null;
 }
-function exitTarget(p){ // out through customs and the arrivals hall to the station, a stop, or the forecourt
-  const tk=pickTransit();p.state='exitW';
-  if(tk==='train'&&G.lv.rail){p.tx=40+rnd()*260;p.ty=704+LAND_DY}
-  else if(tk==='tram'){p.tx=40+rnd()*260;p.ty=789+LAND_DY}
-  else if(tk==='bus'){p.tx=236+rnd()*40;p.ty=641+LAND_DY}
-  else{p.tx=EXIT.x+(rnd()-0.5)*18;p.ty=EXIT.y}
-  route(p,hallId('out'));
-}
 function regionDay(){
   // towns grow towards what their housing, jobs and transport can support; busy stations sprout new buildings
   if(!G.pop)G.pop={};if(!G.tod)G.tod={};const r=R.reg,J=r?r.jobs:0,bs=R.boardSum||{},bn=R.boardN||0;

@@ -129,15 +129,10 @@ function connect(p){
   F2.xferWait--;q.xferred=true;R.pax.push(q);airside(q,p.x,STAND_ROOM[p.stand]);q.x=p.x;q.y=p.y+4;
   G.xfers=(G.xfers||0)+1;finishArrival(p);return true;
 }
-function afterControl(p){ // through the passport desk into the reclaim hall
-  p.y=SEC_LINE+8;p.room=hallId('rec');
-  if(p.checked){p.state='toReclaim';const a=rnd()*Math.PI*2;p.tx=carX(p.stand)+Math.cos(a)*48;p.ty=carY(p.stand)+Math.sin(a)*15}
-  else exitTarget(p);
-}
 function finishArrival(p){
   const A=p.A;p.dead=true;A.cleared++;A.waitSum+=p.wait;countPax(true);
   {const v=(A.fare||A.ac.fare*G.fare)*0.6*(p.biz?3:1);if(A.partner)earn(v*partnerCut(),'handling');else earn(v,'inbound')}
-  if(G.lv.hotel&&rnd()<0.05*G.lv.hotel)earn(6*(1+0.3*A.ac.tier)*(devOn('hotels')?2:1),'landside',1367,700,'#9FC2E0');
+  hotelStay(A);
   if(A.cleared>=A.n&&!A.done){
     A.done=true;const avg=A.waitSum/A.n,mins=G.clock-(A.started??G.clock),pat=patience();
     if(avg<8+pat)repAdj(0.8,'arrivals');else if(avg>18+pat)repAdj(-Math.min(4,(avg-18-pat)*0.2),'arrivals');
@@ -146,27 +141,10 @@ function finishArrival(p){
     floater(`${A.code}${A.no} CLEARED · ${Math.round(mins)} MIN`,970,738,avg>18+pat?'#FF7A8A':'#9FC2E0',true);
   }
 }
+// each part of the terminal moves its own arriving passengers: ARR_STEP[state](p,dt,D) (42-terminal.js)
 function updateArrivals(dt,D){
-  for(const b of R.arrBelt){b.t-=dt;if(b.t<=0){b.A.reclaim++;b.done=true}}
-  if(R.arrBelt.some(b=>b.done))R.arrBelt=R.arrBelt.filter(b=>!b.done);
-  for(let i=0;i<8;i++){
-    const B=R.booths[i]||(R.booths[i]={p:null,t:0});
-    if(i<D.officers&&R.arrQ.length)take(B,()=>R.arrQ.shift(),'passport',D.passT);
-    if(B.p){const bp=boothPos(i);serve(B,bp.x,bp.y-8,dt,afterControl,bp.x,bp.y-18)}
-  }
-  for(let i=0;i<8;i++){
-    const E=R.egates[i]||(R.egates[i]={p:null,t:0});
-    if(i<D.egates)take(E,()=>{const n=Math.min(14,R.arrQ.length);for(let j=0;j<n;j++)if(R.arrQ[j].elig)return R.arrQ.splice(j,1)[0];return null},'passport',D.egateT);
-    if(E.p){const ep=egatePos(i);serve(E,ep.x,ep.y-8,dt,afterControl,ep.x,ep.y-18)}
-  }
-  R.arrQ.forEach((p,i)=>{p.wait+=dt;const s=arrSlot(i);moveTo(p,s.x,s.y,75*p.spd,dt)});
-  for(const p of R.pax){
-    if(!p.inbound)continue;
-    if(p.state==='toArr'){if(walk(p,D.cwalk*p.spd*walkMul(p),dt)){p.state='arrQ';R.arrQ.push(p)}}
-    else if(p.state==='toReclaim'){p.wait+=dt;if(moveTo(p,p.tx,p.ty,80*p.spd,dt))p.state='reclaim'}
-    else if(p.state==='reclaim'){p.wait+=dt;if(p.A.reclaim>0){p.A.reclaim--;exitTarget(p)}}
-    else if(p.state==='exitW'){if(walk(p,80*p.spd,dt))finishArrival(p)}
-  }
+  updateReclaimBelt(dt);updateImmigration(dt,D);
+  for(const p of R.pax){if(!p.inbound)continue;const f=ARR_STEP[p.state];if(f)f(p,dt,D)}
 }
 function arrive(p,D){
   const F=p.F;p.pos=p.row;

@@ -3,6 +3,16 @@
 // concourse, immigration hall (airside), reclaim, customs, arrivals hall and out. Security lanes and passport desks stand in
 // the wall between a landside hall and an airside one (SEC_LINE) and are the only way through it. The baggage hall between
 // the two sides is for bags only. Halls are rooms like the airside ones (41-airside.js): passengers walk through doorways.
+// Each part of the terminal lives in its own file (43-departures, 44-arrivals, 45-baggage, 46-market, 47-hotel) and plugs in here,
+// so the parts can grow without treading on each other:
+const PAX_STEP={},ARR_STEP={}; // state → (p,dt,D): moves a departing (PAX_STEP) or arriving (ARR_STEP) passenger each update
+const TERM_SUBS=[['dep','Departures'],['arr','Arrivals'],['staff','Staff']]; // the Terminal tab's sub-tabs
+const TERM_SECS={dep:['Check-in','Security'],arr:['Arrivals'],staff:['Concourse','Staff']}; // which upgrade sections each shows
+const TERM_PANEL={}; // sub-tab → [() => html]: cards shown under a Terminal sub-tab's upgrades, or 'sales:shops' and 'sales:landside'
+const TERM_CLICK=[],TERM_MINUTE=[],TERM_DAY=[],TERM_DRAW=[]; // (data, button) → true if handled; every game minute; every day; drawing, after the halls
+const TERM_SPAWN=[],TERM_EXIT=[]; // (p) → true if it has placed a new departing passenger (a hotel guest), or sent an arriving one somewhere (the hotel)
+const TERM_FIELDS={}; // saved field → () => its default, for new games and for older saves without it
+const SIMX={}; // functions the checks reach through window.__sim, added by each part
 const RECT=(x0,y0,x1,y1)=>[[x0,y0],[x1,y0],[x1,y1],[x0,y1]];
 const BAG_HALL=[560,SEC_Y,700,LAND_B]; // x0, y0, x1, y1
 const TERM_ROOMS=[

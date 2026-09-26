@@ -17,6 +17,7 @@ function migrate(o){
 const padTo=(a,f,n=NG)=>{a=Array.isArray(a)?a.slice(0,n):[];while(a.length<n)a.push(f(a.length));return a};
 function resetAll(state){
   const d=DEFAULT();G=Object.assign(d,state||{});
+  for(const k in TERM_FIELDS)if(G[k]==null)G[k]=TERM_FIELDS[k](); // the terminal parts' saved fields
   G.lv=Object.assign(DEFAULT().lv,(state&&state.lv)||{});for(const k in G.lv){if(!(k in UPG))delete G.lv[k];else G.lv[k]=clamp(+G.lv[k]||0,0,UPG[k].max)}
   G.revBy=Object.assign(DEFAULT().revBy,(state&&state.revBy)||{});
   G.stands=padTo(G.stands,i=>({built:false,ac:null,method:'random',rear:false,route:'mixed'}));G.stands.forEach(s=>{if(!s.route)s.route='mixed'});
