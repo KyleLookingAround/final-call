@@ -18,10 +18,11 @@ function finishBuild(b){
   else if(kind==='up')G.lv[arg]=Math.min(UPG[arg].max,G.lv[arg]+1);
   else if(kind==='line')finishLine(b);
   else if(kind==='dev')finishDev(b);
+  else if(kind==='layout'){layoutReady(arg);return}
   toast(`${b.label} is finished.`,null,null,'goal',7);fanfare();
 }
 function levelChecks(n){
-  const q=LEVELS[n].req,out=[['Passengers flown',G.flown,q.pax,true],['Rating',Math.round(G.rep),q.rep],['Gates open',builtCount(),q.gates]];
+  const q=LEVELS[n].req,out=[['Passengers flown',G.flown,q.pax,true],['Rating',Math.round(G.rep),q.rep],['Gates open',gatesOpen(),q.gates]];
   if(q.daily)out.splice(1,0,['Passengers in the last 24 hours',dailyPax(),q.daily,true]);
   return out;
 }

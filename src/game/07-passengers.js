@@ -46,12 +46,12 @@ function finishCheckin(p,x){
 }
 function airside(p,x){
   p.x=x;p.y=516;
-  const F=p.F,left=F.std-G.clock,built=[];G.shops.forEach((s,j)=>{if(s&&standOpen(j))built.push(j)});
+  const F=p.F,left=F.std-G.clock,built=[];G.shops.forEach((s,j)=>{if(s&&shopOpen(j))built.push(j)});
   if(p.leader){const L=p.leader;if((L.state==='toShop'||L.state==='shop')&&G.shops[L.shop]&&left>15){p.state='toShop';p.shop=L.shop;p.tx=clamp(L.tx+(rnd()-0.5)*16,shopX(L.shop),shopX(L.shop)+116);p.ty=499+(rnd()-0.5)*4;return}toGate(p);return}
   if(left>15&&built.length){
     for(let k=built.length-1;k>0;k--){const j=Math.floor(rnd()*(k+1));[built[k],built[j]]=[built[j],built[k]]}
     if(p.biz||p.prio){const L=built.find(j=>SHOPS[G.shops[j].type].vip);if(L!=null&&rnd()<0.9){p.state='toShop';p.shop=L;p.tx=shopX(L)+8+rnd()*100;p.ty=499;return}}
-    for(const j of built){const sh=SHOPS[G.shops[j].type];if(sh.vip)continue;if(rnd()<Math.min(0.95,sh.pull*PTYPE[p.type||'lei'].shop*(p.type==='grp'&&sh.id==='bar'?2.5:1)*(1+0.3*((p.psize||1)-1)))){p.state='toShop';p.shop=j;p.tx=shopX(j)+8+rnd()*100;p.ty=499;return}}
+    for(const j of built){const sh=SHOPS[G.shops[j].type];if(sh.vip)continue;if(rnd()<Math.min(0.95,sh.pull*SHOP_PULL[j]*PTYPE[p.type||'lei'].shop*(p.type==='grp'&&sh.id==='bar'?2.5:1)*(1+0.3*((p.psize||1)-1)))){p.state='toShop';p.shop=j;p.tx=shopX(j)+8+rnd()*100;p.ty=499;return}}
   }
   toGate(p);
 }
@@ -71,7 +71,7 @@ function take(sv,pick,state,t){
   if(sv.p&&sv.n)return;const q=pick();if(!q)return;q.state=state;if(typeof t==='function')t=t(q);
   if(!sv.p){sv.p=q;sv.t=t}else{sv.n=q;sv.tn=t}
 }
-const walkMul=p=>G.lv.mover&&Math.abs(p.tx-p.x)>300?2.5:1;
+const walkMul=p=>(Math.abs(p.tx-p.x)>300?Math.max(G.lv.mover?2.5:1,LAY.mover||1):1)*(LAY.walk||1)*(p.xferred&&LAY.xfer||1);
 function updateLandside(dt,D){
   for(let i=0;i<8;i++){
     const d=R.desks[i]||(R.desks[i]={p:null,t:0});
@@ -97,19 +97,18 @@ function updateLandside(dt,D){
   for(const b of R.belt){b.x+=beltV*dt;if(b.x>=478){b.F.bagsIn++;b.done=true}}
   if(R.belt.some(b=>b.done)) R.belt=R.belt.filter(b=>!b.done);
   for(const p of R.pax){
-    const sp=D.cwalk*p.spd;
     if(p.state==='walkIn'){if(moveTo(p,p.tx,p.ty,110*p.spd,dt))enterLandside(p)}
-    else if(p.state==='toShop'){if(!G.shops[p.shop])toGate(p);else if(moveTo(p,p.tx,p.ty,sp*walkMul(p),dt)){p.state='shop';p.t=SHOPS[G.shops[p.shop].type].dwell;p.t0=p.t}}
+    else if(p.state==='toShop'){if(!G.shops[p.shop])toGate(p);else if(moveTo(p,p.tx,p.ty,D.cwalk*p.spd*walkMul(p),dt)){p.state='shop';p.t=SHOPS[G.shops[p.shop].type].dwell;p.t0=p.t}}
     else if(p.state==='shop'){
       const F=p.F,hurry=F.plane.state==='boarding'&&G.clock>=F.std-12;
       p.t-=dt;
       if(p.t<=0||hurry){
         const s=G.shops[p.shop];
-        if(s){const frac=clamp(1-Math.max(0,p.t)/p.t0,0.3,1),v=SHOPS[s.type].spend*Math.pow(1.25,s.lvl)*(1+0.6*F.ac.tier)*frac*(G.lv.mall?1.4:1);s.earned=(s.earned||0)+v;earn(v,'shops',p.x,p.y-6,'#F5D08A',F)}
+        if(s){const frac=clamp(1-Math.max(0,p.t)/p.t0,0.3,1),v=SHOPS[s.type].spend*(LAY.shopBonus&&LAY.shopBonus[SHOPS[s.type].id]||1)*Math.pow(1.25,s.lvl)*(1+0.6*F.ac.tier)*frac*(G.lv.mall?1.4:1);s.earned=(s.earned||0)+v;earn(v,'shops',p.x,p.y-6,'#F5D08A',F)}
         toGate(p);
       }
     }
-    else if(p.state==='toGate'){if(moveTo(p,p.tx,p.ty,sp*walkMul(p),dt))p.state='gate'}
+    else if(p.state==='toGate'){if(moveTo(p,p.tx,p.ty,D.cwalk*p.spd*walkMul(p),dt))p.state='gate'}
   }
 }
 

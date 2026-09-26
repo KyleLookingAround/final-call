@@ -2,7 +2,8 @@
 let last=performance.now(),uiT=0;
 function frame(now){
   const rdt=Math.min(0.1,(now-last)/1000);last=now;
-  if(R.speed>0&&!R.sim){const t=rdt*R.speed,n=Math.ceil(t/0.034);for(let i=0;i<n;i++)update(t/n)}
+  // at 4x and 8x, take the 0.1-minute steps the balance bot has always used: a third of the work, so fast speeds stay smooth on phones
+  if(R.speed>0&&!R.sim){const t=rdt*R.speed,n=Math.ceil(t/(R.speed>=4?0.1:0.034));for(let i=0;i<n;i++)update(t/n)}
   camStep(rdt);draw();
   const hm=hhmm(G.clock);$('#clock').textContent=hm;$('#fsClock').textContent=hm;
   if(R.cashShown==null)R.cashShown=G.cash;R.cashShown+=(G.cash-R.cashShown)*Math.min(1,rdt*9);if(Math.abs(G.cash-R.cashShown)<0.005)R.cashShown=G.cash;
@@ -25,5 +26,6 @@ function start(data){
   else if(!s)startTour();
   setTimeout(()=>{cloudInit().catch(()=>{})},0);
   if(s&&!s.nv3&&!fresh)toast('New: Lowmere opens a rival airport once you are a City Airport. Your planes need crews (Gates › Fleet), and the Office has Records and weekly challenges.',null,'nv3','goal',16);G.nv3=1;
+  if(newsDue())setTimeout(()=>openNews(true,true),400);
   requestAnimationFrame(frame);
 }

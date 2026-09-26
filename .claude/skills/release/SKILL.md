@@ -8,7 +8,7 @@ description: Cut a Final Call release - version history entry, save fixtures for
 `main` publishes to GitHub Pages on every merge, so a release is about the record: what changed for players, and saves that keep old versions tested.
 
 1. **Branch** `feature/release-<version>` from the latest `main`. The version is the next number after the top row of `docs/HISTORY.md`.
-2. **History.** Add a row at the top of `docs/HISTORY.md`: a bold headline, then what players will notice, in concise UK English. Leave out code-only changes.
+2. **History.** Add a row at the top of `docs/HISTORY.md`: a bold headline, then what players will notice, in concise UK English. Leave out code-only changes. Add the same version to `UPDATES` in `src/game/38-updates.js`, as a short title and two to four points; players see it in What's new, and the `rules` check fails if the two disagree.
 3. **Save fixtures.** If anything added saved fields since the last version:
    - `npm run bot -- 1150 --seed 1` (3-4 minutes).
    - Copy `build/saves/L1.json`, `L3.json`, `L5.json` and `L9.json` to `tools/saves/v<version>-L<n>.json`.

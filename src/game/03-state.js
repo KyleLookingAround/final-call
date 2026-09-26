@@ -2,16 +2,16 @@
 const DEFAULT=()=>({cash:25,rep:60,flown:0,flights:0,ontime:0,streak:0,bestStreak:0,earned:0,paxSeated:0,level:0,pierB:false,builds:[],day:1,dstat:null,lastDay:null,
   lv:Object.fromEntries(Object.keys(UPG).map(k=>[k,0])),
   methods:{random:true},
-  stands:SIDX.map(i=>({built:i===0,ac:i===0?0:null,method:'random',rear:false,route:'mixed'})),
-  open:{desks:null,lanes:null,officers:null},auto:true,wageMul:1,loan:0,gstats:SIDX.map(()=>[]),
-  fleet:[{type:0,st:'base',readyAt:0,wear:0}],shops:SIDX.map(()=>null),
-  fare:1,name:'Northwind',livery:0,clock:360,flightNo:101,history:[],best:{},reports:SIDX.map(()=>null),
-  sound:true,tab:'stands',goal:0,lines:{},infra:{},tod:{},stn:{},lineSeq:0,goalV:2,dev:{},pop:{},evq:[],evDone:0,revBy:{transit:0,transitOps:0,region:0,wages:0,upkeep:0,interest:0,assets:0,fares:0,inbound:0,landside:0,cargo:0,bags:0,shops:0,fast:0,priority:0,bonus:0,costs:0},hours:[],arrReports:SIDX.map(()=>null),
+  layout:'classic',stands:[...Array(NG).keys()].map(i=>({built:i===0,ac:i===0?0:null,method:'random',rear:false,route:'mixed'})),
+  open:{desks:null,lanes:null,officers:null},auto:true,wageMul:1,loan:0,gstats:[...Array(NG)].map(()=>[]),
+  fleet:[{type:0,st:'base',readyAt:0,wear:0}],shops:Array(NU).fill(null),
+  fare:1,name:'Northwind',livery:0,clock:360,flightNo:101,history:[],best:{},reports:Array(NG).fill(null),
+  sound:true,tab:'stands',goal:0,lines:{},infra:{},tod:{},stn:{},lineSeq:0,goalV:2,dev:{},pop:{},evq:[],evDone:0,revBy:{transit:0,transitOps:0,region:0,wages:0,upkeep:0,interest:0,assets:0,fares:0,inbound:0,landside:0,cargo:0,bags:0,shops:0,fast:0,priority:0,bonus:0,costs:0},hours:[],arrReports:Array(NG).fill(null),
   savedAt:0,rate:0,lastDest:'',tech:{},pts:0,ptBought:0,pv:2,gdone:{},routes:{DUB:{f:1},EDI:{f:1},AMS:{f:1}},rs:{},crews:[{free:0,back:0,duty:0,res:0},{free:0,back:0,duty:0,res:0}],tour:{s:0},nv3:1,set:{tips:true,msgs:'all',pops:'all',goal:true,badges:true,recs:true,autoLines:true,autoFares:true,autoCrews:true,chal:true}});
 const SET=()=>G.set||{};
 let G=DEFAULT();
 const mkStandRT=()=>({F:null,out:null,bridge:[[],[]],aisle:[[],[],[],[]],dAisle:[[],[],[],[]],dBridge:[[],[]],scanT:[0,0],spots:new Array(80).fill(null),ext:0,geo:null,P:null});
-const R={rwy:{q:[],act:[null,null]},lot:new Array(540).fill(0),platform:[],train:{state:'away',t:3,x:null},lotFull:0,arrQ:[],booths:[],egates:[],arrBelt:[],bm:'dep',pax:[],ciQ:[],secQ:[],ftQ:[],desks:[],kiosks:[],lanes:[],ftL:{p:null,t:0},belt:[],st:SIDX.map(mkStandRT),
+const R={rwy:{q:[],act:[null,null]},lot:new Array(540).fill(0),platform:[],train:{state:'away',t:3,x:null},lotFull:0,arrQ:[],booths:[],egates:[],arrBelt:[],bm:'dep',pax:[],ciQ:[],secQ:[],ftQ:[],desks:[],kiosks:[],lanes:[],ftL:{p:null,t:0},belt:[],st:[...Array(NG).keys()].map(mkStandRT),
   floaters:[],toasts:[],fx:{fog:0,rush:0,sick:0,strike:0,hedge:0,fuelUp:0,fuelDown:0,snow:0},autoN:{},nextEvent:420,speed:1,cam:{x:0,y:0,z:1,tx:null,ty:null},
   sw:1,sh:1,baseK:1,dpr:1,sel:0,minEarn:0,lastMin:360,toastId:0,sim:false,view:'airport',regSub:'lines',tram:{state:'away',t:2,x:null},bus:{state:'away',t:1,x:null},tramQ:[],busQ:[],reg:null};
 
@@ -36,6 +36,7 @@ const upCost=k=>{const u=UPG[k],l=G.lv[k],b=u.lvl||0;return Math.round(u.base*Ma
 const capOf=k=>capAt(k,G.level);
 const upLocked=k=>!has('up:'+k);
 const builtCount=()=>G.stands.filter(s=>s.built).length;
+const gatesOpen=()=>G.stands.filter((s,i)=>s.built&&STAND_KIND[i]!=='remote').length; // what levels count: remote stands aren't gates
 const shopUpCost=s=>Math.round(SHOPS[s.type].cost*0.8*Math.pow(1.7,s.lvl));
 const livery=()=>LIVERIES[G.livery][1];
 const dayOf=c=>Math.floor(c/1440)+1;
@@ -93,7 +94,7 @@ const partnerCut=()=>researched('n_alliance')?0.4:PARTNER_CUT;
 const arrivalRate=F=>2*(1+0.15*G.lv.marketing)*Math.sqrt(F.seatsN/48)*(R.fx.rush>G.clock?1.3:1)*(G.lv.rail?1.1:1);
 const LEVEL_UPKEEP=[0,10,25,50,200,400,600,1400,1900,2400];
 function upkeepRate(){
-  let u=LEVEL_UPKEEP[G.level]||0;G.stands.forEach((s,i)=>{if(s.built)u+=i<4?4+i*4:120+(i-4)*60});
+  let u=(LEVEL_UPKEEP[G.level]||0)+(LAY.upk||0);G.stands.forEach((s,i)=>{if(!s.built)return;const o=STAND_ORDER.indexOf(i);u+=o<4?4+o*4:120+(o-4)*60});
   if(G.pierB)u+=250;if(G.lv.runway2)u+=500;if(G.lv.rail)u+=120;u+=G.lv.hotel*60+G.lv.fire*80+G.lv.fuelfarm*40+G.lv.mover*400+G.lv.tower*300+G.lv.cargohub*500+G.lv.mall*800+G.lv.saf*400+G.lv.icon*1000;
   u+=G.dev?devSum('upk'):0;
   return u*(1-0.12*G.lv.solar)*(G.dev&&devOn('wind')?0.85:1);

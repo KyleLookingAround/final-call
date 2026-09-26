@@ -13,3 +13,4 @@ Short records of decisions that shape the code, so later changes know what they 
 | [ADR-2026-09-26-old-saves-always-load](ADR-2026-09-26-old-saves-always-load.md) | Every older save keeps loading, forever |
 | [ADR-2026-09-26-source-in-numbered-files](ADR-2026-09-26-source-in-numbered-files.md) | The source is numbered files joined into one script |
 | [ADR-2026-09-26-seeded-randomness](ADR-2026-09-26-seeded-randomness.md) | The simulation uses a seeded random generator |
+| [ADR-2026-09-26-layouts-as-data](ADR-2026-09-26-layouts-as-data.md) | Airport layouts are data over one stand model |

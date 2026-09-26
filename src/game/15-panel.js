@@ -44,7 +44,7 @@ function standLockedCard(i){
   let btn,why;
   if(bld){btn=`<button class="buy" disabled>Building</button>`;why=buildLine('stand:'+i)}
   else if(!lvlOk){btn=`<button class="buy" disabled>Level ${s.lvl+1}</button>`;why=`<div class="rd">Unlocks when you become ${aL(s.lvl)}.</div>`}
-  else if(!pierOk){btn=`<button class="buy" disabled>Needs pier</button>`;why=`<div class="rd">Build Pier B first.</div>`}
+  else if(!pierOk){btn=`<button class="buy" disabled>Needs pier</button>`;why=`<div class="rd">Build ${p2name()} first.</div>`}
   else if(!prevBuilt){btn=`<button class="buy" disabled>Locked</button>`;why=`<div class="rd">Open ${GATES[i-1]} first.</div>`}
   else{btn=`<button class="buy" data-standbuy="${i}" data-cost="${s.cost}">${money(s.cost)}</button>`;why=`<div class="rd">Its own jet bridge, lounge, shop unit and baggage carousel. Takes ${Math.round(buildMins(s.build))} min to build.</div>`}
   return `<div class="stand locked" id="stand-${i}"><div class="sh"><div><span class="gate">${GATES[i]}</span><span class="rt">${bld?'Under construction':'Stand for sale'}</span></div>${btn}</div>${why}</div>`;
@@ -57,13 +57,14 @@ function renderPanel(){
     h+=`<div class="segs">${[['gates','Gates'],['fleet','Fleet'],['methods','Boarding']].map(([id,n])=>`<button class="chip${sub===id?' on':''}" data-gsub="${id}">${n}</button>`).join('')}</div>`;
     if(sub==='gates'){
       if(G.builds.length)h+=`<div class="report">Building: ${G.builds.map(b=>`<b>${b.label}</b> ${Math.ceil(b.done-G.clock)}m`).join(' · ')} · crews ${buildSlots()-G.builds.length}/${buildSlots()} free</div>`;
-      G.stands.forEach((st,i)=>{
-        if(i===4&&G.level>=PIER.lvl){
+      const firstPier=STAND_ORDER.find(k=>STAND[k].pier);
+      STAND_ORDER.forEach(i=>{const st=G.stands[i];
+        if(i===firstPier&&G.level>=PIER.lvl){
           if(!G.pierB){const bld=isBuilding('pier:B'),ok=G.level>=PIER.lvl;
-            h+=`<div class="stand locked" id="pierB"><div class="sh"><div><span class="gate">B</span><span class="rt">Pier B</span></div>${bld?'<button class="buy" disabled>Building</button>':ok?`<button class="buy" data-pierbuy="1" data-cost="${PIER.cost}">${money(PIER.cost)}</button>`:`<button class="buy" disabled>Level ${PIER.lvl+1}</button>`}</div>${bld?buildLine('pier:B'):`<div class="rd">${ok?`Room for four more gates, including widebodies. ${Math.round(buildMins(PIER.build)/60*10)/10} h to build, ${money(250)}/h to run.`:`Unlocks at ${lvlName(PIER.lvl)}.`}</div>`}</div>`}
-          else h+=`<div class="sec">Pier B<span>widebody gates</span></div>`;
+            h+=`<div class="stand locked" id="pierB"><div class="sh"><div><span class="gate">B</span><span class="rt">${p2name()}</span></div>${bld?'<button class="buy" disabled>Building</button>':ok?`<button class="buy" data-pierbuy="1" data-cost="${PIER.cost}">${money(PIER.cost)}</button>`:`<button class="buy" disabled>Level ${PIER.lvl+1}</button>`}</div>${bld?buildLine('pier:B'):`<div class="rd">${ok?`Room for ${STAND.filter(s=>s.pier).length} more gates, including widebodies. ${Math.round(buildMins(PIER.build)/60*10)/10} h to build, ${money(250)}/h to run.`:`Unlocks at ${lvlName(PIER.lvl)}.`}</div>`}</div>`}
+          else h+=`<div class="sec">${p2name()}<span>widebody gates</span></div>`;
         }
-        if(!st.built){const nextI=G.stands.findIndex(x=>!x.built);if(i===nextI&&(G.level>=STAND[i].lvl||isBuilding('stand:'+i))&&(!STAND[i].pier||G.pierB))h+=standLockedCard(i);else if(i===nextI&&G.level<STAND[i].lvl)h+=`<p class="note soon">Next gate unlocks at ${lvlName(STAND[i].lvl)}.</p>`;return}
+        if(!st.built){if(standReady(i)&&(G.level>=STAND[i].lvl||isBuilding('stand:'+i))&&(!STAND[i].pier||G.pierB))h+=standLockedCard(i);else if(standReady(i)&&G.level<STAND[i].lvl)h+=`<p class="note soon">Next gate unlocks at ${lvlName(STAND[i].lvl)}.</p>`;return}
         const F=R.st[i].F,mChips=METHODS.filter(m=>G.methods[m.id]).map(m=>`<button class="chip${st.method===m.id?' on':''}" data-method="${i}:${m.id}">${m.name}</button>`).join('');
         const who=F?(F.partner?`<span class="pdot" style="background:${F.partner.col}"></span>${F.partner.name} · ${F.ac.short}`:`${F.ac.name} #${F.fleetIdx+1}`):'Waiting for an aircraft';
         const gs=G.gstats[i]||[];
@@ -103,8 +104,8 @@ function renderPanel(){
     h+=segs('sSub',[['prices','Prices'],['shops','Shops'],['landside','Landside']]);
     h+=`<p class="note">Passengers with 15+ minutes to spare may stop at a shop. Long-haul flyers spend more.</p>`;
     G.shops.forEach((s,j)=>{
-      if(!standOpen(j))return;
-      h+=`<div class="shopcard"><div class="sh"><div><span class="gate" style="background:var(--surface2);color:var(--muted)">${GATES[j]}</span><span class="rt">${s?SHOPS[s.type].name:'Empty unit'}</span></div>${s?`<span class="live">${money(s.earned||0)} earned</span>`:''}</div>`;
+      if(!shopOpen(j))return;
+      h+=`<div class="shopcard"><div class="sh"><div><span class="gate" style="background:var(--surface2);color:var(--muted)">${SHOP_NAME[j]}</span><span class="rt">${s?SHOPS[s.type].name:'Empty unit'}</span></div>${s?`<span class="live">${money(s.earned||0)} earned</span>`:''}</div>`;
       if(s){const t=SHOPS[s.type],max=s.lvl>=4,c=shopUpCost(s);
         h+=`<div class="row" style="border:0;padding:0">${svg(t.ic)}<div><div class="rt">Level ${s.lvl+1}${pips(s.lvl+1,5)}</div><div class="rd"><b>${money(t.spend*Math.pow(1.25,s.lvl))}</b> a visit (short-haul). ${Math.round(t.pull*100)}% of passers-by stop.</div></div><button class="buy${max?' chipd':''}" ${max?'disabled':`data-shopup="${j}" data-cost="${c}"`}>${max?'MAX':money(c)}</button></div><div class="sh"><span class="rd" style="margin:0">Close it to build something else here. You get back ${money(shopValue(s))}.</span><button class="buy sell" data-shopsell="${j}">Close</button></div>`;
       } else {
@@ -113,8 +114,9 @@ function renderPanel(){
       h+=`</div>`;
     });
   } else if(G.tab==='ground'){
-    const showProj=Object.keys(UPG).some(k=>UPG[k].sec==='Landmark projects'&&has('up:'+k)),asub=showProj?(R.aSub||'ops'):'ops';if(showProj)h+=segs('aSub',[['ops','Operations'],['build','Projects']]);
-    h+=asub==='ops'?`<p class="note">Planes wait for every bag and passenger. Buildings cost <b>${money(upkeepRate())}</b>/h to run.</p>`+upSection('ground',['Gates','Apron','Runway','Engineering']):upSection('ground',['Landmark projects']);
+    const showProj=Object.keys(UPG).some(k=>UPG[k].sec==='Landmark projects'&&has('up:'+k)),showLay=G.layout!=='classic'||Object.keys(LAYOUTS).some(id=>id!=='classic'&&has('lay:'+id));
+    const at=[['ops','Operations'],...(showProj?[['build','Projects']]:[]),...(showLay?[['layout','Layout']]:[])],asub=at.some(t=>t[0]===R.aSub)?R.aSub:'ops';if(at.length>1)h+=segs('aSub',at);
+    h+=asub==='layout'?layoutPanel():asub==='ops'?`<p class="note">Planes wait for every bag and passenger. Buildings cost <b>${money(upkeepRate())}</b>/h to run.</p>`+upSection('ground',['Gates','Apron','Runway','Engineering']):upSection('ground',['Landmark projects']);
   } else if(G.tab==='sales'&&R.sSub==='landside'){
     h+=segs('sSub',[['prices','Prices'],['shops','Shops'],['landside','Landside']])+upSection('sales',['Landside']);
   } else if(G.tab==='sales'){
@@ -215,7 +217,7 @@ function settingsHTML(){
   const S=SET(),row=(k,n,d,opts)=>`<div class="polrow"><div class="rt">${n}</div><div class="rd">${d}</div><div class="chips">${opts.map(([v,l])=>`<button class="chip${S[k]===v?' on':''}" data-set='${k}:${JSON.stringify(v)}'>${l}</button>`).join('')}</div></div>`;
   let h=`<div class="sec">Notifications</div>`+SETTINGS.map(([k,n,d,o])=>row(k,n,d,o)).join('');
   h+=`<div class="chips" style="margin-top:10px"><button class="chip" data-setall="quiet">Quiet: hide all of these</button><button class="chip" data-setall="all">Show everything</button></div>`;
-  h+=`<div class="sec">Game</div>`+row('chal','Weekly challenges','Three challenges each game week. Each pays cash; finish all three for a plan point.',[[true,'On'],[false,'Off']]);
+  h+=`<div class="sec">Game</div><div class="polrow"><div class="rt">What's new</div><div class="rd">Every version's new features, newest first.</div><div class="chips"><button class="chip" data-news="1">Open</button></div></div>`+row('chal','Weekly challenges','Three challenges each game week. Each pays cash; finish all three for a plan point.',[[true,'On'],[false,'Off']]);
   h+=`<div class="sec">Managers</div><p class="note">Staff who run the details for you. Change something yourself and they leave it to you.</p>`;
   h+=row('autoLines','Transport manager','Sets how often each line runs from how full it is, and adds night services.',[[true,'On'],[false,'Off']]);
   h+=row('autoCrews','Fleet manager','Hires crews to match your fleet, and lets spare ones go.',[[true,'On'],[false,'Off']]);
@@ -235,7 +237,8 @@ function loanPreview(){
 }
 $('#panel').addEventListener('input',e=>{if(e.target.id==='loanRange')loanPreview()});
 function upBuyable(k){const u=UPG[k];return G.lv[k]<capOf(k)&&!upLocked(k)&&(!u.req||u.req())&&!isBuilding('up:'+k)}
-function standBuyable(i){const s=STAND[i];return !G.stands[i].built&&(i===0||G.stands[i-1].built)&&G.level>=s.lvl&&(!s.pier||G.pierB)&&!isBuilding('stand:'+i)}
+const standReady=i=>{const p=STAND_AFTER[i];return p<0||G.stands[p].built}; // the stand it follows is built
+function standBuyable(i){const s=STAND[i];return i<STAND.length&&!G.stands[i].built&&standReady(i)&&G.level>=s.lvl&&(!s.pier||G.pierB)&&!isBuilding('stand:'+i)}
 function affordableIn(tab){
   let n=0;
   for(const k in UPG){if(UPG[k].tab===tab&&upBuyable(k)&&G.cash>=upCost(k))n++}
@@ -243,7 +246,7 @@ function affordableIn(tab){
   if(tab==='region')n+=regionAffordable();
   if(tab==='office')n+=TECH.filter(T=>techState(T)==='ready').length;
   if(tab==='routes')n+=CITIES.filter(c=>!routeOpen(c[0])&&has('rt:'+c[2])&&G.cash>=ROUTE_FEE[c[2]]).length?1:0;
-  if(tab==='sales')G.shops.forEach((s,j)=>{if(!standOpen(j))return;if(!s&&G.cash>=SHOPS[0].cost)n++;else if(s&&s.lvl<4&&G.cash>=shopUpCost(s))n++});
+  if(tab==='sales')G.shops.forEach((s,j)=>{if(!shopOpen(j))return;if(!s&&G.cash>=SHOPS[0].cost)n++;else if(s&&s.lvl<4&&G.cash>=shopUpCost(s))n++});
   return n;
 }
 function stars(r){const n=clamp(Math.round(r/20),0,5);return `<span class="stars">${'★'.repeat(n)}<span class="off">${'★'.repeat(5-n)}</span></span> <small style="font-size:11px;color:var(--muted)">${Math.round(r)}</small>`}
@@ -296,16 +299,18 @@ function buyUpgrade(k){
   return true;
 }
 function buyStand(i){if(!standBuyable(i)||!canBuild()||!buy(STAND[i].cost))return false;startBuild('stand:'+i,'Gate '+GATES[i],STAND[i].build);return true}
-function buyPier(){if(G.pierB||isBuilding('pier:B')||G.level<PIER.lvl||!canBuild()||!buy(PIER.cost))return false;startBuild('pier:B','Pier B',PIER.build);return true}
+function buyPier(){if(G.pierB||isBuilding('pier:B')||G.level<PIER.lvl||!canBuild()||!buy(PIER.cost))return false;startBuild('pier:B',p2name(),PIER.build);return true}
 function buyAircraft(t){const a=AIRCRAFT[t];if(!has('ac:'+t)||(a.fire&&G.lv.fire<a.fire)||!buy(a.cost))return -1;G.fleet.push({type:t,st:'base',readyAt:G.clock,wear:0});return G.fleet.length-1;}
 function highlight(sel,cls){const el=$('#panel '+sel);if(!el)return;const row=el.closest('.row,.stand,.shopcard,.opt,.lvlcard,.acrow,.lcard')||el;row.classList.remove(cls);void row.offsetWidth;row.classList.add(cls);if(cls==='pulse')row.scrollIntoView({block:'center',behavior:REDUCED?'auto':'smooth'});setTimeout(()=>row.classList.remove(cls),2300)}
 $('#panel').addEventListener('pointerdown',()=>{R.panelPtr=performance.now()},{passive:true});
 $('#panel').addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b||b.disabled&&!b.dataset.look)return;const d=b.dataset;
   if(recsClick(d)){refreshUI();return}
+  if(layoutClick(d,b)){refreshUI();return}
   if(regionClick(d,b)){refreshUI();return}
   if(routesClick(d)){refreshUI();return}
   if(d.plan){openPlan();return}
+  if(d.news){openNews(true,false);return}
   if(d.set){const i=d.set.indexOf(':'),k=d.set.slice(0,i);G.set[k]=JSON.parse(d.set.slice(i+1));applySettings();renderPanel();return}
   if(d.gap){try{localStorage.setItem(GAPKEY,d.gap)}catch(e){}applyGap();renderPanel();return}
   if(d.setall){const q=d.setall==='quiet';Object.assign(G.set,q?{tips:false,msgs:'off',pops:'off',goal:false,badges:false,recs:false}:{tips:true,msgs:'all',pops:'all',goal:true,badges:true,recs:true});applySettings();renderPanel();return}
@@ -369,7 +374,7 @@ $('#panel').addEventListener('click',e=>{
   renderPanel();save();
   if(fsel&&(d.buy||d.route||d.staff||d.service||d.shopup||d.rear||d.mbuy||d.acbuy))highlight(fsel,'flash');
 });
-function subFor(tab,sel){sel=sel||'';if(tab==='terminal'){const k=(sel.match(/data-buy="(\w+)"/)||[])[1];const u=k&&UPG[k];R.tSub=u?(u.sec==='Arrivals'?'arr':u.sec==='Concourse'||u.sec==='Staff'?'staff':'dep'):/staff/.test(sel)?'staff':R.tSub}if(tab==='ground'){const k=(sel.match(/data-buy="(\w+)"/)||[])[1];R.aSub=k&&UPG[k]&&UPG[k].sec==='Landmark projects'?'build':'ops'}if(tab==='office')R.oSub=/loan/.test(sel)?'money':'progress';if(tab==='sales')R.sSub=/shop/.test(sel)?'shops':/carpark|hotel/.test(sel)?'landside':'prices';if(tab==='region')R.regSub=sel.includes('dbuild')?'sites':'lines';if(tab==='stands')R.gSub=/acbuy|servicet|sellt|crewhire/.test(sel)?'fleet':/mbuy/.test(sel)?'methods':'gates';if(tab==='routes')R.rSub=/ropen/.test(sel)?'new':'mine'}
+function subFor(tab,sel){sel=sel||'';if(tab==='terminal'){const k=(sel.match(/data-buy="(\w+)"/)||[])[1];const u=k&&UPG[k];R.tSub=u?(u.sec==='Arrivals'?'arr':u.sec==='Concourse'||u.sec==='Staff'?'staff':'dep'):/staff/.test(sel)?'staff':R.tSub}if(tab==='ground'){const k=(sel.match(/data-buy="(\w+)"/)||[])[1];R.aSub=/^#layout-/.test(sel)?'layout':k&&UPG[k]&&UPG[k].sec==='Landmark projects'?'build':'ops'}if(tab==='office')R.oSub=/loan/.test(sel)?'money':'progress';if(tab==='sales')R.sSub=/shop/.test(sel)?'shops':/carpark|hotel/.test(sel)?'landside':'prices';if(tab==='region')R.regSub=sel.includes('dbuild')?'sites':'lines';if(tab==='stands')R.gSub=/acbuy|servicet|sellt|crewhire/.test(sel)?'fleet':/mbuy/.test(sel)?'methods':'gates';if(tab==='routes')R.rSub=/ropen/.test(sel)?'new':'mine'}
 function goTo(tab,sel){subFor(tab,sel);setTab(tab);if(sel)requestAnimationFrame(()=>highlight(sel,'pulse'))}
 $('#goal').addEventListener('click',()=>{const g=curGoal();if(!g||!g.go)return;if(g.go[0]==='plan'){openPlan();return}goTo(g.go[0],g.go[1])});
 $('#goal').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('#goal').click()}});
