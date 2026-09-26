@@ -223,7 +223,7 @@ function settingsHTML(){
   h+=row('autoLines','Transport manager','Runs your lines by what each change is worth: how often they run, fares, meeting flights, night services and extra services on event days.',[[true,'On'],[false,'Off']]);
   h+=row('autoCrews','Fleet manager','Hires crews to match your fleet, and lets spare ones go.',[[true,'On'],[false,'Off']]);
   h+=row('autoFares','Route manager','Sets each route’s fare to whatever earns most: dearer where people will pay, cheaper where seats go empty.',[[true,'On'],[false,'Off']]);
-  h+=row('autoDuty','Duty manager','Calls each gate in time for its walk from the market place, so passengers shop for longer without holding flights.',[[true,'On'],[false,'Off']]);
+  h+=row('autoDuty','Duty manager','Calls each gate in time for its walk from the market place, so passengers shop for longer without holding flights, and prices hotel rooms.',[[true,'On'],[false,'Off']]);
   {const g=gapPref();h+=`<div class="sec">Screen</div><div class="polrow"><div class="rt">Space for the camera</div><div class="rd">Leaves a band at the top of the screen so a phone’s camera or notch doesn’t cover the board. Saved on this device only.</div><div class="chips">${[['off','None'],['small','Small'],['medium','Medium'],['large','Large']].map(([v,l])=>`<button class="chip${g===v?' on':''}" data-gap="${v}">${l}</button>`).join('')}</div></div>`}
   h+=`<div class="sec">Sound</div><div class="polrow"><div class="rd">Chimes, cash tills and the runway.</div><div class="chips"><button class="chip${G.sound?' on':''}" data-sound="1">On</button><button class="chip${G.sound?'':' on'}" data-sound="0">Off</button></div></div>`;
   return h;
