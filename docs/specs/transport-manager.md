@@ -1,6 +1,6 @@
 # A smarter transport manager
 
-Issue: #15 · Status: Approved
+Issue: #15 · Status: Built
 
 ## What the player gets
 
@@ -49,7 +49,7 @@ Players who'd rather not tune everything get a network that pays its way. Player
     - the line takes the new kind's next number and colour (B1 becomes T4);
     - it keeps its fares, night service and meet-flights;
     - it starts at the fewest services that still carry as many seats as before;
-    - the manager then tunes it.
+    - the manager then tunes it, unless you've taken the line over.
 - **Extensions** use today's route editing:
   - on roads they are free and instant;
   - on track they cost the new track plus 10% for vehicles.
@@ -82,6 +82,24 @@ Players who'd rather not tune everything get a network that pays its way. Player
   - Measured on saves: R2 at level 9 is worth +$500/h at two trains an hour instead of one.
   - Expect slightly quicker pacing. The target is to stay inside the baselines on seeds 1–3, both keeping Classic and rebuilding.
 - **Bot option `{"recs":true}`:** the bot takes the manager's top suggestion when it has three times its price spare. It runs on seeds 1–3 to show that following the manager helps (reported only).
+
+## Results
+
+- **Keeping Classic, with the manager on:**
+  - level 9 at hours 1051, 1068 and 1055 on seeds 1–3 (1086, 1091 and 1088 before), about 3% sooner;
+  - level 5 at 301, 322 and 310 (322, 325 and 345 before).
+
+  Both are just before their baseline ranges and within the 15% tolerance. Most of the gain is dearer fares, which the manager picks on almost every line.
+- **Rebuilding:** level 9 at 953, 966 and 957, about 9% sooner than keeping Classic.
+- **Following the manager's suggestions** (bot option `recs`):
+  - level 5 about 5% sooner on all three seeds;
+  - level 9 at 1033, 1043 and 1060: sooner on seeds 1 and 2, and 0.5% later on seed 3.
+
+  It ends with fewer, busier lines: it closes the buses that trams and trains have replaced, and extends coaches through the airport.
+- **Speed:**
+  - Outside reviews, the game runs as before.
+  - During the hour of a review, a level 9 airport simulates at about 0.2× calibration against 0.12–0.15× (the budget is 0.25×). Each option is measured once against a pinned moment, and fares are looked at on every other review.
+  - A level 9 network's suggestions take about 0.35 s in all on a desktop, in slices between frames.
 
 ## Checks
 

@@ -44,6 +44,7 @@ Playbooks for each part are in `.claude/skills/`: `feature` (issue to merged PR)
   - the full-screen drawer;
   - the guided start;
   - `rules`: the same seed plays the same game, cheaper fares fill more seats and keep more travellers from Lowmere, costs rise with level, planes lose value with wear, levels ask for more each time, plan and goal ids are sound, and loading a save twice changes nothing;
+  - `transport`: the transport manager's suggestions are buildable, pay back within a week and come one per line; Not now hides one; extensions and upgrades work (the old line runs until the new one opens, which takes a reserved number); the manager leaves lines you've taken over alone, reviews the rest, adds services to an overfull line within the hour and runs event extras only while crowds travel;
   - `shots`: phone, tablet and desktop screenshots of the airport, world and region in `build/shots/`. CI keeps them as the "screenshots" artifact on every PR;
   - `share`: the link-preview tags are filled in, and the preview image (1200×630, under 300 KB) and home-screen icon are published;
   - `layouts`: every layout plays two hours fully built without errors, the Layout tab fits a 320 px phone, and each layout's screenshot goes in `build/shots/`;
@@ -52,7 +53,7 @@ Playbooks for each part are in `.claude/skills/`: `feature` (issue to merged PR)
 
   Run `npm run check -- rules` to run one group. Every page in the checks is seeded, so a failure repeats when you run it again. When you change a rule on purpose, update its check in the same PR; add a check when you add a rule.
 - Playwright is pinned to 1.56.1, whose Chromium (build 1194) the web image already has. If Chromium is missing, run `npx playwright install chromium`, or set `CHROMIUM_PATH` to an existing Chromium binary. Change the pin only together with the lock file.
-- For economy or progression changes, run the bot on seeds 1, 2 and 3: `npm run bot -- 1150 --seed 2` (the default seed is 1). Each run takes 3–4 minutes, so run them in the background, side by side: `nohup npm run bot -- 1150 --seed 2 > build/bot-2.log 2>&1 &`. The last lines are `SEED`, `LVLAT {level: game hour}`, `STATE` (a fingerprint of the whole game state at the end), `ERR [...]` and a table against `tools/baseline.json`. The same seed and code always give the same run, so run the same seeds before and after a change to see its effect. A change meant to leave the game as it is, such as a speed-up or a refactor, must leave `STATE` identical on seeds 1–3; compare against a build of `main` (`git worktree add`). The bot keeps the Classic layout unless you pass `'{"layouts":true}'`, which makes it approve layout plans and rebuild (Remote apron, then Satellite, then Starfish). The "Balance" workflow runs seeds 1–3 both ways on PRs that touch `src/game/` or the bot, and puts the tables in the run's summary.
+- For economy or progression changes, run the bot on seeds 1, 2 and 3: `npm run bot -- 1150 --seed 2` (the default seed is 1). Each run takes 3–4 minutes, so run them in the background, side by side: `nohup npm run bot -- 1150 --seed 2 > build/bot-2.log 2>&1 &`. The last lines are `SEED`, `LVLAT {level: game hour}`, `STATE` (a fingerprint of the whole game state at the end), `ERR [...]` and a table against `tools/baseline.json`. The same seed and code always give the same run, so run the same seeds before and after a change to see its effect. A change meant to leave the game as it is, such as a speed-up or a refactor, must leave `STATE` identical on seeds 1–3; compare against a build of `main` (`git worktree add`). The bot keeps the Classic layout unless you pass `'{"layouts":true}'`, which makes it approve layout plans and rebuild (Remote apron, then Satellite, then Starfish). `'{"recs":true}'` makes it also take the transport manager's best suggestion every six hours when it can afford it three times over, to show the suggestions pay (reported only). The "Balance" workflow runs seeds 1–3 both ways on PRs that touch `src/game/` or the bot, and puts the tables in the run's summary.
 - For UI changes, look at the result. `npm run check -- shots` covers the three main views; for anything else, write a small Playwright script in `build/` (git-ignored) that opens `build/test.html` at phone (390×844, `hasTouch`, `isMobile`), tablet (768×1024) and desktop (1440×900) sizes, then screenshots it and reads the images.
 - Seed a save through `localStorage['final-call-save-v2']` in an init script, and the random seed through `window.__seed`. `tools/saves/*.json` and `build/saves/L<n>.json` (written by the bot) are ready-made airports at each level.
 - `tools/saves/` keeps saves from every version that changed what gets saved (`v<version>-L<level>.json`). When a release adds saved fields, add saves made with it from `build/saves/`, so old saves keep being tested for good.
@@ -69,7 +70,7 @@ Playbooks for each part are in `.claude/skills/`: `feature` (issue to merged PR)
 | 7 Global Hub | 630–770 |
 | 9 Airport of the Year | 1,080–1,115 |
 
-With these baselines there are no errors. They are for an airport that keeps Classic; rebuilding well should reach level 9 about 10% sooner (990–1,005 on seeds 1–3). If the bot ignores Lowmere, its share settles at about 50–60%. Keep pacing within about 15% of these numbers unless the owner asks for a change.
+With these baselines there are no errors. They are for an airport that keeps Classic; rebuilding well should reach level 9 about 10% sooner (953–966 on seeds 1–3). Since version 27's transport manager, keeping Classic reaches level 9 at 1,051–1,068 and level 5 at 301–322, a little before those ranges and within the tolerance. If the bot ignores Lowmere, its share settles at about 50–60%. Keep pacing within about 15% of these numbers unless the owner asks for a change.
 
 ## How the code is organised
 
@@ -105,8 +106,8 @@ Some functions sit where they were first written rather than where their name su
 ### Time
 
 `update(dt)` advances game minutes. The frame loop takes steps of up to 0.034 minutes, or 0.1 minutes at 4× and 8× (the bot's step size, a third of the work). These hooks run from it:
-- Every game minute: `updateBuilds`, `dayTick`, `checkLevel`, `fleetTick`.
-- `managersTick` runs every 6 hours, `crewTick` every 30 minutes and `recordsHour` every hour. `nightChecks` runs at 03:00.
+- Every game minute: `updateBuilds`, `dayTick`, `checkLevel`, `fleetTick` and `mgrStep`.
+- `managersTick` runs every 6 hours, `crewTick` every 30 minutes, and `recordsHour` and `mgrHour` every hour. `nightChecks` runs at 03:00.
 - `dayTick` runs `recordsDay`, `regionDay`, `rivalDay` and `chalDay`.
 
 ### Headless sim
@@ -152,6 +153,21 @@ Some functions sit where they were first written rather than where their name su
   - The dispatcher `pickRoute` sends each plane where it earns most per hour.
   - Fares are −20%, standard or +25% per route.
 - **Region.** Bus, tram, rail, metro and high-speed lines, development sites, events, and weather.
+- **Transport manager** (`32-managers.js`, on with `autoLines`, for lines without `L.man`).
+  - **What a change is worth:** `evalRegion` runs the region model with a change and without it, at 09:00 and 17:30. `recValue` adds transport profit, the airport's extra demand (valued by `airWorth`, the median recent hour) and cheaper wages.
+  - **Reviews:** `managersTick` queues a review of each line every 6 hours. `mgrStep` then makes one measurement a game minute:
+    - first the line as it runs, pinned to that moment (`evalFix`: the same weather and flyers for every option);
+    - then a step more or fewer services, and on every other review a cheaper or dearer fare and meeting flights;
+    - it makes the best change if it's worth at least $5/h and 3% of the line's running cost.
+  - **Overfull lines:** `mgrHour` adds services to a line over 105% full, within the shared-track limit (`trackRoom`).
+  - **Event extras:** `evExtra` has `lineFreq` run lines to a venue two steps more often while event crowds travel.
+  - **Log:** its last three changes go in `R.mgrLog`.
+  - **Suggestions** (with Settings › Recommendations):
+    - `recCands` lists new lines, upgrades (`UPGRADE`, `upgradeStops`), one-station extensions, closures, and station and network upgrades;
+    - `recJob` measures them a slice at a time between frames, all pinned to the moment it started (`computeTransitRecs` does all at once for the bot and checks);
+    - they show quickest payback first, at most one per line and within a week (`REC_PAY`);
+    - `applyRec` carries one out, and Not now hides one for a day (`R.recHide`).
+  - **Upgrades** are line builds with `up` (and `from`, the old code): the old line runs until the build finishes, then takes the new kind, number (reserved by `nextNum`) and colour.
 - **Lowmere.**
   - Lowmere opens 3 days after you reach City Airport. Your share of a shared route comes from `rivShare`: flights a day, fare, rating, on-time rate, plus promotions, slot agreements and high-speed rail.
   - It grows daily, runs 3-day fare sales and withdraws from routes you dominate.

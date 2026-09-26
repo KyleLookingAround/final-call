@@ -15,3 +15,4 @@ Short records of decisions that shape the code, so later changes know what they 
 | [ADR-2026-09-26-seeded-randomness](ADR-2026-09-26-seeded-randomness.md) | The simulation uses a seeded random generator |
 | [ADR-2026-09-26-layouts-as-data](ADR-2026-09-26-layouts-as-data.md) | Airport layouts are data over one stand model (superseded in part) |
 | [ADR-2026-09-26-stand-frames-and-rooms](ADR-2026-09-26-stand-frames-and-rooms.md) | Stands have their own frames, and airside is rooms joined by doorways |
+| [ADR-2026-09-26-managers-decide-by-value](ADR-2026-09-26-managers-decide-by-value.md) | Managers decide by measured value, a little at a time |
