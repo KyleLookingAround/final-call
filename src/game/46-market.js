@@ -35,9 +35,14 @@ function boardEta(F,D){
   return Infinity;
 }
 // the board: 'GATE 10:15' until the call, then the gate and GO TO GATE
+// when the gate should be called, as far as anyone can tell yet
+function callAt(F){
+  const D=R.callD&&R.callD.at===R.step?R.callD.D:(R.callD={at:R.step,D:derived()}).D,lead=callLead(F.arr.stand,D);
+  return F.boardStart!=null?F.boardStart-lead:G.clock+boardEta(F,D)-lead;
+}
 function gateCallText(F){
   if(isCalled(F))return 'GO TO GATE';
-  const D=R.callD&&R.callD.at===R.step?R.callD.D:(R.callD={at:R.step,D:derived()}).D,i=F.arr.stand,lead=callLead(i,D),at=F.boardStart!=null?F.boardStart-lead:G.clock+boardEta(F,D)-lead;
+  const at=callAt(F);
   return at<Infinity?'GATE '+hhmm(Math.ceil(Math.max(G.clock,at)/5)*5):'CHECK-IN';
 }
 // every game minute: call the gates that are due, and let crowded lounges cost a little rating
@@ -69,6 +74,7 @@ function mktPlan(){
   M.df=[L,y0+6,Rt,y1-2]; // the walk-through duty free, from the lanes' exits up to the market place
   return R.mplan=M;
 }
+const AGAIN_MIN=2,AGAIN_SPAN=25,AGAIN_MAX=0.6; // browsing again: none with 2 min left before the call, most with 27 min
 const ACT_OF=p=>p.kid?'play':p.type==='fam'?'playB':p.type==='grp'?'food':p.type==='work'?(p.rand<0.6?'charge':'window'):null;
 function pickAct(p){const a=ACT_OF(p);if(a)return a;const r=rnd();return r<0.4?'window':r<0.72?'food':r<0.9?'seats':'wc'}
 
@@ -110,11 +116,12 @@ function nextAct(p,first){
   if(L&&(L.state==='toMkt'||L.state==='mkt')&&!p.kid){goAct(p,L.act==='play'?'playB':L.act);return}
   goAct(p,pickAct(p));
 }
-// a shop, if one tempts them and has room: the first time out of security as before, and less often after that
+// a shop, if one tempts them and has room: the first time out of security as before. After that, the longer until their
+// gate is called the likelier they browse again, so later calls mean more shopping; with little time left they sit.
 function pickShop(p,first){
   const built=[];G.shops.forEach((s,j)=>{if(s&&shopOpen(j))built.push(j)});if(!built.length)return -1;
   for(let k=built.length-1;k>0;k--){const j=Math.floor(rnd()*(k+1));[built[k],built[j]]=[built[j],built[k]]}
-  const again=first||p.away?1:0.08/(1+p.nv),try_=j=>{const s=freeSpot('s'+j,shopCap(j));if(s<0){p.away=1;(R.away||(R.away=[]))[j]=(R.away[j]||0)+1;return -1}p.away=0;toShop(p,j,s);return j};
+  const again=first||p.away?1:clamp((callAt(p.F)-G.clock-AGAIN_MIN)/AGAIN_SPAN,0,1)*AGAIN_MAX/(1+p.nv),try_=j=>{const s=freeSpot('s'+j,shopCap(j));if(s<0){p.away=1;(R.away||(R.away=[]))[j]=(R.away[j]||0)+1;return -1}p.away=0;toShop(p,j,s);return j};
   if(p.biz||p.prio){const L=built.find(j=>SHOPS[G.shops[j].type].vip);if(L!=null&&rnd()<0.9&&try_(L)>=0)return L}
   for(const j of built){const sh=SHOPS[G.shops[j].type];if(sh.vip)continue;
     if(rnd()<again*Math.min(0.95,sh.pull*SHOP_PULL[j]*PTYPE[p.type||'lei'].shop*(p.type==='grp'&&sh.id==='bar'?2.5:1)*(1+0.3*((p.psize||1)-1)))&&try_(j)>=0)return j}
