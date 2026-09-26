@@ -22,19 +22,21 @@ A few of the world's oddest real airports join them. The layouts keep their unlo
   - Passengers walk the corridors, stand on moving walkways, wait at train stations and ride out to satellites.
   - Buses drive across the apron to remote stands.
   - The map is as tall as the layout needs, and the camera pans both ways.
+- **Nose-in parking:** planes park nose-in with a short bridge to the front door, as at real airports. Today they park tail-in, with a long bridge down the side.
 - **Unchanged:**
-  - Landside (car park, check-in, security) stays as it is along the bottom of the main building.
+  - Landside (car park, check-in, security) stays along the bottom of the main building.
   - Boarding inside the cabin still works seat by seat, just drawn rotated.
-  - Classic looks exactly as it does today.
 - **In the panel:** Airfield › Layout shows each layout's real outline in its small plan.
 - **On phones:** tall layouts fit portrait screens better than today's long strip. "All" zooms to fit, and gate buttons fly the camera to each stand.
 
 ## The layouts
 
+Concept plans of every layout are below. `airport-shapes/plans.mjs` redraws them and fails if any plane hits another plane or a building.
+
 | Layout (same id as now) | Modelled on | Shape | Stands | Upside | Downside |
 | --- | --- | --- | --- | --- | --- |
-| **Classic** | today's airport | unchanged | 8 | balanced | long walk to the far end of Pier B |
-| **Remote apron** | London Stansted and Luton | the terminal plus rows of remote stands on the open apron | 8 + 4 remote | the cheapest extra stands | bus rides, worse in bad weather |
+| **Classic, refreshed** | today's airport, made a little more real | the same straight terminal and A gates; Pier B becomes a pier out onto the apron; a control tower | 8 | balanced | a walk out along Pier B |
+| **Remote apron** | London Stansted and Luton | Classic plus a row of remote stands on the open apron, reached by a bus road | 8 + 4 remote | the cheapest extra stands | bus rides, worse in bad weather |
 | **Staggered apron** | your concept | a pier running out from the terminal with planes parked at an angle along both sides, like a herringbone | 10 | more stands on a short pier | planes block each other when they push back |
 | **Curved front** | Osaka Kansai's 1.7 km curved wing, and Berlin Tempelhof's arc | an arc, with planes fanned round the outside and the control tower at its centre | 8 | the shortest walks and a rating bonus | no extra stands |
 | **Hall and finger pier** | Amsterdam Schiphol | central lounges with shops, and piers fanning out at angles | 10 | the best shop spend | long walks to the pier ends |
@@ -62,6 +64,18 @@ Real airports with strange ideas that work as game mechanics. I recommend the fi
   - Kuala Lumpur has a patch of rainforest inside its satellite; Singapore Changi's Jewel has a 40 m indoor waterfall.
   - Either would lift the rating and shop spend in a hall.
 
+## In pictures
+
+Concept plans, drawn to the game's scale and colours. Yellow tags are gates on bridges and blue tags are remote stands. Dashed blue lines are trains and tunnels, and dashed yellow lines are taxiways.
+
+| | |
+| --- | --- |
+| ![Classic, refreshed](airport-shapes/classic.svg) | ![Remote apron](airport-shapes/remote.svg) |
+| ![Staggered apron](airport-shapes/stagger.svg) | ![Curved front](airport-shapes/curve.svg) |
+| ![Hall and finger piers](airport-shapes/hall.svg) | ![Satellite](airport-shapes/sat.svg) |
+| ![Starfish](airport-shapes/star.svg) | ![Midfield concourses](airport-shapes/midfield.svg) |
+| ![Round terminal](airport-shapes/round.svg) | |
+
 ## How it works
 
 - **A plan instead of a line.** Each layout lists:
@@ -72,7 +86,9 @@ Real airports with strange ideas that work as game mechanics. I recommend the fi
   - a taxi route from the runway to every stand.
 - **Walking.** After security, passengers follow the shortest route to their gate. Walking time comes from the real route length. Queues, lounges and shops sit along the routes.
 - **Planes.** They're drawn rotated to their stand's heading. Seats, doors and bridges are worked out in the plane's own frame, so boarding code is shared by every angle.
-- **Classic first.** Classic is rebuilt on the new system and must end in exactly the same state on seeds 1–3 as before. That's how the last refactor was proven.
+- **Classic first.**
+  - Today's Classic is moved onto the new system unchanged, and must end in exactly the same state on seeds 1–3 as before. That's how the last refactor was proven.
+  - Only then does Classic get its refresh. The bot checks that a player who keeps it still paces within the baselines.
 - **Room for more airports later.**
   - An airport becomes one object built from its layout: its plan, stands and people.
   - The code reads "this airport" instead of shared arrays, so a second airport later is another object, not a rewrite.
@@ -91,7 +107,7 @@ Real airports with strange ideas that work as game mechanics. I recommend the fi
 
 ## Balance
 
-- A player who keeps Classic is unchanged, and must be exactly the same on seeds 1–3.
+- A player who keeps Classic paces as today, within the baselines. The refresh changes walks to Pier B a little.
 - Walking times change with the real shapes, so each layout is retuned with the bot.
 - The target stays the same: rebuilding well reaches level 9 about 5–10% sooner.
 - Midfield concourses unlock at level 9 as the alternative to Starfish: more stands, longer rides.
@@ -120,7 +136,7 @@ Real airports with strange ideas that work as game mechanics. I recommend the fi
 ## Order of work
 
 Each step is its own PR, proven before the next:
-1. **The new system with Classic on it,** proven identical.
+1. **The new system with Classic on it,** proven identical, then Classic's refresh.
 2. **Remote apron, Staggered apron, Curved front, and Hall and finger pier** in their real shapes.
 3. **Satellite, Starfish, Midfield concourses and the Round terminal,** with trains.
 4. **Mobile lounges,** then balance with the bot on seeds 1–3, and screenshots.
@@ -135,4 +151,3 @@ Each step is its own PR, proven before the next:
   - Lukla, a short, sloping runway on a mountainside;
   - Princess Juliana, where planes cross the beach just above the sunbathers.
 - **Runway, airspace and region:** they don't change.
-- **Classic's look:** it stays as it is.
