@@ -119,9 +119,6 @@ function drawTerminal(D){
   ctx.fillStyle='#FFC72C';for(const i of SIDX)if(G.stands[i].built){const F=R.st[i].F;
     const bg=busGate(i);if(bg){ctx.fillRect(bg[0]-2.5,bg[1]+bg[2]*4-2.5,5,5)}
     else{faceW(i,-118,FACE_Y-6);ctx.fillRect(WP.x-2.5,WP.y-2.5,5,5);if(F&&F.rear){faceW(i,-150,FACE_Y-6);ctx.fillRect(WP.x-2.5,WP.y-2.5,5,5)}}}
-  // passport desks and e-gates in the wall between immigration and reclaim
-  for(let i=0;i<8;i++){const b=boothPos(i),open=i<D.officers;if(open)inWall(b.x,6,b.y);ctx.fillStyle=open?'#6A7580':i<OWN.officers()?'#3A424B':'#262C32';ctx.fillRect(b.x-9,b.y-3,5,9);if(open){ctx.fillStyle='#FFC72C';ctx.fillRect(b.x-9,b.y+7,5,5)}}
-  for(let i=0;i<8;i++){const e=egatePos(i),open=i<D.egates;if(open)inWall(e.x,4,e.y);ctx.fillStyle=open?'#5CC8FF':'#262C32';ctx.fillRect(e.x-6,e.y-4,3,9);ctx.fillRect(e.x+3,e.y-4,3,9)}
   for(const i of SIDX){if(!G.stands[i].built)continue;
     const cx=carX(i),cy=carY(i),F=R.st[i].F,A=F&&F.arr;
     ctx.strokeStyle='#39414A';ctx.lineWidth=6;rrect(cx-40,cy-10,80,20,10);ctx.stroke();

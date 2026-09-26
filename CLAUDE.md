@@ -124,7 +124,12 @@ How each system works is in `docs/SYSTEMS.md`: levels and the Masterplan, routes
   - `terminalFaults` (part of `layoutFaults`) checks that every desk, kiosk, lane, passport desk, e-gate, carousel and queue sits in its hall.
   - **Departures** (`43-departures.js`): `enterLandside`, `updateCheckin` (desks and kiosks), `finishCheckin`, `enterSecurity` and `updateSecurity` (lanes and fast track).
 
-  - **Arrivals** (`44-arrivals.js`): `updateImmigration` (passport desks and e-gates), `afterControl`, `exitTarget`, and the steps from the concourse to the way out.
+  - **Arrivals** (`44-arrivals.js`):
+    - **Immigration.** `R.arrQ` holds everyone queuing, in two queues: the passport desks' (`arrSlot`) and the e-gates' (`p.eg`, `egSlot`). E-gate passports (`p.elig`) join the e-gates' unless the desks would be quicker; e-gates take only those, and desks help with it when theirs is empty. Rostering still counts all of `R.arrQ`.
+    - **Domestic flights** (`DOMESTIC`: Edinburgh, Belfast, Jersey) walk through the domestic channel (`DOM_X`) without queuing.
+    - **Customs.** `exitTarget` sends everyone in reclaim through customs first (`toCustoms`, `p.cus`): 1 in 40 (`CUS_ODDS`) waits 1–2 min at a search table in the red channel, then `exitTarget` again asks `TERM_EXIT`, then the station, stops, taxi rank, car hire desks (then the car park) or the forecourt.
+    - **Meeters** (`R.meet`) wait at the barrier with signs for flights landed or due within 30 min and walk off with their passenger. They're drawn only, use their own generator (`meetRnd`) and don't run headless.
+    - `drawArrivals` (`TERM_DRAW`) draws the passport desks with officers, e-gates, customs, the arrivals hall and the taxi rank; `TERM_PANEL.arr` shows today's immigration and customs (`R.arrSt`, reset daily).
 
   - **Baggage** (`45-baggage.js`): `updateBelt` takes checked bags to the baggage hall, where they count as ready for the hold (`F.bagsIn`); `updateReclaimBelt` brings arriving bags to the carousel (`A.reclaim`).
 
