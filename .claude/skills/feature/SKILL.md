@@ -50,3 +50,19 @@ Work through these steps in order. Small fixes (a label, a nit, an obvious bug) 
 ## 7. Learn
 
 - If a bug got through to players, add the check that would have caught it, in the same PR as the fix.
+
+## Splitting a big feature across sessions
+
+Worth it only when the feature has parts that can live in different files. The terminal (issue #17) was built this way; these are its lessons.
+
+1. **Groundwork first, merged.** One PR lays the shared structure the parts plug into: tables and hooks, a file per part, a check group per part. It leaves `STATE` identical on seeds 1–3. Merge it, then start every part from `main`. Parts started from the unmerged branch look conflicted everywhere once it's squash-merged (the `steward` playbook has the fix).
+2. **Two or three at a time.** Every session draws on the same five-hour usage limit. Five parts plus the coordinator used it up within the hour, and the rest ran as overage. Start a batch just after the limit resets.
+3. **Each part's brief says:**
+   - its files, the shared hooks it may add, and that its notes stay in its own bullet;
+   - the functions and files to read first, so it doesn't explore the whole game;
+   - its share of any shared budget. Measure the `perf` headroom on `main` and divide it between the parts, or they each spend all of it;
+   - for balance, report the Balance workflow's tables and tune only outside 15% of the baselines. The rebalance happens once, with every part in;
+   - to push and read the Balance workflow rather than run the seeds locally, unless it's tuning;
+   - to open its PR and stop: the coordinator reviews and merges one part at a time.
+4. **Keep the coordinator light.** A long conversation re-reads its whole history on every turn, so it costs far more than a short one. Plan in the spec's "Order of work", start the coordinator fresh for each feature, and let PR notifications and one scheduled check-in wake it instead of polling. While the parts build, write the next spec.
+5. **Bring it together** in one last PR: what spans the parts (each layout's version, the rebalance, screenshots, What's new, save fixtures, notes).

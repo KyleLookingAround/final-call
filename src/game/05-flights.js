@@ -76,7 +76,7 @@ function newFlight(i,src){
   if(cands.length){
     const F2=R.st[cands[Math.floor(rnd()*cands.length)]].F,n=Math.min(Math.round(inN*0.18),F2.manifest.length-6,20);
     for(let j=0;j<n;j++){const p=arrPax[Math.floor(rnd()*arrPax.length)];if(p.xfer)continue;const k=F2.manifest.findIndex(q=>!q.leader&&q.type!=='fam'&&q.type!=='grp');if(k<0)break;const q=F2.manifest.splice(k,1)[0];
-      if(q.checked){q.checked=false;F2.checkedTotal--}p.xfer=q;p.checked=false;F2.xferWait=(F2.xferWait||0)+1;F.arr.xferN=(F.arr.xferN||0)+1}
+      if(q.checked){q.checked=false;(F.arr.xb||(F.arr.xb=[])).push(F2)}p.xfer=q;p.checked=false;F2.xferWait=(F2.xferWait||0)+1;F.arr.xferN=(F.arr.xferN||0)+1}
     F.arr.bags=arrPax.filter(p=>p.checked).length;
   }
   if(FR){const fill=clamp(0.55+0.08*G.lv.cargo+(devOn('logistics')?0.2:0)+(R.reg?R.reg.jobs*0.004:0),0.3,1);F.cargo=Math.round(ac.cargo*fill);F.arr.bags=Math.round(ac.cargo*fill*0.85);F.freighter=true;F.std=Math.ceil((G.clock+30+D.clean+(F.cargo+F.arr.bags)*0.35)/5)*5}

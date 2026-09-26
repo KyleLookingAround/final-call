@@ -8,7 +8,7 @@ description: Drive a Final Call pull request to green and merged - reading CI fa
 ## Checks workflow (`checks.yml`)
 
 - It runs `npm run check` on every PR. Failure screenshots are in the `check-failures` artifact; `screenshots` is kept on every run.
-- Every page is seeded, so a failure repeats locally: `npm run check -- <group>` (`sim`, `rules`, `saves`, `layout`, `sheet`, `tour`, `shots`, `share`).
+- Every page is seeded, so a failure repeats locally: `npm run check -- <group>` (the groups are listed in the project notes).
 - A line number from an error in the built page: `node tools/where.mjs <line>`.
 - Fix the cause. Never skip, weaken or delete a check to get green, and never push an empty commit to re-run CI.
 
@@ -34,6 +34,22 @@ git push --force-with-lease
 ```
 
 Check that the PR's diff now shows only its own changes, and change its base to `main` if it still points at the old branch. Only force-push branches you created; on anyone else's, merge `main` in instead.
+
+## Parts of a split feature
+
+When several branches were built side by side (the `feature` playbook's "Splitting a big feature across sessions"):
+
+- Merge them one at a time, each once it's green. Before merging the next, bring it up to date with `main` and run `npm run check` again.
+- If the parts started from a groundwork branch that was then squash-merged, GitHub shows conflicts across the whole groundwork, because it can't tell the squashed commit is the same work. Check that it is (`git diff <groundwork tip> <squashed commit>` prints nothing), then tell git so without rewriting the part's history:
+
+  ```
+  git merge -s ours <squashed commit>   # the groundwork is already here
+  git merge origin/main                 # only what merged after it
+  ```
+
+  `git merge-tree --write-tree --merge-base=<groundwork tip> origin/main <part-branch>` shows beforehand which conflicts are real.
+- A part's notes go in its own bullet; when two parts touch the same hook, keep both calls in the order the loops ran them before.
+- Check the PR changes only its part's files and the hooks its brief allowed.
 
 ## Before every push
 
