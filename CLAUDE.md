@@ -203,7 +203,12 @@ Some functions sit where they were first written rather than where their name su
 
   - **Market place** (`46-market.js`): `airside` decides between a shop and the gate, with `toShop`, `toGate` and the shop steps.
 
-  - **Hotel** (`47-hotel.js`): `hotelStay` (an arriving passenger who takes a room) and `drawHotel`.
+  - **Hotel** (`47-hotel.js`): 40 rooms per level of the Airport hotel upgrade (`hotelRooms`). Each guest holds a room until check-out (`G.hotelStays`, `[kind, until]`); `hotelBook` never takes more than the rooms and keeps some back for crews. `G.hotelBook` is tonight's book (noon to noon): guests by kind, takings, turned away, and last night's.
+    - Arriving guests (late arrivals, long connections, conference delegates) are chosen in `TERM_EXIT` and walk through the walkway to the lobby, where `hotelStay(p)` takes their money.
+    - Early flyers book at noon from how many came down that morning, and `TERM_SPAWN` starts them in the lobby.
+    - Crews finishing a duty rest there for 9 h instead of 12 (`crewRest`, from `crewAway`).
+    - `hotelStranded`: from level 4, a departure held an hour late at night by fog or a storm owes its passengers rooms; yours are cheap, the rest go to dear city hotels and cost rating.
+    - Rooms are cheap, standard or premium (`G.hotelPrice`); the duty manager (`SET().autoDuty`) re-prices each noon from last night. The card is in Sales › Landside; `drawHotel` lights a window per guest.
 
 - **Airport layouts.** `LAYOUTS` in `39-layouts.js` lists each layout's stands (x, how far back the plane sits `dy`, gate name, price, level, `pier` for the second phase, `kind:'remote'` for bus stands), its buying `order` and its shop units. `applyLayout` copies the current one into `STAND_X`, `STAND_DY`, `STAND`, `GATES`, `SIDX`, `STAND_ORDER`, `SHOP_X` and friends in place, so code that reads those follows the layout.
   - **Every layout is 2D** and has `rooms` (convex floors), `doors` (`[roomA, roomB, x, y, half-width]`), `top` (how far up the runway moves) and `decor`. Their stands have a face point `x`,`y` and a heading `h` (where the nose points, degrees clockwise from north) and park nose-in; shop units add `y`, an angle and a room.

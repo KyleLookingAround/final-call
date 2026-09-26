@@ -98,7 +98,6 @@ function drawTerminal(D){
   tc=tint(seW);if(tc){ctx.fillStyle=tc;ctx.fillRect(8,SEC_LINE,552,80)}
   tc=tint(R.arrQ.length*D.passT/(D.officers+D.egates*1.6));if(tc){ctx.fillStyle=tc;ctx.fillRect(700,SEC_Y,540,SEC_LINE-SEC_Y)}
   ctx.fillStyle='#101316';ctx.fillRect(0,LAND_B+2,W,H-LAND_B-2);
-  drawHotel();
   for(const i of SIDX){
     if(!standOpen(i))continue;
     ctx.fillStyle=G.stands[i].built?'#252C33':'#1F242A';
