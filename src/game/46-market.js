@@ -78,7 +78,7 @@ function pickAct(p){const a=ACT_OF(p);if(a)return a;const r=rnd();return r<0.4?'
 // the lists are the same as gathering them at every step
 function occ(){
   if(!R.occ||R.occOut&&R.occStep!==R.step||R.occLay!==G.layout){R.occOut=false;R.occStep=R.step;R.occLay=G.layout;const o=R.occ={};
-    for(const p of R.pax){const k=p.state==='shop'||p.state==='toShop'?'s'+p.shop:p.state==='mkt'||p.state==='toMkt'?p.act:null;if(k&&p.sl>=0)(o[k]||(o[k]=[])).push(p.sl)}}
+    for(const p of R.pax){const st=p.state,k=st==='shop'||st==='toShop'?'s'+p.shop:st==='mkt'||st==='toMkt'?p.act:null;if(k&&p.sl>=0)(o[k]||(o[k]=[])).push(p.sl)}}
   return R.occ;
 }
 function freeSpot(key,n){const o=occ(),u=o[key]||(o[key]=[]);if(u.length>=n)return -1;for(let s=0;s<n;s++)if(!u.includes(s)){u.push(s);return s}return -1}

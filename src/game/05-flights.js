@@ -1,5 +1,10 @@
 /* ================= flights ================= */
-function seatPax(g,k,extra){const col=k%g.cols;return Object.assign({row:Math.floor(k/g.cols),col,ct:g.colCt[col],ais:g.colA[col],side:g.colS[col]+2*g.colA[col]},extra)}
+// Every passenger starts with every field they may ever get, in one order, so they all share one shape and the loops
+// over R.pax stay fast. A field not yet set reads undefined, just as a missing one would.
+function seatPax(g,k,extra){const col=k%g.cols,u=undefined;return Object.assign({row:Math.floor(k/g.cols),col,ct:g.colCt[col],ais:g.colA[col],side:g.colS[col]+2*g.colA[col],
+  stand:u,inbound:u,lane:u,type:u,party:u,kid:u,biz:u,prio:u,carry:u,checked:u,online:u,fast:u,elig:u,spd:u,rand:u,wait:u,x:u,y:u,tx:u,ty:u,state:u,spot:u,psize:u,leader:u,
+  F:u,A:u,room:u,way:u,wi:u,riding:u,rideAt:u,t:u,isl:u,famL:u,kiosk:u,srch:u,cleared:u,skip:u,sl:u,nv:u,away:u,shop:u,late:u,su:u,act:u,ph:u,t0:u,pt:u,di:u,dx:u,
+  pos:u,phase:u,up:u,s:u,gone:u,out:u,xfer:u,xferred:u,man:u,ok:u,hotel:u,why:u,dead:u},extra)}
 function shuffled(n){const a=[...Array(n).keys()];for(let k=a.length-1;k>0;k--){const j=Math.floor(rnd()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
 function pickPartner(i){
   const c=AC_ORDER.filter(t=>!AIRCRAFT[t].freighter&&AIRCRAFT[t].lvl<=G.level&&fitsGate(t,i));let tot=0;const w=c.map(t=>{const x=1+AIRCRAFT[t].lvl*1.4;tot+=x;return x});
