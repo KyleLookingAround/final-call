@@ -1,6 +1,10 @@
 /* ================= WHAT'S NEW: every version's new features, shown after an update and from Settings or Help ================= */
 // Newest first. Add an entry with each release; the checks make sure the newest one matches docs/HISTORY.md.
 const UPDATES=[
+  {v:23,title:'Classic, made real',points:[
+    'Planes park nose-in with short jet bridges, as at real airports, and push back when they leave.',
+    'Pier B is a real pier out onto the apron, with gates on both sides.',
+    'The start of real airport shapes: the other layouts follow.']},
   {v:22,title:'Airport layouts',points:[
     'Unlock new layouts in the Masterplan and rebuild your airport into them from Airfield › Layout.',
     'Remote apron, Staggered apron, Curved front, Hall and finger pier, Satellite and Starfish, the last few inspired by real airports.',

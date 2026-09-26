@@ -7,14 +7,18 @@ function hatch(x,y,w,h,prog,label){
   ctx.fillStyle='rgba(255,199,44,.06)';ctx.fillRect(x,y,w,h);
   ctx.strokeStyle='rgba(255,199,44,.22)';ctx.lineWidth=6;for(let k=-h;k<w;k+=22){ctx.beginPath();ctx.moveTo(x+k,y+h);ctx.lineTo(x+k+h,y);ctx.stroke()}
   ctx.restore();ctx.strokeStyle='rgba(255,199,44,.6)';ctx.lineWidth=1.5;ctx.setLineDash([6,5]);ctx.strokeRect(x,y,w,h);ctx.setLineDash([]);
-  const cx=x+w/2,cy=y+h/2;ctx.fillStyle='rgba(10,12,15,.88)';rrect(cx-80,cy-22,160,40,4);ctx.fill();
+  if(label)hatchLabel(x+w/2,y+h/2,prog,label);
+}
+// the name and progress bar of something being built, drawn upright at (cx,cy)
+function hatchLabel(cx,cy,prog,label){
+  ctx.fillStyle='rgba(10,12,15,.88)';rrect(cx-80,cy-22,160,40,4);ctx.fill();
   ctx.font='800 12px "Saira Condensed","Arial Narrow",sans-serif';ctx.fillStyle='#FFC72C';ctx.textAlign='center';ctx.textBaseline='alphabetic';ctx.fillText(label,cx,cy-6);
   ctx.fillStyle='#232930';ctx.fillRect(cx-66,cy+3,132,5);ctx.fillStyle='#FFC72C';ctx.fillRect(cx-66,cy+3,132*prog,5);
 }
 function bprog(id){const b=buildOf(id);return b?clamp((G.clock-b.start)/(b.done-b.start),0,1):0}
-function drawPlane(F,sx,offY,tow,alpha){
+function drawPlane(F,i,offY,tow,alpha){
   const g=F.geo,ac=F.ac,fw=g.fw,top=g.top,end=g.end;
-  ctx.save();ctx.globalAlpha=alpha??1;ctx.translate(sx,offY);
+  ctx.save();ctx.globalAlpha=alpha??1;standCtx(i);ctx.translate(0,offY);
   ctx.fillStyle='#A9B3BC';
   for(const s of [-1,1]){
     const sw=g.span*0.55;
@@ -44,35 +48,40 @@ function drawPlane(F,sx,offY,tow,alpha){
   if(tow){ctx.strokeStyle='#5A646E';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,top-64);ctx.lineTo(0,top-74);ctx.stroke();ctx.fillStyle='#3A424B';rrect(-8,top-86,16,12,2);ctx.fill();ctx.fillStyle='#FFC72C';ctx.fillRect(-2,top-84,4,3)}
   ctx.restore();
 }
+// a stand's markings and plane, drawn in its own frame; words stay upright at the matching world place
 function drawStandApron(i){
-  const sx=STAND_X[i],st=G.stands[i],S=R.st[i];
+  const st=G.stands[i],S=R.st[i],nose=XF[i].nose,[ax,ay,aw,ah]=standArea(i);
   if(!st.built){
-    if(isBuilding('stand:'+i)){hatch(sx-140,44,280,TERM_Y-60,bprog('stand:'+i),'BUILDING STAND '+GATES[i]);return}
+    if(isBuilding('stand:'+i)){ctx.save();standCtx(i);hatch(ax,ay,aw,ah,0,'');ctx.restore();toW(i,0,ay+ah/2);hatchLabel(WP.x,WP.y,bprog('stand:'+i),'BUILDING STAND '+GATES[i]);return}
     if(!standOpen(i))return;
-    ctx.strokeStyle='#2B3238';ctx.lineWidth=1.5;ctx.setLineDash([6,6]);ctx.strokeRect(sx-140,44,280,TERM_Y-60);ctx.setLineDash([]);
-    ctx.font='800 22px "Saira Condensed","Arial Narrow",sans-serif';ctx.fillStyle='#2E363E';ctx.textAlign='center';ctx.textBaseline='alphabetic';ctx.fillText('STAND '+GATES[i],sx,236);
-    mono(STAND[i].lvl>G.level?`Needs ${LEVELS[STAND[i].lvl].name}`:'For sale · '+money(STAND[i].cost),sx,256,'#56606A',11,'center');
+    ctx.save();standCtx(i);ctx.strokeStyle='#2B3238';ctx.lineWidth=1.5;ctx.setLineDash([6,6]);ctx.strokeRect(ax,ay,aw,ah);ctx.setLineDash([]);ctx.restore();
+    toW(i,0,nose?ay+ah*0.45:236);const lx=WP.x,ly=WP.y;
+    ctx.font='800 22px "Saira Condensed","Arial Narrow",sans-serif';ctx.fillStyle='#2E363E';ctx.textAlign='center';ctx.textBaseline='alphabetic';ctx.fillText('STAND '+GATES[i],lx,ly);
+    mono(STAND[i].lvl>G.level?`Needs ${LEVELS[STAND[i].lvl].name}`:'For sale · '+money(STAND[i].cost),lx,ly+20,'#56606A',11,'center');
     return;
   }
-  ctx.strokeStyle='rgba(255,199,44,.4)';ctx.lineWidth=2;ctx.setLineDash([10,8]);ctx.beginPath();ctx.moveTo(sx,32);ctx.lineTo(sx,TERM_Y-8);ctx.stroke();ctx.setLineDash([]);
-  ctx.strokeStyle='rgba(255,199,44,.5)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(sx-26,44+STAND_DY[i]);ctx.lineTo(sx+26,44+STAND_DY[i]);ctx.stroke();
-  ctx.font='800 26px "Saira Condensed","Arial Narrow",sans-serif';ctx.fillStyle='rgba(255,199,44,.16)';ctx.textAlign='right';ctx.textBaseline='alphabetic';ctx.fillText(GATES[i],sx+140,TERM_Y-12);
-  if(S.out)drawPlane(S.out.F,sx,S.out.offY,false,S.out.alpha);
-  const F=S.F;if(F&&F.plane.state!=='wait'&&F.plane.state!=='approach')drawPlane(F,sx,F.plane.offY,F.plane.state==='inbound',F.plane.alpha??1);
+  ctx.save();standCtx(i);
+  ctx.strokeStyle='rgba(255,199,44,.4)';ctx.lineWidth=2;ctx.setLineDash([10,8]);ctx.beginPath();if(nose){ctx.moveTo(0,ay+ah);ctx.lineTo(0,FACE_Y+16)}else{ctx.moveTo(0,32);ctx.lineTo(0,TERM_Y-8)}ctx.stroke();ctx.setLineDash([]);
+  const bar=nose?FACE_Y+16:44+STAND_DY[i];ctx.strokeStyle='rgba(255,199,44,.5)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-26,bar);ctx.lineTo(26,bar);ctx.stroke();
+  ctx.restore();
+  ctx.font='800 26px "Saira Condensed","Arial Narrow",sans-serif';ctx.fillStyle='rgba(255,199,44,.16)';ctx.textBaseline='alphabetic';
+  if(nose){toW(i,112,ay+ah-24);ctx.textAlign='center';ctx.fillText(GATES[i],WP.x,WP.y+9)}else{ctx.textAlign='right';ctx.fillText(GATES[i],STAND_X[i]+140,TERM_Y-12)}
+  if(S.out)drawPlane(S.out.F,i,S.out.offY,false,S.out.alpha);
+  const F=S.F;if(F&&F.plane.state!=='wait'&&F.plane.state!=='approach')drawPlane(F,i,F.plane.offY,F.plane.state==='inbound',F.plane.alpha??1);
 }
 function drawBridge(i){
   if(STAND_KIND[i]==='remote'){drawBusStand(i);return}
   const S=R.st[i];if(!G.stands[i].built)return;
-  const sx=STAND_X[i],g=S.geo||geom(AIRCRAFT[0]),e=S.ext;
-  const cornerY=g.fd.y+20,dx=sx+g.fd.x-3,tx=sx-120+(dx-(sx-120))*e,ty=cornerY+(g.fd.y-cornerY)*e;
-  ctx.lineJoin='round';ctx.lineCap='butt';
-  for(const [w,c] of [[14,'#46505A'],[10,'#2A3037']]){ctx.strokeStyle=c;ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(sx-120,TERM_Y);ctx.lineTo(sx-120,cornerY);if(e>0.02)ctx.lineTo(tx,ty);ctx.stroke()}
-  ctx.fillStyle='#46505A';ctx.beginPath();ctx.arc(sx-120,cornerY,8.5,0,Math.PI*2);ctx.fill();ctx.fillStyle='#2A3037';ctx.beginPath();ctx.arc(sx-120,cornerY,5.5,0,Math.PI*2);ctx.fill();
+  const g=S.geo||geom(AIRCRAFT[0]),e=S.ext,nose=XF[i].nose;
+  // the bridge runs from its root on the building to a rotunda, then reaches out to the front door as it extends
+  const rx=nose?-118:-120,ry=nose?FACE_Y:TERM_Y,cornerY=nose?g.fd.y:g.fd.y+20,dx=g.fd.x-3,tx=rx+(dx-rx)*e,ty=cornerY+(g.fd.y-cornerY)*e;
+  ctx.save();standCtx(i);ctx.lineJoin='round';ctx.lineCap='butt';
+  for(const [w,c] of [[14,'#46505A'],[10,'#2A3037']]){ctx.strokeStyle=c;ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(rx,ry);ctx.lineTo(rx,cornerY);if(e>0.02)ctx.lineTo(tx,ty);ctx.stroke()}
+  ctx.fillStyle='#46505A';ctx.beginPath();ctx.arc(rx,cornerY,8.5,0,Math.PI*2);ctx.fill();ctx.fillStyle='#2A3037';ctx.beginPath();ctx.arc(rx,cornerY,5.5,0,Math.PI*2);ctx.fill();
   const F=S.F;
-  if(F&&F.rear){
-    ctx.strokeStyle='#56616B';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);ctx.beginPath();F.P.rear.pts.forEach((p,k)=>k?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke();ctx.setLineDash([]);
-    if(e>0.5){ctx.fillStyle='#7F8A94';ctx.fillRect(sx+g.rd.x-15,g.rd.y-5,13,10);ctx.strokeStyle='#4A545E';ctx.lineWidth=1;for(let k=1;k<4;k++){ctx.beginPath();ctx.moveTo(sx+g.rd.x-15+k*3.3,g.rd.y-5);ctx.lineTo(sx+g.rd.x-15+k*3.3,g.rd.y+5);ctx.stroke()}}
-  }
+  if(F&&F.rear&&e>0.5){ctx.fillStyle='#7F8A94';ctx.fillRect(g.rd.x-15,g.rd.y-5,13,10);ctx.strokeStyle='#4A545E';ctx.lineWidth=1;for(let k=1;k<4;k++){ctx.beginPath();ctx.moveTo(g.rd.x-15+k*3.3,g.rd.y-5);ctx.lineTo(g.rd.x-15+k*3.3,g.rd.y+5);ctx.stroke()}}
+  ctx.restore();
+  if(F&&F.rear){ctx.strokeStyle='#56616B';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);ctx.beginPath();F.P.rear.pts.forEach((p,k)=>k?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke();ctx.setLineDash([])}
   if(F&&e>0.6&&(F.hold<F.bagsIn||F.arr.unloaded<F.arr.bags)){
     const ph=(performance.now()/1000*0.45+i*0.3)%2,s=(ph<1?ph:2-ph)*F.P.cart.len,q=ptAt(F.P.cart,s);
     ctx.fillStyle='#3A424B';ctx.fillRect(q[0]-5,q[1]-4,10,8);ctx.fillStyle='#D9A066';ctx.fillRect(q[0]-4,q[1]+6,8,7);ctx.fillRect(q[0]-4,q[1]+15,8,7);ctx.fillStyle='#FFC72C';ctx.fillRect(q[0]-1.5,q[1]-3,3,2);
@@ -80,9 +89,9 @@ function drawBridge(i){
 }
 function drawTerminal(D){
   const C1=LAY.conc1||LAND_R,P2=LAY.gap?LAY.gap[1]:C1,concR=G.pierB?W-8:C1;
-  ctx.fillStyle='#1C2228';ctx.fillRect(8,TERM_Y,concR-8,SEC_Y-TERM_Y);
+  if(ROOMS)drawRooms();else{ctx.fillStyle='#1C2228';ctx.fillRect(8,TERM_Y,concR-8,SEC_Y-TERM_Y)}
   ctx.fillStyle='#191D22';ctx.fillRect(8,SEC_Y,LAND_R-8,LAND_B-SEC_Y);
-  if(!G.pierB){
+  if(!G.pierB&&!ROOMS){
     if(isBuilding('pier:B'))hatch(P2+4,TERM_Y,W-12-P2,SEC_Y-TERM_Y,bprog('pier:B'),'BUILDING '+p2name().toUpperCase());
     else{ctx.strokeStyle='#2B3238';ctx.lineWidth=1.5;ctx.setLineDash([6,6]);ctx.strokeRect(P2+4,TERM_Y,W-12-P2,SEC_Y-TERM_Y);ctx.setLineDash([]);const n=p2name().toUpperCase();mono(G.level>=PIER.lvl?`${n} · ${money(PIER.cost)}`:`${n} · needs ${LEVELS[PIER.lvl].name}`,(P2+W)/2,488,'#4A535D',11,'center')}
   }
@@ -102,6 +111,7 @@ function drawTerminal(D){
   }
   for(let i=0;i<SHOP_X.length;i++){
     if(!shopOpen(i))continue;
+    if(ROOMS){drawShopUnit(i);continue}
     const s=G.shops[i],x=shopX(i);
     if(s){
       const t=SHOPS[s.type];ctx.fillStyle='#242A31';ctx.fillRect(x,452,118,40);ctx.fillStyle=t.col;ctx.fillRect(x,490,118,3);
@@ -109,13 +119,17 @@ function drawTerminal(D){
       mono(`Lv ${s.lvl+1} · ${money(s.earned||0)}`,x+7,482,'#909AA4',8.5);
     } else {ctx.strokeStyle='#343C45';ctx.lineWidth=1;ctx.setLineDash([3,3]);ctx.strokeRect(x+.5,452.5,117,39);ctx.setLineDash([]);mono('UNIT TO LET',x+59,476,'#4A535D',8.5,'center')}
   }
-  if(G.lv.mover&&G.pierB){ctx.fillStyle='#2A3037';ctx.fillRect(360,515,W-380,3);const t=(performance.now()/1000*0.12)%2,px=360+(t<1?t:2-t)*(W-460);ctx.fillStyle='#5CC8FF';rrect(px,512,80,9,3);ctx.fill()}
+  if(G.lv.mover&&G.pierB&&LAY.track){const P=LAY.trackP||(LAY.trackP=mkPath(LAY.track)),t=(performance.now()/1000*0.12)%2,q=ptAt(P,(t<1?t:2-t)*P.len);
+    ctx.strokeStyle='#2A3037';ctx.lineWidth=3;ctx.beginPath();LAY.track.forEach(([x,y],k)=>k?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();ctx.fillStyle='#5CC8FF';rrect(q[0]-12,q[1]-5,24,10,3);ctx.fill()}
+  if(G.lv.mover&&G.pierB&&!ROOMS){ctx.fillStyle='#2A3037';ctx.fillRect(360,515,W-380,3);const t=(performance.now()/1000*0.12)%2,px=360+(t<1?t:2-t)*(W-460);ctx.fillStyle='#5CC8FF';rrect(px,512,80,9,3);ctx.fill()}
   ctx.strokeStyle='#4E5964';ctx.lineWidth=3;ctx.lineCap='square';
-  const gaps=[];for(const i of SIDX)if(G.stands[i].built){gaps.push([STAND_X[i]-127,STAND_X[i]-113]);const F=R.st[i].F;if(F&&F.rear)gaps.push([STAND_X[i]-77,STAND_X[i]-63])}
-  gaps.sort((a,b)=>a[0]-b[0]);
-  ctx.beginPath();let x=8;for(const [a,b] of gaps){ctx.moveTo(x,TERM_Y);ctx.lineTo(a,TERM_Y);x=b}ctx.moveTo(x,TERM_Y);ctx.lineTo(concR,TERM_Y);
+  ctx.beginPath();let x=8;
+  if(!ROOMS){ // the straight concourse's front wall, open where each bridge and rear-stairs walk leaves it
+    const gaps=[];for(const i of SIDX)if(G.stands[i].built){gaps.push([STAND_X[i]-127,STAND_X[i]-113]);const F=R.st[i].F;if(F&&F.rear)gaps.push([STAND_X[i]-77,STAND_X[i]-63])}
+    gaps.sort((a,b)=>a[0]-b[0]);
+    for(const [a,b] of gaps){ctx.moveTo(x,TERM_Y);ctx.lineTo(a,TERM_Y);x=b}ctx.moveTo(x,TERM_Y);ctx.lineTo(concR,TERM_Y);
+    if(G.pierB){ctx.moveTo(LAND_R,SEC_Y);ctx.lineTo(W-8,SEC_Y);ctx.lineTo(W-8,TERM_Y)}else{ctx.moveTo(LAND_R,SEC_Y);ctx.lineTo(C1,SEC_Y);ctx.lineTo(C1,TERM_Y)}}
   ctx.moveTo(8,TERM_Y);ctx.lineTo(8,LAND_B);ctx.lineTo(140,LAND_B);ctx.moveTo(172,LAND_B);ctx.lineTo(LAND_R,LAND_B);ctx.lineTo(LAND_R,596);ctx.moveTo(LAND_R,560);ctx.lineTo(LAND_R,SEC_Y);
-  if(G.pierB){ctx.moveTo(LAND_R,SEC_Y);ctx.lineTo(W-8,SEC_Y);ctx.lineTo(W-8,TERM_Y)}else{ctx.moveTo(LAND_R,SEC_Y);ctx.lineTo(C1,SEC_Y);ctx.lineTo(C1,TERM_Y)}
   const sg=[];for(let i=0;i<8;i++)if(i<D.lanes)sg.push([laneX(i)-5,laneX(i)+5]);if(D.ft)sg.push([FT_X-5,FT_X+5]);
   sg.push([480,494]);sg.sort((a,b)=>a[0]-b[0]);x=8;for(const [a,b] of sg){ctx.moveTo(x,SEC_Y);ctx.lineTo(a,SEC_Y);x=b}ctx.moveTo(x,SEC_Y);ctx.lineTo(LAND_R,SEC_Y);
   ctx.moveTo(474,SEC_Y);ctx.lineTo(474,LAND_B);ctx.stroke();
@@ -128,7 +142,9 @@ function drawTerminal(D){
     ctx.fillStyle=open?'#8C97A1':closed?'#7A3A42':own?'#3A424B':'#262C32';ctx.fillRect(lx-6,SEC_Y-3,3,9);ctx.fillRect(lx+3,SEC_Y-3,3,9);
     ctx.fillStyle=open?'#39414A':'#1F242A';ctx.fillRect(lx+6,527,6,14);if(open){ctx.fillStyle='#FFC72C';ctx.fillRect(lx+7,543,4,4)}}
   if(D.ft){ctx.fillStyle='#F5D08A';ctx.fillRect(FT_X-6,SEC_Y-3,3,9);ctx.fillRect(FT_X+3,SEC_Y-3,3,9);ctx.fillStyle='#FFC72C';ctx.fillRect(FT_X+7,543,4,4)}
-  ctx.fillStyle='#FFC72C';for(const i of SIDX)if(G.stands[i].built){ctx.fillRect(STAND_X[i]-112,450,5,5);const F=R.st[i].F;if(F&&F.rear)ctx.fillRect(STAND_X[i]-62,450,5,5)}
+  ctx.fillStyle='#FFC72C';for(const i of SIDX)if(G.stands[i].built){const F=R.st[i].F;
+    if(XF[i].nose){toW(i,-118,FACE_Y-6);ctx.fillRect(WP.x-2.5,WP.y-2.5,5,5);if(F&&F.rear){toW(i,-150,FACE_Y-6);ctx.fillRect(WP.x-2.5,WP.y-2.5,5,5)}}
+    else{ctx.fillRect(STAND_X[i]-112,450,5,5);if(F&&F.rear)ctx.fillRect(STAND_X[i]-62,450,5,5)}}
   mono('PASSPORT CONTROL',492,531,'#56606A',8.5);
   for(let i=0;i<8;i++){const b=boothPos(i),open=i<D.officers;ctx.fillStyle=open?'#6A7580':i<OWN.officers()?'#3A424B':'#262C32';ctx.fillRect(b.x-2,b.y-4,6,9);if(open){ctx.fillStyle='#FFC72C';ctx.fillRect(b.x+6,b.y-2,5,5)}}
   for(let i=0;i<8;i++){const e=egatePos(i),open=i<D.egates;ctx.fillStyle=open?'#5CC8FF':'#262C32';ctx.fillRect(e.x-2,e.y-3,4,7);ctx.fillRect(e.x+4,e.y-3,4,7)}
@@ -171,7 +187,8 @@ function drawPax(vx0,vx1){
 }
 function statusCol(s){if(s==='DEPLANING'||s==='LANDED'||s==='AT GATE')return '#5CC8FF';if(s==='ARRIVED')return '#6BE39A';if(s==='EXPECTED'||s==='COMPLETE')return '#909AA4';return s==='CARGO'||s==='LOADING'?'#D9A066':s==='BOARDING'||s==='GO TO GATE'?'#6BE39A':s==='FINAL CALL'||s==='BAGGAGE'?'#FFC72C':s==='DELAYED'||s==='TECH DELAY'||s==='CREW DELAY'?'#FF7A8A':s==='CLOSED'?'#5CC8FF':'#909AA4'}
 function gateBadge(i){
-  const sx=STAND_X[i],F=R.st[i].F,x=sx-146,y=34+STAND_DY[i],w=96,h=F?60:30,sel=i===R.sel;
+  const F=R.st[i].F,w=96,h=F?60:30,sel=i===R.sel;let x,y;
+  if(XF[i].nose){badgeAt(i);x=WP.x-w/2;y=WP.y-h/2}else{x=STAND_X[i]-146;y=34+STAND_DY[i]}
   ctx.fillStyle='rgba(10,12,15,.84)';rrect(x,y,w,h,4);ctx.fill();
   if(sel){ctx.strokeStyle='#FFC72C';ctx.lineWidth=1.2;rrect(x+.5,y+.5,w-1,h-1,4);ctx.stroke()}
   ctx.fillStyle=sel?'#FFC72C':'#3A424B';ctx.fillRect(x+6,y+6,20,13);
@@ -197,6 +214,7 @@ function miniPlane(x,y,ang,sc,alpha,col){
   ctx.fillStyle=livery();ctx.fillRect(-14.5,-0.7,5,1.4);ctx.restore();
 }
 function drawAirfield(d){
+  ctx.save();ctx.translate(0,AF_Y);const Y0=-180; // drawn where Classic has it, then moved up to the layout's runway
   ctx.fillStyle='#12171A';ctx.fillRect(0,Y0,W,-Y0);
   const HX=W-60;
   ctx.fillStyle='#101316';ctx.fillRect(48,RWY_Y[0],24,-RWY_Y[0]);ctx.fillRect(HX-12,RWY_Y[0],24,-RWY_Y[0]);
@@ -216,8 +234,8 @@ function drawAirfield(d){
     if(R.fx.snow>G.clock){ctx.fillStyle='rgba(236,240,245,.12)';ctx.fillRect(20,y-h/2,W-40,h)}
   }
   // tower, fire station, fuel farm, solar farm
-  ctx.fillStyle='#2A3037';ctx.fillRect(612,-44,16,30);ctx.fillStyle='#46505A';rrect(604,-58,32,16,4);ctx.fill();ctx.fillStyle='#5CC8FF';ctx.globalAlpha=0.5;ctx.fillRect(608,-54,24,6);ctx.globalAlpha=1;
-  for(let k=0;k<Math.min(10,G.lv.atc);k++){ctx.fillStyle='#FFC72C';ctx.fillRect(606+k*3,-62,2,3)}
+  if(!(LAY.decor||[]).some(d=>d.t==='tower')){ctx.fillStyle='#2A3037';ctx.fillRect(612,-44,16,30);ctx.fillStyle='#46505A';rrect(604,-58,32,16,4);ctx.fill();ctx.fillStyle='#5CC8FF';ctx.globalAlpha=0.5;ctx.fillRect(608,-54,24,6);ctx.globalAlpha=1;
+    for(let k=0;k<Math.min(10,G.lv.atc);k++){ctx.fillStyle='#FFC72C';ctx.fillRect(606+k*3,-62,2,3)}}
   if(G.lv.fire){ctx.fillStyle='#3A2A2E';ctx.fillRect(500,-46,70,34);ctx.fillStyle='#E5484D';for(let k=0;k<G.lv.fire;k++)ctx.fillRect(506+k*21,-26,16,12);mono('FIRE',535,-34,'#ECE8DF',8,'center')}
   for(let k=0;k<G.lv.fuelfarm;k++){ctx.fillStyle='#39414A';ctx.beginPath();ctx.arc(700+k*38,-30,15,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#56606A';ctx.lineWidth=1.5;ctx.stroke()}
   if(G.lv.solar){ctx.fillStyle='#22364A';for(let k=0;k<G.lv.solar*14;k++){ctx.fillRect(1320+(k%28)*28,-60+Math.floor(k/28)*22,24,16)}}
@@ -230,6 +248,7 @@ function drawAirfield(d){
   const tt=performance.now()/1000;arrs.slice(0,4).forEach((m,j)=>{const a=tt*0.5+j*Math.PI/2;miniPlane(W-120+Math.cos(a)*60,-168+Math.sin(a)*6,a+Math.PI/2,0.8)});
   ctx.fillStyle='rgba(10,12,15,.8)';rrect(22,Y0+6,300,18,3);ctx.fill();
   mono(`RUNWAY · ${arrs.length} holding to land · ${deps.length} waiting to take off`,30,Y0+19,R.rwy.q.length>=3?'#FF7A8A':'#909AA4',9.5);
+  ctx.restore();
 }
 function drawLandside(D){
   ctx.fillStyle='#15191D';ctx.fillRect(0,H,W,Y1-H);
@@ -258,14 +277,16 @@ function draw(){
   const vx0=cam.x,vx1=cam.x+R.sw/k;
   ctx.fillStyle='#14171B';ctx.fillRect(0,Y0,W,Y1-Y0);
   const d=darkness();drawAirfield(d);drawLayoutApron();
-  ctx.strokeStyle='#1A1E23';ctx.lineWidth=1;ctx.beginPath();for(let x=0;x<=W;x+=50){ctx.moveTo(x+.5,32);ctx.lineTo(x+.5,TERM_Y)}for(let y=50;y<TERM_Y;y+=50){ctx.moveTo(0,y+.5);ctx.lineTo(W,y+.5)}ctx.stroke();
-  ctx.fillStyle='#101316';ctx.fillRect(0,0,W,32);ctx.strokeStyle='rgba(255,199,44,.55)';ctx.lineWidth=1.5;ctx.setLineDash([12,10]);ctx.beginPath();ctx.moveTo(0,16);ctx.lineTo(W,16);ctx.stroke();ctx.setLineDash([]);
-  for(const i of SIDX){if(STAND_X[i]+160<vx0||STAND_X[i]-160>vx1)continue;drawStandApron(i)}
+  ctx.strokeStyle='#1A1E23';ctx.lineWidth=1;ctx.beginPath();for(let x=0;x<=W;x+=50){ctx.moveTo(x+.5,AF_Y+32);ctx.lineTo(x+.5,TERM_Y)}for(let y=AF_Y+50;y<TERM_Y;y+=50){ctx.moveTo(0,y+.5);ctx.lineTo(W,y+.5)}ctx.stroke();
+  ctx.fillStyle='#101316';ctx.fillRect(0,AF_Y,W,32);ctx.strokeStyle='rgba(255,199,44,.55)';ctx.lineWidth=1.5;ctx.setLineDash([12,10]);ctx.beginPath();ctx.moveTo(0,AF_Y+16);ctx.lineTo(W,AF_Y+16);ctx.stroke();ctx.setLineDash([]);
+  drawPlanApron();
+  for(const i of SIDX){const b=standBox(i);if(b[0]+b[2]<vx0||b[0]>vx1)continue;drawStandApron(i)}
   for(const i of SIDX)drawBridge(i);
   if(d>0){
-    ctx.fillStyle=`rgba(4,8,22,${d})`;ctx.fillRect(0,0,W,TERM_Y);ctx.fillStyle=`rgba(4,8,22,${d*0.6})`;ctx.fillRect(0,H,W,Y1-H);
+    ctx.fillStyle=`rgba(4,8,22,${d})`;ctx.fillRect(0,AF_Y,W,TERM_Y-AF_Y);ctx.fillStyle=`rgba(4,8,22,${d*0.6})`;ctx.fillRect(0,H,W,Y1-H);
     ctx.globalCompositeOperation='lighter';
-    for(const i of SIDX){if(!G.stands[i].built)continue;const gx=STAND_X[i]+130,gr=ctx.createRadialGradient(gx,60,0,gx,60,230);gr.addColorStop(0,`rgba(255,214,150,${0.2*d})`);gr.addColorStop(1,'rgba(255,214,150,0)');ctx.fillStyle=gr;ctx.fillRect(gx-230,0,460,TERM_Y)}
+    for(const i of SIDX){if(!G.stands[i].built)continue;toW(i,130,XF[i].nose?220:60);const gx=WP.x,gy=WP.y,gr=ctx.createRadialGradient(gx,gy,0,gx,gy,230);gr.addColorStop(0,`rgba(255,214,150,${0.2*d})`);gr.addColorStop(1,'rgba(255,214,150,0)');ctx.fillStyle=gr;
+      if(XF[i].nose)ctx.fillRect(gx-230,gy-230,460,460);else ctx.fillRect(gx-230,0,460,TERM_Y)}
     ctx.globalCompositeOperation='source-over';
   }
   if(R.fx.snow>G.clock){ctx.fillStyle='rgba(230,236,244,.05)';ctx.fillRect(0,Y0,W,TERM_Y-Y0);ctx.fillStyle='rgba(240,244,250,.6)';const t=performance.now()/1000;for(let k=0;k<160;k++){const x=(k*157.3+t*20*(1+(k%3)))%W,y=Y0+((k*97.1+t*40*(1+(k%4)*0.3))%(TERM_Y-Y0));ctx.fillRect(x,y,1.6,1.6)}}
@@ -282,7 +303,7 @@ function draw(){
   sign(1180,622,'EXIT →');
   drawFog(0,Y0,W,TERM_Y-Y0+120,0.3);
   if(R.fx.rain>G.clock){const tt=performance.now()/1000,st=R.fx.storm>G.clock;ctx.fillStyle=`rgba(20,30,50,${st?0.22:0.1})`;ctx.fillRect(0,Y0,W,Y1-Y0);ctx.strokeStyle='rgba(170,195,225,.35)';ctx.lineWidth=1;ctx.beginPath();for(let i=0;i<220;i++){const px=(i*97.3+tt*60)%W,py=Y0+((i*53.1+tt*260)%(Y1-Y0));ctx.moveTo(px,py);ctx.lineTo(px-4,py+12)}ctx.stroke();
-    if(st&&Math.sin(tt*3.1)>0.992){ctx.fillStyle='rgba(255,250,230,.25)';ctx.fillRect(0,Y0,W,Y1-Y0)}if(st)sign(W/2-80,-12,'STORM · RUNWAY CLOSED','#FFC72C')}
+    if(st&&Math.sin(tt*3.1)>0.992){ctx.fillStyle='rgba(255,250,230,.25)';ctx.fillRect(0,Y0,W,Y1-Y0)}if(st)sign(W/2-80,AF_Y-12,'STORM · RUNWAY CLOSED','#FFC72C')}
   if(R.fx.strike>G.clock){const tt=performance.now()/300;for(let k=0;k<9;k++){const px=70+k*20,py=634+Math.sin(tt+k)*1.5;ctx.fillStyle='#ECE8DF';ctx.beginPath();ctx.arc(px,py,2.6,0,Math.PI*2);ctx.fill();ctx.fillStyle='#E5484D';ctx.fillRect(px-5,py-14+Math.sin(tt*1.3+k),10,6);ctx.fillStyle='#8C97A1';ctx.fillRect(px-0.4,py-8,0.8,6)}sign(70,606,'ON STRIKE','#E5484D','#fff')}
   for(const f of R.floaters){
     if(f.x<vx0-60||f.x>vx1+60)continue;

@@ -4,7 +4,7 @@ What's being worked on, what's next, and ideas not yet agreed. Anything here get
 
 ## Now
 
-Nothing in progress. Pick from Next, or open an issue.
+- **Real airport shapes** (#10). The layouts are rebuilt as real 2D shapes: Heathrow T5, Atlanta and Denver, Schiphol, Beijing Daxing, and a few odd ones such as the round Terminal 1 at Paris Charles de Gaulle. The spec is `docs/specs/airport-shapes.md` (approved). It's being built in four steps, one PR each: 1. stand frames and rooms, with Classic made real (version 23); 2. Remote apron, Staggered apron, Curved front, and Hall and finger pier; 3. Satellite, Starfish, Midfield concourses and the Round terminal; 4. mobile lounges and balance.
 
 ## Next
 
@@ -13,6 +13,7 @@ Nothing in progress. Pick from Next, or open an issue.
 
 ## Ideas (not agreed)
 
+- **More than one airport.** Run a second airport. The odd real sites would suit it: Gibraltar's road across the runway, Barra's beach runway that follows the tide, and Madeira's runway on pillars.
 - **Speed on older phones.** A check that fails if a level 9 airport draws too slowly on a throttled phone profile.
 - **Page size budget.** A check on the size of `dist/index.html`, which grows with every feature.
 - **Accessibility.** Route and line colours that work for colour-blind players, and a larger-text option.

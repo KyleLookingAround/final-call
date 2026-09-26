@@ -12,7 +12,7 @@ function pickCrew(trip){let fit=null,fresh=null;for(const c of G.crews){if(c.res
 function crewReady(i,F){
   if(F.partner||F.crew)return true;
   const c=pickCrew(TRIP[(CITY[F.city]||F.ac).tier]);if(c){F.crew=c;return true}
-  if(!F.crewWait){F.crewWait=G.clock;floater('CREW DELAY',STAND_X[i],CABIN_TOP-24,'#FF7A8A',true);if(G.dstat)G.dstat.crewDl=(G.dstat.crewDl||0)+1;if(SET().autoCrews!==false)hireCrew(true)}
+  if(!F.crewWait){F.crewWait=G.clock;toW(i,0,CABIN_TOP-24);floater('CREW DELAY',WP.x,WP.y,'#FF7A8A',true);if(G.dstat)G.dstat.crewDl=(G.dstat.crewDl||0)+1;if(SET().autoCrews!==false)hireCrew(true)}
   return false;
 }
 function crewAway(F,back){const c=F.crew;if(!c)return;c.res=0;c.back=back;c.duty+=back-G.clock;if(c.duty>=CREW_DUTY-50){c.free=back+CREW_REST;c.duty=0}else c.free=back+10}
@@ -29,7 +29,7 @@ function farDelay(C){const w=seasonOf(dayOf(G.clock)).name==='Winter',p=(0.05+0.
 function nightChecks(){
   if(!pol('checks'))return;const due=G.fleet.filter(f=>!f.sold&&f.st==='base'&&(f.wear||0)>=4);if(!due.length)return;
   const k=0.8*(1-0.1*G.lv.hangar);let cost=0,n=0;for(const f of due){const c=Math.round(serviceCost(f)*k);if(G.cash<c)break;spend(c,'costs');cost+=c;f.wear=0;n++}
-  if(n&&!R.sim)floater(`OVERNIGHT CHECKS · ${n} PLANE${n>1?'S':''} · ${money(cost)}`,STAND_X[0]+200,CABIN_TOP-70,'#5CC8FF',true);
+  if(n&&!R.sim){toW(0,200,CABIN_TOP-70);floater(`OVERNIGHT CHECKS · ${n} PLANE${n>1?'S':''} · ${money(cost)}`,WP.x,WP.y,'#5CC8FF',true)}
   if(G.dstat)G.dstat.checks=(G.dstat.checks||0)+n;
 }
 function crewPanel(){

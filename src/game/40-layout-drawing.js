@@ -40,3 +40,45 @@ function drawLayoutTerminal(){
     mono(G.pierB?'SATELLITE':'SATELLITE · NEEDS BUILDING',(LAY.hall[0]+LAY.hall[1])/2,517,'#56606A',9,'center');mono('PEOPLE MOVER',(a+b)/2,503,'#56606A',8.5,'center')}
   if(id==='remote')mono('BUS GATES',(LAND_R+LAY.conc1)/2,517,'#56606A',9,'center');
 }
+// A 2D layout's floors: every room filled, then its walls with a gap at each doorway (a door's fifth number is its
+// half-width). Rooms in the second phase show only a dashed outline until Pier B, or its equivalent, is built.
+function polyPath(P){ctx.beginPath();P.forEach(([x,y],k)=>k?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath()}
+function drawRooms(){
+  const shut=r=>r.ph===2&&!G.pierB;
+  for(const r of ROOMS){if(shut(r))continue;ctx.fillStyle=r.col||'#1C2228';polyPath(r.poly);ctx.fill()}
+  const doors=LAY.doors||[];ctx.strokeStyle='#4E5964';ctx.lineWidth=3;ctx.lineCap='square';ctx.beginPath();
+  for(const r of ROOMS){if(shut(r))continue;const P=r.poly;
+    for(let k=0;k<P.length;k++){const [x1,y1]=P[k],[x2,y2]=P[(k+1)%P.length],len=Math.hypot(x2-x1,y2-y1),ux=(x2-x1)/len,uy=(y2-y1)/len;
+      const cuts=[];for(const d of doors){const t=(d[2]-x1)*ux+(d[3]-y1)*uy,off=Math.abs((d[2]-x1)*uy-(d[3]-y1)*ux);if(off<3&&t>-40&&t<len+40)cuts.push([t-(d[4]||34),t+(d[4]||34)])}
+      cuts.sort((a,b)=>a[0]-b[0]);let t0=0;
+      for(const [a,b] of cuts){if(a>t0){ctx.moveTo(x1+ux*t0,y1+uy*t0);ctx.lineTo(x1+ux*Math.min(a,len),y1+uy*Math.min(a,len))}t0=Math.max(t0,b)}
+      if(t0<len){ctx.moveTo(x1+ux*t0,y1+uy*t0);ctx.lineTo(x2,y2)}}}
+  ctx.stroke();
+  const later=ROOMS.filter(shut);if(!later.length)return;
+  for(const r of later){const xs=r.poly.map(p=>p[0]),ys=r.poly.map(p=>p[1]),x0=Math.min(...xs),y0=Math.min(...ys),w=Math.max(...xs)-x0,h=Math.max(...ys)-y0;
+    if(isBuilding('pier:B')){hatch(x0,y0,w,h,0,'');continue}
+    ctx.strokeStyle='#2B3238';ctx.lineWidth=1.5;ctx.setLineDash([6,6]);polyPath(r.poly);ctx.stroke();ctx.setLineDash([])}
+  const r=later[0],xs=r.poly.map(p=>p[0]),ys=r.poly.map(p=>p[1]),cx=(Math.min(...xs)+Math.max(...xs))/2,cy=(Math.min(...ys)+Math.max(...ys))/2,n=p2name().toUpperCase();
+  if(isBuilding('pier:B'))hatchLabel(cx,cy,bprog('pier:B'),'BUILDING '+n);
+  else mono(G.level>=PIER.lvl?`${n} · ${money(PIER.cost)}`:`${n} · needs ${LEVELS[PIER.lvl].name}`,cx,cy,'#4A535D',11,'center');
+}
+// a shop unit, turned to face its concourse; its words are kept the right way up
+function drawShopUnit(j){
+  const s=G.shops[j],a=((SHOP_A[j]%360)+360)%360;ctx.save();ctx.translate(SHOP_X[j],SHOP_Y[j]);ctx.rotate(a*Math.PI/180);
+  if(s){const t=SHOPS[s.type];ctx.fillStyle='#242A31';ctx.fillRect(0,0,118,40);ctx.fillStyle=t.col;ctx.fillRect(0,38,118,3);
+    if(a>90&&a<=270){ctx.translate(118,40);ctx.rotate(Math.PI)}
+    ctx.font='700 11px "Saira Condensed","Arial Narrow",sans-serif';ctx.fillStyle=t.col;ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.fillText(t.name.toUpperCase(),7,16);
+    mono(`Lv ${s.lvl+1} · ${money(s.earned||0)}`,7,30,'#909AA4',8.5)}
+  else{ctx.strokeStyle='#343C45';ctx.lineWidth=1;ctx.setLineDash([3,3]);ctx.strokeRect(.5,.5,117,39);ctx.setLineDash([]);if(a>90&&a<=270){ctx.translate(118,40);ctx.rotate(Math.PI)}mono('UNIT TO LET',59,24,'#4A535D',8.5,'center')}
+  ctx.restore();
+}
+function shopHit(j,x,y){const a=SHOP_A[j]*Math.PI/180,c=Math.cos(a),s=Math.sin(a),dx=x-SHOP_X[j],dy=y-SHOP_Y[j],u=dx*c+dy*s,v=dy*c-dx*s;return u>=0&&u<=118&&v>=0&&v<=40}
+// a 2D layout's apron furniture: taxi lines, roads, the control tower and names painted on the ground
+function drawPlanApron(){
+  for(const d of LAY.decor||[]){
+    if(d.t==='taxi'){ctx.strokeStyle='rgba(255,199,44,.4)';ctx.lineWidth=2;ctx.setLineDash([12,10]);ctx.beginPath();d.pts.forEach(([x,y],k)=>k?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();ctx.setLineDash([])}
+    else if(d.t==='road'){ctx.strokeStyle='#262C33';ctx.lineWidth=d.w||16;ctx.lineJoin='round';ctx.beginPath();d.pts.forEach(([x,y],k)=>k?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke()}
+    else if(d.t==='tower')drawTower(d.x,d.y);
+    else if(d.t==='label'){ctx.font='800 20px "Saira Condensed","Arial Narrow",sans-serif';ctx.fillStyle='rgba(255,199,44,.14)';ctx.textAlign='center';ctx.textBaseline='alphabetic';ctx.fillText(d.text,d.x,d.y)}
+  }
+}

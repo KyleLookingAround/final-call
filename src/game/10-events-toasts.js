@@ -29,8 +29,8 @@ function tickToasts(realDt){
 }
 function techFault(i,F){
   const cost=Math.round(F.ac.op*2),fl=G.fleet[F.fleetIdx],w=fl?fl.wear||0:0,mins=Math.round(20*(1-0.15*G.lv.fire));F.fault=mins;
-  if(pol('repair')==='rush'&&G.cash>=cost){spend(cost,'costs');F.fault=Math.min(F.fault,4);floater(`FAULT · RUSH REPAIR ${money(cost)}`,STAND_X[i],CABIN_TOP-24,'#FF9F43',true)}
-  else floater(`FAULT · ${mins} MIN REPAIR`,STAND_X[i],CABIN_TOP-24,'#FF7A8A',true);
+  if(pol('repair')==='rush'&&G.cash>=cost){spend(cost,'costs');F.fault=Math.min(F.fault,4);toW(i,0,CABIN_TOP-24);floater(`FAULT · RUSH REPAIR ${money(cost)}`,WP.x,WP.y,'#FF9F43',true)}
+  else{toW(i,0,CABIN_TOP-24);floater(`FAULT · ${mins} MIN REPAIR`,WP.x,WP.y,'#FF7A8A',true)}
 }
 function wageBill(){const D=derived();return (D.desks*WAGE.desks+D.lanes*WAGE.lanes+D.officers*WAGE.officers)*(G.wageMul||1)*payMul()*(R.reg?R.reg.wageMul:1)}
 function fireEvent(){
