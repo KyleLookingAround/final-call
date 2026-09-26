@@ -95,3 +95,23 @@ function drawPlanApron(){
     else if(d.t==='label'){ctx.font='800 20px "Saira Condensed","Arial Narrow",sans-serif';ctx.fillStyle='rgba(255,199,44,.14)';ctx.textAlign='center';ctx.textBaseline='alphabetic';ctx.fillText(d.text,d.x,d.y)}
   }
 }
+// over the floors: CDG's escalator tubes, Denver's tent roof
+function drawPlanOver(){
+  for(const d of LAY.decor||[]){
+    if(d.t==='tubes'){ctx.fillStyle='#101316';ctx.beginPath();ctx.arc(d.x,d.y,d.r,0,Math.PI*2);ctx.fill();ctx.strokeStyle='rgba(92,200,255,.5)';ctx.lineWidth=6; // the open middle and its escalator tubes
+      for(const [a,b] of [[-50,130],[-20,160],[20,-160],[50,-130],[0,180]]){const r1=a*Math.PI/180,r2=b*Math.PI/180;ctx.beginPath();ctx.moveTo(d.x+d.r*Math.sin(r1),d.y-d.r*Math.cos(r1));ctx.lineTo(d.x+d.r*Math.sin(r2),d.y-d.r*Math.cos(r2));ctx.stroke()}}
+    else if(d.t==='tent'){ctx.strokeStyle='rgba(236,232,223,.35)';ctx.lineWidth=2;ctx.beginPath();for(let x=d.x0;x+100<=d.x1;x+=100){ctx.moveTo(x,d.y);ctx.lineTo(x+50,d.y-14);ctx.lineTo(x+100,d.y)}ctx.stroke()} // Denver's tent roof
+  }
+}
+// links: a train's underground track and stations, and a car wherever people are riding (one shuttles when nobody is);
+// tunnels with moving walkways as dashed lines
+function drawLinks(){
+  const Ls=LAY.links;if(!Ls)return;const t=performance.now()/1000;
+  Ls.forEach(([a,b,pa,pb,kind],k)=>{const tr=kind==='train',open=!(ROOMS[ROOM_ID[a]].ph===2||ROOMS[ROOM_ID[b]].ph===2)||G.pierB;if(!open)return;
+    ctx.strokeStyle=tr?'rgba(92,200,255,.45)':'rgba(236,232,223,.22)';ctx.lineWidth=tr?5:8;ctx.setLineDash(tr?[14,10]:[6,6]);ctx.beginPath();ctx.moveTo(pa[0],pa[1]);ctx.lineTo(pb[0],pb[1]);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle=tr?'#5CC8FF':'#7F8A94';for(const [x,y] of [pa,pb])ctx.fillRect(x-9,y-5,18,10);
+    if(tr){const riders=R.pax.filter(p=>p.riding&&Math.abs((p.x-pa[0])*(pb[1]-pa[1])-(p.y-pa[1])*(pb[0]-pa[0]))<30*Math.hypot(pb[0]-pa[0],pb[1]-pa[1]));
+      const ang=Math.atan2(pb[1]-pa[1],pb[0]-pa[0]),car=(x,y)=>{ctx.save();ctx.translate(x,y);ctx.rotate(ang);ctx.fillStyle='#5CC8FF';rrect(-34,-8,68,16,7);ctx.fill();ctx.fillStyle='#14171B';for(let w=0;w<4;w++)ctx.fillRect(-26+w*14,-4,9,5);ctx.restore()};
+      if(riders.length){const done=new Set();for(const p of riders){const key=Math.round(p.x/120)+','+Math.round(p.y/120);if(done.has(key))continue;done.add(key);car(p.x,p.y)}}
+      else{const u=((t*0.15+k*0.37)%2),f=u<1?u:2-u;car(pa[0]+(pb[0]-pa[0])*f,pa[1]+(pb[1]-pa[1])*f)}}});
+}

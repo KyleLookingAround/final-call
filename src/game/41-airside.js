@@ -55,18 +55,21 @@ function buildRooms(L){
   STAND_ROOM.length=0;SHOP_ROOM.length=0;
   if(!L.rooms){ROOMS=null;ROUTE=null;ROOM_ID={};return}
   ROOMS=L.rooms;ROOM_ID={};ROOMS.forEach((r,k)=>ROOM_ID[r.id]=k);
-  // for every pair of rooms, the doorway to walk to first: the shortest walk from the middle of one room to the middle of the
-  // other, through doorways (worked out once per layout)
-  const n=ROOMS.length,doors=(L.doors||[]).map(([a,b,x,y])=>[ROOM_ID[a],ROOM_ID[b],x,y]),mid=ROOMS.map(r=>[r.poly.reduce((a,p)=>a+p[0],0)/r.poly.length,r.poly.reduce((a,p)=>a+p[1],0)/r.poly.length]);
-  const d2=(x1,y1,x2,y2)=>Math.hypot(x2-x1,y2-y1);
+  // Ways between rooms: every doorway both ways, and every link (a train, or a tunnel with moving walkways) from its station in
+  // one room to its station in the other. For every pair of rooms, the way to take first is the one on the quickest trip from
+  // the middle of one to the middle of the other, worked out once per layout; a ride counts as the walk it saves plus the wait.
+  const n=ROOMS.length,mid=ROOMS.map(r=>[r.poly.reduce((a,p)=>a+p[0],0)/r.poly.length,r.poly.reduce((a,p)=>a+p[1],0)/r.poly.length]),d2=(a,b)=>Math.hypot(b[0]-a[0],b[1]-a[1]);
+  const ways=[];
+  for(const [a,b,x,y] of L.doors||[])for(const [f,t] of [[a,b],[b,a]])ways.push({fr:ROOM_ID[f],nx:ROOM_ID[t],en:[x,y],ex:[x,y],c:0,m:0});
+  for(const [a,b,pa,pb,kind] of L.links||[]){const tr=kind==='train',len=d2(pa,pb),c=tr?len*0.12+TRAIN_EVERY*0.5*90:len*0.5;
+    for(const [f,t,e,x] of [[a,b,pa,pb],[b,a,pb,pa]])ways.push({fr:ROOM_ID[f],nx:ROOM_ID[t],en:e,ex:x,c,m:tr?1:2})}
   ROUTE=[...Array(n)].map(()=>new Array(n).fill(null));
   for(let to=0;to<n;to++){
-    const far=doors.map(([a,b,x,y])=>a===to||b===to?d2(x,y,...mid[to]):Infinity); // how far each doorway is from the destination
-    for(let k=0;k<doors.length;k++)for(const [m,[a,b,x,y]] of doors.entries())for(const [i,[a2,b2,x2,y2]] of doors.entries())
-      if(i!==m&&(a2===a||a2===b||b2===a||b2===b)&&far[i]+d2(x,y,x2,y2)<far[m])far[m]=far[i]+d2(x,y,x2,y2);
+    const go=ways.map(w=>w.nx===to?d2(w.ex,mid[to]):Infinity); // from coming out of each way to the destination
+    for(let pass=0;pass<ways.length;pass++){let changed=false;
+      ways.forEach((w,k)=>{if(w.nx===to)return;for(const [k2,w2] of ways.entries())if(w2.fr===w.nx&&w2.nx!==w.fr){const v=d2(w.ex,w2.en)+w2.c+go[k2];if(v<go[k]){go[k]=v;changed=true}}});if(!changed)break}
     for(let r=0;r<n;r++){if(r===to)continue;let best=null,bd=Infinity;
-      for(const [m,[a,b,x,y]] of doors.entries()){if(a!==r&&b!==r)continue;const v=d2(...mid[r],x,y)+far[m];if(v<bd){bd=v;best=[x,y,a===r?b:a]}}
-      ROUTE[r][to]=best}}
+      ways.forEach((w,k)=>{if(w.fr!==r)return;const v=d2(mid[r],w.en)+w.c+go[k];if(v<bd){bd=v;best=w}});ROUTE[r][to]=best}}
   L.stands.forEach((s,i)=>STAND_ROOM[i]=ROOM_ID[s.room||'main']??0);
   L.shops.forEach((s,j)=>SHOP_ROOM[j]=ROOM_ID[s[6]||'main']??0);
 }
@@ -75,14 +78,20 @@ const ROOM_MAIN=()=>ROOMS?ROOM_ID.main??0:null;
 function route(p,room){
   p.way=null;if(!ROOMS||room==null)return;
   if(p.room==null||p.room===room){p.room=room;return}
-  const way=[];let r=p.room;
-  for(let k=0;k<ROOMS.length&&r!==room;k++){const d=ROUTE[r][room];if(!d)break;way.push(d[0],d[1],d[2]);r=d[2]}
+  const way=[];let r=p.room; // four numbers a step: where to, the room it leads into, and how (0 walk, 1 train, 2 moving walkway)
+  for(let k=0;k<ROOMS.length&&r!==room;k++){const d=ROUTE[r][room];if(!d)break;if(d.m)way.push(d.en[0],d.en[1],r,0);way.push(d.ex[0],d.ex[1],d.nx,d.m);r=d.nx}
   if(way.length){p.way=way;p.wi=0}else p.room=room;
 }
-// walks towards the target, through any doorways first; true on arrival
+// walks towards the target, through any doorways and along any links first; true on arrival. A train leaves each station
+// every TRAIN_EVERY game minutes; riders are hidden and drawn as the train.
+const TRAIN_EVERY=2,TRAIN_V=900;
 function walk(p,v,dt){
   const w=p.way;
-  if(w){if(moveTo(p,w[p.wi],w[p.wi+1],v,dt)){p.room=w[p.wi+2];p.wi+=3;if(p.wi>=w.length)p.way=null}return false}
+  if(w){const k=p.wi,m=w[k+3];let sp=v;
+    if(m===1){if(!p.riding){if(p.rideAt==null)p.rideAt=Math.ceil(G.clock/TRAIN_EVERY+1e-9)*TRAIN_EVERY;if(G.clock<p.rideAt)return false;p.riding=true}sp=TRAIN_V}
+    else if(m===2)sp=v*2;
+    if(moveTo(p,w[k],w[k+1],sp,dt)){p.room=w[k+2];p.riding=false;p.rideAt=null;p.wi+=4;if(p.wi>=w.length)p.way=null}
+    return false}
   return moveTo(p,p.tx,p.ty,v,dt);
 }
 // a 2D remote stand: passengers wait by its bus gate in the terminal ([x, y, 1 if the lounge is below the gate else -1])
@@ -104,6 +113,7 @@ function layoutFaults(id){
   ROOMS.forEach(r=>{const P=r.poly,n=P.length;let sgn=0;for(let k=0;k<n;k++){const [a,b]=P[k],[c,d]=P[(k+1)%n],[e,f]=P[(k+2)%n],cr=Math.sign((c-a)*(f-d)-(d-b)*(e-c));if(cr&&sgn&&cr!==sgn){bad.push(`room ${r.id} isn't convex`);break}if(cr)sgn=cr}
     if(r.id!=='main'&&!ROUTE[ROOM_ID[r.id]][ROOM_ID.main])bad.push(`room ${r.id} can't be reached`)});
   for(const [a,b,x,y] of L.doors||[])for(const r of [a,b])if(ROOM_ID[r]==null||edgeDist(ROOMS[ROOM_ID[r]].poly,x,y)>3)bad.push(`doorway ${a}–${b} isn't on the wall of ${r}`);
+  for(const [a,b,pa,pb] of L.links||[])for(const [r,[x,y]] of [[a,pa],[b,pb]])if(ROOM_ID[r]==null||!inPoly(ROOMS[ROOM_ID[r]].poly,x,y))bad.push(`the link ${a}–${b} has no station in ${r}`);
   SIDX.forEach(i=>{
     for(let j=i+1;j<SIDX.length;j++)if(planes[i].some(A=>planes[j].some(B=>convexOverlap(A,B))))bad.push(`${GATES[i]} and ${GATES[j]} touch`);
     ROOMS.forEach(r=>{if(planes[i].some(A=>convexOverlap(A,r.poly)))bad.push(`${GATES[i]} touches room ${r.id}`)});

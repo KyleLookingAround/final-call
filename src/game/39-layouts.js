@@ -3,7 +3,8 @@
 // and its shop units. applyLayout copies the current one into the shared arrays (STAND_X, STAND, GATES, SHOP_X...)
 // in place, so everything that reads them follows the layout.
 // price, build minutes and level of the n-th stand bought, following Classic's ladder and carrying on past eight
-const LADDER=[[0,0,0],[400,30,0],[3000,60,1],[12000,90,3],[80000,120,4],[150000,150,4],[300000,180,6],[500000,210,6],[700000,240,7],[900000,270,7],[1200000,300,8],[1500000,330,8]];
+const LADDER=[[0,0,0],[400,30,0],[3000,60,1],[12000,90,3],[80000,120,4],[150000,150,4],[300000,180,6],[500000,210,6],[700000,240,7],[900000,270,7],[1200000,300,8],[1500000,330,8],
+  [1800000,360,9],[2100000,390,9],[2400000,420,9],[2800000,450,9]];
 const lad=(x,g,n,o={})=>{const s={x,g,cost:LADDER[n][0],build:LADDER[n][1],lvl:LADDER[n][2],...o};if(!s.pier)delete s.pier;return s};
 // the refreshed Classic's parts, shared by the layouts built on it: the main concourse, a second stretch that opens with
 // Pier B (ending at x), and the pier itself
@@ -48,6 +49,10 @@ function arcParts(cx,cy,R,thick,w,bears,pull){
   doors.push(['main','join',1240,484,38],['join','arc0',(ox+ix)/2,(oy+iy)/2,thick/2+2]);
   return {rooms,doors,stands,shops,ring:(r,b0,b1)=>[...Array(13)].map((_,k)=>P(b0+(b1-b0)*k/12,r))};
 }
+// the Round terminal: [centre x, y, ring radius, how far out the pods are, pod half-size], the pods' bearings, width, top
+const RT={geo:[2000,-1000,330,1050,160],bears:[-100,-60,-20,20,60,100],W:3900,top:-2800};
+// the Starfish: hall [centre x, y, radius], the north pier [length, stand distance], the diagonal ones, the southern ones, width, top
+const SF={hall:[2300,-700,420],n:[700,480],d:[800,560],s:[650,420],W:4000,top:-1900};
 // the hall's piers: centre [length, first and second stand distances], sides likewise, the map's width and top
 const HP={hall:[1500,2320],c:[1000,450,760],s:[1250,900,900],W:3900,top:-1000};
 // the herringbone: first stand's height, the gap between stands, how far planes lean, and how far they sit back
@@ -95,19 +100,67 @@ const LAYOUTS={
     shops:[[30,'A1',1,1,452],[330,'A2',1,1,452],[630,'A3',1,1,452],[930,'A4',1,1,452],
       ...[0,1,2,3].map(k=>[x0+150+k*123,'Hall',1,1.3,300,0,'hall']),...[0,1,2,3,4,5].map(k=>[x0+20+k*123,'B'+(k+1),2,1,420,0,'hall'])],
     decor:[{t:'tower',x:cx,y:HP.top+100}]}})(),
-  sat:{name:'Satellite',plan:'l_sat',lvl:7,pts:3,cost:1200000,build:960,W:4410,gap:[1232,1600],hall:[2740,3240],mover:1.8,upk:2500,
-    from:'the satellites at London Stansted and Munich Terminal 2',p2:'Satellite',
-    up:'Twelve stands, a built-in people mover, big duty-free and lounge space, and quicker transfers.',down:'Every walk to the satellite is long, and it costs the most to run after Starfish.',
-    stands:[160,440,720,1000,1760,2040,2320,2600,3380,3660,3940,4220].map((x,k)=>lad(x,k<4?'A'+(k+1):'S'+(k-3),k,{pier:k>=4?1:0})),
-    shops:[[182,'A1'],[462,'A2'],[742,'A3'],[1022,'A4'],...[1760,2040,2320,2600].map((x,k)=>[x+22,'S'+(k+1),2]),
-      [2750,'Hall',2,1.2],[2873,'Hall',2,1.2],[2996,'Hall',2,1.2],[3119,'Hall',2,1.2],...[3380,3660,3940,4220].map((x,k)=>[x+22,'S'+(k+5),2])],
-    shopBonus:{duty:1.3,lounge:1.3},xfer:1.5},
-  star:{name:'Starfish',plan:'l_star',lvl:9,pts:3,cost:3000000,build:1440,W:4430,conc1:2150,hall:[1140,2140],walk:1.35,rep:0.5,upk:5000,
-    from:'the star-shaped terminal at Beijing Daxing, built for short walks',p2:'East wing',
-    up:'Twelve stands close to a star-shaped hall, the shortest walks for its size, the most shops and a rating bonus.',down:'The costliest to rebuild and to run.',
-    stands:[[160,-100,'A1'],[440,-60,'A2'],[720,-25,'A3'],[1000,0,'A4'],[2280,0,'B1'],[2560,-20,'B2'],[2840,-40,'B3'],[3120,-60,'B4'],[3400,-75,'B5'],[3680,-90,'B6'],[3960,-100,'B7'],[4240,-110,'B8']].map(([x,dy,g],k)=>lad(x,g,k,{dy,pier:k>=4?1:0})),
-    shops:[[182,'A1'],[462,'A2'],[742,'A3'],[1022,'A4'],...[0,1,2,3,4,5,6,7].map(k=>[1150+k*123,'Hall',1,1.3]),
-      ...[2280,2560,2840,3120,3400,3680,3960,4240].map((x,k)=>[x+22,'B'+(k+1),2])]},
+  // the main building and two satellites out on the apron, joined by an underground train (London Heathrow Terminal 5)
+  sat:(()=>{const sats=[[-540,'5B',0],[-1700,'5C',4]].map(([yS,id,k0])=>{const yN=yS-180;
+      return {room:{id,ph:2,poly:[[280,yN],[1040,yN],[1040,yS],[280,yS]]},
+        stands:[[500,yS,0],[820,yS,0],[500,yN,180],[820,yN,180]].map(([x,y,h],k)=>({x,y,h,g:'S'+(k0+k+1),room:id})),
+        shops:[0,1,2,3,4].map(k=>[290+k*123,'S'+(k0/4*5+k+1),2,1,yS-130,0,id]),station:[980,yS-90]}});
+    return {name:'Satellite',plan:'l_sat',lvl:7,pts:3,cost:1200000,build:960,W:1560,top:-2390,upk:2500,
+    from:'Terminal 5 at London Heathrow, with its two satellites and the Transit',p2:'Satellite',
+    up:'Twelve stands, big duty-free and lounge space, and quicker transfers.',down:'A train ride out to the satellites, and it costs the most to run after Starfish.',
+    rooms:[CLP.rooms(0)[0],...sats.map(S=>S.room)],doors:[],
+    links:[['main','5B',[980,505],sats[0].station,'train'],['5B','5C',sats[0].station,sats[1].station,'train']],
+    stands:[...CLP.stands().slice(0,4),...sats.flatMap(S=>S.stands)].map((s,k)=>k<4?s:{...lad(0,'',k),...s,pier:1}),
+    shops:[...CLP.shops().slice(0,4),...sats.flatMap(S=>S.shops)],
+    shopBonus:{duty:1.3,lounge:1.3},xfer:1.5,
+    decor:[{t:'taxi',pts:[[0,-47],[1560,-47]]},{t:'taxi',pts:[[0,-1210],[1560,-1210]]},{t:'tower',x:1350,y:-900},{t:'label',x:170,y:-600,text:'5B'},{t:'label',x:170,y:-1760,text:'5C'}]}})(),
+  // long concourses out on the airfield, one behind the other, strung along an underground train (Atlanta, Denver)
+  mid:(()=>{const cons=[[-540,'A'],[-1700,'B']].map(([yS,id])=>{const yN=yS-180,xs=[320,640,960];
+      return {room:{id,ph:2,poly:[[140,yN],[1140,yN],[1140,yS],[140,yS]]},
+        stands:[...xs.map(x=>[x,yS,0]),...xs.map(x=>[x,yN,180])].map(([x,y,h],k)=>({x,y,h,g:id+(k+1),room:id})),
+        shops:[150,273,396,700,823,946].map((x,k)=>[x,id+(k+1),2,1,yS-130,0,id]),station:[640,yS-90]}});
+    return {name:'Midfield concourses',plan:'l_mid',lvl:9,pts:3,cost:2500000,build:1320,W:1560,top:-2480,upk:4500,p2:'Concourses',
+    from:'the midfield concourses and Plane Train of Atlanta, and Denver\'s tent roof',
+    up:'Sixteen stands, the most of any layout, along a fast underground train.',down:'The longest rides out to the gates, and costly to run.',
+    rooms:[CLP.rooms(0)[0],...cons.map(C=>C.room)],doors:[],
+    links:[['main','A',[640,505],cons[0].station,'train'],['A','B',cons[0].station,cons[1].station,'train']],
+    stands:[...CLP.stands().slice(0,4).map((s,k)=>({...s,g:'T'+(k+1)})),...cons.flatMap(C=>C.stands)].map((s,k)=>k<4?s:{...lad(0,'',k),...s,pier:1}),
+    shops:[...CLP.shops().slice(0,4),...cons.flatMap(C=>C.shops)],
+    decor:[{t:'taxi',pts:[[0,-47],[1560,-47]]},{t:'taxi',pts:[[0,-1210],[1560,-1210]]},{t:'tower',x:1350,y:-900},{t:'tent',x0:20,x1:1220,y:TERM_Y+42}]}})(),
+  // a round terminal with glass tubes across its open middle, and satellite pods reached through tunnels with moving
+  // walkways (Paris Charles de Gaulle Terminal 1)
+  round:(()=>{const [cx,cy,Rr,Rs,a]=RT.geo,D=b=>{const r=b*Math.PI/180;return [Math.sin(r),-Math.cos(r)]},pt=(x,y,b,d)=>{const [u,v]=D(b);return [Math.round(x+u*d),Math.round(y+v*d)]};
+    const ring={id:'ring',col:'#20272E',poly:[...Array(12)].map((_,k)=>pt(cx,cy,15+k*30,Rr))},[sx,sy]=pt(cx,cy,180,Rr*Math.cos(Math.PI/12));
+    const pods=RT.bears.map((sb,k)=>{const [px,py]=pt(cx,cy,sb,Rs),id='pod'+k,ns=[sb-45,sb+45,sb+135,sb+225];
+      const poly=ns.map((n,j)=>{const [u,v]=D(n),[u2,v2]=D(ns[(j+1)%4]);return [Math.round(px+a*u+a*u2),Math.round(py+a*v+a*v2)]});
+      const stands=[sb-45,sb+45].map(n=>{const [x,y]=pt(px,py,n,a);return {x,y,h:(n+180+360)%360,room:id}});
+      const ar=sb*Math.PI/180,shop=[Math.round(px-59*Math.cos(ar)+20*Math.sin(ar)),'Kiosk',k<2?1:2,0.8,Math.round(py-59*Math.sin(ar)-20*Math.cos(ar)),sb,id];
+      return {room:{id,ph:k<2?1:2,poly},stands,shop,link:['ring',id,pt(cx,cy,sb,Rr-60),[px,py],'walkway']}});
+    return {name:'Round terminal',plan:'l_round',lvl:6,pts:2,cost:600000,build:900,W:RT.W,top:RT.top,rep:0.3,upk:1500,p2:'Outer satellites',
+    from:'Terminal 1 at Paris Charles de Gaulle, with its tubes and tunnels',
+    up:'Twelve stands in little space, round a terminal whose glass tubes lift your rating.',down:'Each satellite has only a kiosk, and the tunnels are a long way to walk.',
+    rooms:[CLP.rooms(0)[0],{id:'link',poly:[[1240,TERM_Y],[sx+60,TERM_Y],[sx+60,SEC_Y],[1240,SEC_Y]]},{id:'spoke',poly:[[sx-55,sy],[sx+55,sy],[sx+55,TERM_Y],[sx-55,TERM_Y]]},ring,...pods.map(P=>P.room)],
+    doors:[['main','link',1240,484,38],['link','spoke',sx,TERM_Y,55],['spoke','ring',sx,sy,55]],links:pods.map(P=>P.link),
+    stands:pods.flatMap(P=>P.stands).map((s,k)=>({...lad(0,'',k),...s,g:(k<4?'A':'B')+(k<4?k+1:k-3),...(k>=4?{pier:1}:{})})),
+    shops:[...CLP.shops().slice(0,4),...[0,1,2,3,4,5].map(k=>{const b=30+k*60,r=b*Math.PI/180,d=Rr*0.6;return [Math.round(cx+d*Math.sin(r)-59*Math.cos(r)),'Ring',1,1,Math.round(cy-d*Math.cos(r)-59*Math.sin(r)),b,'ring']}),...pods.map(P=>P.shop)],
+    decor:[{t:'tubes',x:cx,y:cy,r:Rr*0.36},{t:'tower',x:sx+420,y:TERM_Y-260}]}})(),
+  // five piers radiating from a star-shaped hall; the sixth spoke is the way in from the main concourse (Beijing Daxing)
+  star:(()=>{const [cx,cy,R]=SF.hall,e=R*Math.cos(Math.PI/12),at=b=>{const a=b*Math.PI/180;return [Math.round(cx+e*Math.sin(a)),Math.round(cy-e*Math.cos(a))]};
+    const hall={id:'hall',col:'#20272E',poly:[...Array(12)].map((_,k)=>{const a=(15+k*30)*Math.PI/180;return [Math.round(cx+R*Math.sin(a)),Math.round(cy-R*Math.cos(a))]})};
+    const P=(id,b,L,st,ph)=>{const [x,y]=at(b),p=pierParts(id,'hall',x,y,b,L,110,st);p.rooms.forEach(r=>{if(ph)r.ph=2});return p};
+    const N=P('pn',0,SF.n[0],[[SF.n[1],-1],[SF.n[1],1]]),SW=P('psw',240,SF.s[0],[[SF.s[1],1],[0,0]]),
+      NW=P('pnw',300,SF.d[0],[[SF.d[1],-1],[SF.d[1],1],[0,0]],1),NE=P('pne',60,SF.d[0],[[SF.d[1],-1],[SF.d[1],1],[0,0]],1),SE=P('pse',120,SF.s[0],[[SF.s[1],-1],[0,0]],1);
+    const [sx,sy]=at(180),spoke={id:'spoke',poly:[[sx-55,sy],[sx+55,sy],[sx+55,TERM_Y],[sx-55,TERM_Y]]};
+    const ps=[N,SW,NW,NE,SE];
+    return {name:'Starfish',plan:'l_star',lvl:9,pts:3,cost:3000000,build:1440,W:SF.W,top:SF.top,rep:0.5,upk:5000,p2:'Outer piers',
+    from:'the star-shaped terminal at Beijing Daxing, built for short walks',
+    up:'Twelve stands round a star-shaped hall: the shortest walks for its size, the most shops and a rating bonus.',down:'The costliest to rebuild and to run.',
+    rooms:[CLP.rooms(0)[0],{id:'link',poly:[[1240,TERM_Y],[sx+60,TERM_Y],[sx+60,SEC_Y],[1240,SEC_Y]]},spoke,hall,...ps.flatMap(p=>p.rooms)],
+    doors:[['main','link',1240,484,38],['link','spoke',sx,TERM_Y,55],['spoke','hall',sx,sy,55],...ps.flatMap(p=>p.doors)],
+    stands:ps.flatMap(p=>p.stands).map((s,k)=>({...lad(0,'',k),...s,g:(k<4?'A':'B')+(k<4?k+1:k-3),...(k>=4?{pier:1}:{})})),
+    shops:[...CLP.shops().slice(0,4),...[0,1,2,3,4,5,6,7].map(k=>{const b=-157.5+k*45,a=b*Math.PI/180,r=R*0.52;return [Math.round(cx+r*Math.sin(a)-59*Math.cos(a)),'Hall',k<4?1:2,1.3,Math.round(cy-r*Math.cos(a)-59*Math.sin(a)),b,'hall']}),
+      ...[0,1,2,3].map(k=>[1300+k*123,'B'+(k+1),2,1,452,0,'link'])],
+    decor:[{t:'tower',x:sx+420,y:TERM_Y-260}]}})(),
 };
 LAYOUTS.classic.cost=20000;LAYOUTS.classic.build=240;LAYOUTS.classic.up='Today\'s airport: eight stands on bridges in a straight line.';LAYOUTS.classic.down='Long walks to the far end of Pier B.';
 let LAY=LAYOUTS.classic; // the current layout

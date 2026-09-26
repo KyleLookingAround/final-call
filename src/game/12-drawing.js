@@ -171,6 +171,7 @@ const BUGGY_ST=new Set(['walkIn','toShop','toGate','gate','toArr','exitW','toRec
 function drawPax(vx0,vx1){
   for(const p of R.pax){
     if(p.x<vx0-10||p.x>vx1+10)continue;
+    if(p.riding)continue; // on a train, drawn as the train
     if((p.state==='bridge'||p.state==='dBridge')&&STAND_KIND[p.stand]==='remote')continue; // riding a bus, drawn as the bus
     const inCabin=p.state==='aisle'||p.state==='sitting'||p.state==='dAisle',r=inCabin?clamp(p.F.geo.pitch*0.42,2.7,3.8):3;
     if(p.inbound){
@@ -295,7 +296,7 @@ function draw(){
     ctx.globalCompositeOperation='source-over';
   }
   if(R.fx.snow>G.clock){ctx.fillStyle='rgba(230,236,244,.05)';ctx.fillRect(0,Y0,W,TERM_Y-Y0);ctx.fillStyle='rgba(240,244,250,.6)';const t=performance.now()/1000;for(let k=0;k<160;k++){const x=(k*157.3+t*20*(1+(k%3)))%W,y=Y0+((k*97.1+t*40*(1+(k%4)*0.3))%(TERM_Y-Y0));ctx.fillRect(x,y,1.6,1.6)}}
-  drawTerminal(D);drawLayoutTerminal();
+  drawTerminal(D);drawLayoutTerminal();drawPlanOver();drawLinks();
   if(pol('ads')){ctx.fillStyle='#E5484D';for(let x=60;x<W-100;x+=560){ctx.fillRect(x,TERM_Y-3,220,10);ctx.font='800 9px "Saira Condensed",sans-serif';ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('FIZZCO · FIZZCO · FIZZCO',x+110,TERM_Y+2.5);ctx.fillStyle='#E5484D'}}
   drawLandside(D);
   drawPax(vx0,vx1);

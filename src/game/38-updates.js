@@ -1,6 +1,11 @@
 /* ================= WHAT'S NEW: every version's new features, shown after an update and from Settings or Help ================= */
 // Newest first. Add an entry with each release; the checks make sure the newest one matches docs/HISTORY.md.
 const UPDATES=[
+  {v:25,title:'More real airports',points:[
+    'The Satellite is now Heathrow Terminal 5, with an underground train out to two satellites.',
+    'The Starfish is now Beijing Daxing: five piers round a star-shaped hall.',
+    'New: Midfield concourses (level 9), sixteen stands along a train like Atlanta and Denver.',
+    'New: the Round terminal (level 6), with glass tubes and satellites through tunnels, like Paris Charles de Gaulle.']},
   {v:24,title:'Real airport shapes',points:[
     'Remote apron, Staggered apron, Curved front, and Hall and finger pier now look like real airports.',
     'Buses drive out to remote stands, planes park at an angle down the herringbone pier, and piers fan out from a hall of shops like Schiphol.',
