@@ -1,0 +1,14 @@
+{
+  "name": "final-call",
+  "private": true,
+  "type": "module",
+  "description": "Final Call: an airport management game in a single HTML page",
+  "scripts": {
+    "build": "node tools/build.mjs",
+    "check": "node tools/build.mjs && node tools/check.mjs",
+    "bot": "node tools/build.mjs && node tools/run-bot.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.56.0"
+  }
+}
