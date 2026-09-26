@@ -13,7 +13,7 @@ function updateStand(i,dt,D){
   else if(pl.state==='boarding'){
     if(!F.manifest.length&&!F.straggler&&F.seated>=F.booked&&F.hold>=F.checkedTotal-1e-6&&F.arr.sent>=F.arr.bags&&!(F.xferWait>0)&&F.fault<=0&&crewReady(i,F)){pl.state='closing';pl.t=0.8;settle(i)}
   }
-  else if(pl.state==='closing'){if(pol('curfew')&&nightWin()){F.curfewHeld=true;pl.t=0.2}pl.t-=dt;if(pl.t<=0){S.out={F,t:0,offY:0,alpha:1};R.rwy.q.push({type:'dep',F,stand:i});{const fl=G.fleet[F.fleetIdx];if(fl&&!fl.sold){fl.st='away';fl.dep=G.clock;const dl=CITY[F.city]?farDelay(CITY[F.city]):0;fl.late=dl;fl.back=G.clock+tripMins(CITY[F.city]||F.ac)+dl;crewAway(F,fl.back);fl.dest=F.dest[0];fl.trips=(fl.trips||0)+1;fl.gate=null}}if(STAND_KIND[i]==='remote')repAdj(-0.1,'bus');S.F=null;S.idleT=0;return}}
+  else if(pl.state==='closing'){if(pol('curfew')&&nightWin()){F.curfewHeld=true;pl.t=0.2}pl.t-=dt;if(pl.t<=0){S.out={F,t:0,offY:0,alpha:1};R.rwy.q.push({type:'dep',F,stand:i});{const fl=G.fleet[F.fleetIdx];if(fl&&!fl.sold){fl.st='away';fl.dep=G.clock;const dl=CITY[F.city]?farDelay(CITY[F.city]):0;fl.late=dl;fl.back=G.clock+tripMins(CITY[F.city]||F.ac)+dl;crewAway(F,fl.back);fl.dest=F.dest[0];fl.trips=(fl.trips||0)+1;fl.gate=null}}if(STAND_KIND[i]==='remote'&&!G.lounges)repAdj(-0.1,'bus');S.F=null;S.idleT=0;return}}
   if(pl.state==='boarding'&&F.xferWait>0&&pol('xfer')==='leave'&&G.clock>=F.std){
     const m=F.xferWait;spend(m*F.fare*0.5,'costs');F.booked-=m;F.xferWait=0;F.xferCancelled=true;repAdj(-1,'missed');toW(i,0,CABIN_TOP-24);floater(`LEFT ${m} CONNECTING`,WP.x,WP.y,'#FF7A8A',true);
   }
@@ -31,7 +31,7 @@ function updateStand(i,dt,D){
   }
   // gate scanners, one per door
   if(pl.state==='boarding'){
-    const bus=STAND_KIND[i]==='remote';if(bus&&S.busT>0)S.busT-=dt;
+    const bus=STAND_KIND[i]==='remote'&&!G.lounges;if(bus&&S.busT>0)S.busT-=dt; // mobile lounges don't wait to fill a bus
     for(const door of (F.rear?DOORS:FRONT)){
       if(bus&&S.busT>0)continue;
       S.scanT[door]-=dt;if(S.scanT[door]>0)continue;

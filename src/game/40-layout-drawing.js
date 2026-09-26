@@ -7,7 +7,9 @@ function drawBusRoad(i){
   if(F&&S.ext>0.5){ctx.save();standCtx(i);ctx.fillStyle='#7F8A94';ctx.strokeStyle='#4A545E';ctx.lineWidth=1;
     for(const [dx,dy] of [[g.fd.x,g.fd.y],...(F.rear?[[g.rd.x,g.rd.y]]:[])]){ctx.fillRect(dx-15,dy-5,13,10);for(let k=1;k<4;k++){ctx.beginPath();ctx.moveTo(dx-15+k*3.3,dy-5);ctx.lineTo(dx-15+k*3.3,dy+5);ctx.stroke()}}ctx.restore()}
   const bus=(path,list)=>{const L=list.slice().sort((a,b)=>a.s-b.s);for(let k=0;k<L.length;k+=20){const grp=L.slice(k,k+20),s=grp.reduce((a,p)=>a+p.s,0)/grp.length,q=ptAt(path,s),q2=ptAt(path,Math.min(path.len,s+4));
-    ctx.save();ctx.translate(q[0],q[1]);ctx.rotate(Math.atan2(q2[1]-q[1],q2[0]-q[0])+Math.PI/2);ctx.fillStyle='#E6E1D6';rrect(-5,-12,10,24,3);ctx.fill();ctx.fillStyle='#5CC8FF';ctx.fillRect(-3.5,-9,7,4);ctx.fillStyle='#39414A';ctx.fillRect(-3.5,-3,7,10);ctx.restore()}};
+    ctx.save();ctx.translate(q[0],q[1]);ctx.rotate(Math.atan2(q2[1]-q[1],q2[0]-q[0])+Math.PI/2);
+    if(G.lounges){ctx.fillStyle='#6BE39A';rrect(-8,-15,16,30,3);ctx.fill();ctx.fillStyle='#14171B';ctx.globalAlpha=0.45;ctx.fillRect(-5,-11,10,22);ctx.globalAlpha=1} // a mobile lounge
+    else{ctx.fillStyle='#E6E1D6';rrect(-5,-12,10,24,3);ctx.fill();ctx.fillStyle='#5CC8FF';ctx.fillRect(-3.5,-9,7,4);ctx.fillStyle='#39414A';ctx.fillRect(-3.5,-3,7,10)}ctx.restore()}};
   if(F)for(const door of DOORS){const path=door?F.P.rear:F.P.bridge;if(S.bridge[door].length)bus(path,S.bridge[door]);if(S.dBridge[door].length)bus(path,S.dBridge[door])}
 }
 function drawTower(x,y){ctx.fillStyle='#39414A';ctx.fillRect(x-7,y,14,200);ctx.fillStyle='#2A333C';ctx.beginPath();ctx.moveTo(x-26,y);ctx.lineTo(x+26,y);ctx.lineTo(x+18,y-22);ctx.lineTo(x-18,y-22);ctx.closePath();ctx.fill();

@@ -19,6 +19,7 @@ function finishBuild(b){
   else if(kind==='line')finishLine(b);
   else if(kind==='dev')finishDev(b);
   else if(kind==='layout'){layoutReady(arg);return}
+  else if(kind==='lounges')G.lounges=true;
   toast(`${b.label} is finished.`,null,null,'goal',7);fanfare();
 }
 function levelChecks(n){

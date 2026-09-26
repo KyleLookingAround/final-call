@@ -4,7 +4,7 @@ What's being worked on, what's next, and ideas not yet agreed. Anything here get
 
 ## Now
 
-- **Real airport shapes** (#10). The layouts are rebuilt as real 2D shapes: Heathrow T5, Atlanta and Denver, Schiphol, Beijing Daxing, and a few odd ones such as the round Terminal 1 at Paris Charles de Gaulle. The spec is `docs/specs/airport-shapes.md` (approved). It's being built in four steps, one PR each: 1. stand frames and rooms, with Classic made real (version 23); 2. Remote apron, Staggered apron, Curved front, and Hall and finger pier; 3. Satellite, Starfish, Midfield concourses and the Round terminal; 4. mobile lounges and balance.
+Nothing in progress. Pick from Next, or open an issue.
 
 ## Next
 
@@ -13,6 +13,7 @@ What's being worked on, what's next, and ideas not yet agreed. Anything here get
 
 ## Ideas (not agreed)
 
+- **Speed for the biggest airports.** A fully built sixteen-stand Midfield simulates about 2.5 times slower than Classic, and reaches about half of 8× on a throttled phone. One pass over passengers per step instead of three, or indexing them by state, would help.
 - **More than one airport.** Run a second airport. The odd real sites would suit it: Gibraltar's road across the runway, Barra's beach runway that follows the tide, and Madeira's runway on pillars.
 - **Speed on older phones.** A check that fails if a level 9 airport draws too slowly on a throttled phone profile.
 - **Page size budget.** A check on the size of `dist/index.html`, which grows with every feature.
@@ -20,6 +21,7 @@ What's being worked on, what's next, and ideas not yet agreed. Anything here get
 
 ## Done
 
+- **Versions 23–26: real airport shapes** (#10). Classic made real with nose-in planes and a real Pier B; the Remote apron, Staggered apron, Curved front (Kansai), Hall and finger pier (Schiphol), Satellite (Heathrow T5) and Starfish (Daxing) rebuilt as real shapes; two new layouts, Midfield concourses (Atlanta, Denver) and the Round terminal (Paris CDG T1); trains, tunnels and mobile lounges (Dulles).
 - **Version 22: airport layouts.** Six layouts to unlock and rebuild into, smoother fast speeds on phones, and a What's new page with the full history.
 - **Link previews.** A preview card, title and description when the link is shared, a tab icon and a home-screen icon; `npm run preview` remakes them.
 - **Ways of working.** Issue, PR and spec templates, decision records (`docs/decisions/`), and playbooks for features, balance, releases and PRs.

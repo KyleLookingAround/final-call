@@ -102,6 +102,11 @@ if(!only||only==='rules'){
       S.SIDX.forEach(i=>{S.G.stands[i].built=true});const cash=S.G.cash;S.switchLayout('curve');const b=S.G.stands.filter(s=>s.built).length,sold=S.G.cash-cash;
       S.switchLayout('classic');
       t('rules: rebuilding keeps gates and shops, and sells what the new layout has no room for',a===built&&w===S.LAYOUTS.remote.W&&b===8&&sold>0&&S.G.layout==='classic',`kept ${a}/${built}, then ${b} of 12 with ${Math.round(sold)} back`)}
+    {// mobile lounges: remote boarding keeps its speed in rain, and they're built as a construction project
+      S.switchLayout('remote');const i=S.STAND_KIND.indexOf('remote'),rain=S.R.fx.rain;S.R.fx.rain=S.G.clock+60;const bus=S.busMul(i);S.G.lounges=true;const lounge=S.busMul(i);S.G.lounges=false;S.R.fx.rain=rain;
+      const cash=S.G.cash;S.G.cash=1e7;const bought=S.buyLounges(),job=S.G.builds.find(b=>b.id==='lounges');if(job)S.finishBuild(job);S.G.builds=S.G.builds.filter(b=>b.id!=='lounges');
+      const built=S.G.lounges;S.G.lounges=false;S.G.cash=cash;S.switchLayout('classic');
+      t('rules: mobile lounges keep remote boarding quick in rain, and are built as a project',bus<lounge&&bought&&built,`in rain: buses ${bus}, lounges ${lounge}`)}
     {const v=S.UPDATES.map(u=>u.v);t('rules: What\'s new versions run newest first and match the history',v.every((x,i)=>i===0||x<v[i-1])&&v[0]===HIST_TOP,`newest ${v[0]}, history ${HIST_TOP}`)}
     {const s1=JSON.stringify(S.G);S.resetAll(JSON.parse(s1));const g2=S.G,g1=JSON.parse(s1);
       bad=Object.keys(g1).filter(k=>k!=='savedAt'&&JSON.stringify(g1[k])!==JSON.stringify(g2[k])); // savedAt is when it was last saved
@@ -200,8 +205,8 @@ if(!only||only==='layouts'){
 if(!only||only==='news'){
   // an older save opens the card on load; after closing it, a reload doesn't
   const {ctx,page,errs}=await open(undefined,saveText(newest),false,{news:true});
-  // saves from before What's new count as version 21, so every version since opens as new
-  const a=await page.evaluate(()=>({open:!document.querySelector('#news').hidden,fresh:document.querySelectorAll('#newsList details[open]').length,want:__sim.UPDATES.filter(u=>u.v>21).length,all:document.querySelectorAll('#newsList details').length}));
+  // every version newer than the save has seen opens as new (saves from before What's new count as version 21)
+  const a=await page.evaluate(()=>({open:!document.querySelector('#news').hidden,fresh:document.querySelectorAll('#newsList details[open]').length,want:__sim.UPDATES.filter(u=>u.v>__sim.G.seen).length,all:document.querySelectorAll('#newsList details').length}));
   await page.click('#news [data-newsclose]');await page.waitForTimeout(200);
   await page.reload();await page.waitForTimeout(900);
   const b=await page.evaluate(()=>!document.querySelector('#news').hidden);
@@ -227,6 +232,18 @@ if(!only||only==='perf'){
     return {ms:+ms.toFixed(2),ratio:+(ms/c).toFixed(3)}});
   ok('perf: late-game simulation',!errs.length&&r.ratio<=PERF_BUDGET,`${r.ms} ms per game minute, ${r.ratio}x calibration (budget ${PERF_BUDGET}x)`+(errs.length?' '+errs[0]:''));
   await ctx.close()}
+  // the biggest airport: sixteen stands of Midfield concourses, fully built, with its trains
+  {const {ctx,page,errs}=await open(undefined,saveText(newest),false,{still:true});
+  const r=await page.evaluate(()=>{
+    const S=__sim,G=S.G;S.switchLayout('mid');G.pierB=true;S.SIDX.forEach(i=>{G.stands[i].built=true});
+    const types=G.shops.filter(Boolean).map(s=>s.type);S.SHOP_X.forEach((x,j)=>{if(!G.shops[j])G.shops[j]={type:types[j%types.length]||0,lvl:1,earned:0,spent:500}});
+    S.R.sim=true;for(let i=0;i<1200;i++)S.update(0.1); // two hours in, so every stand is busy
+    const cal=()=>{const t=performance.now(),a=[];for(let i=0;i<2e5;i++)a.push({x:i%97,y:i%89});a.sort((p,q)=>p.x-q.x||p.y-q.y);let s=0;for(const p of a)s+=Math.hypot(p.x,p.y);return performance.now()-t+s*0};
+    cal();const c=Math.min(cal(),cal(),cal());
+    const t=performance.now();for(let i=0;i<600;i++)S.update(0.1);const ms=(performance.now()-t)/60;
+    return {ms:+ms.toFixed(2),ratio:+(ms/c).toFixed(3),busy:S.R.st.filter((x,i)=>i<S.SIDX.length&&x.F).length}});
+  ok('perf: sixteen stands of Midfield concourses',!errs.length&&r.ratio<=PERF_BUDGET*1.5,`${r.ms} ms per game minute, ${r.ratio}x calibration (budget ${+(PERF_BUDGET*1.5).toFixed(3)}x), ${r.busy} of 16 stands busy`+(errs.length?' '+errs[0]:''));
+  await ctx.close()}
   // at 8x on a phone-sized screen with the CPU slowed 4x: how close the game gets to 8 game minutes a second, and the
   // share of the CPU its own code uses. Reported, not judged: headless browsers paint in software, which real phones don't
   {const {ctx,page,errs}=await open({width:390,height:844},saveText(newest),true);
@@ -236,6 +253,16 @@ if(!only||only==='perf'){
   const a=await met(),c0=await page.evaluate(()=>__sim.G.clock);await page.waitForTimeout(4000);const z=await met(),c1=await page.evaluate(()=>__sim.G.clock);
   const secs=z.Timestamp-a.Timestamp;
   ok('perf: phone at 8x, CPU slowed 4x',!errs.length,`${((c1-c0)/secs).toFixed(1)} of 8 game minutes a second, game code ${Math.round((z.ScriptDuration-a.ScriptDuration)/secs*100)}% of the CPU`+(errs.length?' '+errs[0]:''));
+  await ctx.close()}
+  // the same, fully built as sixteen stands of Midfield concourses
+  {const {ctx,page,errs}=await open({width:390,height:844},saveText(newest),true);
+  await page.evaluate(()=>{const S=__sim,G=S.G;S.switchLayout('mid');G.pierB=true;S.SIDX.forEach(i=>{G.stands[i].built=true});S.R.sim=true;for(let i=0;i<1200;i++)S.update(0.1);S.R.sim=false});
+  const cdp=await ctx.newCDPSession(page);await cdp.send('Emulation.setCPUThrottlingRate',{rate:4});await cdp.send('Performance.enable');
+  const met=async()=>Object.fromEntries((await cdp.send('Performance.getMetrics')).metrics.map(x=>[x.name,x.value]));
+  await page.evaluate(()=>{__sim.R.speed=8});await page.waitForTimeout(1000);
+  const a=await met(),c0=await page.evaluate(()=>__sim.G.clock);await page.waitForTimeout(4000);const z=await met(),c1=await page.evaluate(()=>__sim.G.clock);
+  const secs=z.Timestamp-a.Timestamp;
+  ok('perf: phone at 8x, CPU slowed 4x, sixteen stands',!errs.length,`${((c1-c0)/secs).toFixed(1)} of 8 game minutes a second, game code ${Math.round((z.ScriptDuration-a.ScriptDuration)/secs*100)}% of the CPU`+(errs.length?' '+errs[0]:''));
   await ctx.close()}
 }
 if(!only||only==='share'){

@@ -63,7 +63,7 @@ const LAYOUTS={
   // Classic plus a row of remote stands out on the apron, reached by bus from gates at the end of the concourse
   remote:{name:'Remote apron',plan:'l_remote',lvl:5,pts:1,cost:15000,build:180,W:3700,top:-280,upk:200,
     from:'the remote stands at London Stansted and Luton',
-    up:'Four remote stands for short-haul planes from level 6, at 60% of the price of pier stands.',down:'Buses cost money to run, make boarding slower, more so in rain and snow, and cost a little rating. Remote stands don\'t count as gates for your airport\'s level.',
+    up:'Four remote stands for short-haul planes from level 6, at 60% of the price of pier stands. Mobile lounges can replace the buses.',down:'Buses cost money to run, make boarding slower, more so in rain and snow, and cost a little rating. Remote stands don\'t count as gates for your airport\'s level.',
     rooms:CLP.rooms(2600),doors:CLP.doors,
     stands:[...CLP.stands(),...[[2560,2090,'R1',48000,60,6],[2860,2230,'R2',90000,80,6],[3160,2370,'R3',180000,100,8],[3460,2510,'R4',300000,120,8]].map(([x,gx,g,cost,build,lvl],k)=>
       ({x,y:400,h:180,g,cost,build,lvl,kind:'remote',pier:1,room:'east',gate:[gx,TERM_Y,1],road:[[gx,432],[x+100,432]],...(k?{}:{after:3})}))],
@@ -180,7 +180,9 @@ function applyLayout(id){
   fill(XF,L.stands.map(standXf));buildRooms(L);AF_Y=L.top||0;Y0=AF_Y-180;placeBadges();
 }
 
-const busMul=i=>STAND_KIND[i]!=='remote'?1:R.fx.rain>G.clock||R.fx.snow>G.clock?1.4:2.2; // buses outpace walkers, less so in bad weather
+const busMul=i=>STAND_KIND[i]!=='remote'?1:!G.lounges&&(R.fx.rain>G.clock||R.fx.snow>G.clock)?1.4:2.2; // buses outpace walkers, less so in bad weather; mobile lounges don't mind it
+// mobile lounges (Washington Dulles): lounges on stilts that drive out to remote stands and rise to the door
+const LOUNGES={cost:200000,build:120};
 const layoutOk=id=>id==='classic'||has('lay:'+id);
 const layoutBuilding=()=>(G.builds||[]).find(b=>b.id.startsWith('layout:'));
 // rebuilding: a construction project; the new layout opens at the first 03:00 after it's finished
@@ -250,11 +252,19 @@ function layoutPanel(){
     h+=`<div class="stand laycard" id="layout-${id}"><div class="sh"><div><span class="gate">${me?'●':'○'}</span><span class="rt">${L.name}</span></div>${btn}</div>${layoutPlan(L)}
       <div class="rd">${L.stands.length} stands${L.stands.some(s=>s.kind==='remote')?` (${L.stands.filter(s=>s.kind==='remote').length} remote)`:''} · ${L.shops.length} shop units${walk?' · '+walk:''}${L.upk?` · ${money(L.upk)}/h to run`:''}${me?'':` · ${Math.round(buildMins(L.build)/60*10)/10} h to build`}</div>
       <div class="rd"><b>+</b> ${L.up}</div><div class="rd"><b>−</b> ${L.down}</div>${L.from?`<div class="rd">Inspired by ${L.from}.</div>`:''}
-      ${bld?buildLine('layout:'+id):''}${lost||lostS?`<div class="rd warn">Sells ${[lost?`${lost} stand${lost>1?'s':''}`:'',lostS?`${lostS} shop${lostS>1?'s':''}`:''].filter(Boolean).join(' and ')} it has no room for.</div>`:''}</div>`;
+      ${me&&L.stands.some(s=>s.kind==='remote')?loungeRow():''}${bld?buildLine('layout:'+id):''}${lost||lostS?`<div class="rd warn">Sells ${[lost?`${lost} stand${lost>1?'s':''}`:'',lostS?`${lostS} shop${lostS>1?'s':''}`:''].filter(Boolean).join(' and ')} it has no room for.</div>`:''}</div>`;
   }
   return h;
 }
+// the Remote apron's upgrade: lounges on stilts instead of buses
+function loungeRow(){
+  if(G.lounges)return '<div class="rd"><b>Mobile lounges</b> drive out to the remote stands and rise to the door, in any weather.</div>';
+  if(isBuilding('lounges'))return buildLine('lounges');
+  return `<div class="rd lounge"><span><b>Mobile lounges</b>, as at Washington Dulles: remote boarding as quick as a bridge in any weather, and no rating cost.</span><button class="buy" data-lounges="1" data-cost="${LOUNGES.cost}">${money(LOUNGES.cost)}</button></div>`;
+}
+function buyLounges(){if(G.lounges||isBuilding('lounges')||!canBuild()||!buy(LOUNGES.cost))return false;startBuild('lounges','mobile lounges',LOUNGES.build);return true}
 function layoutClick(d,b){
+  if(d.lounges){if(buyLounges()){renderPanel();save()}return true}
   if(!d.layout)return false;
   const key='layout'+d.layout;
   if(!R.sim&&!(R.armKey===key&&Date.now()-R.armT<3000)){R.armKey=key;R.armT=Date.now();b.textContent='Tap to confirm';b.classList.add('arm');return true}

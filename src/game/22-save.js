@@ -47,6 +47,7 @@ function resetAll(state){
   if(state&&!state.gdone){for(const g of GOALS){try{const [v,t]=g.p();if(v>=t)G.gdone[g.id]=1}catch(e){}}}
   G.day=dayOf(G.clock);if(!G.dstat)G.dstat={pax:0,arr:0,flights:0,ontime:0,rev:0,cost:0,rep0:G.rep};
   if(G.seen==null)G.seen=state?21:UPDATES[0].v; // new games have seen everything; airports from before What's new see this release's notes once
+  if(G.lounges==null)G.lounges=false;
   applyLayout(G.layout||'classic');
   R.rwy={q:[],act:[null,null]};R.lot=new Array(540).fill(0);R.platform=[];R.train={state:'away',t:3,x:null};R.lotFull=0;
   R.arrQ=[];R.booths=[];R.egates=[];R.arrBelt=[];

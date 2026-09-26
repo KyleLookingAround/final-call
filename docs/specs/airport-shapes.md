@@ -1,6 +1,6 @@
 # Real airport shapes
 
-Issue: #10 · Status: Approved
+Issue: #10 · Status: Built
 
 Follows #7, which shipped the layouts along one straight corridor.
 
@@ -111,6 +111,21 @@ Concept plans, drawn to the game's scale and colours. Yellow tags are gates on b
 - Walking times change with the real shapes, so each layout is retuned with the bot.
 - The target stays the same: rebuilding well reaches level 9 about 5–10% sooner.
 - Midfield concourses unlock at level 9 as the alternative to Starfish: more stands, longer rides.
+
+## Results
+
+- **Built in four PRs** (#11, #12, #13 and the mobile lounges), versions 23 to 26.
+- **Proofs that the game is unchanged:**
+  - the step that adds stand frames and rooms;
+  - the removal of the straight-line code.
+
+  Both end in exactly the same state on seeds 1–3, keeping Classic and rebuilding.
+- **Keeping Classic** reaches level 9 at 1086, 1091 and 1088 on seeds 1–3, inside the baselines (before: 1109, 1076 and 1085).
+- **Rebuilding** (Remote apron with mobile lounges, then Satellite, then Starfish) reaches level 9 at 988, 978 and 973, about 10% sooner.
+- **Each layout on its own** (seed 1): Staggered apron 1019, Hall and finger pier 1033, Curved front 1073 (it gains early, not late), Round terminal 1074. Midfield, Satellite and Starfish are end-game layouts.
+- **Speed:**
+  - A fully built sixteen-stand Midfield simulates about 2.5 times slower than Classic, within the check's budget.
+  - On a phone with the CPU slowed 4×, Classic holds 7.7 of 8 game minutes a second at 8×, and Midfield reaches 3.7. It doesn't yet hold full speed on a slow phone. That's logged on the roadmap as "Speed for the biggest airports".
 
 ## Checks
 
