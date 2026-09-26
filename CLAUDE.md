@@ -49,6 +49,7 @@ Playbooks for each part are in `.claude/skills/`: `feature` (issue to merged PR)
   - `share`: the link-preview tags are filled in, and the preview image (1200×630, under 300 KB) and home-screen icon are published;
   - `layouts`: every layout plays two hours fully built without errors, the Layout tab fits a 320 px phone, and each layout's screenshot goes in `build/shots/`;
   - `news`: What's new opens once for an older save and not again, never for a new game, and from Settings with every version;
+  - each file in `tools/checks/` is a group named after it (`terminal`: every layout's desks, lanes, passport desks, carousels and queues sit in their halls, and departing and arriving passengers each go through their own halls). It exports a function that gets the helpers (`open`, `ok`, `saveText`…);
   - `perf`: how long a level 9 airport, and a fully built sixteen-stand Midfield, take to simulate, against a calibration run so machines compare (fails over its budget), and how close a CPU-throttled phone gets to full speed at 8× with each (reported only).
 
   Run `npm run check -- rules` to run one group. Every page in the checks is seeded, so a failure repeats when you run it again. When you change a rule on purpose, update its check in the same PR; add a check when you add a rule.
@@ -89,6 +90,7 @@ The game is one strict IIFE, split into files in `src/game/`. The build joins th
 | `38-updates` | What's new: the `UPDATES` list (every version, newest first) and its card |
 | `39-layouts`, `40-layout-drawing` | Airport layouts: the `LAYOUTS` table, rebuilding and switching, the Airfield › Layout tab; remote stands, buses, rooms, shop units and each layout's buildings |
 | `41-airside` | Stand frames (`XF`, `toW`, `toL`), airside rooms and doorways (`route`, `walk`), and `layoutFaults`, the fit check for 2D layouts |
+| `42-terminal` to `47-hotel` | The terminal: its halls and the tables the parts plug into, then departures (check-in, security), arrivals (immigration, reclaim, the way out), baggage, the market place (shops, the walk to the gate) and the hotel |
 | `99-start` | The `/*SIM_HOOK*/` marker and the call that starts the game |
 
 Some functions sit where they were first written rather than where their name suggests (`pickRoute` is in `03-state.js`), so search `src/game/` by name.
@@ -106,9 +108,9 @@ Some functions sit where they were first written rather than where their name su
 ### Time
 
 `update(dt)` advances game minutes. The frame loop takes steps of up to 0.034 minutes, or 0.1 minutes at 4× and 8× (the bot's step size, a third of the work). These hooks run from it:
-- Every game minute: `updateBuilds`, `dayTick`, `checkLevel`, `fleetTick` and `mgrStep`.
+- Every game minute: `updateBuilds`, `dayTick`, `checkLevel`, `fleetTick`, `mgrStep` and the terminal's `TERM_MINUTE` hooks.
 - `managersTick` runs every 6 hours, `crewTick` every 30 minutes, and `recordsHour` and `mgrHour` every hour. `nightChecks` runs at 03:00.
-- `dayTick` runs `recordsDay`, `regionDay`, `rivalDay` and `chalDay`.
+- `dayTick` runs `recordsDay`, `regionDay`, `rivalDay`, `chalDay` and the terminal's `TERM_DAY` hooks.
 
 ### Headless sim
 
@@ -117,7 +119,7 @@ Some functions sit where they were first written rather than where their name su
   - toasts resolve to their last choice.
 - Everything reachable from `update()` must work that way.
 - **Randomness.** Anything that can change the game state uses `rnd()`, never `Math.random()`, so a seed repeats a run exactly. Only sound, the board's flaps, weather drawing and the device id use `Math.random()`, and the build rejects it on any line that doesn't end with `// cosmetic`.
-- Tests reach functions through `window.__sim`. Its list is in `tools/build.mjs`; add to it when a test needs something new.
+- Tests reach functions through `window.__sim`. Its list is in `tools/build.mjs`; add to it when a test needs something new. The terminal's parts add theirs to `SIMX` in their own files instead.
 
 ### UI
 
@@ -180,6 +182,29 @@ Some functions sit where they were first written rather than where their name su
   - Personal bests (`G.rec`) show a RECORD floater when broken.
   - There are 24 stamps; only earned ones are shown.
   - Each game week has 3 challenges, sized from last week. Each pays about 12% of a day's profit, and finishing all three gives a plan point while plans remain.
+- **The terminal** (`42-terminal.js`, spec `docs/specs/terminal.md`). Its halls are rooms like the airside ones, the same in every layout for now (`TERM_ROOMS`, `TERM_DOORS`, merged into each layout's rooms by `applyLayout`), in the order real airports use them.
+  - **Departing passengers** go from the forecourt (`out`) through the check-in hall (`ci`) and the security hall (`sec`) to the airside market place (`mkt`) and the concourse (`main`).
+  - **Arriving passengers** leave the concourse by their own door into the immigration hall (`imm`), then go through reclaim (`rec`), customs (`cus`) and the arrivals hall (`arh`) and out. The hotel's lobby (`hot`) and walkway (`wlk`) exist once there's a hotel (`need`).
+  - **Security lanes and passport desks** stand in the wall between a landside hall and an airside one (`SEC_LINE`) and are the only way through. The baggage hall (`BAG_HALL`) between the two sides is for bags only. Everything outside (road, stops, station, car park) sits `LAND_DY` lower than before the halls.
+  - **Each part plugs in** rather than editing shared loops:
+    - `PAX_STEP[state]` and `ARR_STEP[state]` move departing and arriving passengers each update;
+    - `TERM_SUBS` and `TERM_SECS` set the Terminal tab's sub-tabs and their upgrade sections, and `TERM_PANEL[sub]` adds cards (also `'sales:shops'` and `'sales:landside'`);
+    - `TERM_SPAWN` can place a new departing passenger (a hotel guest), and `TERM_EXIT` can send an arriving one somewhere other than out;
+    - `TERM_CLICK`, `TERM_MINUTE`, `TERM_DAY` and `TERM_DRAW` handle clicks, every game minute, every day and drawing;
+    - `TERM_FIELDS` gives saved fields their defaults for new games and older saves;
+    - `SIMX` exposes functions to the checks, and a part's checks go in `tools/checks/<part>.mjs`;
+    - new upgrades go in the part's file with `Object.assign(UPG,{...})`.
+  - `terminalFaults` (part of `layoutFaults`) checks that every desk, kiosk, lane, passport desk, e-gate, carousel and queue sits in its hall.
+  - **Departures** (`43-departures.js`): `enterLandside`, `updateCheckin` (desks and kiosks), `finishCheckin`, `enterSecurity` and `updateSecurity` (lanes and fast track).
+
+  - **Arrivals** (`44-arrivals.js`): `updateImmigration` (passport desks and e-gates), `afterControl`, `exitTarget`, and the steps from the concourse to the way out.
+
+  - **Baggage** (`45-baggage.js`): `updateBelt` takes checked bags to the baggage hall, where they count as ready for the hold (`F.bagsIn`); `updateReclaimBelt` brings arriving bags to the carousel (`A.reclaim`).
+
+  - **Market place** (`46-market.js`): `airside` decides between a shop and the gate, with `toShop`, `toGate` and the shop steps.
+
+  - **Hotel** (`47-hotel.js`): `hotelStay` (an arriving passenger who takes a room) and `drawHotel`.
+
 - **Airport layouts.** `LAYOUTS` in `39-layouts.js` lists each layout's stands (x, how far back the plane sits `dy`, gate name, price, level, `pier` for the second phase, `kind:'remote'` for bus stands), its buying `order` and its shop units. `applyLayout` copies the current one into `STAND_X`, `STAND_DY`, `STAND`, `GATES`, `SIDX`, `STAND_ORDER`, `SHOP_X` and friends in place, so code that reads those follows the layout.
   - **Every layout is 2D** and has `rooms` (convex floors), `doors` (`[roomA, roomB, x, y, half-width]`), `top` (how far up the runway moves) and `decor`. Their stands have a face point `x`,`y` and a heading `h` (where the nose points, degrees clockwise from north) and park nose-in; shop units add `y`, an angle and a room.
     - Helpers build the shapes: `CLP` (Classic's parts, shared with the Remote apron and Staggered apron), `pierParts` (a pier from a wall, with stands on either side and a wider head for a stand at its tip), `arcParts` (a curved concourse, one segment per stand).
