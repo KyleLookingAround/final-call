@@ -46,11 +46,13 @@ const faultRisk=w=>clamp((w-5)*0.035,0,0.5);
 function demandNow(){const h=(G.clock/60)%24;return h>=5&&h<9?1.2:h>=9&&h<16?0.95:h>=16&&h<20?1.15:h>=20&&h<23?0.9:0.6}
 function demandName(){const h=(G.clock/60)%24;return h>=5&&h<9?'MORNING PEAK':h>=9&&h<16?'DAYTIME':h>=16&&h<20?'EVENING PEAK':h>=20&&h<23?'LATE':'NIGHT'}
 const boothPos=i=>({x:704,y:531+i*10}),egatePos=i=>({x:i<4?728:744,y:531+(i%4)*12}),carX=i=>800+(i%4)*108,carY=i=>i<4?566:600;
-function arrSlot(i){if(i>=168)return {x:492+(i%4)*3,y:604};const per=24,r=Math.floor(i/per),k=i%per;return {x:r%2===0?678-k*8:678-(per-1-k)*8,y:534+r*12}}
+// queue places: one shared object, refilled on each call, as the queues read it straight away every step
+const SLOT={x:0,y:0},slot=(x,y)=>{SLOT.x=x;SLOT.y=y;return SLOT};
+function arrSlot(i){if(i>=168)return slot(492+(i%4)*3,604);const per=24,r=Math.floor(i/per),k=i%per;return slot(r%2===0?678-k*8:678-(per-1-k)*8,534+r*12)}
 const deskX=i=>32+i*26, kioskX=i=>230+i*17, laneX=i=>304+i*20, FT_X=462;
-function ciSlot(i){if(i>=165)return {x:14+(i%4)*3,y:562+(i%7)*3};const per=33,r=Math.floor(i/per),k=i%per;return {x:r%2===0?24+k*8:24+(per-1-k)*8,y:553+r*12}}
-function secSlot(i){if(i>=85)return {x:296+(i%3)*3,y:604};const per=17,r=Math.floor(i/per),k=i%per;return {x:r%2===0?302+k*8:302+(per-1-k)*8,y:553+r*12}}
-const ftSlot=i=>({x:FT_X,y:Math.min(606,553+i*8)});
+function ciSlot(i){if(i>=165)return slot(14+(i%4)*3,562+(i%7)*3);const per=33,r=Math.floor(i/per),k=i%per;return slot(r%2===0?24+k*8:24+(per-1-k)*8,553+r*12)}
+function secSlot(i){if(i>=85)return slot(296+(i%3)*3,604);const per=17,r=Math.floor(i/per),k=i%per;return slot(r%2===0?302+k*8:302+(per-1-k)*8,553+r*12)}
+const ftSlot=i=>slot(FT_X,Math.min(606,553+i*8));
 function spotPos(i,j){return {x:STAND_X[i]-138+(j%16)*9,y:456+Math.floor(j/16)*8.5}}
 const shopX=j=>STAND_X[j]+22;
 const standOpen=i=>i<4||G.pierB;

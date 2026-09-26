@@ -7,6 +7,8 @@
 //   rules    the same seed plays the same game, and the game's rules hold (fares, shares, costs, levels, saves)
 //   shots    phone, tablet and desktop screenshots of the airport, world and region, in build/shots/
 //   share    the link preview: tags filled in, preview image and icon present, the right size and small enough
+//   perf     how fast a level 9 airport simulates (against a calibration run, so machines compare), and how
+//            much of a phone's CPU the game uses at 8x with the CPU slowed 4x
 // Every page is seeded (window.__seed), so a failure repeats when you run it again.
 // Exit code 1 if anything fails. Screenshots of failures go to build/check/.
 import {chromium} from 'playwright';
@@ -150,6 +152,30 @@ if(!only||only==='shots'){
     ok(`shots: ${name}`,!errs.length,errs[0]||'build/shots/'+name+'-*.png');
     await ctx.close();
   }
+}
+if(!only||only==='perf'){
+  // the simulation at the 0.1-minute steps the game takes at 4x and 8x, timed against a fixed piece of plain
+  // JavaScript in the same page, so the ratio means the same on a fast laptop and a slow CI machine
+  const PERF_BUDGET=0.25; // simulation ms per game minute over calibration ms; today it's about 0.11
+  {const {ctx,page,errs}=await open(undefined,saveText(newest),false,{still:true});
+  const r=await page.evaluate(()=>{
+    const S=__sim;S.R.sim=true;for(let i=0;i<600;i++)S.update(0.1); // an hour in, so the code is warmed up
+    const cal=()=>{const t=performance.now(),a=[];for(let i=0;i<2e5;i++)a.push({x:i%97,y:i%89});a.sort((p,q)=>p.x-q.x||p.y-q.y);let s=0;for(const p of a)s+=Math.hypot(p.x,p.y);return performance.now()-t+s*0};
+    cal();const c=Math.min(cal(),cal(),cal());
+    const t=performance.now();for(let i=0;i<600;i++)S.update(0.1);const ms=(performance.now()-t)/60;
+    return {ms:+ms.toFixed(2),ratio:+(ms/c).toFixed(3)}});
+  ok('perf: late-game simulation',!errs.length&&r.ratio<=PERF_BUDGET,`${r.ms} ms per game minute, ${r.ratio}x calibration (budget ${PERF_BUDGET}x)`+(errs.length?' '+errs[0]:''));
+  await ctx.close()}
+  // at 8x on a phone-sized screen with the CPU slowed 4x: how close the game gets to 8 game minutes a second, and the
+  // share of the CPU its own code uses. Reported, not judged: headless browsers paint in software, which real phones don't
+  {const {ctx,page,errs}=await open({width:390,height:844},saveText(newest),true);
+  const cdp=await ctx.newCDPSession(page);await cdp.send('Emulation.setCPUThrottlingRate',{rate:4});await cdp.send('Performance.enable');
+  const met=async()=>Object.fromEntries((await cdp.send('Performance.getMetrics')).metrics.map(x=>[x.name,x.value]));
+  await page.evaluate(()=>{__sim.R.speed=8});await page.waitForTimeout(1000);
+  const a=await met(),c0=await page.evaluate(()=>__sim.G.clock);await page.waitForTimeout(4000);const z=await met(),c1=await page.evaluate(()=>__sim.G.clock);
+  const secs=z.Timestamp-a.Timestamp;
+  ok('perf: phone at 8x, CPU slowed 4x',!errs.length,`${((c1-c0)/secs).toFixed(1)} of 8 game minutes a second, game code ${Math.round((z.ScriptDuration-a.ScriptDuration)/secs*100)}% of the CPU`+(errs.length?' '+errs[0]:''));
+  await ctx.close()}
 }
 if(!only||only==='share'){
   // what chat apps and social sites read when the link is shared (dist/index.html, as published)

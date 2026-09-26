@@ -97,9 +97,8 @@ function updateLandside(dt,D){
   for(const b of R.belt){b.x+=beltV*dt;if(b.x>=478){b.F.bagsIn++;b.done=true}}
   if(R.belt.some(b=>b.done)) R.belt=R.belt.filter(b=>!b.done);
   for(const p of R.pax){
-    const sp=D.cwalk*p.spd;
     if(p.state==='walkIn'){if(moveTo(p,p.tx,p.ty,110*p.spd,dt))enterLandside(p)}
-    else if(p.state==='toShop'){if(!G.shops[p.shop])toGate(p);else if(moveTo(p,p.tx,p.ty,sp*walkMul(p),dt)){p.state='shop';p.t=SHOPS[G.shops[p.shop].type].dwell;p.t0=p.t}}
+    else if(p.state==='toShop'){if(!G.shops[p.shop])toGate(p);else if(moveTo(p,p.tx,p.ty,D.cwalk*p.spd*walkMul(p),dt)){p.state='shop';p.t=SHOPS[G.shops[p.shop].type].dwell;p.t0=p.t}}
     else if(p.state==='shop'){
       const F=p.F,hurry=F.plane.state==='boarding'&&G.clock>=F.std-12;
       p.t-=dt;
@@ -109,7 +108,7 @@ function updateLandside(dt,D){
         toGate(p);
       }
     }
-    else if(p.state==='toGate'){if(moveTo(p,p.tx,p.ty,sp*walkMul(p),dt))p.state='gate'}
+    else if(p.state==='toGate'){if(moveTo(p,p.tx,p.ty,D.cwalk*p.spd*walkMul(p),dt))p.state='gate'}
   }
 }
 

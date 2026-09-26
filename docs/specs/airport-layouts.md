@@ -69,7 +69,17 @@ A small rating modifier applies only where a layout is plainly nicer or worse to
 ## Performance (in the same PR)
 
 - **The problem:** late-game airports at 8× run at about 10 fps on a phone-speed CPU. Simulating passengers takes about 17.5 ms per frame on a desktop CPU.
-- **Target:** at least 30 fps at 8× on a level 9 airport with the CPU slowed 4×.
+- **Target:** a level 9 airport keeps full speed at 8× on a phone with the CPU slowed 4×, with the game's own code using under half the CPU. (Frame rate in a headless browser is capped by software painting, which real phones do on their graphics chip, so it isn't a fair target.)
+- **Result (step 1, done):**
+
+  | Level 9 airport | Before | After |
+  | --- | --- | --- |
+  | Simulation per game minute (desktop, small steps) | 19.0 ms | 12.9 ms |
+  | Simulation per game minute (desktop, 0.1-minute steps) | 5.9 ms | 5.0 ms |
+  | Phone at 8×, CPU slowed 4×: speed reached | 6.5 of 8 min/s | 7.9 of 8 min/s |
+  | Phone at 8×, CPU slowed 4×: game code's CPU share | 56% | 45% |
+
+  The game itself is unchanged: seeds 1–3 end in exactly the same state (`STATE` fingerprint) as `main` after 1,150 game hours.
 - **Proof it changes nothing:** the speed-up comes first, before any layout work. It must leave the game identical: seeds 1–3 must reach every level at exactly the same hour as before.
 - **Staying fast:** a new `perf` check measures a level 9 airport at 8× and reports the frame time on every PR. It fails only on a large regression, so CI machines don't make it flaky.
 

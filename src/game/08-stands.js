@@ -1,4 +1,5 @@
 /* ================= stands ================= */
+const DOORS=[0,1],FRONT=[0]; // reused so the loops below don't make new arrays every step
 function updateStand(i,dt,D){
   const S=R.st[i],st=G.stands[i];
   if(S.out){S.out.t+=dt;const k=Math.min(1,S.out.t/2.6);S.out.offY=-230*k*k;S.out.alpha=1-k;if(k>=1)S.out=null}
@@ -30,11 +31,11 @@ function updateStand(i,dt,D){
   }
   // gate scanners, one per door
   if(pl.state==='boarding'){
-    for(const door of (F.rear?[0,1]:[0])){
+    for(const door of (F.rear?DOORS:FRONT)){
       S.scanT[door]-=dt;if(S.scanT[door]>0)continue;
       const br=S.bridge[door];if(br.length&&br[br.length-1].s<SPACING)continue;
       let best=null,bk=Infinity;
-      for(const p of R.pax){if(p.state==='gate'&&p.stand===i&&p.lane===door&&p.F===F){const k=keyOf(p);if(k<bk){bk=k;best=p}}}
+      for(const p of gateQueue(i)){if(p.state==='gate'&&p.lane===door&&p.F===F){const k=keyOf(p);if(k<bk){bk=k;best=p}}}
       if(best){
         if(F.firstScan==null)F.firstScan=G.clock;
         if(best.prio)earn(F.fare*0.4,'priority',null,null,null,F);
@@ -43,7 +44,7 @@ function updateStand(i,dt,D){
     }
   }
   // jet bridge and rear stairs
-  for(const door of [0,1]){
+  for(const door of DOORS){
     const br=S.bridge[door];if(!br.length)continue;
     const path=door?F.P.rear:F.P.bridge;
     br.sort((a,b)=>b.s-a.s);let lead=Infinity;
@@ -74,6 +75,12 @@ function updateStand(i,dt,D){
     S.aisle[L]=al.filter(p=>p.phase!=='done');
   }
 }
+// passengers waiting at each stand's gate, in their order in R.pax, gathered once per step for the scanners.
+// Only updateLandside puts passengers at a gate, after the stands have run, so the lists hold for the whole stand loop.
+function gateQueue(i){
+  if(R.gateStep!==R.step){R.gateStep=R.step;R.gateBy=[];for(const p of R.pax)if(p.state==='gate')(R.gateBy[p.stand]||(R.gateBy[p.stand]=[])).push(p)}
+  return R.gateBy[i]||[];
+}
 function deplane(i,S,F,dt,D){
   const A=F.arr,g=F.geo,sx=STAND_X[i];
   if(A.pax.length){
@@ -91,26 +98,26 @@ function deplane(i,S,F,dt,D){
     const al=S.dAisle[L];if(!al.length)continue;
     const door=L%2,exitPos=door?g.P1:g.P0,br=S.dBridge[door],path=door?F.P.rear:F.P.bridge,ax=sx+g.aisleX[L>>1];
     al.sort(door===0?(a,b)=>a.pos-b.pos:(a,b)=>b.pos-a.pos);
-    let lead=door===0?-Infinity:Infinity;
+    let lead=door===0?-Infinity:Infinity,gone=false;
     for(const p of al){
       if(p.phase==='grab'){p.t-=dt;if(p.t<=0)p.phase='walk'}
       else{const v=D.aisleSpd*p.spd*dt;
         if(door===0)p.pos=Math.min(p.pos,Math.max(p.pos-v,exitPos,lead+GAP));else p.pos=Math.max(p.pos,Math.min(p.pos+v,exitPos,lead-GAP));
-        if(Math.abs(p.pos-exitPos)<1e-6&&!br.some(q=>q.s>path.len-SPACING)){p.state='dBridge';p.s=path.len;br.push(p);A.onboard--;p.gone=true}
+        if(Math.abs(p.pos-exitPos)<1e-6&&!br.some(q=>q.s>path.len-SPACING)){p.state='dBridge';p.s=path.len;br.push(p);A.onboard--;p.gone=true;gone=true}
       }
       if(!p.gone){p.tx=ax;p.ty=rowY(F,p.pos);lead=p.pos}
     }
-    S.dAisle[L]=al.filter(p=>!p.gone);
+    if(gone)S.dAisle[L]=al.filter(p=>!p.gone);
   }
 }
 function stepDeplaneBridges(i,D,dt){
   const S=R.st[i];
-  for(const door of [0,1]){
+  for(const door of DOORS){
     const br=S.dBridge[door];if(!br.length)continue;
     const F=br[0].F,path=door?F.P.rear:F.P.bridge;
-    br.sort((a,b)=>a.s-b.s);let lead=-Infinity;
-    for(const p of br){p.s=Math.min(p.s,Math.max(p.s-D.walk*p.spd*dt,lead+SPACING,0));const q=ptAt(path,p.s);p.tx=q[0];p.ty=q[1];lead=p.s;if(p.s<=0.01){p.out=true;if(!(p.xfer&&connect(p))){p.state='toArr';p.tx=ARR_DOOR.x+(rnd()-0.5)*6;p.ty=ARR_DOOR.y}}}
-    S.dBridge[door]=br.filter(p=>!p.out);
+    br.sort((a,b)=>a.s-b.s);let lead=-Infinity,out=false;
+    for(const p of br){p.s=Math.min(p.s,Math.max(p.s-D.walk*p.spd*dt,lead+SPACING,0));const q=ptAt(path,p.s);p.tx=q[0];p.ty=q[1];lead=p.s;if(p.s<=0.01){p.out=true;out=true;if(!(p.xfer&&connect(p))){p.state='toArr';p.tx=ARR_DOOR.x+(rnd()-0.5)*6;p.ty=ARR_DOOR.y}}}
+    if(out)S.dBridge[door]=br.filter(p=>!p.out);
   }
 }
 function connect(p){

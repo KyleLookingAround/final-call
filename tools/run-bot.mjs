@@ -4,11 +4,12 @@
 //   npm run bot -- 300 '{"noBuyLow":true}'   (bot options, see tools/bot.js)
 // The same seed and the same code always give the same run, so a difference between two
 // versions is the code's doing. Compare a few seeds before calling a balance change good.
-// Prints one JSON line per 6 game hours, then LVLAT {level: hour reached}, ERR [...], and a
+// Prints one JSON line per 6 game hours, then LVLAT {level: hour reached}, STATE <fingerprint>, ERR [...], and a
 // table against tools/baseline.json. Writes build/bot-<seed>.json, and saves reached at each
 // level to build/saves/L<n>.json for checks and screenshots.
 import {chromium} from 'playwright';
 import {appendFileSync,mkdirSync,readFileSync,writeFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
 import {dirname,join} from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 
@@ -32,8 +33,11 @@ for(let h=0;h<hours;h+=6){
   if(errs.length)break;
 }
 const fin=await m.evaluate(()=>B.run(1,0.1)),sv=await m.evaluate(()=>window.SAVES||{});
+// a fingerprint of the whole saved state: two runs with the same seed and the same game give the same one
+const gJson=await m.evaluate(()=>JSON.stringify({...__sim.G,savedAt:0})); // savedAt is wall-clock time, not game statewriteFileSync(join(root,`build/state-${seed}.json`),gJson);
+const state=createHash('sha256').update(gJson).digest('hex').slice(0,16);
 mkdirSync(join(root,'build/saves'),{recursive:true});for(const k in sv)writeFileSync(join(root,'build/saves/L'+k+'.json'),sv[k]);
-console.log('SEED',seed);console.log('LVLAT',JSON.stringify(fin.lvlAt));console.log('ERR',JSON.stringify(errs.slice(0,5)));
+console.log('SEED',seed);console.log('LVLAT',JSON.stringify(fin.lvlAt));console.log('STATE',state);console.log('ERR',JSON.stringify(errs.slice(0,5)));
 await b.close();
 
 // against the baseline: inside the range is ok, within the tolerance of it is near, beyond that is off
@@ -49,7 +53,7 @@ const table=[`Bot, seed ${seed}, ${hours} game hours${errs.length?`, ${errs.leng
   ...rows.map(r=>`| ${r.lv} | ${r.h??'—'} | ${r.lo}–${r.hi} | ${r.status}${r.dev?` (${r.dev}% outside)`:''} |`)].join('\n');
 console.log('\n'+table);
 mkdirSync(join(root,'build'),{recursive:true});
-writeFileSync(join(root,`build/bot-${seed}.json`),JSON.stringify({seed,hours,lvlAt:fin.lvlAt,errs,rows},null,1));
+writeFileSync(join(root,`build/bot-${seed}.json`),JSON.stringify({seed,hours,lvlAt:fin.lvlAt,state,errs,rows},null,1));
 if(process.env.GITHUB_STEP_SUMMARY)appendFileSync(process.env.GITHUB_STEP_SUMMARY,table+'\n');
 for(const r of rows)if(r.status==='off'&&process.env.GITHUB_ACTIONS)console.log(`::warning::Level ${r.lv} reached at hour ${r.h??'never'}, baseline ${r.lo}–${r.hi} (seed ${seed})`);
 process.exit(errs.length?1:0);
