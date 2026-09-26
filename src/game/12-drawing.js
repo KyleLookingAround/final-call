@@ -106,16 +106,9 @@ function drawTerminal(D){
   for(let i=0;i<SHOP_X.length;i++)if(shopOpen(i))drawShopUnit(i);
   if(G.lv.mover&&G.pierB&&LAY.track){const P=LAY.trackP||(LAY.trackP=mkPath(LAY.track)),t=(performance.now()/1000*0.12)%2,q=ptAt(P,(t<1?t:2-t)*P.len);
     ctx.strokeStyle='#2A3037';ctx.lineWidth=3;ctx.beginPath();LAY.track.forEach(([x,y],k)=>k?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();ctx.fillStyle='#5CC8FF';rrect(q[0]-12,q[1]-5,24,10,3);ctx.fill()}
-  // check-in: the belt behind the desks, an agent at each open desk; kiosks beside them
+  // bags on the belt behind the check-in desks (check-in and security draw themselves: 43-departures.js)
   ctx.fillStyle='#D9A066';for(const b of R.belt)ctx.fillRect(b.x-2,684.5,4,4);
-  for(let i=0;i<8;i++){const open=i<D.desks,own=i<OWN.desks(),x0=deskX(i)-8;ctx.fillStyle=open?'#6A7580':own?'#3A424B':'#262C32';ctx.fillRect(x0,695,16,4);if(open){ctx.fillStyle='#FFC72C';ctx.fillRect(x0+5.5,689.5,5,5)}}
-  for(let i=0;i<4;i++){const open=i<D.kiosks,x0=kioskX(i)-4;ctx.fillStyle=open?'#5CC8FF':'#262C32';ctx.fillRect(x0,694,8,6)}
-  // security: each lane's scanner stands in the wall to the market place, the fast track lane at the end
   const inWall=(x,w,y)=>{ctx.fillStyle='#191D22';ctx.fillRect(x-w,y-2,2*w,4)};
-  for(let i=0;i<8;i++){const lx=laneX(i),open=i<D.lanes,own=i<OWN.lanes(),closed=i===D.lanes&&R.fx.sick>G.clock;if(open)inWall(lx,5,SEC_LINE);
-    ctx.fillStyle=open?'#8C97A1':closed?'#7A3A42':own?'#3A424B':'#262C32';ctx.fillRect(lx-7,SEC_LINE-4,3,10);ctx.fillRect(lx+4,SEC_LINE-4,3,10);
-    ctx.fillStyle=open?'#39414A':'#1F242A';ctx.fillRect(lx+8,SEC_LINE+3,6,16);if(open){ctx.fillStyle='#FFC72C';ctx.fillRect(lx+9,SEC_LINE+21,4,4)}}
-  if(D.ft){inWall(FT_X,5,SEC_LINE);ctx.fillStyle='#F5D08A';ctx.fillRect(FT_X-7,SEC_LINE-4,3,10);ctx.fillRect(FT_X+4,SEC_LINE-4,3,10);ctx.fillStyle='#FFC72C';ctx.fillRect(FT_X+9,SEC_LINE+21,4,4)}
   ctx.fillStyle='#FFC72C';for(const i of SIDX)if(G.stands[i].built){const F=R.st[i].F;
     const bg=busGate(i);if(bg){ctx.fillRect(bg[0]-2.5,bg[1]+bg[2]*4-2.5,5,5)}
     else{faceW(i,-118,FACE_Y-6);ctx.fillRect(WP.x-2.5,WP.y-2.5,5,5);if(F&&F.rear){faceW(i,-150,FACE_Y-6);ctx.fillRect(WP.x-2.5,WP.y-2.5,5,5)}}}
@@ -132,7 +125,7 @@ function drawTerminal(D){
   for(const f of TERM_DRAW)f(D);
 }
 function paxColor(p){
-  if(p.state==='walkIn'||p.state==='queue'||p.state==='desk'||p.state==='secQ'||p.state==='ftQ'||p.state==='sec'||p.state==='new')return p.fast||p.biz?'#F5D08A':LAND_C;
+  if(LAND_ST.has(p.state))return p.fast||p.biz?'#F5D08A':LAND_C;
   return GROUPC[groupOf(p)];
 }
 const BUGGY_ST=new Set(['walkIn','toShop','toGate','gate','toArr','exitW','toReclaim','queue','secQ','ftQ']);
