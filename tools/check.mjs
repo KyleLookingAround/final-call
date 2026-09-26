@@ -5,6 +5,8 @@
 //   sheet    on a phone the bottom panel drags up and down with touch and snaps, and the page never scrolls
 //   tour     a new game starts the guided first hour and it advances
 //   rules    the same seed plays the same game, and the game's rules hold (fares, shares, costs, levels, saves)
+//   transport the transport manager: suggestions are sound, upgrades and extensions work, and it runs only
+//            the lines you leave to it, adding services for crowds and events
 //   shots    phone, tablet and desktop screenshots of the airport, world and region, in build/shots/
 //   layouts  every airport layout plays two hours fully built, its Layout tab fits a 320 px phone, and a
 //            desktop screenshot of each goes in build/shots/
@@ -115,6 +117,50 @@ if(!only||only==='rules'){
   for(const [name,pass,info] of res)ok(name,pass&&!errs.length,info+(errs.length?' '+errs[0]:''));
   await ctx.close();
 }
+if(!only||only==='transport'){
+  const {ctx,page,errs}=await open(undefined,saveText('v26-L9.json'),false,{still:true});
+  const res=await page.evaluate(()=>{
+    const S=__sim,G=S.G,out=[],t=(name,pass,info='')=>out.push([name,!!pass,info]);S.R.sim=true;G.cash+=5e6;S.regionTick();
+    const lines=()=>Object.values(G.lines),code=L=>S.lineCode(L),snap=()=>JSON.stringify(lines().map(L=>[L.id,L.mode,L.freq,L.fare??1,!!L.sync,L.stops.join()]));
+    // every suggestion can be built or made, and is worth it
+    const recs=S.computeTransitRecs(),kinds=[...new Set(recs.map(c=>c.kind))];
+    let bad=recs.filter(c=>!(c.val.v>0.5&&c.pay<=S.REC_PAY&&(!['line','mode','ext'].includes(c.kind)||S.lineQuote(c.mode,c.stops,c.kind==='line'?null:c.id).ok)));
+    t('transport: every suggestion is buildable and pays back within a week',recs.length&&!bad.length,`${recs.length} suggestions (${kinds.join(', ')})${bad.length?' bad: '+bad.map(c=>c.kind).join(' '):''}`);
+    bad=recs.filter(c=>c.id&&recs.filter(d=>d.id===c.id).length>1);
+    t('transport: at most one suggestion per line',!bad.length,bad.map(c=>c.kind+':'+c.id).join(' '));
+    // Not now hides a suggestion for a day
+    {const c=recs[0],k=S.recKey(c);S.R.recHide={[k]:G.clock+1440};const hid=!S.recCands().some(d=>S.recKey(d)===k);S.R.recHide={};const back=S.recCands().some(d=>S.recKey(d)===k);
+      t('transport: Not now hides a suggestion, and it comes back',hid&&back,c.kind)}
+    // an extension suggestion extends the line
+    {const L=lines().find(L=>L.mode==='bus'),to=S.EDGES.map(e=>e.a===L.stops.at(-1)?e.b:e.b===L.stops.at(-1)?e.a:null).find(n=>n&&!L.stops.includes(n)&&S.lineQuote('bus',[...L.stops,n],L.id).ok),st=[...L.stops,to];
+      const ok=S.applyRec({kind:'ext',id:L.id,stops:st});t('transport: an extension suggestion extends the line',ok&&G.lines[L.id].stops.join()===st.join(),`${code(L)} → ${st.join('-')}`)}
+    // an upgrade keeps the old line running until it's built, then switches kind, number and colour
+    {const L=lines().find(L=>L.mode==='bus'&&S.upTargets(L).some(m=>{const st=S.upgradeStops(L,m);return st&&S.lineQuote(m,st,L.id).ok}));
+      const m=S.upTargets(L).find(m=>{const st=S.upgradeStops(L,m);return st&&S.lineQuote(m,st,L.id).ok}),st=S.upgradeStops(L,m),was=code(L);
+      const ok=S.applyRec({kind:'mode',id:L.id,mode:m,stops:st}),b=G.builds.find(b=>b.id==='line:'+L.id);
+      const during=G.lines[L.id].mode==='bus'&&S.lineFreq(G.lines[L.id],true)>0&&b&&b.up&&b.from===was,held=S.nextNum(m)!==b.num;
+      S.finishBuild(b);G.builds=G.builds.filter(x=>x!==b);const N=G.lines[L.id];
+      t('transport: an upgrade keeps the old line running until it is built',ok&&during,`${was} → ${S.MODES[m].L}${b&&b.num}`);
+      t('transport: an upgrade reserves its number while it is built',held,`next ${S.MODES[m].name} ${S.nextNum(m)}`);
+      t('transport: a finished upgrade switches kind, number, colour and route',N.mode===m&&N.num===b.num&&N.col===b.col&&N.stops.join()===st.join(),`${was} is now ${code(N)} ${N.stops.join('-')}, every ${Math.round(60/N.freq)} min`)}
+    // the manager leaves lines you've taken over alone
+    {for(const L of lines())L.man=true;const a=snap();S.managersTick();for(let i=0;i<90;i++)S.mgrStep();for(const L of lines())S.R.reg.lines[L.id]&&(S.R.reg.lines[L.id].baseLoad=1.3);S.mgrHour();const b=snap();for(const L of lines())delete L.man;S.regionTick();
+      t('transport: the manager never changes a line you have taken over',a===b)}
+    // it reviews its own lines and makes changes worth having
+    {const a=snap();S.managersTick();const q=S.R.mgrQ.length;for(let i=0;i<120&&S.R.mgrQ.length;i++)S.mgrStep();const b=snap();
+      t('transport: the manager reviews every line it runs',q===lines().filter(L=>!S.lineDown(L)&&!S.isBuilding('line:'+L.id)).length&&!S.R.mgrQ.length,`${q} lines, ${a===b?'no change':'changes: '+(S.R.mgrLog||[]).map(x=>x.text).join('; ')}`)}
+    // a line over 105% full gets more services within the hour
+    {const L=lines().find(L=>{const fq=S.MODES[L.mode].freqs,i=fq.indexOf(L.freq);return i>=0&&i<fq.length-1&&!S.lineDown(L)}),f0=L.freq;S.R.reg.lines[L.id].baseLoad=1.2;S.mgrHour();
+      t('transport: a line over 105% full gets more services within the hour',G.lines[L.id].freq>f0,`${code(L)} ${f0}/h → ${G.lines[L.id].freq}/h`)}
+    // event days: lines to the venue run extra services only while the crowds travel
+    {const e=G.evq.find(e=>S.PLOTS.find(p=>p.id===e.plot).node!=='air'),node=S.PLOTS.find(p=>p.id===e.plot).node,L=lines().find(L=>S.serves(L,node)&&!S.lineDown(L)),c0=G.clock,at=e.at;
+      const fAt=d=>{G.clock=at+d;return S.lineFreq(L)};const before=fAt(-400),arr=fAt(-60),gap=fAt(30),home=fAt(150),after=fAt(260);G.clock=c0;
+      t('transport: lines to an event run extra services only while the crowds travel',arr>before&&home>before&&gap===before&&after===before,`${code(L)} to ${node}: ${before}/h, arriving ${arr}/h, during ${gap}/h, going home ${home}/h, after ${after}/h`)}
+    S.R.sim=false;return out});
+  for(const [n,p,i] of res)ok(n,p,i);
+  ok('transport: no errors',!errs.length,errs[0]||'');
+  await ctx.close();
+}
 if(!only||only==='saves'){
   for(const f of saves){
     const {ctx,page,errs}=await open({width:1280,height:800},saveText(f));
@@ -203,8 +249,10 @@ if(!only||only==='layouts'){
   await ctx.close();
 }
 if(!only||only==='news'){
-  // an older save opens the card on load; after closing it, a reload doesn't
-  const {ctx,page,errs}=await open(undefined,saveText(newest),false,{news:true});
+  // an older save opens the card on load; after closing it, a reload doesn't. The newest save is marked as last
+  // seeing the version before the newest, whenever it was made
+  const older=JSON.stringify({...JSON.parse(saveText(newest)),seen:HIST_TOP-1});
+  const {ctx,page,errs}=await open(undefined,older,false,{news:true});
   // every version newer than the save has seen opens as new (saves from before What's new count as version 21)
   const a=await page.evaluate(()=>({open:!document.querySelector('#news').hidden,fresh:document.querySelectorAll('#newsList details[open]').length,want:__sim.UPDATES.filter(u=>u.v>__sim.G.seen).length,all:document.querySelectorAll('#newsList details').length}));
   await page.click('#news [data-newsclose]');await page.waitForTimeout(200);
@@ -228,9 +276,10 @@ if(!only||only==='perf'){
     const S=__sim;S.R.sim=true;for(let i=0;i<600;i++)S.update(0.1); // an hour in, so the code is warmed up
     const cal=()=>{const t=performance.now(),a=[];for(let i=0;i<2e5;i++)a.push({x:i%97,y:i%89});a.sort((p,q)=>p.x-q.x||p.y-q.y);let s=0;for(const p of a)s+=Math.hypot(p.x,p.y);return performance.now()-t+s*0};
     cal();const c=Math.min(cal(),cal(),cal());
+    S.managersTick(); // the transport manager reviews every line during the hour timed, its busiest time
     const t=performance.now();for(let i=0;i<600;i++)S.update(0.1);const ms=(performance.now()-t)/60;
-    return {ms:+ms.toFixed(2),ratio:+(ms/c).toFixed(3)}});
-  ok('perf: late-game simulation',!errs.length&&r.ratio<=PERF_BUDGET,`${r.ms} ms per game minute, ${r.ratio}x calibration (budget ${PERF_BUDGET}x)`+(errs.length?' '+errs[0]:''));
+    return {ms:+ms.toFixed(2),ratio:+(ms/c).toFixed(3),left:S.R.mgrQ.length}});
+  ok('perf: late-game simulation, with the transport manager reviewing',!errs.length&&r.ratio<=PERF_BUDGET,`${r.ms} ms per game minute, ${r.ratio}x calibration (budget ${PERF_BUDGET}x), ${r.left} lines left to review`+(errs.length?' '+errs[0]:''));
   await ctx.close()}
   // the biggest airport: sixteen stands of Midfield concourses, fully built, with its trains
   {const {ctx,page,errs}=await open(undefined,saveText(newest),false,{still:true});

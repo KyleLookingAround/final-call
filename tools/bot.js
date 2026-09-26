@@ -64,11 +64,16 @@ window.BOT=function(opts){
       const plan=opts.plan||[['bus',['air','mil','hbc']],['bus',['air','hbs','doc']],['coach',['air','cas']],['coach',['air','low']],['bus',['air','brk','eas']],['bus',['hbc','old']],
         ['tram',['air','mil','hbc','old']],['tram',['doc','hbs','hbc','old']],['rail',['air','ash','cas']],['rail',['air','brk','eas']],['tram',['air','ano','fel']],
         ['metro',['air','mil','hbc','old']],['hsr',['air','low']],['metro',['doc','hbs','hbc']]];
-      for(const [m,st] of plan){const same=L=>L.mode===m&&L.stops.join()===st.join();if(Object.values(g.lines).some(same)||g.builds.some(b=>b.lid&&same(b)))continue;const q=S.lineQuote(m,st,null);if(!q.ok)continue;if(g.cash>=q.cost*2.2+reserve&&g.builds.length<1+g.lv.crews){S.orderLine(m,st,[],null)}break}
+      // following the manager, a line it extended still counts as built, and one it closed isn't rebuilt
+      const covers=opts.recs?(L,m,st)=>L.mode===m&&st.every(x=>L.stops.includes(x)):(L,m,st)=>L.mode===m&&L.stops.join()===st.join();
+      for(const [m,st] of plan){const same=L=>covers(L,m,st);if(Object.values(g.lines).some(same)||g.builds.some(b=>b.lid&&same(b))||(window._closed||[]).includes(m+st.join()))continue;const q=S.lineQuote(m,st,null);if(!q.ok)continue;if(g.cash>=q.cost*2.2+reserve&&g.builds.length<1+g.lv.crews){S.orderLine(m,st,[],null)}break}
       for(const L of Object.values(g.lines)){const st=S.R.reg&&S.R.reg.lines[L.id];if(!st||!st.f)continue;const fq=S.MODES[L.mode].freqs,fi=fq.indexOf(L.freq);
         if(!(g.set&&g.set.autoLines)){if(st.baseLoad>0.85&&fi<fq.length-1)L.freq=fq[fi+1];else if(st.baseLoad<0.3&&fi>0&&st.rev<st.ops)L.freq=fq[fi-1];}
         if(st.baseLoad>0.9&&fi===fq.length-1&&(L.cars||0)<2){const cc=Math.round(S.MODES[L.mode].fix*1.5*((L.cars||0)+1));if(g.cash>cc*2&&S.buy(cc))L.cars=(L.cars||0)+1}
         if(!(g.set&&g.set.autoLines)&&!L.night&&['tram','rail','metro'].includes(L.mode))L.night=true}
+      // with opts.recs: follow the transport manager's best suggestion every six hours, when it's affordable three times over
+      if(opts.recs&&g.clock>=(window._recT||0)){window._recT=g.clock+360;const c=S.computeTransitRecs()[0];
+        if(c&&g.cash>=c.cost*3+reserve&&(!c.cost||c.kind==='stn'||S.canBuild())){const L=c.kind==='close'&&g.lines[c.id];if(S.applyRec(c)&&L)(window._closed||(window._closed=[])).push(L.mode+L.stops.join())}}
       if(opts.stn!==false)for(const [n,k] of [['mil','pr'],['hbc','hub'],['air','hub'],['brk','pr']]){const u=S.STN_UP[k];if(S.has('stn:'+k)&&!(g.stn&&g.stn[n]&&g.stn[n][k])&&S.linesAt(n).length&&g.cash>u.cost*5+reserve&&S.buy(u.cost)){(g.stn||(g.stn={}))[n]=Object.assign(g.stn[n]||{},{[k]:1})}}
       const dp={docks:'stadium',mill:'bizpark',north:'logistics',castle:'uni',fell:'themepark',sea:'wind',centre:'techcampus',roads:'lowtraffic'};
       for(const pl in dp){if(g.dev[pl]||S.isBuilding('dev:'+pl))continue;const d=S.DEV[dp[pl]];if(S.has('dev:'+dp[pl])&&g.cash>=d.cost*1.5+reserve&&S.canBuild())S.buildDev(pl,dp[pl])}
