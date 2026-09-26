@@ -63,7 +63,7 @@ const LAYOUTS={
   // Classic plus a row of remote stands out on the apron, reached by bus from gates at the end of the concourse
   remote:{name:'Remote apron',plan:'l_remote',lvl:5,pts:1,cost:15000,build:180,W:3700,top:-280,upk:200,
     from:'the remote stands at London Stansted and Luton',
-    up:'Four remote stands for short-haul planes from level 6, at 60% of the price of pier stands.',down:'Buses cost money to run, make boarding slower, more so in rain and snow, and cost a little rating. Remote stands don\'t count as gates for your airport\'s level.',
+    up:'Four remote stands for short-haul planes from level 6, at 60% of the price of pier stands. Mobile lounges can replace the buses.',down:'Buses cost money to run, make boarding slower, more so in rain and snow, and cost a little rating. Remote stands don\'t count as gates for your airport\'s level.',
     rooms:CLP.rooms(2600),doors:CLP.doors,
     stands:[...CLP.stands(),...[[2560,2090,'R1',48000,60,6],[2860,2230,'R2',90000,80,6],[3160,2370,'R3',180000,100,8],[3460,2510,'R4',300000,120,8]].map(([x,gx,g,cost,build,lvl],k)=>
       ({x,y:400,h:180,g,cost,build,lvl,kind:'remote',pier:1,room:'east',gate:[gx,TERM_Y,1],road:[[gx,432],[x+100,432]],...(k?{}:{after:3})}))],
@@ -162,7 +162,7 @@ const LAYOUTS={
       ...[0,1,2,3].map(k=>[1300+k*123,'B'+(k+1),2,1,452,0,'link'])],
     decor:[{t:'tower',x:sx+420,y:TERM_Y-260}]}})(),
 };
-LAYOUTS.classic.cost=20000;LAYOUTS.classic.build=240;LAYOUTS.classic.up='Today\'s airport: eight stands on bridges in a straight line.';LAYOUTS.classic.down='Long walks to the far end of Pier B.';
+LAYOUTS.classic.cost=20000;LAYOUTS.classic.build=240;LAYOUTS.classic.up='The airport you started with: four gates along the terminal and Pier B out on the apron.';LAYOUTS.classic.down='A walk out along Pier B.';
 let LAY=LAYOUTS.classic; // the current layout
 const STAND_KIND=['bridge','bridge','bridge','bridge','bridge','bridge','bridge','bridge'],SHOP_PULL=[1,1,1,1,1,1,1,1]; // remote stands board by bus; hall units draw more shoppers
 const SHOP_Y=[],SHOP_A=[]; // shop units: top edge and angle (degrees; 0 faces the concourse below it)
@@ -171,7 +171,7 @@ const fill=(a,v)=>{a.length=0;a.push(...v);return a};
 function applyLayout(id){
   const L=LAYOUTS[id]||LAYOUTS.classic;
   LAY=L;W=L.W;fill(STAND_KIND,L.stands.map(s=>s.kind||'bridge'));fill(SHOP_PULL,L.shops.map(s=>s[3]||1));
-  fill(STAND_X,L.stands.map(s=>s.x));fill(STAND_DY,L.stands.map(s=>s.dy||0));fill(GATES,L.stands.map(s=>s.g));
+  fill(STAND_X,L.stands.map(s=>s.x));fill(GATES,L.stands.map(s=>s.g));
   fill(STAND,L.stands.map(s=>{const o={cost:s.cost,build:s.build,lvl:s.lvl};if(s.pier)o.pier=1;return o}));
   fill(SIDX,L.stands.map((s,i)=>i));fill(STAND_ORDER,L.order||SIDX);
   fill(STAND_AFTER,L.stands.map((s,i)=>s.after!=null?s.after:(o=>o>0?STAND_ORDER[o-1]:-1)(STAND_ORDER.indexOf(i))));
@@ -180,7 +180,9 @@ function applyLayout(id){
   fill(XF,L.stands.map(standXf));buildRooms(L);AF_Y=L.top||0;Y0=AF_Y-180;placeBadges();
 }
 
-const busMul=i=>STAND_KIND[i]!=='remote'?1:R.fx.rain>G.clock||R.fx.snow>G.clock?1.4:2.2; // buses outpace walkers, less so in bad weather
+const busMul=i=>STAND_KIND[i]!=='remote'?1:!G.lounges&&(R.fx.rain>G.clock||R.fx.snow>G.clock)?1.4:2.2; // buses outpace walkers, less so in bad weather; mobile lounges don't mind it
+// mobile lounges (Washington Dulles): lounges on stilts that drive out to remote stands and rise to the door
+const LOUNGES={cost:200000,build:120};
 const layoutOk=id=>id==='classic'||has('lay:'+id);
 const layoutBuilding=()=>(G.builds||[]).find(b=>b.id.startsWith('layout:'));
 // rebuilding: a construction project; the new layout opens at the first 03:00 after it's finished
@@ -200,7 +202,7 @@ function layoutTick(){
 const layoutDrains=i=>G.layoutNext&&i>=LAYOUTS[G.layoutNext].stands.length;
 const AT_STAND=new Set(['gate','toGate','bridge','aisle','sitting','dAisle','dBridge']),IN_PLANE=new Set(['bridge','aisle','sitting','dAisle','dBridge']);
 function switchLayout(id){
-  const oXF=XF.map(t=>({...t})),ody=STAND_DY.slice(),old=STAND.slice(),from=LAY.name;
+  const oXF=XF.map(t=>({...t})),old=STAND.slice(),from=LAY.name;
   G.layout=id;G.layoutNext=null;G.layoutAt=null;applyLayout(id);
   // stands and shop units the new layout doesn't have are sold at their resale value
   let refund=0;
@@ -209,14 +211,14 @@ function switchLayout(id){
   if(refund){G.cash+=refund;G.revBy.assets+=refund}
   // flights carry on: each plane and everyone aboard or on its bridge move with the stand; people at gates and shops,
   // and arrivals on their way out, step into the matching place in the new layout
-  const n=SIDX.length,move=(i,p,k)=>{const T=oXF[i],dx=p[k+'x']-T.ox,dy=p[k+'y']-T.oy;toW(i,dx*T.c+dy*T.s,dy*T.c-dx*T.s+(STAND_DY[i]||0)-(ody[i]||0));p[k+'x']=WP.x;p[k+'y']=WP.y};
+  const n=SIDX.length,move=(i,p,k)=>{const T=oXF[i],dx=p[k+'x']-T.ox,dy=p[k+'y']-T.oy;toW(i,dx*T.c+dy*T.s,dy*T.c-dx*T.s);p[k+'x']=WP.x;p[k+'y']=WP.y};
   for(const p of R.pax){const i=p.stand;p.way=null;
     if(i<n&&IN_PLANE.has(p.state)){move(i,p,'');move(i,p,'t')}
     else if(i<n&&(p.state==='gate'||p.state==='toGate')){if(p.spot>=0){const s=spotPos(i,p.spot);p.tx=s.x;p.ty=s.y}else if(XF[i].nose){toW(i,-80,FACE_Y-24);p.tx=WP.x;p.ty=WP.y}else{p.tx=STAND_X[i]-70;p.ty=506}p.x=p.tx;p.y=p.ty;p.room=STAND_ROOM[i]}
     else if(p.state==='toShop'||p.state==='shop'){if(p.shop<SHOP_X.length&&G.shops[p.shop]){if(ROOMS){shopPt(p.shop,58,47);p.tx=WP.x;p.ty=WP.y;p.su=58}else{p.tx=SHOP_X[p.shop]+58;p.ty=499}p.x=p.tx;p.y=p.ty;p.room=SHOP_ROOM[p.shop]}else if(p.stand<n){p.state='gate';toGate(p);p.x=p.tx;p.y=p.ty;p.way=null}}
     else if(p.state==='toArr'){p.x=p.tx;p.y=p.ty;p.room=ROOM_MAIN()}}
   for(const i of SIDX){const S=R.st[i];
-    if(S.F){const F=S.F;F.geo=geom(F.ac,STAND_DY[i]);F.P=paths(i,F.geo);S.geo=F.geo;S.P=F.P;
+    if(S.F){const F=S.F;F.geo=geom(F.ac);F.P=paths(i,F.geo);S.geo=F.geo;S.P=F.P;
       for(const br of S.bridge)for(const p of br)p.s=Math.min(p.s,(p.lane?F.P.rear:F.P.bridge).len)}
   }
   R.sel=Math.max(0,Math.min(R.sel,SIDX.length-1));
@@ -225,21 +227,9 @@ function switchLayout(id){
 }
 
 // Airfield › Layout: every layout the player can rebuild into, as a small plan with what it gives and takes
+// Airfield › Layout: every layout the player can rebuild into, as a small plan with what it gives and takes. The plan shows
+// its rooms, each plane where it parks, and the shop fronts, from the same data the game uses.
 function layoutPlan(L){
-  if(L.rooms)return layoutPlan2D(L);
-  const w=300,k=w/L.W,y=v=>Math.round((v+130)*0.16),sx=L.stands.map(s=>s.x*k);
-  let g=`<svg class="lplan" viewBox="0 0 ${w} 96" role="img" aria-label="Plan of the ${L.name} layout">`;
-  g+=`<rect x="0" y="${y(446)}" width="${(L.gap?L.gap[0]:L.W)*k}" height="${y(522)-y(446)}" fill="#2A3037"/>`;
-  if(L.gap)g+=`<rect x="${L.gap[1]*k}" y="${y(446)}" width="${(L.W-L.gap[1])*k}" height="${y(522)-y(446)}" fill="#2A3037"/><line x1="${L.gap[0]*k}" x2="${L.gap[1]*k}" y1="${y(484)}" y2="${y(484)}" stroke="#5CC8FF" stroke-width="2"/>`;
-  if(L.hall)g+=`<rect x="${L.hall[0]*k}" y="${y(360)}" width="${(L.hall[1]-L.hall[0])*k}" height="${y(522)-y(360)}" rx="3" fill="#3A4652"/>`;
-  L.shops.forEach(s=>{g+=`<rect x="${s[0]*k}" y="${y(456)}" width="${118*k}" height="4" fill="#F5D08A" opacity=".8"/>`});
-  L.stands.forEach((s,i)=>{const t=y(110+(s.dy||0)),b=y(380+(s.dy||0)),r=s.kind==='remote';
-    g+=`<rect x="${sx[i]-5}" y="${t}" width="10" height="${b-t}" rx="4" fill="${r?'#7F8A94':'#CDD4DA'}"/>`;
-    g+=r?`<line x1="${sx[i]}" x2="${sx[i]}" y1="${b}" y2="${y(446)}" stroke="#FFC72C" stroke-dasharray="2 2"/>`:`<line x1="${sx[i]-4}" x2="${sx[i]-4}" y1="${b-6}" y2="${y(446)}" stroke="#5A646E" stroke-width="2"/>`});
-  return g+'</svg>';
-}
-// a 2D layout's plan: its rooms, each plane where it parks, and the shop fronts, from the same data the game uses
-function layoutPlan2D(L){
   const y0=(L.top||0)+40,w=300,k=w/L.W,h=Math.round((SEC_Y-y0)*k),X=x=>(x*k).toFixed(1),Y=y=>((y-y0)*k).toFixed(1),pts=P=>P.map(([x,y])=>X(x)+','+Y(y)).join(' ');
   let g=`<svg class="lplan" viewBox="0 0 ${w} ${h}" role="img" aria-label="Plan of the ${L.name} layout">`;
   for(const r of L.rooms)g+=`<polygon points="${pts(r.poly)}" fill="#2A3037"/>`;
@@ -262,11 +252,19 @@ function layoutPanel(){
     h+=`<div class="stand laycard" id="layout-${id}"><div class="sh"><div><span class="gate">${me?'●':'○'}</span><span class="rt">${L.name}</span></div>${btn}</div>${layoutPlan(L)}
       <div class="rd">${L.stands.length} stands${L.stands.some(s=>s.kind==='remote')?` (${L.stands.filter(s=>s.kind==='remote').length} remote)`:''} · ${L.shops.length} shop units${walk?' · '+walk:''}${L.upk?` · ${money(L.upk)}/h to run`:''}${me?'':` · ${Math.round(buildMins(L.build)/60*10)/10} h to build`}</div>
       <div class="rd"><b>+</b> ${L.up}</div><div class="rd"><b>−</b> ${L.down}</div>${L.from?`<div class="rd">Inspired by ${L.from}.</div>`:''}
-      ${bld?buildLine('layout:'+id):''}${lost||lostS?`<div class="rd warn">Sells ${[lost?`${lost} stand${lost>1?'s':''}`:'',lostS?`${lostS} shop${lostS>1?'s':''}`:''].filter(Boolean).join(' and ')} it has no room for.</div>`:''}</div>`;
+      ${me&&L.stands.some(s=>s.kind==='remote')?loungeRow():''}${bld?buildLine('layout:'+id):''}${lost||lostS?`<div class="rd warn">Sells ${[lost?`${lost} stand${lost>1?'s':''}`:'',lostS?`${lostS} shop${lostS>1?'s':''}`:''].filter(Boolean).join(' and ')} it has no room for.</div>`:''}</div>`;
   }
   return h;
 }
+// the Remote apron's upgrade: lounges on stilts instead of buses
+function loungeRow(){
+  if(G.lounges)return '<div class="rd"><b>Mobile lounges</b> drive out to the remote stands and rise to the door, in any weather.</div>';
+  if(isBuilding('lounges'))return buildLine('lounges');
+  return `<div class="rd lounge"><span><b>Mobile lounges</b>, as at Washington Dulles: remote boarding as quick as a bridge in any weather, and no rating cost.</span><button class="buy" data-lounges="1" data-cost="${LOUNGES.cost}">${money(LOUNGES.cost)}</button></div>`;
+}
+function buyLounges(){if(G.lounges||isBuilding('lounges')||!canBuild()||!buy(LOUNGES.cost))return false;startBuild('lounges','mobile lounges',LOUNGES.build);return true}
 function layoutClick(d,b){
+  if(d.lounges){if(buyLounges()){renderPanel();save()}return true}
   if(!d.layout)return false;
   const key='layout'+d.layout;
   if(!R.sim&&!(R.armKey===key&&Date.now()-R.armT<3000)){R.armKey=key;R.armT=Date.now();b.textContent='Tap to confirm';b.classList.add('arm');return true}

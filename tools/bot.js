@@ -18,7 +18,9 @@ window.BOT=function(opts){
       const next=path.map(id=>S.TECH.find(x=>x.id==='l_'+id)).find(T=>T&&S.techState(T)!=='done');
       if(next){const st=S.techState(next);if(st==='ready')S.research(next.id);else hold=st==='pts'}
       const target=[...path].reverse().find(id=>S.has('lay:'+id));
-      if(target&&target!==g.layout&&!g.layoutNext&&S.canBuild()&&g.cash>=S.LAYOUTS[target].cost*2+reserve&&path.indexOf(target)>path.indexOf(g.layout))S.rebuildLayout(target)}
+      if(target&&target!==g.layout&&!g.layoutNext&&S.canBuild()&&g.cash>=S.LAYOUTS[target].cost*2+reserve&&path.indexOf(target)>path.indexOf(g.layout))S.rebuildLayout(target)
+      // mobile lounges for remote stands, once some are built and they're affordable twice over
+      if(!g.lounges&&S.STAND_KIND.some((k,i)=>k==='remote'&&g.stands[i].built)&&S.canBuild()&&g.cash>=S.LOUNGES.cost*2+reserve)S.buyLounges()}
     for(let n=0;n<4&&!hold;n++){const T=PRI.map(id=>S.TECH.find(x=>x.id===id)).find(T=>T&&S.techState(T)==='ready')||S.TECH.find(T=>T.b!=='lay'&&S.techState(T)==='ready');if(!T||!S.research(T.id))break}
 
     if(g.level>=4&&S.TECH.some(T=>S.techState(T)==='pts')&&g.cash>S.consultCost()*(opts.ptMul??6)+reserve)S.buyPoint();

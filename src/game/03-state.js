@@ -2,7 +2,7 @@
 const DEFAULT=()=>({cash:25,rep:60,flown:0,flights:0,ontime:0,streak:0,bestStreak:0,earned:0,paxSeated:0,level:0,pierB:false,builds:[],day:1,dstat:null,lastDay:null,
   lv:Object.fromEntries(Object.keys(UPG).map(k=>[k,0])),
   methods:{random:true},
-  layout:'classic',stands:[...Array(NG).keys()].map(i=>({built:i===0,ac:i===0?0:null,method:'random',rear:false,route:'mixed'})),
+  layout:'classic',lounges:false,stands:[...Array(NG).keys()].map(i=>({built:i===0,ac:i===0?0:null,method:'random',rear:false,route:'mixed'})),
   open:{desks:null,lanes:null,officers:null},auto:true,wageMul:1,loan:0,gstats:[...Array(NG)].map(()=>[]),
   fleet:[{type:0,st:'base',readyAt:0,wear:0}],shops:Array(NU).fill(null),
   fare:1,name:'Northwind',livery:0,clock:360,flightNo:101,history:[],best:{},reports:Array(NG).fill(null),

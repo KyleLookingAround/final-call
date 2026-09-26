@@ -1,6 +1,9 @@
 /* ================= WHAT'S NEW: every version's new features, shown after an update and from Settings or Help ================= */
 // Newest first. Add an entry with each release; the checks make sure the newest one matches docs/HISTORY.md.
 const UPDATES=[
+  {v:26,title:'Mobile lounges',points:[
+    'With the Remote apron, buy mobile lounges on stilts, as at Washington Dulles (Airfield › Layout).',
+    'They drive out to the remote stands and rise to the door: as quick as a bridge in any weather, and no rating cost.']},
   {v:25,title:'More real airports',points:[
     'The Satellite is now Heathrow Terminal 5, with an underground train out to two satellites.',
     'The Starfish is now Beijing Daxing: five piers round a star-shaped hall.',

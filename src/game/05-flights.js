@@ -44,7 +44,7 @@ function newFlight(i,src){
   const st=G.stands[i];if(!st.built||!src) return null;
   const partner=src.partner||null,fl=partner?null:G.fleet[src.fleet];if(!partner&&(!fl||fl.sold))return null;
   const ac=AIRCRAFT[partner?partner.type:fl.type],D=derived(),S=R.st[i];
-  const rear=(st.rear||STAND_KIND[i]==='remote')&&ac.tier>=1,geo=geom(ac,STAND_DY[i]),cols=geo.cols,seatsN=ac.rows*cols,P=paths(i,geo);
+  const rear=(st.rear||STAND_KIND[i]==='remote')&&ac.tier>=1,geo=geom(ac),cols=geo.cols,seatsN=ac.rows*cols,P=paths(i,geo);
   // where it flies: your planes follow the dispatcher, partners fly their own schedules
   let dc=partner?null:pickRoute(ac);
   if(!dc){const pool=CITIES.filter(c=>c[2]<=ac.tier&&c[2]>=ac.tier-1&&c[0]!==G.lastDest);dc=pool[Math.floor(rnd()*pool.length)][0]}

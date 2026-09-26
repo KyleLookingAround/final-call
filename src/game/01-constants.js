@@ -4,7 +4,6 @@ const SIDX=[0,1,2,3,4,5,6,7],STAND_ORDER=[0,1,2,3,4,5,6,7],STAND_AFTER=[-1,0,1,2
 // the airport's layout: these arrays hold the current layout's stands and shop units (39-layouts.js fills them in place)
 let W=2480; // world width
 const STAND_X=[170,470,770,1070,1370,1670,1970,2270];
-const STAND_DY=[0,0,0,0,0,0,0,0]; // how far each stand's plane sits back from the concourse
 const GATES=['A1','A2','A3','A4','B1','B2','B3','B4'];
 const SHOP_X=STAND_X.map(x=>x+22),SHOP_PH=[1,1,1,1,2,2,2,2],SHOP_NAME=GATES.slice(); // shop units: left edge, phase (2 needs Pier B), label
 const STAND=[
