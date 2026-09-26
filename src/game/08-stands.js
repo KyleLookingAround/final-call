@@ -132,7 +132,7 @@ function connect(p){
 function finishArrival(p){
   const A=p.A;p.dead=true;A.cleared++;A.waitSum+=p.wait;countPax(true);
   {const v=(A.fare||A.ac.fare*G.fare)*0.6*(p.biz?3:1);if(A.partner)earn(v*partnerCut(),'handling');else earn(v,'inbound')}
-  hotelStay(A);
+  hotelStay(p);
   if(A.cleared>=A.n&&!A.done){
     A.done=true;const avg=A.waitSum/A.n,mins=G.clock-(A.started??G.clock),pat=patience();
     if(avg<8+pat)repAdj(0.8,'arrivals');else if(avg>18+pat)repAdj(-Math.min(4,(avg-18-pat)*0.2),'arrivals');

@@ -15,7 +15,7 @@ function crewReady(i,F){
   if(!F.crewWait){F.crewWait=G.clock;toW(i,0,CABIN_TOP-24);floater('CREW DELAY',WP.x,WP.y,'#FF7A8A',true);if(G.dstat)G.dstat.crewDl=(G.dstat.crewDl||0)+1;if(SET().autoCrews!==false)hireCrew(true)}
   return false;
 }
-function crewAway(F,back){const c=F.crew;if(!c)return;c.res=0;c.back=back;c.duty+=back-G.clock;if(c.duty>=CREW_DUTY-50){c.free=back+CREW_REST;c.duty=0}else c.free=back+10}
+function crewAway(F,back){const c=F.crew;if(!c)return;c.res=0;c.back=back;c.duty+=back-G.clock;if(c.duty>=CREW_DUTY-50){c.free=back+crewRest(back);c.duty=0}else c.free=back+10}
 function hireCrew(quiet){const fee=crewFee();if(G.cash<fee)return false;spend(fee,'costs');G.crews.push(mkCrew(G.clock+(quiet?30:20)));if(!quiet&&!R.sim)toast(`Crew hired. They report for duty in 20 min.`,null,null,'goal',4);return true}
 function releaseCrew(){const k=G.crews.findIndex(c=>!c.res&&c.back<=G.clock);if(k<0||G.crews.length<=1)return false;G.crews.splice(k,1);return true}
 function crewTick(){ // the fleet manager keeps enough crews for the fleet
