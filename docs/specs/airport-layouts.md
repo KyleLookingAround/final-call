@@ -95,8 +95,8 @@ A small rating modifier applies only where a layout is plainly nicer or worse to
 
 ## Files
 
-- **New:** `src/game/38-layouts.js` for layout data, rebuilding, and the Airfield › Layout tab.
-- **New:** `src/game/39-layout-drawing.js` for each layout's terminal, piers and apron.
+- **New:** `src/game/39-layouts.js` for layout data, rebuilding, and the Airfield › Layout tab.
+- **New:** `src/game/40-layout-drawing.js` for each layout's terminal, piers and apron.
 - **Changed:**
   - geometry (`01-constants`, `04-geometry`), where stand positions come from the current layout;
   - stands and passengers, for buses and remote stands;
