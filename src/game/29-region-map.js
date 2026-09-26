@@ -167,7 +167,7 @@ function drawBuilds(t,k){
     const Es=(b.track||[]).map(id=>E_BY[id]).filter(Boolean),tot=Es.reduce((a,e)=>a+e.len,0);let rem=pr*tot,head=null;
     for(const e of Es){strokePath(e.pts,'rgba(255,199,44,.22)',Math.max(3,4*minW),[5/k,4/k]);if(rem>0){const s=Math.min(e.len,rem);rem-=s;const pts=[];for(let q=0;q<s;q+=6)pts.push(ptOn(e.P,q));pts.push(ptOn(e.P,s));strokePath(pts,'#FFC72C',Math.max(3,4*minW));if(s<e.len)head=ptOn(e.P,s)}}
     if(head){const p=(Math.sin(t*6)+1)/2;ctx.fillStyle='#FFC72C';ctx.beginPath();ctx.arc(head[0],head[1],(3+2*p)/k,0,7);ctx.fill()}
-    const mid=Es[Math.floor(Es.length/2)]||(RE[0]&&RE[0].e);if(mid&&k>0.3){const q=ptOn(mid.P,mid.len/2);lblBg(`BUILDING ${MODES[b.mode].L}${b.num} · ${Math.round(pr*100)}%`,q[0],q[1]-12/k,'#FFC72C',9)}}
+    const mid=Es[Math.floor(Es.length/2)]||(RE[0]&&RE[0].e);if(mid&&k>0.3){const q=ptOn(mid.P,mid.len/2);lblBg(`${b.up?`UPGRADING ${b.from} → `:'BUILDING '}${MODES[b.mode].L}${b.num} · ${Math.round(pr*100)}%`,q[0],q[1]-12/k,'#FFC72C',9)}}
 }
 function lineW(L,k,sp){const M=MODES[L.mode];return Math.min(sp*0.82,({road:2.6,water:2.6,track:3.4,rail:3.8}[M.kind]*(L.mode==='metro'||L.mode==='hsr'?1.15:1))/k)}
 function drawNetLines(t,k){

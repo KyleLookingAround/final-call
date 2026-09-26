@@ -53,7 +53,8 @@ function lineDown(L){
   if(L.mode==='water'){if(R.fx.fog>G.clock)return true;for(const {e} of (routeEdges(L.mode,L.stops)||[])){const m=ptOn(e.P,e.len/2),w=wxAt(m[0],m[1]);if(w&&(w.c.type==='fog'||w.c.type==='storm'))return true}}
   return false;
 }
-function lineFreq(L,nominal){if(!L)return 0;let f=L.freq;if(L.freight)f=Math.max(1,f-1);if(nominal)return f;if(lineDown(L))return 0;if(isNight())f=L.night?Math.max(1,Math.floor(f/2)):0;return f}
+function lineFreq(L,nominal){if(!L)return 0;let f=L.freq;if(!nominal&&evExtra(L)){const fq=MODES[L.mode].freqs;f=fq[Math.min(fq.length-1,Math.max(0,fq.indexOf(f))+2)]} // the manager's extra services while event crowds travel
+  if(L.freight)f=Math.max(1,f-1);if(nominal)return f;if(lineDown(L))return 0;if(isNight())f=L.night?Math.max(1,Math.floor(f/2)):0;return f}
 const fareMul=L=>[0.7,1,1.5][L.fare??1];
 function edgeMins(L,e,M,rb){ // minutes for one vehicle to cover a corridor right now
   const road=M.kind==='road',w=R.reg&&R.reg.ewx?R.reg.ewx[e.id]:null;let v=M.spd;

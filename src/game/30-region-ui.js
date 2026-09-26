@@ -5,6 +5,10 @@ function setView(v){
   clampCam();renderCam();$('#viewb').classList.toggle('on',v==='region');{const wb=$('#worldb');if(wb)wb.classList.toggle('on',v==='world')}$('#viewb').setAttribute('aria-label',v==='region'?'Show the airport':'Show the region');$('#viewb').title=v==='region'?'Back to the airport (R)':'Region map (R)';
 }
 function regionFocus(pid){const c=R.cam;if(pid==='all'){c.z=zMin();c.tx=0;c.ty=0;return}const pl=PLACES[pid]||PLOTS.find(p=>p.id===pid);c.z=Math.max(c.z,zMin()*2.2);const k=viewK();c.tx=pl.x-R.sw/k/2;c.ty=pl.y-R.sh/k/2;const b=camBounds(),vw=R.sw/k,vh=R.sh/k;c.tx=clamp(c.tx,b.x0,Math.max(b.x0,b.x1-vw));c.ty=clamp(c.ty,b.y0,Math.max(b.y0,b.y1-vh))}
+function focusStops(st){ // fly the camera to show a whole route
+  const c=R.cam,xs=st.map(n=>NODES[n].x),ys=st.map(n=>NODES[n].y),x0=Math.min(...xs)-90,x1=Math.max(...xs)+90,y0=Math.min(...ys)-90,y1=Math.max(...ys)+90;
+  c.z=clamp(Math.min(R.sw/(x1-x0),R.sh/(y1-y0))/R.baseK,zMin(),zMin()*4);const k=viewK(),vw=R.sw/k,vh=R.sh/k,b=camBounds();
+  c.tx=clamp((x0+x1)/2-vw/2,b.x0,Math.max(b.x0,b.x1-vw));c.ty=clamp((y0+y1)/2-vh/2,b.y0,Math.max(b.y0,b.y1-vh))}
 function nearestNode(wx,wy,r){let best=null,bd=r;for(const n of NODE_IDS){const N=NODES[n];let d=Math.hypot(wx-N.x,wy-N.y);if(N.pier)d=Math.min(d,Math.hypot(wx-N.pier[0],wy-N.pier[1]));if(d<bd){bd=d;best=n}}return best}
 function showCard(id){requestAnimationFrame(()=>{const el=document.getElementById(id);if(el)el.scrollIntoView({block:'start',behavior:REDUCED?'auto':'smooth'})})}
 function regionTap(wx,wy){
@@ -29,7 +33,9 @@ function startDraft(from){
   if(R.view!=='region')setView('region');if(isPhone()&&!document.body.classList.contains('fs'))setSheetSnap(1);
   renderPanel();$('#panel').scrollTop=0;
 }
-function setDraftMode(m){const D=R.draft;if(!D||!has('mode:'+m))return;R.lastMode=m;D.mode=m;D.col=draftCol(m);D.skip=[];
+function setDraftMode(m){const D=R.draft;if(!D||!has('mode:'+m))return;const L=D.edit&&G.lines[D.edit];
+  if(L){if(m!==L.mode&&!upTargets(L).includes(m))return;D.mode=m;D.col=m===L.mode?L.col:draftCol(m);D.stops=m===L.mode?L.stops.slice():(upgradeStops(L,m)||[]);D.skip=m===L.mode?(L.skip||[]).slice():[];return}
+  R.lastMode=m;D.mode=m;D.col=draftCol(m);D.skip=[];
   if(!routeEdges(m,D.stops))D.stops=D.stops.length&&neighbours(D.stops[0],m).length?[D.stops[0]]:[]}
 function draftTap(n){
   const D=R.draft,st=D.stops,M=MODES[D.mode],name=NODES[n].n;
@@ -90,17 +96,19 @@ function stopChips(stops,skip,attr){
   return `<div class="stops">${stops.map((n,i)=>{const mid=i>0&&i<stops.length-1,sk=(skip||[]).includes(n);return (i?'<span class="arr">›</span>':'')+(attr?attr(n,i,mid,sk):`<span class="chip static">${NODES[n].n}</span>`)}).join('')}</div>`;
 }
 function draftCard(){
-  const D=R.draft,M=MODES[D.mode],edit=D.edit&&G.lines[D.edit],q=lineQuote(D.mode,D.stops,D.edit),code=edit?lineCode(edit):M.L+nextNum(D.mode);
-  let h=`<div class="lcard draft" id="draft"><div class="lh"><span class="lbadge" style="--c:${D.col}">${code}</span><div><div class="rt">${edit?'Edit '+code:'New '+M.name.toLowerCase()+' line'}</div><div class="rd">${D.stops.length?'Tap stations to extend it. Tap an end to drop it.':'Tap a station on the map to start.'}</div></div><button class="chip" data-dcancel="">Cancel</button></div>`;
-  if(!edit)h+=`<div class="chips">${MODE_ORDER.filter(m=>has('mode:'+m)).map(m=>`<button class="chip${m===D.mode?' on':''}" data-dmode="${m}">${MODES[m].name}</button>`).join('')}</div><div class="rd" style="margin:7px 0 2px">${M.desc} ${M.cap} seats · ${money(M.fare)} a ride${trackOf(D.mode)&&D.mode!=='water'?' · lays its own track':''}.</div>`;
+  const D=R.draft,M=MODES[D.mode],edit=D.edit&&G.lines[D.edit],up=edit&&edit.mode!==D.mode,q=lineQuote(D.mode,D.stops,D.edit),code=edit&&!up?lineCode(edit):M.L+nextNum(D.mode);
+  let h=`<div class="lcard draft" id="draft"><div class="lh"><span class="lbadge" style="--c:${D.col}">${code}</span><div><div class="rt">${up?`Upgrade ${lineCode(edit)} to ${M.name.toLowerCase()} ${code}`:edit?'Edit '+code:'New '+M.name.toLowerCase()+' line'}</div><div class="rd">${up?`${lineCode(edit)} keeps running until it’s ready.`:D.stops.length?'Tap stations to extend it. Tap an end to drop it.':'Tap a station on the map to start.'}</div></div><button class="chip" data-dcancel="">Cancel</button></div>`;
+  const ut=edit?upTargets(edit).filter(m=>upgradeStops(edit,m)):[],kinds=edit?(ut.length?[edit.mode,...ut]:[]):MODE_ORDER.filter(m=>has('mode:'+m));
+  if(kinds.length)h+=`<div class="chips">${kinds.map(m=>`<button class="chip${m===D.mode?' on':''}" data-dmode="${m}">${MODES[m].name}</button>`).join('')}</div>`;
+  if(!edit||up)h+=`<div class="rd" style="margin:7px 0 2px">${M.desc} ${M.cap} seats · ${money(M.fare)} a ride${trackOf(D.mode)&&D.mode!=='water'?' · lays its own track':''}.</div>`;
   if(D.stops.length)h+=stopChips(D.stops,D.skip,(n,i,mid,sk)=>`<button class="chip${sk?' skip':''}" ${mid?`data-dskip="${n}" title="${sk?'Stop here':'Skip this stop'}"`:`data-dend="${i?'end':'start'}" title="Remove"`}>${NODES[n].n}${mid?'':' ×'}</button>`);
   const sug=edit?[]:(SUGGEST[D.mode]||[]).filter(s=>!Object.values(G.lines||{}).some(L=>L.mode===D.mode&&L.stops.join()===s.join())&&!modeLocked(D.mode,s)).slice(0,4);
   if(sug.length&&D.stops.length<2)h+=`<div class="rd" style="margin-top:8px">Ideas</div><div class="chips" style="margin-top:4px">${sug.map(s=>`<button class="chip" data-dsug="${s.join(',')}">${s.map(n=>NODES[n].n).join(' › ')}</button>`).join('')}</div>`;
   if(D.stops.length>=2){
-    const parts=[];if(!edit)parts.push(`${M.name==='Bus'?'Buses':M.name==='Coach'?'Coaches':M.name+'s'} ${money(M.fix)}`);if(q.track.length)parts.push(`${q.track.length} new track section${q.track.length>1?'s':''} ${money(q.tcost)}`);else if(trackOf(D.mode))parts.push('track already laid');
-    h+=`<div class="report">${parts.join(' · ')} · about <b>${q.ride} min</b> end to end · ${q.mins?`<b>${Math.round(q.mins/60*10)/10} h</b> to build`:'ready at once'}</div>`;
+    const parts=[];if(!edit||up)parts.push(`${M.name==='Bus'?'Buses':M.name==='Coach'?'Coaches':M.name+'s'} ${money(M.fix)}`);if(q.track.length)parts.push(`${q.track.length} new track section${q.track.length>1?'s':''} ${money(q.tcost)}`);else if(trackOf(D.mode))parts.push('track already laid');
+    h+=`<div class="report">${parts.map(x=>x+' · ').join('')}about <b>${q.ride} min</b> end to end · ${q.mins?`<b>${Math.round(q.mins/60*10)/10} h</b> to build`:'ready at once'}</div>`;
     if(q.why)h+=`<div class="rd" style="color:var(--bad);margin-top:6px">${q.why}</div>`;
-    h+=`<div style="margin-top:8px;display:flex;justify-content:flex-end"><button class="buy" data-dgo="" ${q.ok?`data-cost="${q.cost}"`:'disabled'}>${edit&&!q.cost?'Save route':'Build '+money(q.cost)}</button></div>`;
+    h+=`<div style="margin-top:8px;display:flex;justify-content:flex-end"><button class="buy" data-dgo="" ${q.ok?`data-cost="${q.cost}"`:'disabled'}>${edit&&!q.cost?'Save route':(up?'Upgrade ':'Build ')+money(q.cost)}</button></div>`;
   }
   return h+`</div>`;
 }
@@ -117,11 +125,12 @@ function stationCard(n,r){
 }
 function buildCard(b){const M=MODES[b.mode];return `<div class="lcard" id="line-${b.lid}"><div class="lh"><span class="lbadge" style="--c:${b.col}">${M.L}${b.num}</span><div><div class="rt">${NODES[b.stops[0]].n} – ${NODES[b.stops[b.stops.length-1]].n}</div><div class="rd">${M.name} · ${Math.ceil(b.done-G.clock)} min to go</div></div><span class="pill" style="--c:var(--sign)">BUILDING</span></div><div class="prog"><i style="width:${bprog(b.id)*100}%;background:var(--sign)"></i></div></div>`}
 function lineCard(L,r){
-  const M=MODES[L.mode],st=r.lines[L.id],sel=R.regSel===L.id,down=lineDown(L),eb=buildOf('line:'+L.id);
-  let pill=null;if(replOn(L.id))pill=['BUSES','var(--good)'];else if(down)pill=['STOPPED','var(--bad)'];else if(eb)pill=['EXTENDING','var(--sign)'];else if(st&&st.f===0)pill=['NO SERVICE','var(--muted)'];else if(st&&st.load>1)pill=['FULL','var(--bad)'];else if(st&&st.load>0.85)pill=['BUSY','var(--sign)'];
+  const M=MODES[L.mode],st=r.lines[L.id],sel=R.regSel===L.id,down=lineDown(L),eb=buildOf('line:'+L.id),ev=!down&&evExtra(L);
+  let pill=null;if(replOn(L.id))pill=['BUSES','var(--good)'];else if(down)pill=['STOPPED','var(--bad)'];else if(eb)pill=[eb.up?'UPGRADING':'EXTENDING','var(--sign)'];else if(ev)pill=[EVT[ev.type].label.toUpperCase(),'var(--good)'];else if(st&&st.f===0)pill=['NO SERVICE','var(--muted)'];else if(st&&st.load>1)pill=['FULL','var(--bad)'];else if(st&&st.load>0.85)pill=['BUSY','var(--sign)'];
   let h=`<div class="lcard${sel?' sel':''}" id="line-${L.id}"><button class="lhb" data-lsel="${L.id}" aria-expanded="${sel}"><span class="lbadge" style="--c:${L.col}">${lineCode(L)}</span><div><div class="rt">${lineName(L)}</div><div class="rd">${M.name} · every ${Math.round(60/L.freq)} min${st?` · ${num(st.riders)} riders/h`:''}</div></div>${pill?`<span class="pill" style="--c:${pill[1]}">${pill[0]}</span>`:`<span class="chev">${sel?'⌃':'⌄'}</span>`}</button>`;
   if(!sel)return h+`</div>`;
-  if(eb)h+=`<div class="rd">Extending to ${lineName({stops:eb.stops})} · ${Math.ceil(eb.done-G.clock)} min to go.</div><div class="prog"><i style="width:${bprog(eb.id)*100}%;background:var(--sign)"></i></div>`;
+  if(eb)h+=`<div class="rd">${eb.up?`Becoming ${MODES[eb.mode].name.toLowerCase()} line ${MODES[eb.mode].L}${eb.num}, ${lineName({stops:eb.stops})}`:`Extending to ${lineName({stops:eb.stops})}`} · ${Math.ceil(eb.done-G.clock)} min to go.</div><div class="prog"><i style="width:${bprog(eb.id)*100}%;background:var(--sign)"></i></div>`;
+  if(ev)h+=`<div class="rd">Extra services for the ${EVT[ev.type].label.toLowerCase()} while the crowds travel.</div>`;
   if(st){const profit=st.rev-st.ops;
     h+=`<div class="lstats"><div><b>${num(st.riders)}</b><span>riders/h</span></div><div><b>${num(st.fly)}</b><span>flyers/h</span></div><div><b style="color:${st.load>1?'var(--bad)':st.load>0.85?'var(--sign)':''}">${Math.round(st.load*100)}%</b><span>full</span></div><div><b>${Math.round(st.one)}</b><span>min trip</span></div><div><b style="color:${profit<0?'var(--bad)':'var(--good)'}">${money(profit)}</b><span>profit/h</span></div></div>`;
     h+=`<div class="prog"><i style="width:${clamp(st.load,0,1)*100}%;background:${st.load>1?'var(--bad)':L.col}"></i></div>`}
@@ -136,6 +145,8 @@ function lineCard(L,r){
   h+=`<div class="chips" style="margin:6px 0">${tg.map(([k,n,t])=>`<button class="chip${L[k]?' on':''}" data-ltog="${L.id}:${k}" title="${t}">${L[k]?'✓ ':''}${n}</button>`).join('')}</div>`;
   const cc=carsCost(L);
   h+=`<div class="opt"><div><div class="rt">${L.mode==='bus'||L.mode==='coach'?'Bigger vehicles':'Longer '+(L.mode==='water'?'boats':L.mode==='tram'?'trams':'trains')} ${pips(L.cars||0,2)}</div><div class="rd">+50% seats each step, +35% running cost.</div></div>${(L.cars||0)<2?`<button class="buy" data-lcars="${L.id}" data-cost="${cc}">${money(cc)}</button>`:'<button class="buy chipd" disabled>Max</button>'}</div>`;
+  const ups=eb?[]:upTargets(L).map(m=>{const stp=upgradeStops(L,m),q=stp&&lineQuote(m,stp,L.id);return q&&q.ok?[m,q.cost]:null}).filter(Boolean);
+  if(ups.length)h+=`<div class="lrowc"><span class="rt">Upgrade</span><div class="chips">${ups.map(([m,c])=>`<button class="chip" data-lup="${L.id}:${m}">${MODES[m].name} <small>${money(c)}</small></button>`).join('')}</div></div>`;
   h+=`<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="buy ghost" data-ledit="${L.id}" ${eb?'disabled':''}>Edit route</button><button class="buy sell" data-lclose="${L.id}">Close line</button></div>`;
   return h+`</div>`;
 }
@@ -168,6 +179,7 @@ function regionClick(d,b){
   if(d.ltog){const [c,k]=d.ltog.split(':');G.lines[c][k]=!G.lines[c][k];if(k==='night')G.lines[c].man=true;regionTick();re();return true}
   if(d.lskip){const [c,n]=d.lskip.split(':'),L=G.lines[c],s=L.skip||(L.skip=[]),i=s.indexOf(n);if(i>=0)s.splice(i,1);else s.push(n);R.ng=null;regionTick();re();return true}
   if(d.lcars){const L=G.lines[d.lcars],cc=carsCost(L);if((L.cars||0)<2&&buy(cc)){L.cars=(L.cars||0)+1;regionTick();re()}return true}
+  if(d.lup){const [id,m]=d.lup.split(':'),L=G.lines[id];if(L){R.draft={mode:L.mode,stops:L.stops.slice(),skip:[],edit:id,col:L.col};setDraftMode(m);R.regSel=null;if(R.view!=='region')setView('region');if(R.draft.stops.length)focusStops(R.draft.stops);renderPanel();$('#panel').scrollTop=0}return true}
   if(d.ledit){const L=G.lines[d.ledit];R.draft={mode:L.mode,stops:L.stops.slice(),skip:(L.skip||[]).slice(),edit:L.id,col:L.col};R.regSel=null;if(R.view!=='region')setView('region');renderPanel();$('#panel').scrollTop=0;return true}
   if(d.lclose){const key='close'+d.lclose;if(!(R.armKey===key&&Date.now()-R.armT<3000)){R.armKey=key;R.armT=Date.now();b.textContent='Tap to confirm';b.classList.add('arm');return true}R.armKey=null;closeLine(d.lclose);re();return true}
   if(d.dbuild){const [p,o]=d.dbuild.split(':');if(buildDev(p,o)){R.regSel='plot:'+p;re()}return true}

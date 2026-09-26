@@ -9,13 +9,14 @@ function nodeAttr(){ // jobs and visitors drawn to each station
   jobs.air=(jobs.air||0)+8+3*builtCount()+2*G.level;jobs.ano=(jobs.ano||0)+2;
   return {jobs,tour};
 }
-function carTimes(C){ // minutes by car between stations (parking included), and the roads each trip uses
+function carTimes(C){ // minutes by car between stations (parking included), and the roads each trip uses; the last answer is kept, as measuring changes asks the same again
+  const key=C+'|'+((R.fx.roadworks||0)>G.clock?R.fx.rwE:'')+devOn('ringroad')+devOn('lowtraffic');if(R.carC&&R.carC.k===key)return R.carC.T;
   const spd=r=>(r===2?34:22)*(1-0.45*C)*(devOn('ringroad')&&r===1?1.15:1),park=n=>NODES[n].pl==='city'?(devOn('lowtraffic')?14:8):n==='air'?4:2,T={},P={};
   for(const s of NODE_IDS){const d={[s]:0},pv={},done=new Set();
     for(;;){let u=null;for(const k in d)if(!done.has(k)&&(u==null||d[k]<d[u]))u=k;if(u==null)break;done.add(u);
       for(const e of EDGES){if(e.water||!e.road)continue;const v=e.a===u?e.b:e.b===u?e.a:null;if(!v)continue;const w=(e.len+(e.extra||0))/spd(e.road)/(rwOn(e.id)?0.6:1);if(d[v]==null||d[u]+w<d[v]){d[v]=d[u]+w;pv[v]=[u,e]}}}
     T[s]={};for(const n of NODE_IDS)T[s][n]=n===s?0:(d[n]??999)+park(n);P[s]=pv}
-  T.P=P;return T;
+  T.P=P;R.carC={k:key,T};return T;
 }
 function svcGraph(nominal,prevL){ // every ride you can take from each station; parallel lines share riders by frequency
   const adj={},info={},grp={},rt=G.lv.rtinfo?0.7:1;NODE_IDS.forEach(n=>adj[n]=[]);
@@ -45,7 +46,8 @@ function regionTick(){
   const old=R.reg,reg={lines:{},T:0,share:0,airSh:[],rev:0,ops:0,riders:0,flyers:0,locals:0,boardAt:{},q:{},acc:{},cong:old&&isFinite(old.cong)?old.cong:0.3,at:G.clock};
   R.reg=reg;const lines=Object.values(G.lines||{}),prevL=old?old.lines:{};
   // weather over each corridor, and how busy shared track is
-  reg.ewx={};for(const e of EDGES){const m=ptOn(e.P,e.len/2),w=wxAt(m[0],m[1]);if(w&&w.d<0.9)reg.ewx[e.id]=w.c.type}
+  const fix=R.evalMode&&R.evalFix; // a measurement pinned to the moment it started: the same weather and flyers throughout
+  if(fix)reg.ewx=fix.ewx;else{reg.ewx={};for(const e of EDGES){const m=ptOn(e.P,e.len/2),w=wxAt(m[0],m[1]);if(w&&w.d<0.9)reg.ewx[e.id]=w.c.type}}
   reg.over={};for(const L of lines){const RE=routeEdges(L.mode,L.stops),tm=trackOf(L.mode);if(!RE||!tm||!TRACKCAP[tm])continue;const f=lineFreq(L,true);for(const {e} of RE){const k=e.id+':'+tm;reg.over[k]=(reg.over[k]||0)+f/TRACKCAP[tm]}}
   let surge=0,bizSurge=0;for(const e of (G.evq||[])){const E=EVT[e.type],dtm=G.clock-e.at;if(Math.abs(dtm)<240){const b=1-Math.abs(dtm)/240;if(E.biz)bizSurge+=E.surge*b;else surge+=E.surge*b}}
   reg.surge=surge;reg.bizSurge=bizSurge;
@@ -59,7 +61,7 @@ function regionTick(){
   const add=(o,d,V,kind)=>{const Ls=LEG[o]&&LEG[o][d];if(!Ls||!(V>0))return;for(const s of Ls){reg.boardAt[s.from]=(reg.boardAt[s.from]||0)+V;for(const x of s.alts){const f=F[x.L.id],v=V*x.w;if(!f)continue;const a=Math.min(x.i,x.j),b=Math.max(x.i,x.j);for(let q=a;q<b;q++){f.seg[q]+=v;if(kind!=='ev')f.sb[q]+=v}f.board+=v;f[kind]+=v;f.at[s.from]=(f.at[s.from]||0)+v}}};
   const legK=s=>{let c=0;for(const x of s.alts)c+=x.w*(reg.lines[x.L.id]?reg.lines[x.L.id].k:1);return c};
   // flyers: how many come by public transport, and how much demand good links add
-  const air=airPerHour(),polShare=(tix?1.2:1)*(devOn('lowtraffic')?1.15:1)*(devOn('ringroad')?0.95:1);
+  const air=fix?fix.air:airPerHour(),polShare=(tix?1.2:1)*(devOn('lowtraffic')?1.15:1)*(devOn('ringroad')?0.95:1);
   const qf=(g,far)=>g==null?0:far?clamp(2.4-(g+5)/110,0,1.2):clamp(1.5-(g+5)/60,0,1.2);
   let Dn=0;const fl=[];
   for(const n of NODE_IDS){if(n==='air'||n==='ano')continue;const far=NODES[n].far,w=(far?placePop('low'):nodePop(n))+1.5*(tour[n]||0)+0.5*(jobs[n]||0),k=far?0.00018:0.0006,pr=stnUp(n,'pr')?6:0,qn=qf(GTn[n].air!=null?GTn[n].air-pr:null,far),qa=qf(GT[n].air!=null?GT[n].air-pr:null,far);
@@ -114,7 +116,6 @@ function regionTick(){
   reg.parkMul=(1-reg.share)*(1-0.3*reg.cong)*(devOn('ringroad')?1.25:1)*(devOn('lowtraffic')?0.75:1);
   reg.wageMul=1-Math.min(0.12,0.2*reg.airCommute);
   reg.income=devSum('income');
-  if(!R.evalMode)mgrSample(reg);
   if(!isNight()&&!R.evalMode){const bs=R.boardSum||(R.boardSum={});for(const n in reg.boardAt)bs[n]=(bs[n]||0)+reg.boardAt[n];R.boardN=(R.boardN||0)+1}
   const hr=Math.floor(G.clock/60);
   if(old&&old.hr!=null&&old.hr!==hr&&!R.evalMode){let c=0;for(const id in reg.lines){const l=reg.lines[id];if(l.baseLoad>1.05)c+=Math.min(2,(l.baseLoad-1)*3)}if(c)repAdj(-Math.min(3,c),'crowding');if(reg.cong>0.75)repAdj(-(reg.cong-0.75)*4,'traffic')}

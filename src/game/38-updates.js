@@ -1,6 +1,11 @@
 /* ================= WHAT'S NEW: every version's new features, shown after an update and from Settings or Help ================= */
 // Newest first. Add an entry with each release; the checks make sure the newest one matches docs/HISTORY.md.
 const UPDATES=[
+  {v:27,title:'A smarter transport manager',points:[
+    'The transport manager runs your lines by what each change is worth: how often they run, fares and meeting flights.',
+    'It adds services at once to an overfull line, and runs extra ones to the stadium and other venues on event days.',
+    'It suggests upgrading a line to a tram, train or metro, extending one to the next town, or closing one you no longer need (Region › Transport).',
+    'Upgrade any line yourself from its card; it keeps running until the new one is ready.']},
   {v:26,title:'Mobile lounges',points:[
     'With the Remote apron, buy mobile lounges on stilts, as at Washington Dulles (Airfield › Layout).',
     'They drive out to the remote stands and rise to the door: as quick as a bridge in any weather, and no rating cost.']},
