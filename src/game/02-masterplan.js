@@ -1,6 +1,12 @@
 /* ================= the Masterplan: a tech tree bought with planning points ================= */
-const BRANCHES=[['term','Terminal'],['air','Airside'],['net','Fleet and routes'],['com','Commercial'],['reg','Region']];
+const BRANCHES=[['term','Terminal'],['air','Airside'],['net','Fleet and routes'],['com','Commercial'],['reg','Region'],['lay','Layouts']];
 const TECH=[
+  {id:'l_remote',b:'lay',t:5,c:1,d:'Rebuild with four cheaper remote stands, reached by bus.',n:'Remote apron',u:['lay:remote']},
+  {id:'l_stagger',b:'lay',t:3,c:1,d:'Rebuild with ten stands set at two depths.',n:'Staggered apron',u:['lay:stagger']},
+  {id:'l_curve',b:'lay',t:4,c:2,d:'Rebuild with a curved front, moving walkways and a control tower.',n:'Curved front',u:['lay:curve']},
+  {id:'l_hall',b:'lay',t:5,c:2,d:'Rebuild around a central shopping hall and a long finger pier.',n:'Hall and finger pier',u:['lay:hall']},
+  {id:'l_sat',b:'lay',t:7,c:3,d:'Rebuild with a satellite and its own people mover.',n:'Satellite',u:['lay:sat']},
+  {id:'l_star',b:'lay',t:9,c:3,d:'Rebuild around a star-shaped hall with the shortest walks.',n:'Starfish',u:['lay:star']},
   {id:'t_self',b:'term',t:1,c:1,d:'Passengers without hold bags skip the desks.',n:'Self-service',u:['up:kiosks','up:online']},
   {id:'t_border',b:'term',t:1,c:1,d:'Fast automatic passport gates for arrivals.',n:'E-gates',u:['up:egates']},
   {id:'t_fast',b:'term',t:1,c:1,d:'A paid lane that skips the security queue.',n:'Fast track',u:['up:fasttrack','up:ftsales']},
@@ -63,7 +69,7 @@ const FEAT_NAMES={promo:'Route promotions',alliance:'Partners pay 40% and fly mo
 function itemName(key){const [k,v]=key.split(':');
   if(k==='up')return UPG[v]?UPG[v].name:v;if(k==='ac')return AIRCRAFT[+v].name;if(k==='meth')return (METHODS.find(m=>m.id===v)||{}).name||v;
   if(k==='shop')return (SHOPS.find(x=>x.id===v)||{}).name||v;if(k==='mode')return MODES[v].name+' lines';if(k==='dev')return DEV[v].name;
-  if(k==='stn')return STN_UP[v].name;if(k==='rt')return ['Short-haul','Medium-haul','Sun and capital','Long-haul','Ultra long-haul'][+v]+' routes';if(k==='feat')return FEAT_NAMES[v]||v;return v}
+  if(k==='stn')return STN_UP[v].name;if(k==='rt')return ['Short-haul','Medium-haul','Sun and capital','Long-haul','Ultra long-haul'][+v]+' routes';if(k==='feat')return FEAT_NAMES[v]||v;if(k==='lay')return 'Rebuild as '+LAYOUTS[v].name+' (Airfield › Layout)';return v}
 function research(id){const T=TECH_BY[id];if(!T||techState(T)!=='ready')return false;G.pts-=T.c;(G.tech||(G.tech={}))[id]=1;
   const nt=new Set(G.newTabs||[]);for(const k of T.u){const [a,v]=k.split(':');if(a==='up'&&UPG[v])nt.add(UPG[v].tab);else if(a==='ac'||a==='meth')nt.add('stands');else if(a==='rt'||a==='feat')nt.add('routes');else if(a==='shop')nt.add('sales');else if(a==='mode'||a==='dev'||a==='stn')nt.add('region')}G.newTabs=[...nt];
   if(!R.sim){toast(`Approved: ${T.n}. ${T.u.map(itemName).join(', ')}.`,null,null,'goal',6);kaching();renderTabs();renderPlanBtn()}return true}
@@ -111,7 +117,7 @@ const GOALS=[
   {id:'wide',t:'Fly the W-300 Widebody',go:['stands','[data-acbuy="6"]'],p:()=>[G.fleet.some(f=>f.type===6&&!f.sold)?1:0,1],r:30000,need:()=>has('ac:6')},
   {id:'metro',t:'Dig a metro to the city',go:['region','[data-newline]'],p:()=>[anyMode('metro')?1:0,1],r:80000,need:()=>has('mode:metro')},
   {id:'riders',t:'Carry 1,000 riders an hour',go:['region','[data-newline]'],p:()=>[Math.round(R.reg?R.reg.riders:0),1000],r:120000,pts:1,need:()=>G.level>=1},
-  {id:'g8',t:'Open all eight gates',go:['stands','[data-standbuy="7"]'],p:()=>[builtCount(),8],r:60000,need:()=>G.level>=STAND[7].lvl},
+  {id:'g8',t:'Open all eight gates',go:['stands','[data-standbuy="7"]'],p:()=>[gatesOpen(),8],r:60000,need:()=>G.level>=STAND[7].lvl},
   {id:'tower',t:'Build the new control tower',go:['ground','[data-buy="tower"]'],p:()=>[G.lv.tower,1],r:100000,need:()=>has('up:tower')},
   {id:'l7',t:'Become a Global Hub',go:['office','#levels'],p:()=>[G.level,7],r:0},
   {id:'hsr',t:'Run high-speed trains to Lowmere',go:['region','[data-newline]'],p:()=>[anyMode('hsr')?1:0,1],r:250000,need:()=>has('mode:hsr')},

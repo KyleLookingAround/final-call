@@ -1,6 +1,6 @@
 /* ================= constants ================= */
 const NG=12,NU=20,H=640,SEATW=15,AISLE=16,CABIN_TOP=110,CABIN_MAX=250,TERM_Y=446,SEC_Y=522,LAND_B=614,LAND_R=1232,GAP=0.95,SPACING=8.5;
-const SIDX=[0,1,2,3,4,5,6,7],STAND_ORDER=[0,1,2,3,4,5,6,7]; // the current layout's stands, and the order they're bought in
+const SIDX=[0,1,2,3,4,5,6,7],STAND_ORDER=[0,1,2,3,4,5,6,7],STAND_AFTER=[-1,0,1,2,3,4,5,6]; // the current layout's stands, the order they're shown and bought in, and which stand each needs first
 // the airport's layout: these arrays hold the current layout's stands and shop units (39-layouts.js fills them in place)
 let W=2480; // world width
 const STAND_X=[170,470,770,1070,1370,1670,1970,2270];
@@ -44,7 +44,7 @@ const CARGO_RATE=()=>12*(1+0.1*G.lv.cargo);
 const TRIP=[60,85,120,180,240];
 const PARTNERS=[['Blue Heron','BH','#4C7DFF'],['Aerolux','AX','#E5484D'],['Nordvind','NV','#9B6BFF'],['Sahara Air','SH','#FF9F43'],['Kestrel','KE','#6BE39A'],['Skyline Pacific','SP','#2BB3A3']];
 const PARTNER_CUT=0.3;
-const fitsGate=(t,i)=>{const a=AIRCRAFT[t];return !(a.tier>=4&&i<4)&&!(a.fire&&G.lv.fire<a.fire)};
+const fitsGate=(t,i)=>{const a=AIRCRAFT[t];return !(a.tier>=4&&i<4)&&!(a.tier>=2&&STAND_KIND[i]==='remote')&&!(a.fire&&G.lv.fire<a.fire)};
 const tripMins=a=>Math.round(TRIP[a.tier]*(0.85+rnd()*0.3));
 const AC_ORDER=[0,4,1,5,2,7,3,6];
 /* the cities you can fly to: code, name, haul (0 short … 4 ultra long), business share, size 1–5, compass bearing, season */

@@ -13,7 +13,7 @@ function updateStand(i,dt,D){
   else if(pl.state==='boarding'){
     if(!F.manifest.length&&!F.straggler&&F.seated>=F.booked&&F.hold>=F.checkedTotal-1e-6&&F.arr.sent>=F.arr.bags&&!(F.xferWait>0)&&F.fault<=0&&crewReady(i,F)){pl.state='closing';pl.t=0.8;settle(i)}
   }
-  else if(pl.state==='closing'){if(pol('curfew')&&nightWin()){F.curfewHeld=true;pl.t=0.2}pl.t-=dt;if(pl.t<=0){S.out={F,t:0,offY:0,alpha:1};R.rwy.q.push({type:'dep',F,stand:i});{const fl=G.fleet[F.fleetIdx];if(fl&&!fl.sold){fl.st='away';fl.dep=G.clock;const dl=CITY[F.city]?farDelay(CITY[F.city]):0;fl.late=dl;fl.back=G.clock+tripMins(CITY[F.city]||F.ac)+dl;crewAway(F,fl.back);fl.dest=F.dest[0];fl.trips=(fl.trips||0)+1;fl.gate=null}}S.F=null;S.idleT=0;return}}
+  else if(pl.state==='closing'){if(pol('curfew')&&nightWin()){F.curfewHeld=true;pl.t=0.2}pl.t-=dt;if(pl.t<=0){S.out={F,t:0,offY:0,alpha:1};R.rwy.q.push({type:'dep',F,stand:i});{const fl=G.fleet[F.fleetIdx];if(fl&&!fl.sold){fl.st='away';fl.dep=G.clock;const dl=CITY[F.city]?farDelay(CITY[F.city]):0;fl.late=dl;fl.back=G.clock+tripMins(CITY[F.city]||F.ac)+dl;crewAway(F,fl.back);fl.dest=F.dest[0];fl.trips=(fl.trips||0)+1;fl.gate=null}}if(STAND_KIND[i]==='remote')repAdj(-0.1,'bus');S.F=null;S.idleT=0;return}}
   if(pl.state==='boarding'&&F.xferWait>0&&pol('xfer')==='leave'&&G.clock>=F.std){
     const m=F.xferWait;spend(m*F.fare*0.5,'costs');F.booked-=m;F.xferWait=0;F.xferCancelled=true;repAdj(-1,'missed');floater(`LEFT ${m} CONNECTING`,STAND_X[i],CABIN_TOP-24,'#FF7A8A',true);
   }
@@ -31,7 +31,9 @@ function updateStand(i,dt,D){
   }
   // gate scanners, one per door
   if(pl.state==='boarding'){
+    const bus=STAND_KIND[i]==='remote';if(bus&&S.busT>0)S.busT-=dt;
     for(const door of (F.rear?DOORS:FRONT)){
+      if(bus&&S.busT>0)continue;
       S.scanT[door]-=dt;if(S.scanT[door]>0)continue;
       const br=S.bridge[door];if(br.length&&br[br.length-1].s<SPACING)continue;
       let best=null,bk=Infinity;
@@ -40,6 +42,7 @@ function updateStand(i,dt,D){
         if(F.firstScan==null)F.firstScan=G.clock;
         if(best.prio)earn(F.fare*0.4,'priority',null,null,null,F);
         best.state='bridge';best.s=0;if(best.spot>=0)S.spots[best.spot]=null;best.spot=-1;br.push(best);S.scanT[door]=D.scan;
+          if(bus&&(S.busN=(S.busN||0)+1)>=40){S.busN=0;S.busT=5}
       } else S.scanT[door]=0;
     }
   }
@@ -48,7 +51,7 @@ function updateStand(i,dt,D){
     const br=S.bridge[door];if(!br.length)continue;
     const path=door?F.P.rear:F.P.bridge;
     br.sort((a,b)=>b.s-a.s);let lead=Infinity;
-    for(const p of br){p.s=Math.max(p.s,Math.min(p.s+D.walk*p.spd*dt,lead-SPACING,path.len));const q=ptAt(path,p.s);p.tx=q[0];p.ty=q[1];lead=p.s}
+    const bm=busMul(i);for(const p of br){p.s=Math.max(p.s,Math.min(p.s+D.walk*p.spd*bm*dt,lead-SPACING,path.len));const q=ptAt(path,p.s);p.tx=q[0];p.ty=q[1];lead=p.s}
     if(br[0].s>=path.len-0.01){
       const p=br[0],al=S.aisle[door+2*p.ais];let clear=true;
       for(const a of al){if(door===0?a.pos<g.P0+GAP:a.pos>g.P1-GAP){clear=false;break}}
@@ -116,7 +119,7 @@ function stepDeplaneBridges(i,D,dt){
     const br=S.dBridge[door];if(!br.length)continue;
     const F=br[0].F,path=door?F.P.rear:F.P.bridge;
     br.sort((a,b)=>a.s-b.s);let lead=-Infinity,out=false;
-    for(const p of br){p.s=Math.min(p.s,Math.max(p.s-D.walk*p.spd*dt,lead+SPACING,0));const q=ptAt(path,p.s);p.tx=q[0];p.ty=q[1];lead=p.s;if(p.s<=0.01){p.out=true;out=true;if(!(p.xfer&&connect(p))){p.state='toArr';p.tx=ARR_DOOR.x+(rnd()-0.5)*6;p.ty=ARR_DOOR.y}}}
+    for(const p of br){p.s=Math.min(p.s,Math.max(p.s-D.walk*p.spd*busMul(i)*dt,lead+SPACING,0));const q=ptAt(path,p.s);p.tx=q[0];p.ty=q[1];lead=p.s;if(p.s<=0.01){p.out=true;out=true;if(!(p.xfer&&connect(p))){p.state='toArr';p.tx=ARR_DOOR.x+(rnd()-0.5)*6;p.ty=ARR_DOOR.y}}}
     if(out)S.dBridge[door]=br.filter(p=>!p.out);
   }
 }

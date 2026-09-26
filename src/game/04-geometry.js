@@ -45,7 +45,7 @@ const serviceCost=f=>Math.round(AIRCRAFT[f.type].cost*0.05+15);
 const faultRisk=w=>clamp((w-5)*0.035,0,0.5);
 function demandNow(){const h=(G.clock/60)%24;return h>=5&&h<9?1.2:h>=9&&h<16?0.95:h>=16&&h<20?1.15:h>=20&&h<23?0.9:0.6}
 function demandName(){const h=(G.clock/60)%24;return h>=5&&h<9?'MORNING PEAK':h>=9&&h<16?'DAYTIME':h>=16&&h<20?'EVENING PEAK':h>=20&&h<23?'LATE':'NIGHT'}
-const boothPos=i=>({x:704,y:531+i*10}),egatePos=i=>({x:i<4?728:744,y:531+(i%4)*12}),carX=i=>800+(i%4)*108,carY=i=>i<4?566:600;
+const boothPos=i=>({x:704,y:531+i*10}),egatePos=i=>({x:i<4?728:744,y:531+(i%4)*12}),carX=i=>800+(i%4)*108,carY=i=>i%8<4?566:600; // stands past the eighth share a carousel
 // queue places: one shared object, refilled on each call, as the queues read it straight away every step
 const SLOT={x:0,y:0},slot=(x,y)=>{SLOT.x=x;SLOT.y=y;return SLOT};
 function arrSlot(i){if(i>=168)return slot(492+(i%4)*3,604);const per=24,r=Math.floor(i/per),k=i%per;return slot(r%2===0?678-k*8:678-(per-1-k)*8,534+r*12)}

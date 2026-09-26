@@ -61,6 +61,7 @@ function drawStandApron(i){
   const F=S.F;if(F&&F.plane.state!=='wait'&&F.plane.state!=='approach')drawPlane(F,sx,F.plane.offY,F.plane.state==='inbound',F.plane.alpha??1);
 }
 function drawBridge(i){
+  if(STAND_KIND[i]==='remote'){drawBusStand(i);return}
   const S=R.st[i];if(!G.stands[i].built)return;
   const sx=STAND_X[i],g=S.geo||geom(AIRCRAFT[0]),e=S.ext;
   const cornerY=g.fd.y+20,dx=sx+g.fd.x-3,tx=sx-120+(dx-(sx-120))*e,ty=cornerY+(g.fd.y-cornerY)*e;
@@ -78,12 +79,12 @@ function drawBridge(i){
   }
 }
 function drawTerminal(D){
-  const concR=G.pierB?W-8:LAND_R;
+  const C1=LAY.conc1||LAND_R,P2=LAY.gap?LAY.gap[1]:C1,concR=G.pierB?W-8:C1;
   ctx.fillStyle='#1C2228';ctx.fillRect(8,TERM_Y,concR-8,SEC_Y-TERM_Y);
   ctx.fillStyle='#191D22';ctx.fillRect(8,SEC_Y,LAND_R-8,LAND_B-SEC_Y);
   if(!G.pierB){
-    if(isBuilding('pier:B'))hatch(LAND_R+4,TERM_Y,W-12-LAND_R,SEC_Y-TERM_Y,bprog('pier:B'),'BUILDING PIER B');
-    else{ctx.strokeStyle='#2B3238';ctx.lineWidth=1.5;ctx.setLineDash([6,6]);ctx.strokeRect(LAND_R+4,TERM_Y,W-12-LAND_R,SEC_Y-TERM_Y);ctx.setLineDash([]);mono(G.level>=PIER.lvl?`PIER B · ${money(PIER.cost)}`:`PIER B · needs ${LEVELS[PIER.lvl].name}`,(LAND_R+W)/2,488,'#4A535D',11,'center')}
+    if(isBuilding('pier:B'))hatch(P2+4,TERM_Y,W-12-P2,SEC_Y-TERM_Y,bprog('pier:B'),'BUILDING '+p2name().toUpperCase());
+    else{ctx.strokeStyle='#2B3238';ctx.lineWidth=1.5;ctx.setLineDash([6,6]);ctx.strokeRect(P2+4,TERM_Y,W-12-P2,SEC_Y-TERM_Y);ctx.setLineDash([]);const n=p2name().toUpperCase();mono(G.level>=PIER.lvl?`${n} · ${money(PIER.cost)}`:`${n} · needs ${LEVELS[PIER.lvl].name}`,(P2+W)/2,488,'#4A535D',11,'center')}
   }
   const ciW=R.ciQ.length*D.checkin/(D.desks+D.kiosks*0.6),seW=R.secQ.length*D.sec/D.lanes,tint=w=>w>15?'rgba(255,122,138,.11)':w>8?'rgba(255,199,44,.07)':null;
   let tc=tint(ciW);if(tc){ctx.fillStyle=tc;ctx.fillRect(8,SEC_Y+22,284,LAND_B-SEC_Y-22)}
@@ -114,7 +115,7 @@ function drawTerminal(D){
   gaps.sort((a,b)=>a[0]-b[0]);
   ctx.beginPath();let x=8;for(const [a,b] of gaps){ctx.moveTo(x,TERM_Y);ctx.lineTo(a,TERM_Y);x=b}ctx.moveTo(x,TERM_Y);ctx.lineTo(concR,TERM_Y);
   ctx.moveTo(8,TERM_Y);ctx.lineTo(8,LAND_B);ctx.lineTo(140,LAND_B);ctx.moveTo(172,LAND_B);ctx.lineTo(LAND_R,LAND_B);ctx.lineTo(LAND_R,596);ctx.moveTo(LAND_R,560);ctx.lineTo(LAND_R,SEC_Y);
-  if(G.pierB){ctx.moveTo(LAND_R,SEC_Y);ctx.lineTo(W-8,SEC_Y);ctx.lineTo(W-8,TERM_Y)}else{ctx.moveTo(LAND_R,SEC_Y);ctx.lineTo(LAND_R,TERM_Y)}
+  if(G.pierB){ctx.moveTo(LAND_R,SEC_Y);ctx.lineTo(W-8,SEC_Y);ctx.lineTo(W-8,TERM_Y)}else{ctx.moveTo(LAND_R,SEC_Y);ctx.lineTo(C1,SEC_Y);ctx.lineTo(C1,TERM_Y)}
   const sg=[];for(let i=0;i<8;i++)if(i<D.lanes)sg.push([laneX(i)-5,laneX(i)+5]);if(D.ft)sg.push([FT_X-5,FT_X+5]);
   sg.push([480,494]);sg.sort((a,b)=>a[0]-b[0]);x=8;for(const [a,b] of sg){ctx.moveTo(x,SEC_Y);ctx.lineTo(a,SEC_Y);x=b}ctx.moveTo(x,SEC_Y);ctx.lineTo(LAND_R,SEC_Y);
   ctx.moveTo(474,SEC_Y);ctx.lineTo(474,LAND_B);ctx.stroke();
@@ -149,6 +150,7 @@ const BUGGY_ST=new Set(['walkIn','toShop','toGate','gate','toArr','exitW','toRec
 function drawPax(vx0,vx1){
   for(const p of R.pax){
     if(p.x<vx0-10||p.x>vx1+10)continue;
+    if((p.state==='bridge'||p.state==='dBridge')&&STAND_KIND[p.stand]==='remote')continue; // riding a bus, drawn as the bus
     const inCabin=p.state==='aisle'||p.state==='sitting'||p.state==='dAisle',r=inCabin?clamp(p.F.geo.pitch*0.42,2.7,3.8):3;
     if(p.inbound){
       ctx.fillStyle='#14171B';ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.fill();ctx.strokeStyle=p.xfer?'#6BE39A':p.stand===R.sel?'#ECE8DF':'#9FC2E0';ctx.lineWidth=1.5;ctx.stroke();
@@ -255,7 +257,7 @@ function draw(){
   ctx.setTransform(s,0,0,s,-cam.x*s,-cam.y*s);
   const vx0=cam.x,vx1=cam.x+R.sw/k;
   ctx.fillStyle='#14171B';ctx.fillRect(0,Y0,W,Y1-Y0);
-  const d=darkness();drawAirfield(d);
+  const d=darkness();drawAirfield(d);drawLayoutApron();
   ctx.strokeStyle='#1A1E23';ctx.lineWidth=1;ctx.beginPath();for(let x=0;x<=W;x+=50){ctx.moveTo(x+.5,32);ctx.lineTo(x+.5,TERM_Y)}for(let y=50;y<TERM_Y;y+=50){ctx.moveTo(0,y+.5);ctx.lineTo(W,y+.5)}ctx.stroke();
   ctx.fillStyle='#101316';ctx.fillRect(0,0,W,32);ctx.strokeStyle='rgba(255,199,44,.55)';ctx.lineWidth=1.5;ctx.setLineDash([12,10]);ctx.beginPath();ctx.moveTo(0,16);ctx.lineTo(W,16);ctx.stroke();ctx.setLineDash([]);
   for(const i of SIDX){if(STAND_X[i]+160<vx0||STAND_X[i]-160>vx1)continue;drawStandApron(i)}
@@ -267,7 +269,7 @@ function draw(){
     ctx.globalCompositeOperation='source-over';
   }
   if(R.fx.snow>G.clock){ctx.fillStyle='rgba(230,236,244,.05)';ctx.fillRect(0,Y0,W,TERM_Y-Y0);ctx.fillStyle='rgba(240,244,250,.6)';const t=performance.now()/1000;for(let k=0;k<160;k++){const x=(k*157.3+t*20*(1+(k%3)))%W,y=Y0+((k*97.1+t*40*(1+(k%4)*0.3))%(TERM_Y-Y0));ctx.fillRect(x,y,1.6,1.6)}}
-  drawTerminal(D);
+  drawTerminal(D);drawLayoutTerminal();
   if(pol('ads')){ctx.fillStyle='#E5484D';for(let x=60;x<W-100;x+=560){ctx.fillRect(x,TERM_Y-3,220,10);ctx.font='800 9px "Saira Condensed",sans-serif';ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('FIZZCO · FIZZCO · FIZZCO',x+110,TERM_Y+2.5);ctx.fillStyle='#E5484D'}}
   drawLandside(D);
   drawPax(vx0,vx1);

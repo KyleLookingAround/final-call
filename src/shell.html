@@ -321,6 +321,9 @@ body.fs .tip{bottom:52px}
 .row.sel{background:rgba(255,199,44,.07)}
 .segs{display:flex;gap:6px;margin:12px 0 4px}
 .segs .chip{flex:1;padding:8px 6px 7px;font:700 12px/1 var(--disp);letter-spacing:.1em;text-transform:uppercase}
+.laycard .lplan{display:block;width:100%;height:auto;background:#101316;border-radius:6px}
+.laycard .rd b{color:var(--text)}
+.rd.warn{color:var(--bad)}
 .lcard{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-top:10px;background:var(--surface);scroll-margin-top:8px}
 .lcard.sel{border-color:var(--sign);box-shadow:0 0 0 1px var(--sign) inset}
 .lh{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;margin-bottom:6px}
@@ -418,6 +421,11 @@ table.rtab th{font:600 10px/1 var(--mono);color:var(--muted);text-align:right;pa
 .recrow .rt{font-size:14px}
 .recrow .btns{align-items:flex-end}
 .recrow .btns .chip{padding:5px 7px 4px;font-size:11px}
+.upd{border-top:1px solid var(--line);padding:10px 0}
+.upd summary{cursor:pointer;font:700 15px/1.3 var(--body);list-style-position:inside}
+.upd .uv{font:600 11px var(--mono);color:var(--muted);margin-right:6px}
+.upd ul{margin:8px 0 0;padding-left:20px;color:var(--muted);font-size:14px;line-height:1.45}
+.newsgo{margin:14px 0 0;text-align:right}
 .linkb{border:0;background:none;padding:0;color:var(--sign);font:inherit;text-decoration:underline;cursor:pointer}
 @media (max-width:899px){.plan{padding:0}.pcard{width:100%;height:100%;max-height:none;border-radius:0;border:0;padding-top:max(14px,env(safe-area-inset-top))}}
 
@@ -540,11 +548,19 @@ body.fs .cam{max-width:calc(100% - 172px)}
     <div id="planBody"></div>
   </div>
 </div>
+<div class="help" id="news" hidden role="dialog" aria-modal="true" aria-labelledby="newsT">
+  <div class="hcard">
+    <button class="close" data-newsclose aria-label="Close">×</button>
+    <h2 id="newsT">What's new</h2>
+    <div id="newsList"></div>
+    <p class="newsgo"><button class="buy" data-newsclose>Play</button></p>
+  </div>
+</div>
 <div class="help" id="help" hidden role="dialog" aria-modal="true" aria-labelledby="helpT">
   <div class="hcard">
     <button class="close" data-helpclose aria-label="Close">×</button>
     <h2 id="helpT">How to play</h2>
-    <p><button class="linkb" id="tourAgain">Replay the guided start</button></p>
+    <p><button class="linkb" id="tourAgain">Replay the guided start</button> · <button class="linkb" id="newsAgain">What's new</button></p>
     <p>Planes land full. Clear the arrivals, clean the cabin, and board the next flight on time. Short queues and punctual flights raise your rating, which fills more seats.</p>
     <h3>Moving around</h3>
     <div class="hgrid">

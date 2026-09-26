@@ -1,0 +1,37 @@
+/* ================= WHAT'S NEW: every version's new features, shown after an update and from Settings or Help ================= */
+// Newest first. Add an entry with each release; the checks make sure the newest one matches docs/HISTORY.md.
+const UPDATES=[
+  {v:22,title:'Airport layouts',points:[
+    'Unlock new layouts in the Masterplan and rebuild your airport into them from Airfield › Layout.',
+    'Remote apron, Staggered apron, Curved front, Hall and finger pier, Satellite and Starfish, the last few inspired by real airports.',
+    'Each trades something: more stands, more shops, quicker walks, or buses out to remote stands.',
+    'Fast speeds run more smoothly on phones, and this page keeps the full history.']},
+  {v:21,title:'Smoother on phones',points:[
+    'The bottom panel slides over the map as you drag it, and always leaves some map in view.',
+    'Landscape phones show the map and panel side by side.',
+    'The full-screen drawer opens from Manage, and the page no longer scrolls or bounces.']},
+  {v:20,title:'Five new features',points:[
+    'Lowmere opens a rival airport once you are a City Airport, and competes for your travellers.',
+    'Your planes need rested crews, get overnight checks, and can come back late.',
+    'Records, stamps and weekly challenges in the Office.',
+    'A guided first hour for new airports, and saves across devices.']},
+  {v:19,title:'Room for the phone camera',points:['Settings › Screen keeps the top of the game clear of the camera.','Tidier top buttons, stand labels and pause tag.']},
+  {v:18,title:'Recommendations and managers',points:['The Region and Routes tabs suggest lines, routes, fares and planes.','Managers can run transport, routes and crews for you, and step back when you take over.']},
+  {v:17,title:'Settings',points:['Turn off tips, messages, map pop-ups, the goal bar, recommendations or badges. Replies to your own taps always show.']},
+  {v:16,title:'Levels and the Masterplan',points:['Ten levels, from Airfield to Airport of the Year.','A Masterplan of plans to approve, and a world map of routes with markets and fares.','Business travellers, holidaymakers, families, groups and passengers needing assistance.']},
+  {v:15,title:'The early days',points:['The airport itself: queues, boarding methods and turnarounds.','The region, with its transport, development sites, weather and events.']},
+];
+function renderNews(auto){
+  const seen=G.seen??0,fresh=UPDATES.filter(u=>u.v>seen);
+  $('#newsList').innerHTML=UPDATES.map((u,k)=>`<details class="upd"${(auto?u.v>seen:k===0)?' open':''}><summary><span class="uv">${u.v<=15?'Up to 15':'Version '+u.v}</span> ${u.title}${u.v>seen&&auto?' <span class="live">New</span>':''}</summary><ul>${u.points.map(p=>`<li>${p}</li>`).join('')}</ul></details>`).join('');
+  $('#newsT').textContent=auto&&fresh.length?`What's new`:`What's new · all versions`;
+}
+function openNews(on,auto){
+  const el=$('#news');if(!on){if(el.hidden)return;el.hidden=true;G.seen=UPDATES[0].v;save();if(R.newsPrev)setSpeed(R.newsPrev);return}
+  renderNews(auto);el.hidden=false;R.newsPrev=R.speed;setSpeed(0);$('#news .close').focus();
+}
+$('#news').addEventListener('click',e=>{if(e.target.id==='news'||e.target.closest('[data-newsclose]'))openNews(false)});
+$('#newsAgain').addEventListener('click',()=>{openHelp(false);openNews(true,false)});
+document.addEventListener('keydown',e=>{if(!$('#news').hidden&&e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();openNews(false)}},true);
+// after loading: only when there's something the player hasn't seen, and never over the guided start
+const newsDue=()=>(G.seen??0)<UPDATES[0].v&&(!G.tour||G.tour.done);

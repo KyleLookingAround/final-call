@@ -9,7 +9,7 @@ function pickPartner(i){
 const nightWin=()=>{const h=(G.clock/60)%24;return h>=23.5||h<5.5};
 function curfewSoon(){if(!pol('curfew'))return false;const h=(G.clock/60)%24;return nightWin()||(h<23.5&&(23.5-h)*60<90)}
 function allocFlight(i){
-  if(curfewSoon())return null;
+  if(curfewSoon()||layoutDrains(i))return null;
   const st=G.stands[i],S=R.st[i];let best=-1;
   G.fleet.forEach((f,j)=>{if(!f.sold&&f.st==='base'&&fitsGate(f.type,i)&&(best<0||(f.readyAt||0)<(G.fleet[best].readyAt||0)))best=j});
   if(best>=0)return newFlight(i,{fleet:best});
@@ -44,7 +44,7 @@ function newFlight(i,src){
   const st=G.stands[i];if(!st.built||!src) return null;
   const partner=src.partner||null,fl=partner?null:G.fleet[src.fleet];if(!partner&&(!fl||fl.sold))return null;
   const ac=AIRCRAFT[partner?partner.type:fl.type],D=derived(),S=R.st[i];
-  const rear=st.rear&&ac.tier>=1,geo=geom(ac,STAND_DY[i]),cols=geo.cols,seatsN=ac.rows*cols,P=paths(i,geo);
+  const rear=(st.rear||STAND_KIND[i]==='remote')&&ac.tier>=1,geo=geom(ac,STAND_DY[i]),cols=geo.cols,seatsN=ac.rows*cols,P=paths(i,geo);
   // where it flies: your planes follow the dispatcher, partners fly their own schedules
   let dc=partner?null:pickRoute(ac);
   if(!dc){const pool=CITIES.filter(c=>c[2]<=ac.tier&&c[2]>=ac.tier-1&&c[0]!==G.lastDest);dc=pool[Math.floor(rnd()*pool.length)][0]}

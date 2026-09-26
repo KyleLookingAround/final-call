@@ -36,6 +36,7 @@ const upCost=k=>{const u=UPG[k],l=G.lv[k],b=u.lvl||0;return Math.round(u.base*Ma
 const capOf=k=>capAt(k,G.level);
 const upLocked=k=>!has('up:'+k);
 const builtCount=()=>G.stands.filter(s=>s.built).length;
+const gatesOpen=()=>G.stands.filter((s,i)=>s.built&&STAND_KIND[i]!=='remote').length; // what levels count: remote stands aren't gates
 const shopUpCost=s=>Math.round(SHOPS[s.type].cost*0.8*Math.pow(1.7,s.lvl));
 const livery=()=>LIVERIES[G.livery][1];
 const dayOf=c=>Math.floor(c/1440)+1;
@@ -93,7 +94,7 @@ const partnerCut=()=>researched('n_alliance')?0.4:PARTNER_CUT;
 const arrivalRate=F=>2*(1+0.15*G.lv.marketing)*Math.sqrt(F.seatsN/48)*(R.fx.rush>G.clock?1.3:1)*(G.lv.rail?1.1:1);
 const LEVEL_UPKEEP=[0,10,25,50,200,400,600,1400,1900,2400];
 function upkeepRate(){
-  let u=LEVEL_UPKEEP[G.level]||0;G.stands.forEach((s,i)=>{if(s.built)u+=i<4?4+i*4:120+(i-4)*60});
+  let u=(LEVEL_UPKEEP[G.level]||0)+(LAY.upk||0);G.stands.forEach((s,i)=>{if(!s.built)return;const o=STAND_ORDER.indexOf(i);u+=o<4?4+o*4:120+(o-4)*60});
   if(G.pierB)u+=250;if(G.lv.runway2)u+=500;if(G.lv.rail)u+=120;u+=G.lv.hotel*60+G.lv.fire*80+G.lv.fuelfarm*40+G.lv.mover*400+G.lv.tower*300+G.lv.cargohub*500+G.lv.mall*800+G.lv.saf*400+G.lv.icon*1000;
   u+=G.dev?devSum('upk'):0;
   return u*(1-0.12*G.lv.solar)*(G.dev&&devOn('wind')?0.85:1);
