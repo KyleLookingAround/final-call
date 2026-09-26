@@ -4,7 +4,7 @@ What's being worked on, what's next, and ideas not yet agreed. Anything here get
 
 ## Now
 
-- **Real airport shapes** (#10). The layouts are rebuilt as real 2D shapes: Heathrow T5, Atlanta and Denver, Schiphol, Beijing Daxing, and a few odd ones such as the round Terminal 1 at Paris Charles de Gaulle. The spec is `docs/specs/airport-shapes.md`, and it's waiting for approval.
+- **Real airport shapes** (#10). The layouts are rebuilt as real 2D shapes: Heathrow T5, Atlanta and Denver, Schiphol, Beijing Daxing, and a few odd ones such as the round Terminal 1 at Paris Charles de Gaulle. The spec is `docs/specs/airport-shapes.md` (approved). It's being built in four steps, one PR each.
 
 ## Next
 

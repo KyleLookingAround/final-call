@@ -1,6 +1,6 @@
 # Real airport shapes
 
-Issue: #10 · Status: Proposed
+Issue: #10 · Status: Approved
 
 Follows #7, which shipped the layouts along one straight corridor.
 
@@ -46,21 +46,21 @@ Concept plans of every layout are below. `airport-shapes/plans.mjs` redraws them
 
 ## The odd ones
 
-Real airports with strange ideas that work as game mechanics. I recommend the first two for this work.
+Real airports with strange ideas that work as game mechanics. The owner approved the first two for this work; the others stay ideas.
 
 - **Round terminal (new layout)**, from Paris Charles de Gaulle Terminal 1.
   - A round concrete terminal with glass escalator tubes criss-crossing its open middle.
-  - Seven small satellites are reached through tunnels under the apron.
+  - Six small satellites are reached through tunnels under the apron (the real one has seven).
   - Upside: lots of stands in little space, and the tubes lift the rating.
   - Downside: each satellite has only a kiosk or two of shops.
 - **Mobile lounges (a Remote apron upgrade)**, from Washington Dulles.
   - Lounges on stilts drive out to the plane and rise to the door.
   - Remote boarding becomes as quick as a bridge, whatever the weather.
-- **Drive-to-gate rings (a possible layout)**, from Kansas City's old terminals.
+- **Drive-to-gate rings (an idea for later)**, from Kansas City's old terminals.
   - Ring-shaped terminals where you park about 25 m from your gate.
   - Security sits at every gate, so walks are tiny but staffing costs much more.
   - It changes how landside works, so it's a bigger job than the others.
-- **A forest or a waterfall (possible hall upgrades)**, from Kuala Lumpur and Singapore Changi.
+- **A forest or a waterfall (an idea for later)**, from Kuala Lumpur and Singapore Changi.
   - Kuala Lumpur has a patch of rainforest inside its satellite; Singapore Changi's Jewel has a 40 m indoor waterfall.
   - Either would lift the rating and shop spend in a hall.
 
