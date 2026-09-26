@@ -28,6 +28,13 @@ export default async function({open,ok,saveText}){
       const n0=B.sort.reduce((s,g)=>s+g[1],0);for(let k=0;k<100;k++)S.update(0.1);const left=B.sort.reduce((s,g)=>s+g[1],0);return {moved:n0-left,left,late:B.late}};
     const slow=run(0),fast=run(3);R.sim=false;return {slow,fast,cap:[S.bagCaps().sort]}});
   ok('baggage: an overloaded sorter backs up, and the automated system clears it faster',s.slow.left>0&&s.slow.late>=3&&s.slow.moved<=21*10&&s.fast.moved>s.slow.moved*1.8,JSON.stringify(s));
+  // a carousel full of one flight's uncollected bags holds up the next flight's: the board says so for that one only
+  const c=await page.evaluate(()=>{const S=__sim,R=S.R;R.sim=true;const B=S.bagRT();
+    const As=S.SIDX.map(i=>R.st[i].F).filter(F=>F&&!F.freighter).map(F=>F.arr).slice(0,2);if(As.length<2){R.sim=false;return {none:true}}
+    const [A1,A2]=As;for(const L of B.car)L.length=0;for(const A of As){A.car=0;A.started=A.started??S.G.clock;B.car[0].push(A);A.bg=A.bg||{ap:0,ap0:0,hall:0,fed:0,acc:0,first:null,last:null,stall:0,xs:true}}
+    A1.reclaim=45;A1.bg.fed=0;A1.bags=Math.max(A1.bags,90);A1.bg.hall=0;A2.reclaim=0;A2.bg.fed=0;A2.bags=Math.max(A2.bags,30);A2.bg.hall=30;A2.bg.stall=0;
+    const pax=R.pax;R.pax=[];for(let k=0;k<30;k++)S.update(0.1);R.pax=pax;const r={a1:S.bagStatus(A1),a2:S.bagStatus(A2)};R.sim=false;return r});
+  ok('baggage: bags held up by another flight’s on the carousel show BAGS LATE',c.a2==='BAGS LATE'&&c.a1!=='BAGS LATE',JSON.stringify(c));
   // a tight transfer: the next flight is ready to go before the bag gets there
   const t=await page.evaluate(()=>{const S=__sim,G=S.G,R=S.R;R.sim=true;G.lv.bagsys=0;
     let A=null,F2=null;for(let k=0;k<600*10&&!F2;k++){S.update(0.1);for(const i of S.SIDX){const F=R.st[i].F;if(F&&F.arr.xb&&!F.arr.started){A=F.arr;F2=A.xb.find(x=>R.st[x.i].F===x&&!x.bg?.cut);if(F2)break}}}

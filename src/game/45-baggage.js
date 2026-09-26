@@ -83,8 +83,8 @@ function updateReclaimBelt(dt){
   // carousels: each takes up to CAR_CAP bags; the hall feeds each flight's in turn
   const load=B.car.map(L=>L.reduce((s,A)=>s+A.reclaim,0)),rate=CAR_FEED*bagMul();
   for(let k=0;k<B.car.length;k++)for(const A of B.car[k]){const a=A.bg;if(!a||!a.hall){if(a)a.acc=0;continue}
-    a.acc+=rate*dt;const n=Math.min(a.hall,Math.floor(a.acc),CAR_CAP-load[k]);if(n<=0){if(load[k]>=CAR_CAP)a.stall+=dt;a.acc=Math.min(a.acc,1);continue}
-    a.acc-=n;a.hall-=n;a.fed+=n;A.reclaim+=n;load[k]+=n;if(a.first==null)a.first=G.clock;if(a.fed>=A.bags&&a.last==null)a.last=G.clock}
+    a.acc+=rate*dt;const n=Math.min(a.hall,Math.floor(a.acc),CAR_CAP-load[k]);if(n<=0){if(load[k]>=CAR_CAP&&A.reclaim<5)a.stall+=dt;a.acc=Math.min(a.acc,1);continue} // held up by another flight's bags
+    a.stall=0;a.acc-=n;a.hall-=n;a.fed+=n;A.reclaim+=n;load[k]+=n;if(a.first==null)a.first=G.clock;if(a.fed>=A.bags&&a.last==null)a.last=G.clock}
 }
 // a carousel for an arriving flight: the one with fewest flights on it
 function pickCar(n,A){const B=bagRT();while(B.car.length<n)B.car.push([]);let k=0;for(let j=1;j<n;j++)if(B.car[j].length<B.car[k].length)k=j;B.car[k].push(A);return k}
