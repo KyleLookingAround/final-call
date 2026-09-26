@@ -10,7 +10,17 @@ window.BOT=function(opts){
   function act(){
     const g=G(),reserve=opts.reserve??50;
     // masterplan: approve in priority order
-    for(let n=0;n<4;n++){const T=PRI.map(id=>S.TECH.find(x=>x.id===id)).find(T=>T&&S.techState(T)==='ready')||S.TECH.find(T=>S.techState(T)==='ready');if(!T||!S.research(T.id))break}
+    // layouts (only with opts.layouts:true; the baselines are for an airport that never rebuilds): approve the next one
+    // on the path before other plans, keeping points for it once its level is reached, and rebuild into the furthest
+    // approved one when it's affordable twice over and no other rebuild is under way
+    let hold=false;
+    if(opts.layouts){const path=opts.layoutPath||['remote','sat','star'];
+      const next=path.map(id=>S.TECH.find(x=>x.id==='l_'+id)).find(T=>T&&S.techState(T)!=='done');
+      if(next){const st=S.techState(next);if(st==='ready')S.research(next.id);else hold=st==='pts'}
+      const target=[...path].reverse().find(id=>S.has('lay:'+id));
+      if(target&&target!==g.layout&&!g.layoutNext&&S.canBuild()&&g.cash>=S.LAYOUTS[target].cost*2+reserve&&path.indexOf(target)>path.indexOf(g.layout))S.rebuildLayout(target)}
+    for(let n=0;n<4&&!hold;n++){const T=PRI.map(id=>S.TECH.find(x=>x.id===id)).find(T=>T&&S.techState(T)==='ready')||S.TECH.find(T=>T.b!=='lay'&&S.techState(T)==='ready');if(!T||!S.research(T.id))break}
+
     if(g.level>=4&&S.TECH.some(T=>S.techState(T)==='pts')&&g.cash>S.consultCost()*(opts.ptMul??6)+reserve)S.buyPoint();
     if(!opts.noBuyLow&&g.rival&&!g.rival.owned&&g.level>=8&&g.cash>S.rivBuyCost()*1.1)S.buyRival();
     // routes: open the biggest market the fleet can reach

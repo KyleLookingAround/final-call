@@ -6,7 +6,10 @@
 //   tour     a new game starts the guided first hour and it advances
 //   rules    the same seed plays the same game, and the game's rules hold (fares, shares, costs, levels, saves)
 //   shots    phone, tablet and desktop screenshots of the airport, world and region, in build/shots/
+//   layouts  every airport layout plays two hours fully built, its Layout tab fits a 320 px phone, and a
+//            desktop screenshot of each goes in build/shots/
 //   share    the link preview: tags filled in, preview image and icon present, the right size and small enough
+//   news     What's new opens once for an older save and not again, never for a new game, and from Settings
 //   perf     how fast a level 9 airport simulates (against a calibration run, so machines compare), and how
 //            much of a phone's CPU the game uses at 8x with the CPU slowed 4x
 // Every page is seeded (window.__seed), so a failure repeats when you run it again.
@@ -25,19 +28,22 @@ const results=[];const ok=(name,pass,info)=>{results.push([name,pass]);console.l
 const ignorable=m=>/fonts\.(googleapis|gstatic)|ERR_TUNNEL|ERR_NAME_NOT_RESOLVED|net::/.test(m);
 
 // seed: the game's random seed; still: no frame loop, so only the check moves the game on
-async function open(vp={width:1280,height:800},save=null,touch=false,{seed=1,still=false}={}){
+// news: leave the What's new card as it opens (older saves open it on load); otherwise it's closed first
+async function open(vp={width:1280,height:800},save=null,touch=false,{seed=1,still=false,news=false}={}){
   const ctx=await browser.newContext({viewport:vp,deviceScaleFactor:touch?2:1,hasTouch:touch,isMobile:touch,screen:{width:Math.min(vp.width,vp.height)<=520&&touch?Math.min(vp.width,vp.height):vp.width,height:Math.min(vp.width,vp.height)<=520&&touch?Math.max(vp.width,vp.height):vp.height}});
   await ctx.addInitScript(([seed,still])=>{window.__seed=seed;if(still)window.requestAnimationFrame=()=>0},[seed,still]);
   if(save)await ctx.addInitScript(s=>{if(!sessionStorage.getItem('seeded')){localStorage.setItem('final-call-save-v2',s);sessionStorage.setItem('seeded','1')}},save);
   const page=await ctx.newPage();const errs=[];
   page.on('pageerror',e=>errs.push(e.message));page.on('console',c=>{if(c.type()==='error'&&!ignorable(c.text()))errs.push(c.text())});
   await page.goto(url);await page.waitForTimeout(800);
+  if(!news)await page.evaluate(()=>{const n=document.querySelector('#news');if(n&&!n.hidden)n.querySelector('[data-newsclose]').click()});
   await page.evaluate(()=>{__sim.R.toasts.length=0;document.querySelector('#toasts').innerHTML=''});
   return {ctx,page,errs};
 }
 const saves=readdirSync(join(root,'tools/saves')).filter(f=>f.endsWith('.json')).sort();
 const saveText=f=>readFileSync(join(root,'tools/saves',f),'utf8');
 const newest=saves.at(-1); // the latest version's highest level
+const HIST_TOP=+(readFileSync(join(root,'docs/HISTORY.md'),'utf8').match(/^\| (\d+) \|/m)||[])[1]; // the newest version in docs/HISTORY.md
 
 if(!only||only==='sim'){
   const {ctx,page,errs}=await open();
@@ -52,7 +58,7 @@ if(!only||only==='rules'){
   const a=await run(7),b=await run(7),c=await run(8);
   ok('rules: the same seed plays the same game',a===b&&a!==c,`seed 7 twice ${a===b?'same':'different'}, seed 8 ${a!==c?'different':'same'}`);
   const {ctx,page,errs}=await open(undefined,saveText('v20-L8.json'),false,{still:true});
-  const res=await page.evaluate(()=>{
+  const res=await page.evaluate(HIST_TOP=>{
     const S=__sim,G=S.G,out=[],t=(name,pass,info='')=>out.push([name,!!pass,info]),few=a=>a.slice(0,4).join(' ');
     S.seedRandom(5);const r1=[S.rnd(),S.rnd(),S.rnd()];S.seedRandom(5);const r2=[S.rnd(),S.rnd(),S.rnd()];
     t('rules: the random generator repeats from a seed and stays in [0, 1)',r1.join()===r2.join()&&r1.every(x=>x>=0&&x<1),r1.map(x=>x.toFixed(3)).join(' '));
@@ -81,10 +87,31 @@ if(!only||only==='rules'){
     {const ids=new Set(S.TECH.map(T=>T.id));bad=S.TECH.filter(T=>(T.r||[]).some(r=>!ids.has(r))).map(T=>T.id);
       const gids=new Set(S.GOALS.map(g=>g.id));
       t('rules: plan and goal ids are unique and prerequisites exist',ids.size===S.TECH.length&&gids.size===S.GOALS.length&&!bad.length,few(bad))}
+    {bad=[];for(const [id,L] of Object.entries(S.LAYOUTS)){const st=L.stands,sh=L.shops,names=new Set(st.map(x=>x.g)),seg=x=>!(L.gap&&x>L.gap[0]-4&&x<L.gap[1]+4);
+      if(names.size!==st.length||st.length>12||sh.length>20)bad.push(id+': names or counts');
+      const order=L.order||st.map((x,i)=>i);if(order.length!==st.length||new Set(order).size!==st.length)bad.push(id+': buying order');
+      st.forEach((a,i)=>{if(a.x<140||a.x>L.W-140||110-64+(a.dy||0)<-100)bad.push(`${id} ${a.g}: off the apron`);
+        st.forEach((b,j)=>{if(j>i&&Math.abs((a.dy||0)-(b.dy||0))<150&&Math.abs(a.x-b.x)<272)bad.push(`${id} ${a.g}/${b.g}: wings touch`)});
+        if(!seg(a.x-138)||!seg(a.x+3))bad.push(`${id} ${a.g}: lounge off the concourse`);
+        sh.forEach(u=>{if(u[0]<a.x+4&&u[0]+118>a.x-138)bad.push(`${id} ${a.g}: lounge under a shop`)})});
+      sh.forEach((u,i)=>{if(!seg(u[0])||!seg(u[0]+118))bad.push(`${id} shop ${i}: off the concourse`);sh.forEach((v,j)=>{if(j>i&&Math.abs(u[0]-v[0])<120)bad.push(`${id} shops ${i}/${j} overlap`)})})}
+      t('rules: every layout fits: names, buying order, wings, lounges and shops',!bad.length,few(bad))}
+    {// no layout can leave a player stuck: at each level, the gates on bridges they can reach cover the next level's needs
+      bad=[];for(const [id,L] of Object.entries(S.LAYOUTS)){const st=L.stands,order=L.order||st.map((x,i)=>i),after=st.map((s,i)=>s.after!=null?s.after:(o=>o>0?order[o-1]:-1)(order.indexOf(i)));
+        for(let n=0;n+1<S.LEVELS.length;n++){const got=new Set();let more=true;
+          while(more){more=false;st.forEach((s,i)=>{if(!got.has(i)&&s.lvl<=n&&(!s.pier||n>=S.PIER.lvl)&&(after[i]<0||got.has(after[i]))){got.add(i);more=true}})}
+          const gates=[...got].filter(i=>st[i].kind!=='remote').length,need=S.LEVELS[n+1].req.gates;if(gates<need){bad.push(`${id}: level ${n} reaches ${gates} gates, ${S.LEVELS[n+1].name} needs ${need}`);break}}}
+      t('rules: in every layout, each level can reach the gates the next one needs',!bad.length,few(bad))}
+    {// rebuilding carries gates and shops across by position, and sells what doesn't fit
+      const G0=S.G,built=G0.stands.filter(s=>s.built).length;S.switchLayout('remote');const a=S.G.stands.filter(s=>s.built).length,w=S.W;
+      S.SIDX.forEach(i=>{S.G.stands[i].built=true});const cash=S.G.cash;S.switchLayout('curve');const b=S.G.stands.filter(s=>s.built).length,sold=S.G.cash-cash;
+      S.switchLayout('classic');
+      t('rules: rebuilding keeps gates and shops, and sells what the new layout has no room for',a===built&&w===3800&&b===8&&sold>0&&S.G.layout==='classic',`kept ${a}/${built}, then ${b} of 12 with ${Math.round(sold)} back`)}
+    {const v=S.UPDATES.map(u=>u.v);t('rules: What\'s new versions run newest first and match the history',v.every((x,i)=>i===0||x<v[i-1])&&v[0]===HIST_TOP,`newest ${v[0]}, history ${HIST_TOP}`)}
     {const s1=JSON.stringify(S.G);S.resetAll(JSON.parse(s1));const g2=S.G,g1=JSON.parse(s1);
       bad=Object.keys(g1).filter(k=>k!=='savedAt'&&JSON.stringify(g1[k])!==JSON.stringify(g2[k])); // savedAt is when it was last saved
       t('rules: loading a save twice changes nothing',!bad.length,few(bad))}
-    return out});
+    return out},HIST_TOP);
   for(const [name,pass,info] of res)ok(name,pass&&!errs.length,info+(errs.length?' '+errs[0]:''));
   await ctx.close();
 }
@@ -152,6 +179,44 @@ if(!only||only==='shots'){
     ok(`shots: ${name}`,!errs.length,errs[0]||'build/shots/'+name+'-*.png');
     await ctx.close();
   }
+}
+if(!only||only==='layouts'){
+  for(const id of ['remote','stagger','curve','hall','sat','star']){
+    const {ctx,page,errs}=await open({width:1440,height:900},saveText(newest),false);
+    const r=await page.evaluate(id=>{const S=__sim,G=S.G;S.switchLayout(id);S.SIDX.forEach(i=>{G.stands[i].built=true});
+      const types=G.shops.filter(Boolean).map(s=>s.type);S.SHOP_X.forEach((x,j)=>{if(!G.shops[j])G.shops[j]={type:types[j%types.length]||0,lvl:1,earned:0,spent:500}});
+      const f0=G.flights;S.R.sim=true;for(let i=0;i<120*10;i++)S.update(0.1);S.R.sim=false;
+      document.querySelectorAll('#tip,#toasts').forEach(e=>e.style.display='none');
+      return {flights:G.flights-f0,busy:S.R.st.filter((x,i)=>i<S.SIDX.length&&x.F).length,stands:S.SIDX.length}},id);
+    await page.keyboard.press('0');await page.waitForTimeout(500);
+    await page.screenshot({path:join(root,'build/shots',`layout-${id}.png`)});
+    ok(`layouts: ${id} plays two hours fully built`,!errs.length&&r.flights>0&&r.busy>0,`${r.flights} flights, ${r.busy} of ${r.stands} stands busy`+(errs.length?' '+errs[0]:''));
+    await ctx.close();
+  }
+  // the Layout tab on the smallest phone, with every layout approved
+  const {ctx,page,errs}=await open({width:320,height:640},saveText(newest),true);
+  const o=await page.evaluate(()=>{const S=__sim;for(const T of S.TECH)if(T.b==='lay')S.G.tech[T.id]=1;S.R.aSub='layout';S.setTab('ground');
+    const W=document.documentElement.clientWidth;const over=[...document.querySelectorAll('#panel *')].filter(e=>{const r=e.getBoundingClientRect();return r.width&&(r.right>W+1||r.left<-1)}).slice(0,2).map(e=>e.className||e.tagName);
+    return {over,cards:document.querySelectorAll('.laycard').length}});
+  if(o.over.length)await page.screenshot({path:join(out,'layouts_tab_320.png')});
+  ok('layouts: the Layout tab fits a 320 px phone',!o.over.length&&o.cards===7&&!errs.length,`${o.cards} layouts`+(o.over.length?' overflow: '+o.over.join(' '):'')+(errs.length?' '+errs[0]:''));
+  await ctx.close();
+}
+if(!only||only==='news'){
+  // an older save opens the card on load; after closing it, a reload doesn't
+  const {ctx,page,errs}=await open(undefined,saveText(newest),false,{news:true});
+  const a=await page.evaluate(()=>({open:!document.querySelector('#news').hidden,fresh:document.querySelectorAll('#newsList details[open]').length,all:document.querySelectorAll('#newsList details').length}));
+  await page.click('#news [data-newsclose]');await page.waitForTimeout(200);
+  await page.reload();await page.waitForTimeout(900);
+  const b=await page.evaluate(()=>!document.querySelector('#news').hidden);
+  await page.evaluate(()=>{__sim.R.oSub='settings';__sim.setTab('office')});await page.click('[data-news]');await page.waitForTimeout(200);
+  const c=await page.evaluate(()=>({open:!document.querySelector('#news').hidden,all:document.querySelectorAll('#newsList details').length}));
+  ok('news: opens once after an update, and from Settings with every version',a.open&&a.fresh===1&&!b&&c.open&&c.all===a.all&&!errs.length,JSON.stringify({first:a,again:b,settings:c})+(errs.length?' '+errs[0]:''));
+  await ctx.close();
+  const n=await open(undefined,null,false,{news:true});
+  const d=await n.page.evaluate(()=>new Promise(r=>setTimeout(()=>r(!document.querySelector('#news').hidden),700)));
+  ok('news: a new game starts with the guided start, not What\'s new',!d&&!n.errs.length,d?'opened':'');
+  await n.ctx.close();
 }
 if(!only||only==='perf'){
   // the simulation at the 0.1-minute steps the game takes at 4x and 8x, timed against a fixed piece of plain

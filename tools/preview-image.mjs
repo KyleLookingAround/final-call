@@ -21,7 +21,7 @@ const browser=await chromium.launch(exe?{executablePath:exe}:{});
 const saves=readdirSync(join(root,'tools/saves')).filter(f=>f.endsWith('.json')).sort();
 const ctx=await browser.newContext({viewport:{width:1440,height:900},deviceScaleFactor:2});
 await ctx.addInitScript(([save,css])=>{window.__seed=1;localStorage.setItem('final-call-save-v2',save);
-  addEventListener('DOMContentLoaded',()=>{const s=document.createElement('style');s.textContent=css+'#tip,#toasts,#coach,#spot{display:none!important}';document.head.append(s)})},
+  addEventListener('DOMContentLoaded',()=>{const s=document.createElement('style');s.textContent=css+'#tip,#toasts,#coach,#spot,#news{display:none!important}';document.head.append(s)})},
   [readFileSync(join(root,'tools/saves',saves.at(-1)),'utf8'),fonts]);
 const page=await ctx.newPage();
 await page.goto(pathToFileURL(join(root,'build/test.html')).href);await page.waitForTimeout(800);

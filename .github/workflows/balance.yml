@@ -1,7 +1,8 @@
 name: Balance
 
 # The bot plays 1,150 game hours on three seeds and compares when it reaches each level with
-# tools/baseline.json. Runs on PRs that change the game or the bot, and on demand.
+# tools/baseline.json, once keeping the Classic layout and once rebuilding into better layouts
+# (which should reach level 9 about 5-10% sooner). Runs on PRs that change the game or the bot, and on demand.
 on:
   pull_request:
     paths:
@@ -22,6 +23,7 @@ jobs:
       fail-fast: false
       matrix:
         seed: [1, 2, 3]
+        layouts: [false, true]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -31,4 +33,4 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - run: npx playwright install --with-deps chromium
       # the table lands in the run's summary, and a level far off its baseline becomes a warning
-      - run: npm run bot -- 1150 --seed ${{ matrix.seed }}
+      - run: npm run bot -- 1150 '{"layouts":${{ matrix.layouts }}}' --seed ${{ matrix.seed }}
