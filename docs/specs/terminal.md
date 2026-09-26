@@ -1,6 +1,6 @@
 # A terminal that works like a real one
 
-Issue: #17 · Status: Proposed
+Issue: #17 · Status: Approved
 
 ## What the player gets
 
