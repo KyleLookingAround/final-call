@@ -53,7 +53,7 @@ If a session can only push to its own branch, it opens a PR instead of pushing t
 
 | Path | What it is |
 | --- | --- |
-| `src/game.js`, `src/shell.html` | The game's source: logic and drawing, then CSS and HTML |
+| `src/game/*.js`, `src/shell.html` | The game's source: logic and drawing in numbered files, then CSS and HTML |
 | `tools/build.mjs` | Builds `dist/index.html` (published) and `build/test.html` (for tests) |
 | `tools/check.mjs` | Checks for crashes, old saves, every screen size, phone gestures and the guided start |
 | `tools/run-bot.mjs`, `tools/bot.js` | A bot that plays for hundreds of game hours to check balance |

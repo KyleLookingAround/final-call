@@ -2,31 +2,35 @@
 //   dist/index.html  - the page GitHub Pages publishes
 //   build/test.html  - the same page with window.__sim exposed, for the checks and the bot
 // Plain Node, no dependencies.
-import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
-import {dirname,join} from 'node:path';
-import {fileURLToPath} from 'node:url';
+import {writeFileSync,mkdirSync} from 'node:fs';
+import {join} from 'node:path';
+import {Script} from 'node:vm';
+import {root,shell as readShell,parts as readParts,joinGame,page,locate} from './sources.mjs';
 
-const root=join(dirname(fileURLToPath(import.meta.url)),'..');
-const shell=readFileSync(join(root,'src/shell.html'),'utf8');
-const game=readFileSync(join(root,'src/game.js'),'utf8');
-
+const shell=readShell(),parts=readParts();
 const fail=m=>{console.error('build: '+m);process.exit(1)};
+const parse=(code,filename,where=l=>`${filename}:${l}`)=>{try{new Script(code,{filename})}catch(e){
+  const l=+((e.stack||'').split('\n')[0].match(/:(\d+)$/)||[])[1];fail(`${e.message} at ${l?where(l):filename}`)}};
 if(!shell.includes('/*GAME*/'))fail('src/shell.html has lost its /*GAME*/ marker');
-if(!game.includes('/*SIM_HOOK*/'))fail('src/game.js has lost its /*SIM_HOOK*/ marker');
-if(/<\/script/i.test(game))fail('src/game.js must not contain a closing script tag');
+for(const p of parts){
+  if(!p.text.endsWith('\n'))fail(p.file+' must end with a newline');
+  if(/<\/script/i.test(p.text))fail(p.file+' must not contain a closing script tag');
+  parse(p.text,p.file); // each file is whole statements, so a slip is reported against the right file
+}
+const game=joinGame(parts);
+if(!game.includes('/*SIM_HOOK*/'))fail('src/game has lost its /*SIM_HOOK*/ marker');
+parse(game,'src/game',l=>{const w=locate(parts,l);return w.file+':'+w.line}); // catches a top-level const or let declared twice across files
 // two top-level functions with one name silently replace each other
-const names=[...game.matchAll(/^function ([A-Za-z0-9_$]+)/gm)].map(m=>m[1]);
-const dup=[...new Set(names.filter((n,i)=>names.indexOf(n)!==i))];
-if(dup.length)fail('duplicate top-level functions: '+dup.join(', '));
-
-const head='<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n';
-const page=js=>head+shell.replace('/*GAME*/',()=>js);
+const names=[];
+for(const p of parts)for(const m of p.text.matchAll(/^function ([A-Za-z0-9_$]+)/gm))names.push([m[1],p.file]);
+const dup=[...new Set(names.filter(([n],i)=>names.findIndex(([o])=>o===n)!==i).map(([n])=>n))];
+if(dup.length)fail('duplicate top-level functions: '+dup.map(n=>`${n} in ${names.filter(([o])=>o===n).map(([,f])=>f).join(' and ')}`).join('; '));
 
 // what the checks and the bot can reach inside the game; add new functions here when a test needs them
 const SIM='window.__sim={get G(){return G},set G(v){G=v},R,update,buyUpgrade,buyStand,buyPier,buyAircraft,buy,capOf,upCost,upLocked,UPG,AIRCRAFT,AC_ORDER,LEVELS,STAND,PIER,METHODS,SHOPS,canBuild,isBuilding,buildSlots,sellValue,serviceCost,dailyPax,levelChecks,upkeepRate,wageBill,loanCap,derived,loadFactor,advise,resetAll,DEFAULT,shopUpCost,standOpen,save,advise,checkGoals,standBuyable,upBuyable,builtCount,shopValue,seasonOf,dayOf,fitsGate,TRIP,regionTick,orderLine,lineQuote,closeLine,setTab,draftTap,startDraft,renderPanel,netGeom,buildDev,MODES,DEV,PLOTS,PLACES,NODES,EDGES,modeLocked,serves,lineCode,linesAt,SUGGEST,update,STN_UP,setView,regionPanel,updateEvents,pol,POLICIES,news,scheduleEvent,has,research,TECH,techState,buyPoint,curGoal,GOALS,checkLevel,openPlan,closePlan,renderPlan,CITY,CITIES,routeLF,cityMarket,cityWill,pickRoute,openRoute,rsOf,promoteRoute,ROUTE_FEE,TIERBASE,worldTap,setView,consultCost,computeTransitRecs,evalRegion,managersTick,transportRecs,routeRecs,lineTweaks,rivShare,rivKeep,rivalDay,buyRival,rivMix,rivalPanel,routesPanel,dayTick,routeCard,crewState,crewTarget,hireCrew,nightChecks,farDelay,checkStamps,chalDay,checkChal,recordsPanel,tourStep,startTour,tourNext,cloudPut,CL,cloudNote,rivBuyCost};';
 
 mkdirSync(join(root,'dist'),{recursive:true});
-writeFileSync(join(root,'dist/index.html'),page(game));
+writeFileSync(join(root,'dist/index.html'),page(shell,game));
 mkdirSync(join(root,'build'),{recursive:true});
-writeFileSync(join(root,'build/test.html'),page(game.replace('/*SIM_HOOK*/',()=>SIM)));
-console.log(`built dist/index.html (${Math.round(page(game).length/1024)} KB) and build/test.html`);
+writeFileSync(join(root,'build/test.html'),page(shell,game.replace('/*SIM_HOOK*/',()=>SIM)));
+console.log(`built dist/index.html (${Math.round(page(shell,game).length/1024)} KB) from ${parts.length} files, and build/test.html`);
