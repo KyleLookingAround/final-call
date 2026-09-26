@@ -102,7 +102,7 @@ function renderPanel(){
     h+=upSection('terminal',TERM_SECS[tsub]||[]);h+=(TERM_PANEL[tsub]||[]).map(f=>f()).join('');
   } else if(G.tab==='sales'&&(R.sSub||'prices')==='shops'){
     h+=segs('sSub',[['prices','Prices'],['shops','Shops'],['landside','Landside']]);
-    h+=`<p class="note">Passengers with 15+ minutes to spare may stop at a shop. Long-haul flyers spend more.</p>`;
+    h+=`<p class="note">Passengers shop while they wait for their gate to be called. Long-haul flyers spend more.</p>`;
     G.shops.forEach((s,j)=>{
       if(!shopOpen(j))return;
       h+=`<div class="shopcard"><div class="sh"><div><span class="gate" style="background:var(--surface2);color:var(--muted)">${SHOP_NAME[j]}</span><span class="rt">${s?SHOPS[s.type].name:'Empty unit'}</span></div>${s?`<span class="live">${money(s.earned||0)} earned</span>`:''}</div>`;
@@ -125,7 +125,7 @@ function renderPanel(){
     const lf=loadFactor();
     h+=`<div class="sec">Pricing</div><div class="row">${svg('ticket')}<div><div class="rt">Ticket prices</div><div class="rd">Fares at <b>${Math.round(G.fare*100)}%</b> of base. Expect flights <b>${Math.round(lf*100)}%</b> full right now (${demandName().toLowerCase()}, ${seasonOf(dayOf(G.clock)).name.toLowerCase()}). Dearer fares lose some passengers even on busy routes; a frequent flyer club softens that. Fewer passengers also board faster.</div></div>
       <div class="lever"><button data-fare="-1" aria-label="Lower prices">−</button><output>${Math.round(G.fare*100)}%</output><button data-fare="1" aria-label="Raise prices">+</button></div></div>`;
-    h+=upSection('sales',null,['Landside']);
+    h+=upSection('sales',null,['Landside','Market place']);
   } else if(G.tab==='routes'){
     h+=routesPanel();
   } else if(G.tab==='region'){
@@ -223,6 +223,7 @@ function settingsHTML(){
   h+=row('autoLines','Transport manager','Runs your lines by what each change is worth: how often they run, fares, meeting flights, night services and extra services on event days.',[[true,'On'],[false,'Off']]);
   h+=row('autoCrews','Fleet manager','Hires crews to match your fleet, and lets spare ones go.',[[true,'On'],[false,'Off']]);
   h+=row('autoFares','Route manager','Sets each route’s fare to whatever earns most: dearer where people will pay, cheaper where seats go empty.',[[true,'On'],[false,'Off']]);
+  h+=row('autoDuty','Duty manager','Calls each gate in time for its walk from the market place, so passengers shop for longer without holding flights.',[[true,'On'],[false,'Off']]);
   {const g=gapPref();h+=`<div class="sec">Screen</div><div class="polrow"><div class="rt">Space for the camera</div><div class="rd">Leaves a band at the top of the screen so a phone’s camera or notch doesn’t cover the board. Saved on this device only.</div><div class="chips">${[['off','None'],['small','Small'],['medium','Medium'],['large','Large']].map(([v,l])=>`<button class="chip${g===v?' on':''}" data-gap="${v}">${l}</button>`).join('')}</div></div>`}
   h+=`<div class="sec">Sound</div><div class="polrow"><div class="rd">Chimes, cash tills and the runway.</div><div class="chips"><button class="chip${G.sound?' on':''}" data-sound="1">On</button><button class="chip${G.sound?'':' on'}" data-sound="0">Off</button></div></div>`;
   return h;

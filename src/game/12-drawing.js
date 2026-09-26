@@ -103,7 +103,6 @@ function drawTerminal(D){
     ctx.fillStyle=G.stands[i].built?'#252C33':'#1F242A';
     for(let j=0;j<80;j++){const s=spotPos(i,j);ctx.fillRect(s.x-3,s.y-3,6,6)}
   }
-  for(let i=0;i<SHOP_X.length;i++)if(shopOpen(i))drawShopUnit(i);
   if(G.lv.mover&&G.pierB&&LAY.track){const P=LAY.trackP||(LAY.trackP=mkPath(LAY.track)),t=(performance.now()/1000*0.12)%2,q=ptAt(P,(t<1?t:2-t)*P.len);
     ctx.strokeStyle='#2A3037';ctx.lineWidth=3;ctx.beginPath();LAY.track.forEach(([x,y],k)=>k?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();ctx.fillStyle='#5CC8FF';rrect(q[0]-12,q[1]-5,24,10,3);ctx.fill()}
   // check-in: the belt behind the desks, an agent at each open desk; kiosks beside them
