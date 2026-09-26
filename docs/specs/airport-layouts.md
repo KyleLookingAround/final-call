@@ -1,6 +1,6 @@
 # Airport layouts
 
-Issue: #7 · Status: Approved
+Issue: #7 · Status: Built
 
 Bundled with the performance work below, at the owner's request.
 
@@ -21,12 +21,12 @@ Everyone still starts at the same airport, with today's layout, now called **Cla
 
 ## The layouts
 
-The numbers are starting points; the bot tunes them.
+The numbers are starting points; the bot tunes them. The table shows the numbers after tuning.
 
 | Layout | Inspired by | Unlocks | Stands | Shop units | Upside | Downside |
 | --- | --- | --- | --- | --- | --- | --- |
 | **Classic** | today's airport | start | 8 on bridges | 8 | balanced | long walk to the far end of Pier B |
-| **Remote apron** | London Stansted and Luton remote stands | level 2 · 1 point · $8k · 3 h | 8 on bridges + 4 remote | 8 | the cheapest extra stands (remote ones cost 40%) | buses: slower boarding, worse in rain and snow, small rating hit |
+| **Remote apron** | London Stansted and Luton remote stands | level 5 · 1 point · $15k · 3 h | 8 on bridges + 4 remote (two from level 6, two from level 8) | 8 | the cheapest extra stands (remote ones cost 60% of a pier stand) | short-haul planes only; buses cost $200/h, board slower and worse in rain and snow; small rating hit; remote stands don't count as gates for levels |
 | **Staggered apron** | your concept | level 3 · 1 point · $40k · 6 h | 10 on bridges, in two rows | 10 | more stands; arrivals visibly taxi in | back-row bridges are longer, so boarding starts later |
 | **Curved front** | your concept, with a control tower | level 4 · 2 points · $120k · 8 h | 8 on bridges, on an arc | 12 | shortest walks: boarding starts sooner, fewer late passengers, rating bonus | no extra stands |
 | **Hall and finger pier** | your concept; Amsterdam Schiphol | level 5 · 2 points · $300k · 10 h | 10 on bridges | 14 | shops cluster in the central hall, where passengers spend most | walks to the pier ends |
@@ -50,7 +50,7 @@ A small rating modifier applies only where a layout is plainly nicer or worse to
 - **Pier B:** becomes the second phase of every layout. The first four stands are available straight away, and the rest open with it, as now.
 - **Remote stands:** passengers wait in a gate lounge, ride a bus, then board by stairs at both doors. That's slower to reach the plane but quicker to fill it. Weather slows the buses.
 - **Upgrades:** the people mover, control tower, landmark terminal and mall upgrades still show and work in every layout.
-- **Managers and recommendations:** a recommendation suggests a layout when one would clearly help, for example "Remote apron: 4 more stands for $8k". The layout choice is never made automatically.
+- **Managers and recommendations:** a recommendation suggests a layout when one would clearly help, for example "Every stand is built. The Satellite layout has room for 12.". The layout choice is never made automatically.
 
 ## Saved state
 
@@ -65,6 +65,17 @@ A small rating modifier applies only where a layout is plainly nicer or worse to
 - The bot learns to approve layout plans and rebuild into the best layout it can afford. Its results are compared on seeds 1–3 with and without rebuilding.
 - **Target:** rebuilding well reaches Airport of the Year about 5–10% sooner, not more.
 - If the baselines need to move, I'll show you the numbers first.
+- **Result:** the baselines didn't move. The bot rebuilds into the Remote apron, then the Satellite and Starfish when it can afford them (`'{"layouts":true}'`); the Balance workflow now runs seeds 1–3 both ways.
+
+  | Level reached (game hour) | Keeps Classic, seed 1 | Rebuilds, seed 1 | Rebuilds, seed 2 | Rebuilds, seed 3 |
+  | --- | --- | --- | --- | --- |
+  | 1 Local Airport | 37.3 | 37.3 | 40.3 | 33.1 |
+  | 3 City Airport | 103.1 | 103.1 | 99.9 | 98.7 |
+  | 5 Gateway Airport | 349.8 | 349.8 | 332.9 | 317.6 |
+  | 7 Global Hub | 735.1 | 782.3 | 767.3 | 743.7 |
+  | 9 Airport of the Year | 1109.4 | 1005.4 (−9%) | 995.7 | 990.0 |
+
+  Keeping Classic reaches every level at the same hour as before. The Remote apron was the strongest layout at first (level 9 about 17% sooner), so its plan moved to level 5, its remote stands to levels 6 and 8, it takes short-haul planes only, and its buses cost $200/h. Rebuilding delays level 7 a little, because remote stands don't count as gates, and then pays off.
 
 ## Performance (in the same PR)
 
@@ -116,4 +127,4 @@ Each step is its own commit on one branch, in one PR, unless the PR gets too big
 
 - The starting airport's look stays as it is.
 - The runway, airspace and region map don't change.
-- A midfield-concourse layout with a train, like Atlanta or Heathrow Terminal 5, is a candidate for later.
+- Real two-dimensional shapes (piers at angles, satellites out on the apron, midfield concourses like Atlanta or Heathrow Terminal 5) need the airport map to become 2D. They come next, in their own spec, replacing these layouts' shapes under the same names.

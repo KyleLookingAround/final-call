@@ -19,6 +19,7 @@ Nothing in progress. Pick from Next, or open an issue.
 
 ## Done
 
+- **Version 22: airport layouts.** Six layouts to unlock and rebuild into, smoother fast speeds on phones, and a What's new page with the full history.
 - **Link previews.** A preview card, title and description when the link is shared, a tab icon and a home-screen icon; `npm run preview` remakes them.
 - **Ways of working.** Issue, PR and spec templates, decision records (`docs/decisions/`), and playbooks for features, balance, releases and PRs.
 - **Repeatable tests.** Seeded randomness, rule checks, version 21 save fixtures, the bot against baselines on three seeds, screenshots on every PR.

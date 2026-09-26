@@ -46,11 +46,13 @@ Playbooks for each part are in `.claude/skills/`: `feature` (issue to merged PR)
   - `rules`: the same seed plays the same game, cheaper fares fill more seats and keep more travellers from Lowmere, costs rise with level, planes lose value with wear, levels ask for more each time, plan and goal ids are sound, and loading a save twice changes nothing;
   - `shots`: phone, tablet and desktop screenshots of the airport, world and region in `build/shots/`. CI keeps them as the "screenshots" artifact on every PR;
   - `share`: the link-preview tags are filled in, and the preview image (1200×630, under 300 KB) and home-screen icon are published;
+  - `layouts`: every layout plays two hours fully built without errors, the Layout tab fits a 320 px phone, and each layout's screenshot goes in `build/shots/`;
+  - `news`: What's new opens once for an older save and not again, never for a new game, and from Settings with every version;
   - `perf`: how long a level 9 airport takes to simulate, against a calibration run so machines compare (fails over its budget), and how close a CPU-throttled phone gets to full speed at 8× (reported only).
 
   Run `npm run check -- rules` to run one group. Every page in the checks is seeded, so a failure repeats when you run it again. When you change a rule on purpose, update its check in the same PR; add a check when you add a rule.
 - Playwright is pinned to 1.56.1, whose Chromium (build 1194) the web image already has. If Chromium is missing, run `npx playwright install chromium`, or set `CHROMIUM_PATH` to an existing Chromium binary. Change the pin only together with the lock file.
-- For economy or progression changes, run the bot on seeds 1, 2 and 3: `npm run bot -- 1150 --seed 2` (the default seed is 1). Each run takes 3–4 minutes, so run them in the background, side by side: `nohup npm run bot -- 1150 --seed 2 > build/bot-2.log 2>&1 &`. The last lines are `SEED`, `LVLAT {level: game hour}`, `STATE` (a fingerprint of the whole game state at the end), `ERR [...]` and a table against `tools/baseline.json`. The same seed and code always give the same run, so run the same seeds before and after a change to see its effect. A change meant to leave the game as it is, such as a speed-up or a refactor, must leave `STATE` identical on seeds 1–3; compare against a build of `main` (`git worktree add`). The "Balance" workflow does this on PRs that touch `src/game/` or the bot, and puts the tables in the run's summary.
+- For economy or progression changes, run the bot on seeds 1, 2 and 3: `npm run bot -- 1150 --seed 2` (the default seed is 1). Each run takes 3–4 minutes, so run them in the background, side by side: `nohup npm run bot -- 1150 --seed 2 > build/bot-2.log 2>&1 &`. The last lines are `SEED`, `LVLAT {level: game hour}`, `STATE` (a fingerprint of the whole game state at the end), `ERR [...]` and a table against `tools/baseline.json`. The same seed and code always give the same run, so run the same seeds before and after a change to see its effect. A change meant to leave the game as it is, such as a speed-up or a refactor, must leave `STATE` identical on seeds 1–3; compare against a build of `main` (`git worktree add`). The bot keeps the Classic layout unless you pass `'{"layouts":true}'`, which makes it approve layout plans and rebuild (Remote apron, then Satellite, then Starfish). The "Balance" workflow runs seeds 1–3 both ways on PRs that touch `src/game/` or the bot, and puts the tables in the run's summary.
 - For UI changes, look at the result. `npm run check -- shots` covers the three main views; for anything else, write a small Playwright script in `build/` (git-ignored) that opens `build/test.html` at phone (390×844, `hasTouch`, `isMobile`), tablet (768×1024) and desktop (1440×900) sizes, then screenshots it and reads the images.
 - Seed a save through `localStorage['final-call-save-v2']` in an init script, and the random seed through `window.__seed`. `tools/saves/*.json` and `build/saves/L<n>.json` (written by the bot) are ready-made airports at each level.
 - `tools/saves/` keeps saves from every version that changed what gets saved (`v<version>-L<level>.json`). When a release adds saved fields, add saves made with it from `build/saves/`, so old saves keep being tested for good.
@@ -67,7 +69,7 @@ Playbooks for each part are in `.claude/skills/`: `feature` (issue to merged PR)
 | 7 Global Hub | 630–770 |
 | 9 Airport of the Year | 1,080–1,115 |
 
-With these baselines there are no errors. If the bot ignores Lowmere, its share settles at about 50–60%. Keep pacing within about 15% of these numbers unless the owner asks for a change.
+With these baselines there are no errors. They are for an airport that keeps Classic; rebuilding well should reach level 9 about 10% sooner (990–1,005 on seeds 1–3). If the bot ignores Lowmere, its share settles at about 50–60%. Keep pacing within about 15% of these numbers unless the owner asks for a change.
 
 ## How the code is organised
 
@@ -83,6 +85,8 @@ The game is one strict IIFE, split into files in `src/game/`. The build joins th
 | `22-save`, `23-boot` | Saving and migrating (`resetAll`), boot and the frame loop |
 | `24-region-places` to `30-region-ui` | The region: places and stations, helpers, the journey network, events and line building, weather, map drawing, the Region tab |
 | `31-routes` to `37-cloud-saves` | Routes and the world map, managers and recommendations, Lowmere, airline operations, records/stamps/challenges, guided start, saves across devices |
+| `38-updates` | What's new: the `UPDATES` list (every version, newest first) and its card |
+| `39-layouts`, `40-layout-drawing` | Airport layouts: the `LAYOUTS` table, rebuilding and switching, the Airfield › Layout tab; remote stands, buses and each layout's buildings |
 | `99-start` | The `/*SIM_HOOK*/` marker and the call that starts the game |
 
 Some functions sit where they were first written rather than where their name suggests (`pickRoute` is in `03-state.js`), so search `src/game/` by name.
@@ -131,7 +135,7 @@ Some functions sit where they were first written rather than where their name su
 
 ### Gating and settings
 
-- **Gating:** `has('kind:id')` (for example `up:desks`, `ac:3`, `rt:2`, `mode:hsr`, `feat:slots`) comes from approved Masterplan plans (`TECH`, 52 plans in 5 branches). Level unlocks come from `LEVELS`, which has 10 levels from Airfield to Airport of the Year.
+- **Gating:** `has('kind:id')` (for example `up:desks`, `ac:3`, `rt:2`, `mode:hsr`, `feat:slots`) comes from approved Masterplan plans (`TECH`, 58 plans in 6 branches; the sixth is Layouts). Level unlocks come from `LEVELS`, which has 10 levels from Airfield to Airport of the Year.
 - **Settings** live in `G.set`, read through `SET()`:
   - notifications: `tips`, `msgs`, `pops`, `goal`, `recs`, `badges`;
   - managers: `autoLines`, `autoFares`, `autoCrews`;
@@ -159,6 +163,11 @@ Some functions sit where they were first written rather than where their name su
   - Personal bests (`G.rec`) show a RECORD floater when broken.
   - There are 24 stamps; only earned ones are shown.
   - Each game week has 3 challenges, sized from last week. Each pays about 12% of a day's profit, and finishing all three gives a plan point while plans remain.
+- **Airport layouts.** `LAYOUTS` in `39-layouts.js` lists each layout's stands (x, how far back the plane sits `dy`, gate name, price, level, `pier` for the second phase, `kind:'remote'` for bus stands), its buying `order` and its shop units. `applyLayout` copies the current one into `STAND_X`, `STAND_DY`, `STAND`, `GATES`, `SIDX`, `STAND_ORDER`, `SHOP_X` and friends in place, so code that reads those follows the layout. Planes always point nose-up; a layout varies where stands sit, not their angle.
+  - Layouts unlock as Masterplan plans (`has('lay:<id>')`) and are rebuilt as a construction job `layout:<id>`. The switch happens at the first 03:00 after it's built (`G.layoutNext`, `G.layoutAt`), once stands it drops have seen off their last flight; kept stands move with their planes and passengers, and what doesn't fit is sold.
+  - Effects come from what the game already simulates: positions and distances, stand and shop counts, `walk` (moving walkways) and `mover` (people mover) speed-ups, hall shops' extra pull, remote stands' buses (loads of 40 every 5 minutes, slower in rain, short-haul planes only, a small rating cost), and `upk` running costs.
+  - The `rules` check keeps every layout sound (names, buying order, wings, lounges, shops). Classic is today's airport and every save's default.
+- **What's new.** `UPDATES` holds every version's headline and points. The card opens after loading when `G.seen` is older than the newest version (not for new games or during the guided start) and from Settings or Help. Each release adds an entry; the `rules` check matches it against `docs/HISTORY.md`.
 - **Guided start.** A 6-step tour (`TOUR`) runs on new games only and can be skipped or replayed from Help. It turns itself off on any save with progress.
 - **Saves across devices.** These only work on claude.ai, through `window.claude.use('db')`. On GitHub Pages `window.claude` is undefined, so the game saves on the device only. Keep that fallback working.
 
