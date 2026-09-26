@@ -1,6 +1,6 @@
 # A smarter transport manager
 
-Issue: #15 · Status: Proposed
+Issue: #15 · Status: Approved
 
 ## What the player gets
 
@@ -22,7 +22,7 @@ Players who'd rather not tune everything get a network that pays its way. Player
   - **Extend a line** by a station at either end.
   - **Close a line** that the network does better without: "B3 carries almost nobody now R2 runs: closing it saves $12/h."
   - **What it suggests today:** new lines, park and ride, interchange halls, network upgrades and longer vehicles.
-- **What the manager did lately:** the card lists the manager's last three changes, for example "R2 every 30 min (was 60): +$500/h" or "Meet flights on C1".
+- **What the manager did lately:** the card lists the manager's last three changes, for example "R2 every 30 min (was 60): +$500/h", "Premium fares on M1" or "Meet flights on C1".
 - **Line cards:**
   - an **Upgrade** row (Tram $35k · Train $61k) opens the same preview;
   - a line being upgraded shows UPGRADING and keeps running until the new one is ready;
@@ -59,7 +59,7 @@ Players who'd rather not tune everything get a network that pays its way. Player
   - A suggestion must pay back within a week (today's limit is four days).
   - They're worked out a few at a time between frames, so a level 9 network (around 70 options, about 0.2 s in all on a desktop) never stalls the game.
 - **The manager runs lines by value, not just by how full they are.** When it's on (Settings › Transport manager), for every line you haven't taken over:
-  - **Every 6 hours** it weighs one step more or fewer services, and meet-flights for airport lines. It makes the change worth most, if that's worth at least $5/h and 3% of the line's running cost. It reviews one line per game minute, so the game never stalls.
+  - **Every 6 hours** it weighs one step more or fewer services, a cheaper or dearer fare, and meet-flights for airport lines. It makes the change worth most, if that's worth at least $5/h and 3% of the line's running cost. It reviews one line per game minute, so the game never stalls.
   - **Every hour** it adds services straight away to a line over 105% full, which costs rating today, if the timetable and shared track allow.
   - **On event days,** lines serving the venue run two steps more often while the crowds travel: from 2½ hours before to 3½ hours after. Then they go back.
   - Night services work as today.
@@ -78,7 +78,7 @@ Players who'd rather not tune everything get a network that pays its way. Player
 
 ## Balance
 
-- The manager is on by default, so the bot plays with it. Running lines by value adds service where it brings flyers.
+- The manager is on by default, so the bot plays with it. Running lines by value adds service where it brings flyers, and it will choose dearer fares on most lines, because riders hardly notice them in the region model. The owner accepted that this may speed up pacing.
   - Measured on saves: R2 at level 9 is worth +$500/h at two trains an hour instead of one.
   - Expect slightly quicker pacing. The target is to stay inside the baselines on seeds 1–3, both keeping Classic and rebuilding.
 - **Bot option `{"recs":true}`:** the bot takes the manager's top suggestion when it has three times its price spare. It runs on seeds 1–3 to show that following the manager helps (reported only).
@@ -107,7 +107,6 @@ Players who'd rather not tune everything get a network that pays its way. Player
 
 ## Left out
 
-- **Fares.** The manager leaves line fares alone. The region model finds dearer fares pay on almost every line, because riders hardly notice them. That wants a balance look of its own before a manager leans on it (a roadmap idea).
 - **Building on its own.** The manager never spends on building. A later "let the manager build within a budget" option is a roadmap idea.
 - **Timetables by time of day** (more services at peaks than midday).
 - **Merging two lines into one.**
