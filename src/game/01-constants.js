@@ -41,7 +41,7 @@ const TRIP=[60,85,120,180,240];
 const PARTNERS=[['Blue Heron','BH','#4C7DFF'],['Aerolux','AX','#E5484D'],['Nordvind','NV','#9B6BFF'],['Sahara Air','SH','#FF9F43'],['Kestrel','KE','#6BE39A'],['Skyline Pacific','SP','#2BB3A3']];
 const PARTNER_CUT=0.3;
 const fitsGate=(t,i)=>{const a=AIRCRAFT[t];return !(a.tier>=4&&i<4)&&!(a.fire&&G.lv.fire<a.fire)};
-const tripMins=a=>Math.round(TRIP[a.tier]*(0.85+Math.random()*0.3));
+const tripMins=a=>Math.round(TRIP[a.tier]*(0.85+rnd()*0.3));
 const AC_ORDER=[0,4,1,5,2,7,3,6];
 /* the cities you can fly to: code, name, haul (0 short … 4 ultra long), business share, size 1–5, compass bearing, season */
 const CITIES=[

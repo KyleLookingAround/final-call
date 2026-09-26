@@ -126,16 +126,16 @@ function regionMoney(dt){
   if(r.income>0)earn(r.income*dt/60,'region');
 }
 function pickTransit(){
-  const r=R.reg;if(!r)return null;let x=Math.random();
+  const r=R.reg;if(!r)return null;let x=rnd();
   for(const [id,s] of r.airSh){if(x<s){const L=G.lines[id];if(!L||lineFreq(L)<=0)return null;const k=effKind(L);if(k==='train'&&!G.lv.rail)return null;return k}x-=s}
   return null;
 }
 function exitTarget(p){
   const tk=pickTransit();p.state='exitW';
-  if(tk==='train'&&G.lv.rail){p.tx=40+Math.random()*260;p.ty=704}
-  else if(tk==='tram'){p.tx=40+Math.random()*260;p.ty=789}
-  else if(tk==='bus'){p.tx=236+Math.random()*40;p.ty=641}
-  else{p.tx=EXIT.x;p.ty=EXIT.y+(Math.random()-0.5)*18}
+  if(tk==='train'&&G.lv.rail){p.tx=40+rnd()*260;p.ty=704}
+  else if(tk==='tram'){p.tx=40+rnd()*260;p.ty=789}
+  else if(tk==='bus'){p.tx=236+rnd()*40;p.ty=641}
+  else{p.tx=EXIT.x;p.ty=EXIT.y+(rnd()-0.5)*18}
 }
 function regionDay(){
   // towns grow towards what their housing, jobs and transport can support; busy stations sprout new buildings

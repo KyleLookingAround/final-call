@@ -4,6 +4,9 @@
 //   layout   no sideways overflow and no page scroll, 320 px phones to 2560 px screens, portrait and landscape
 //   sheet    on a phone the bottom panel drags up and down with touch and snaps, and the page never scrolls
 //   tour     a new game starts the guided first hour and it advances
+//   rules    the same seed plays the same game, and the game's rules hold (fares, shares, costs, levels, saves)
+//   shots    phone, tablet and desktop screenshots of the airport, world and region, in build/shots/
+// Every page is seeded (window.__seed), so a failure repeats when you run it again.
 // Exit code 1 if anything fails. Screenshots of failures go to build/check/.
 import {chromium} from 'playwright';
 import {readFileSync,readdirSync,mkdirSync} from 'node:fs';
@@ -18,8 +21,10 @@ const browser=await chromium.launch(exe?{executablePath:exe}:{});
 const results=[];const ok=(name,pass,info)=>{results.push([name,pass]);console.log(`${pass?'PASS':'FAIL'}  ${name}${info?'  '+info:''}`)};
 const ignorable=m=>/fonts\.(googleapis|gstatic)|ERR_TUNNEL|ERR_NAME_NOT_RESOLVED|net::/.test(m);
 
-async function open(vp={width:1280,height:800},save=null,touch=false){
+// seed: the game's random seed; still: no frame loop, so only the check moves the game on
+async function open(vp={width:1280,height:800},save=null,touch=false,{seed=1,still=false}={}){
   const ctx=await browser.newContext({viewport:vp,deviceScaleFactor:touch?2:1,hasTouch:touch,isMobile:touch,screen:{width:Math.min(vp.width,vp.height)<=520&&touch?Math.min(vp.width,vp.height):vp.width,height:Math.min(vp.width,vp.height)<=520&&touch?Math.max(vp.width,vp.height):vp.height}});
+  await ctx.addInitScript(([seed,still])=>{window.__seed=seed;if(still)window.requestAnimationFrame=()=>0},[seed,still]);
   if(save)await ctx.addInitScript(s=>{if(!sessionStorage.getItem('seeded')){localStorage.setItem('final-call-save-v2',s);sessionStorage.setItem('seeded','1')}},save);
   const page=await ctx.newPage();const errs=[];
   page.on('pageerror',e=>errs.push(e.message));page.on('console',c=>{if(c.type()==='error'&&!ignorable(c.text()))errs.push(c.text())});
@@ -29,11 +34,55 @@ async function open(vp={width:1280,height:800},save=null,touch=false){
 }
 const saves=readdirSync(join(root,'tools/saves')).filter(f=>f.endsWith('.json')).sort();
 const saveText=f=>readFileSync(join(root,'tools/saves',f),'utf8');
+const newest=saves.at(-1); // the latest version's highest level
 
 if(!only||only==='sim'){
   const {ctx,page,errs}=await open();
   const r=await page.evaluate(()=>{const S=__sim,G=S.G;S.R.sim=true;for(let i=0;i<72*60*4;i++)S.update(0.25);S.R.sim=false;return {flights:G.flights,clock:Math.round(G.clock),cash:Math.round(G.cash)}});
   ok('sim: 72 game hours headless',!errs.length&&r.flights>10,JSON.stringify(r)+(errs.length?' '+errs[0]:''));
+  await ctx.close();
+}
+if(!only||only==='rules'){
+  const run=async seed=>{const {ctx,page}=await open(undefined,null,false,{seed,still:true});
+    const r=await page.evaluate(()=>{const S=__sim;S.R.sim=true;for(let i=0;i<24*60*4;i++)S.update(0.25);const G=S.G;return JSON.stringify([Math.round(G.cash*100),G.flights,G.flown,G.rep,G.clock])});
+    await ctx.close();return r};
+  const a=await run(7),b=await run(7),c=await run(8);
+  ok('rules: the same seed plays the same game',a===b&&a!==c,`seed 7 twice ${a===b?'same':'different'}, seed 8 ${a!==c?'different':'same'}`);
+  const {ctx,page,errs}=await open(undefined,saveText('v20-L8.json'),false,{still:true});
+  const res=await page.evaluate(()=>{
+    const S=__sim,G=S.G,out=[],t=(name,pass,info='')=>out.push([name,!!pass,info]),few=a=>a.slice(0,4).join(' ');
+    S.seedRandom(5);const r1=[S.rnd(),S.rnd(),S.rnd()];S.seedRandom(5);const r2=[S.rnd(),S.rnd(),S.rnd()];
+    t('rules: the random generator repeats from a seed and stays in [0, 1)',r1.join()===r2.join()&&r1.every(x=>x>=0&&x<1),r1.map(x=>x.toFixed(3)).join(' '));
+    const cities=Object.keys(G.routes),shared=cities.filter(c=>S.rivShare(c)<1);
+    let bad=cities.filter(c=>!(S.routeLF(c,0,0)>=S.routeLF(c,0,1)&&S.routeLF(c,0,1)>=S.routeLF(c,0,2)));
+    t('rules: cheaper fares fill more seats',cities.length&&!bad.length,`${cities.length} routes ${few(bad)}`);
+    bad=shared.filter(c=>!(S.rivShare(c,0)>=S.rivShare(c,1)&&S.rivShare(c,1)>=S.rivShare(c,2)));
+    t('rules: Lowmere takes more travellers as your fares rise',shared.length&&!bad.length,`${shared.length} shared routes ${few(bad)}`);
+    bad=cities.filter(c=>{const s=S.rivShare(c),k=S.rivKeep(c);return !(s>0&&s<=1&&k>0&&k<=1)});
+    t('rules: shares and kept markets stay between 0 and 1',!bad.length,few(bad));
+    if(shared.length){const c=shared[0],r=G.rival.routes[c],was=r.sale,before=S.rivShare(c);r.sale=G.clock+60;const after=S.rivShare(c);r.sale=was;
+      t('rules: a Lowmere fare sale takes travellers',after<before,`${c} ${before.toFixed(3)} → ${after.toFixed(3)}`)}
+    bad=S.CITIES.filter(c=>!(S.cityMarket(c[0])>0)).map(c=>c[0]);
+    {const c=cities[0],m0=S.cityMarket(c),lm=G.lv.marketing;G.lv.marketing=lm+1;const m1=S.cityMarket(c);G.lv.marketing=lm;
+      t('rules: every city has a market, and marketing grows it',!bad.length&&m1>m0,`${few(bad)} ${Math.round(m0)} → ${Math.round(m1)}`)}
+    bad=[];for(const k in S.UPG){const l=G.lv[k];for(let v=0;v+1<S.UPG[k].max;v++){G.lv[k]=v;const a=S.upCost(k);G.lv[k]=v+1;const b=S.upCost(k);if(!(a>0&&b>a)){bad.push(`${k}@${v}`);break}}G.lv[k]=l}
+    t('rules: each upgrade level costs more than the last',!bad.length,few(bad));
+    bad=S.AC_ORDER.filter(ty=>{const v=w=>S.sellValue({type:ty,wear:w}),cost=S.AIRCRAFT[ty].cost;return !(v(0)<cost&&v(10)<v(0)&&v(100)>=Math.round(cost*0.6*0.4)&&S.serviceCost({type:ty})>0)});
+    t('rules: planes lose value with wear, down to a floor',!bad.length,few(bad));
+    {const e=G.earned,l=G.loan;G.loan=0;G.earned=0;const a=S.loanCap();G.earned=1e6;const b=S.loanCap();G.earned=1e12;const c=S.loanCap();G.earned=e;G.loan=l;
+      t('rules: the loan limit grows with earnings, up to 1M',a>0&&b>a&&c===1000000,`${a} ${b} ${c}`)}
+    {const p=G.ptBought,a=S.consultCost();G.ptBought=(p||0)+1;const b=S.consultCost();G.ptBought=p;t('rules: each consultant point costs more',b>a,`${a} → ${b}`)}
+    t('rules: there are enough crews for the fleet',S.crewTarget()>=G.fleet.filter(f=>!f.sold).length,`${S.crewTarget()} for ${G.fleet.filter(f=>!f.sold).length} planes`);
+    bad=[];for(let n=2;n<S.LEVELS.length;n++){const p=S.LEVELS[n-1].req,q=S.LEVELS[n].req;if(!(q.pax>=p.pax&&q.gates>=p.gates))bad.push(n)}
+    t('rules: each level asks for at least as much as the one before',!bad.length,few(bad));
+    {const ids=new Set(S.TECH.map(T=>T.id));bad=S.TECH.filter(T=>(T.r||[]).some(r=>!ids.has(r))).map(T=>T.id);
+      const gids=new Set(S.GOALS.map(g=>g.id));
+      t('rules: plan and goal ids are unique and prerequisites exist',ids.size===S.TECH.length&&gids.size===S.GOALS.length&&!bad.length,few(bad))}
+    {const s1=JSON.stringify(S.G);S.resetAll(JSON.parse(s1));const g2=S.G,g1=JSON.parse(s1);
+      bad=Object.keys(g1).filter(k=>k!=='savedAt'&&JSON.stringify(g1[k])!==JSON.stringify(g2[k])); // savedAt is when it was last saved
+      t('rules: loading a save twice changes nothing',!bad.length,few(bad))}
+    return out});
+  for(const [name,pass,info] of res)ok(name,pass&&!errs.length,info+(errs.length?' '+errs[0]:''));
   await ctx.close();
 }
 if(!only||only==='saves'){
@@ -47,7 +96,7 @@ if(!only||only==='saves'){
   }
 }
 if(!only||only==='layout'){
-  const save=saveText(saves.filter(f=>f.startsWith('v20')).pop()||saves.pop());
+  const save=saveText(newest);
   for(const [w,h] of [[320,640],[360,780],[390,844],[768,1024],[844,390],[915,412],[1024,768],[1440,900],[2560,1440]]){
     const touch=w<1000&&h<1100;const {ctx,page,errs}=await open({width:w,height:h},save,touch);const bad=[];
     for(const [tab,view,sub] of [['stands','airport','fleet'],['routes','world'],['region','region'],['office','airport','records'],['office','airport','settings']]){
@@ -61,7 +110,7 @@ if(!only||only==='layout'){
   }
 }
 if(!only||only==='sheet'){
-  const {ctx,page,errs}=await open({width:390,height:844},saveText(saves.filter(f=>f.startsWith('v20')).pop()||saves.pop()),true);
+  const {ctx,page,errs}=await open({width:390,height:844},saveText(newest),true);
   const cdp=await ctx.newCDPSession(page);
   const st=()=>page.evaluate(()=>{const g=document.querySelector('#grip').getBoundingClientRect();return {h:Math.round(document.querySelector('#side').getBoundingClientRect().height),grip:Math.round(g.top+g.height/2),scroll:document.documentElement.scrollTop+document.body.scrollTop,docH:document.documentElement.scrollHeight,vh:innerHeight}});
   const swipe=async(y0,y1)=>{await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:195,y:y0}]});for(let k=1;k<=10;k++){await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:195,y:y0+(y1-y0)*k/10}]});await page.waitForTimeout(16)}await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await page.waitForTimeout(350)};
@@ -84,6 +133,20 @@ if(!only||only==='tour'){
     await page.click('[data-tnext]');await page.waitForTimeout(400);
     const b=await page.evaluate(()=>({s:__sim.G.tour.s,spot:!document.querySelector('#spot').hidden}));
     ok(`tour: ${vp.width}px`,a.coach&&a.s===0&&b.s===1&&b.spot&&!errs.length,JSON.stringify([a,b]));
+    await ctx.close();
+  }
+}
+if(!only||only==='shots'){
+  // for looking at a change by eye; CI keeps them as the "screenshots" artifact on every PR
+  const dir=join(root,'build/shots');mkdirSync(dir,{recursive:true});
+  for(const [name,vp,touch] of [['phone',{width:390,height:844},true],['tablet',{width:768,height:1024},true],['desktop',{width:1440,height:900},false]]){
+    const {ctx,page,errs}=await open(vp,saveText(newest),touch);
+    await page.evaluate(()=>{const S=__sim;S.R.sim=true;for(let i=0;i<60*4;i++)S.update(0.25);S.R.sim=false}); // an hour in, so planes are at the gates
+    for(const [tab,view] of [['stands','airport'],['routes','world'],['region','region']]){
+      await page.evaluate(([tab,view])=>{__sim.setView(view);__sim.setTab(tab)},[tab,view]);await page.waitForTimeout(400);
+      await page.screenshot({path:join(dir,`${name}-${view}.png`)});
+    }
+    ok(`shots: ${name}`,!errs.length,errs[0]||'build/shots/'+name+'-*.png');
     await ctx.close();
   }
 }

@@ -1,0 +1,12 @@
+{
+  "about": "Game hour at which the bot (npm run bot -- 1150) reaches each level. Inside a range is ok; within the tolerance of it is near; beyond that is off. Change these only for a balance change the owner asked for.",
+  "hours": 1150,
+  "tolerance": 0.15,
+  "levels": {
+    "1": [31, 41],
+    "3": [95, 117],
+    "5": [340, 370],
+    "7": [630, 770],
+    "9": [1080, 1115]
+  }
+}

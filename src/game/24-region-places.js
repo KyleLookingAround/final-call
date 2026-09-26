@@ -124,6 +124,6 @@ const SHIPS=['MS Aurora Sky','Coral Meridian','Nordic Tern','Silver Horizon','Is
 const ARTISTS=['The Velvet Tides','Nova Kane','Paper Lanterns','Echo Parade','Marisol Reyes','Kid Halcyon','Glasshouse'];
 const CONFS=['FinTech North','Global Freight Expo','MedTech Summit','Green Energy Forum','GameDev Live','Aviation Futures'];
 const FILMS=['Midnight Harbour','The Glass Coast','Paper Kingdoms','Signal Lost','Northern Light'];
-const pickOf=a=>a[Math.floor(Math.random()*a.length)];
+const pickOf=a=>a[Math.floor(rnd()*a.length)];
 const RLBL={road:'bus',track:'tram',rail:'train',water:'bus'};
 

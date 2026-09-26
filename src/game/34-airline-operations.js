@@ -24,7 +24,7 @@ function crewTick(){ // the fleet manager keeps enough crews for the fleet
   if(G.crews.length>t+2)releaseCrew();
 }
 // knock-on: weather and slots at the far end can bring a plane back late
-function farDelay(C){const w=seasonOf(dayOf(G.clock)).name==='Winter',p=(0.05+0.02*C.tier+(w?0.05:0))*(has('feat:occ')?0.5:1);if(Math.random()>=p)return 0;return Math.round((10+Math.random()*35*(1+0.25*C.tier))*(has('feat:occ')?0.6:1))}
+function farDelay(C){const w=seasonOf(dayOf(G.clock)).name==='Winter',p=(0.05+0.02*C.tier+(w?0.05:0))*(has('feat:occ')?0.5:1);if(rnd()>=p)return 0;return Math.round((10+rnd()*35*(1+0.25*C.tier))*(has('feat:occ')?0.6:1))}
 // overnight checks: at 03:00 planes parked at base are serviced
 function nightChecks(){
   if(!pol('checks'))return;const due=G.fleet.filter(f=>!f.sold&&f.st==='base'&&(f.wear||0)>=4);if(!due.length)return;

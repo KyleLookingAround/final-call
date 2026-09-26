@@ -34,10 +34,10 @@ function techFault(i,F){
 }
 function wageBill(){const D=derived();return (D.desks*WAGE.desks+D.lanes*WAGE.lanes+D.officers*WAGE.officers)*(G.wageMul||1)*payMul()*(R.reg?R.reg.wageMul:1)}
 function fireEvent(){
-  if(G.lines&&Object.keys(G.lines).length&&Math.random()<0.3&&regionEvent())return;
+  if(G.lines&&Object.keys(G.lines).length&&rnd()<0.3&&regionEvent())return;
   const winter=seasonOf(dayOf(G.clock)).name==='Winter',p=pol('pay');
-  const opts=['rush','rush'];if(G.lv.lanes>0){opts.push('sick');if(p===0)opts.push('sick','sick');if(p===1)opts.push('sick')}if(G.flights>=8){if(p===0)opts.push('strike','strike');if(p===1&&Math.random()<0.4)opts.push('strike')}
-  const e=opts[Math.floor(Math.random()*opts.length)];
+  const opts=['rush','rush'];if(G.lv.lanes>0){opts.push('sick');if(p===0)opts.push('sick','sick');if(p===1)opts.push('sick')}if(G.flights>=8){if(p===0)opts.push('strike','strike');if(p===1&&rnd()<0.4)opts.push('strike')}
+  const e=opts[Math.floor(rnd()*opts.length)];
   if(e==='fog')R.fx.fog=G.clock+45;
   else if(e==='snow')R.fx.snow=G.clock+90;
   else if(e==='rush')R.fx.rush=G.clock+90;
