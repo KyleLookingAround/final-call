@@ -36,7 +36,12 @@ function updateEvents(dt){
 function modeLocked(mode,stops){const M=MODES[mode];if(!has('mode:'+mode))return `Approve ${TECH_BY[NODE_OF['mode:'+mode]].n} in the Masterplan first.`;if(M.kind==='rail'&&stops&&stops.includes('air')&&!G.lv.rail)return 'Trains need the airport station first (below)';return ''}
 const pendingTrack=(eid,m)=>(G.builds||[]).some(b=>b.track&&b.mode===m&&b.track.includes(eid));
 function trackCost(e,m){return Math.round((e.len+(e.extra||0))*MODES[m].tpx*(e.old?0.4:1)*(e.cost||1)*(devOn('wind')?0.85:1))}
-function nextNum(mode){const used=new Set();for(const L of Object.values(G.lines||{}))if(L.mode===mode)used.add(L.num);for(const b of (G.builds||[]))if(b.lid&&!b.edit&&b.mode===mode)used.add(b.num);let n=1;while(used.has(n))n++;return n}
+function nextNum(mode){const used=new Set();for(const L of Object.values(G.lines||{}))if(L.mode===mode)used.add(L.num);for(const b of (G.builds||[]))if(b.lid&&(!b.edit||b.up)&&b.mode===mode)used.add(b.num);let n=1;while(used.has(n))n++;return n}
+/* upgrades: a line moves up to a bigger kind of transport, keeping its stations where the new kind can run */
+const UPGRADE={bus:['tram','rail','metro'],coach:['rail','hsr'],tram:['rail','metro'],rail:['metro','hsr']};
+function upgradeStops(L,m){if(routeEdges(m,L.stops))return L.stops.slice();const p=modePath(L.stops[0],L.stops[L.stops.length-1],m);return p&&p.length>1?p:null}
+function upFreq(L,m){const o=MODES[L.mode],M=MODES[m],seats=L.freq*o.cap*(1+0.5*(L.cars||0));return M.freqs.find(f=>f*M.cap>=seats)??M.freqs[M.freqs.length-1]} // the fewest services that carry as many seats as before
+const upTargets=L=>(UPGRADE[L.mode]||[]).filter(m=>has('mode:'+m));
 function lineQuote(mode,stops,editId){
   const M=MODES[mode],q={ok:false,cost:0,track:[],tcost:0,mins:0,ride:0,why:''};
   if(!stops||stops.length<2){q.why='Pick at least two stations.';return q}
@@ -44,11 +49,11 @@ function lineQuote(mode,stops,editId){
   if(new Set(stops).size!==stops.length){q.why='A line can’t visit a station twice.';return q}
   const tm=trackOf(mode);let tmins=0,ride=0;
   for(const {e} of RE){ride+=edgeMins({mode,id:''},e,M,false);if(tm&&!hasTrack(e,mode)){if(pendingTrack(e.id,mode)){q.why='Track here is still being laid.';return q}q.track.push(e.id);q.tcost+=trackCost(e,mode);tmins+=(e.len+(e.extra||0))*M.tbuild*(e.old?0.6:1)}}
-  const edit=editId&&G.lines[editId];
-  q.cost=q.tcost+(edit?(q.track.length?Math.round(M.fix*0.1):0):M.fix);
-  q.mins=edit&&!q.track.length?0:buildMins(Math.max(M.build,tmins));
+  const edit=editId&&G.lines[editId],up=edit&&edit.mode!==mode;q.up=!!up;
+  q.cost=q.tcost+(edit&&!up?(q.track.length?Math.round(M.fix*0.1):0):M.fix);
+  q.mins=edit&&!up&&!q.track.length?0:buildMins(Math.max(M.build,tmins));
   q.ride=Math.round(ride+Math.max(0,stops.length-2));
-  q.why=modeLocked(mode,stops);if(!q.why&&edit&&isBuilding('line:'+editId))q.why='This line is already being extended.';q.ok=!q.why;
+  q.why=modeLocked(mode,stops);if(!q.why&&up&&!(UPGRADE[edit.mode]||[]).includes(mode))q.why=`A ${MODES[edit.mode].name.toLowerCase()} line can’t become a ${M.name.toLowerCase()} line.`;if(!q.why&&edit&&isBuilding('line:'+editId))q.why='Work on this line is already under way.';q.ok=!q.why;
   return q;
 }
 function orderLine(mode,stops,skip,editId){
@@ -56,16 +61,17 @@ function orderLine(mode,stops,skip,editId){
   const edit=editId&&G.lines[editId],sk=(skip||[]).filter(n=>stops.slice(1,-1).includes(n));
   if(edit&&!q.mins){if(q.cost&&!buy(q.cost))return false;edit.stops=stops.slice();edit.skip=sk;R.ng=null;regionTick();toast(`${lineCode(edit)} now runs ${lineName(edit)}.`,null,null,'',5);return true}
   if(!canBuild()||!buy(q.cost))return false;
-  const M=MODES[mode],lid=edit?edit.id:'L'+(G.lineSeq=(G.lineSeq||0)+1),num=edit?edit.num:nextNum(mode),col=edit?edit.col:M.cols[(num-1)%M.cols.length];
-  const label=edit?`the ${M.L}${num} extension`:`${M.name.toLowerCase()} line ${M.L}${num}`;
-  G.builds.push({id:'line:'+lid,label:label[0].toUpperCase()+label.slice(1),start:G.clock,done:G.clock+q.mins,mode,stops:stops.slice(),skip:sk,track:q.track,edit:edit?lid:null,lid,num,col});
+  const M=MODES[mode],up=q.up,lid=edit?edit.id:'L'+(G.lineSeq=(G.lineSeq||0)+1),num=edit&&!up?edit.num:nextNum(mode),col=edit&&!up?edit.col:M.cols[(num-1)%M.cols.length];
+  const label=up?`the upgrade of ${lineCode(edit)} to ${M.name.toLowerCase()} line ${M.L}${num}`:edit?`the ${M.L}${num} extension`:`${M.name.toLowerCase()} line ${M.L}${num}`;
+  G.builds.push({id:'line:'+lid,label:label[0].toUpperCase()+label.slice(1),start:G.clock,done:G.clock+q.mins,mode,stops:stops.slice(),skip:sk,track:q.track,edit:edit?lid:null,lid,num,col,...(up?{up:1,from:lineCode(edit)}:{})});
   toast(`Work has started on ${label}. Ready in about ${Math.round(q.mins/60*10)/10} h.`,null,null,'',6);return true;
 }
 function finishLine(b){
   if(!b.stops)return;if(!G.infra)G.infra={};
   for(const eid of (b.track||[]))(G.infra[eid]||(G.infra[eid]={}))[b.mode]=1;
   const L=G.lines[b.lid];
-  if(b.edit){if(L){L.stops=b.stops;L.skip=b.skip||[]}}
+  if(b.up){if(L){const code=lineCode(L);L.freq=upFreq(L,b.mode);Object.assign(L,{mode:b.mode,stops:b.stops,skip:b.skip||[],num:b.num,col:b.col,cars:0});if(L.mode!=='rail')L.freight=false;if(!serves(L,'air'))L.sync=false;mgrNote(`${code} is now ${lineCode(L)}, a ${MODES[L.mode].name.toLowerCase()} line`)}}
+  else if(b.edit){if(L){L.stops=b.stops;L.skip=b.skip||[]}}
   else{const M=MODES[b.mode];G.lines[b.lid]={id:b.lid,mode:b.mode,stops:b.stops,skip:b.skip||[],freq:M.freqs[Math.min(1,M.freqs.length-1)],fare:1,night:false,sync:false,cars:0,freight:false,num:b.num,col:b.col}}
   R.ng=null;regionTick();
 }

@@ -20,7 +20,7 @@ function advise(){
   if(!a&&R.st.some(s=>s.F&&s.F.plane.state==='boarding'&&s.F.seated>=s.F.booked-2&&s.F.hold<s.F.checkedTotal-2))a=up('A full plane is waiting on hold bags.',['handlers','bagsys']);
   if(!a){const crowd=R.st.some((S,i)=>S.F&&S.F.plane.state==='boarding'&&R.pax.filter(p=>p.stand===i&&p.state==='gate').length>14);if(crowd)a=up('Passengers are piling up at a gate.',['scanners','walkway'])}
   if(!a){const jam=R.st.some(S=>S.aisle.flat().filter(p=>p.phase==='stow'||p.phase==='shuffle').length>=4);if(jam)a=up('Aisles are jammed with people stowing bags.',['bins'])}
-  if(!a&&SET().recs!==false&&R.trRecs&&R.trRecs.sig===recSig()){const c=R.trRecs.list[0];if(c&&c.pay<12&&G.cash>=c.cost)a={text:c.kind==='line'?`A ${MODES[c.mode].name.toLowerCase()} ${c.stops.map(n=>NODES[n].n).join('–')} would earn about ${money(c.val.v)} an hour.`:`${c.kind==='stn'?STN_UP[c.k].name+' at '+NODES[c.n].n:UPG[c.k].name} would earn about ${money(c.val.v)} an hour.`,go:['region',c.kind==='line'?'[data-recline]':'[data-recother]'],label:'See it'}}
+  if(!a&&SET().recs!==false&&R.trRecs&&R.trRecs.sig===recSig()){const c=R.trRecs.list.find(c=>!c.id||G.lines[c.id]);if(c&&c.pay<12&&G.cash>=c.cost)a={...recTip(c),label:'See it'}}
   if(!a&&tabOpen('routes')){let sup=0,mk=0;for(const c in (G.routes||{})){sup+=rsOf(c).s;mk+=cityMarket(c)}if(mk>0&&sup>mk*1.15&&CITIES.some(c=>!routeOpen(c[0])&&has('rt:'+c[2])))a={text:`Your planes offer ${Math.round(sup/mk*100)}% of the seats your cities want, so flights leave emptier. A new route opens a new market.`,go:['routes','[data-ropen]'],label:'Routes'}}
   if(!a&&!G.layoutNext&&!layoutBuilding()&&SIDX.every(i=>G.stands[i].built)){ // every stand built: an approved layout with more
     const id=Object.keys(LAYOUTS).find(id=>id!==G.layout&&has('lay:'+id)&&LAYOUTS[id].stands.length>SIDX.length&&G.cash>=LAYOUTS[id].cost);
@@ -35,7 +35,7 @@ function advise(){
   return a;
 }
 function renderTip(){
-  if(SET().recs!==false&&tabOpen('region')&&!R.trRecQ&&(!R.trRecs||G.clock-R.trRecs.at>180||R.trRecs.sig!==recSig())&&performance.now()-(R.trRecT||0)>20000){R.trRecQ=1;R.trRecT=performance.now();setTimeout(()=>{try{computeTransitRecs()}catch(e){}R.trRecQ=0},50)}
+  if(SET().recs!==false&&tabOpen('region')&&!R.trJob&&(!R.trRecs||G.clock-R.trRecs.at>180||R.trRecs.sig!==recSig())&&performance.now()-(R.trRecT||0)>20000){R.trRecT=performance.now();recStart()}
   const a=SET().tips===false?null:advise(),el=$('#tip'),sig=a?a.text+(a.k||a.label)+(a.c||''):'';
   if(sig===R.tipSig){const b=el.querySelector('[data-cost]');if(b)b.disabled=G.cash<+b.dataset.cost;return}
   R.tipSig=sig;el.hidden=!a;if(!a)return;
