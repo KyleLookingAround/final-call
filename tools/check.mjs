@@ -87,15 +87,10 @@ if(!only||only==='rules'){
     {const ids=new Set(S.TECH.map(T=>T.id));bad=S.TECH.filter(T=>(T.r||[]).some(r=>!ids.has(r))).map(T=>T.id);
       const gids=new Set(S.GOALS.map(g=>g.id));
       t('rules: plan and goal ids are unique and prerequisites exist',ids.size===S.TECH.length&&gids.size===S.GOALS.length&&!bad.length,few(bad))}
-    {bad=[];for(const [id,L] of Object.entries(S.LAYOUTS)){if(L.rooms){bad.push(...S.layoutFaults(id).map(f=>id+': '+f));continue}const st=L.stands,sh=L.shops,names=new Set(st.map(x=>x.g)),seg=x=>!(L.gap&&x>L.gap[0]-4&&x<L.gap[1]+4);
-      if(names.size!==st.length||st.length>12||sh.length>20)bad.push(id+': names or counts');
-      const order=L.order||st.map((x,i)=>i);if(order.length!==st.length||new Set(order).size!==st.length)bad.push(id+': buying order');
-      st.forEach((a,i)=>{if(a.x<140||a.x>L.W-140||110-64+(a.dy||0)<-100)bad.push(`${id} ${a.g}: off the apron`);
-        st.forEach((b,j)=>{if(j>i&&Math.abs((a.dy||0)-(b.dy||0))<150&&Math.abs(a.x-b.x)<272)bad.push(`${id} ${a.g}/${b.g}: wings touch`)});
-        if(!seg(a.x-138)||!seg(a.x+3))bad.push(`${id} ${a.g}: lounge off the concourse`);
-        sh.forEach(u=>{if(u[0]<a.x+4&&u[0]+118>a.x-138)bad.push(`${id} ${a.g}: lounge under a shop`)})});
-      sh.forEach((u,i)=>{if(!seg(u[0])||!seg(u[0]+118))bad.push(`${id} shop ${i}: off the concourse`);sh.forEach((v,j)=>{if(j>i&&Math.abs(u[0]-v[0])<120)bad.push(`${id} shops ${i}/${j} overlap`)})})}
-      t('rules: every layout fits: names, buying order, wings, lounges and shops',!bad.length,few(bad))}
+    {bad=[];for(const [id,L] of Object.entries(S.LAYOUTS)){bad.push(...S.layoutFaults(id).map(f=>id+': '+f));const st=L.stands,names=new Set(st.map(x=>x.g));
+      if(names.size!==st.length||st.length>16||L.shops.length>20)bad.push(id+': names or counts');
+      const order=L.order||st.map((x,i)=>i);if(order.length!==st.length||new Set(order).size!==st.length)bad.push(id+': buying order')}
+      t('rules: every layout fits: names, buying order, planes, rooms, lounges, shops, links and cards',!bad.length,few(bad))}
     {// no layout can leave a player stuck: at each level, the gates on bridges they can reach cover the next level's needs
       bad=[];for(const [id,L] of Object.entries(S.LAYOUTS)){const st=L.stands,order=L.order||st.map((x,i)=>i),after=st.map((s,i)=>s.after!=null?s.after:(o=>o>0?order[o-1]:-1)(order.indexOf(i)));
         for(let n=0;n+1<S.LEVELS.length;n++){const got=new Set();let more=true;

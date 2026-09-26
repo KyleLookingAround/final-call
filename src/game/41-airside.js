@@ -1,17 +1,15 @@
 /* ================= AIRSIDE: stands at any angle, rooms joined by doorways, and walking between them ================= */
 // Every stand has a frame that turns plane-local coordinates into the world: x across the plane (0 on its centreline),
-// y along it with the nose up (smaller y), as geom() lays out a cabin. A 'tail' stand is the old straight-line kind,
-// the terminal behind the tail at TERM_Y, turned into place by its x alone, so its numbers come out exactly as before.
-// A 'nose' stand parks nose-in: the building face sits FACE_Y ahead of the cabin, and the stand has a position on that
-// face (x, y) and a heading h, the way the nose points in degrees clockwise from north.
+// y along it with the nose up (smaller y), as geom() lays out a cabin. Planes park nose-in: the building face sits FACE_Y
+// ahead of the cabin, and the stand has a position on that face (x, y) and a heading h, the way the nose points in
+// degrees clockwise from north.
 const FACE_Y=22;
-const XF=STAND_X.map(x=>({ox:x,oy:0,c:1,s:0,nose:false})); // per stand: {ox,oy,c,s,nose}; applyLayout fills it
+const XF=[]; // per stand: {ox,oy,c,s} and, for a leaning stand, its face frame; applyLayout fills it
 const exact=v=>Math.abs(v)<1e-12?0:Math.abs(Math.abs(v)-1)<1e-12?Math.sign(v):v;
 // A stand with a lean (herringbone) turns its plane by that many degrees and sets it back by 'back' from the face, while its
 // bridge root and lounge stay square to the wall: those use the face frame, XF[i].face.
 function standXf(s){
-  if(s.h==null)return {ox:s.x,oy:0,c:1,s:0,nose:false};
-  const f=(h,back)=>{const a=h*Math.PI/180,c=exact(Math.cos(a)),sn=exact(Math.sin(a)),d=FACE_Y-back;return {ox:s.x+d*sn,oy:s.y-d*c,c,s:sn,nose:true}};
+  const f=(h,back)=>{const a=h*Math.PI/180,c=exact(Math.cos(a)),sn=exact(Math.sin(a)),d=FACE_Y-back;return {ox:s.x+d*sn,oy:s.y-d*c,c,s:sn}};
   const T=f(s.h+(s.lean||0),s.lean?s.back||0:0);if(s.lean)T.face=f(s.h,0);return T;
 }
 // face-frame coordinates (the wall a stand's bridge and lounge are square to) to the world
@@ -23,10 +21,9 @@ const wx=(i,lx,ly)=>{const T=XF[i];return T.ox+(lx*T.c-ly*T.s)},wy=(i,lx,ly)=>{c
 function toL(i,x,y){const T=XF[i],dx=x-T.ox,dy=y-T.oy;WP.x=dx*T.c+dy*T.s;WP.y=dy*T.c-dx*T.s;return WP}
 function standCtx(i){const T=XF[i];ctx.transform(T.c,T.s,-T.s,T.c,T.ox,T.oy)} // draw in stand i's own coordinates
 // the stand's area in its own coordinates: across, and from the nose end to the tail end
-const standArea=i=>XF[i].nose?[-150,FACE_Y+8,300,470]:[-140,44,280,TERM_Y-60];
+const standArea=()=>[-150,FACE_Y+8,300,470];
 // the stand's area as a box in the world, for the camera, taps and the guided start
 function standBox(i){
-  if(!XF[i].nose)return [STAND_X[i]-150,20,300,TERM_Y-20];
   const [x,y,w,h]=standArea(i);let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
   for(const [a,b] of [[x,y],[x+w,y],[x,y+h],[x+w,y+h]]){toW(i,a,b);x0=Math.min(x0,WP.x);y0=Math.min(y0,WP.y);x1=Math.max(x1,WP.x);y1=Math.max(y1,WP.y)}
   return [x0,y0,x1-x0,y1-y0];
@@ -45,10 +42,10 @@ function placeBadges(){
       if(x<48||x>W-48||y<AF_Y+40)continue;if(SIDX.some(j=>planes[j].some(A=>convexOverlap(A,card)))||ROOMS.some(r=>convexOverlap(card,r.poly)))continue;pick=[x,y];break}
     BADGE[i]=pick}
 }
-function standHit(i,x,y){toL(i,x,y);if(!XF[i].nose)return Math.abs(WP.x)<150&&y>=0&&y<SEC_Y;const [ax,ay,w,h]=standArea(i);return WP.x>=ax&&WP.x<=ax+w&&WP.y>=ay-40&&WP.y<=ay+h}
+function standHit(i,x,y){toL(i,x,y);const [ax,ay,w,h]=standArea(i);return WP.x>=ax&&WP.x<=ax+w&&WP.y>=ay-40&&WP.y<=ay+h}
 
-// Airside rooms: convex floors joined by doorways. Inside a room passengers walk straight to where they're going;
-// to reach another room they walk through the doorways on the way. A layout without rooms is one straight concourse.
+// Airside rooms: convex floors joined by doorways and links. Inside a room passengers walk straight to where they're going;
+// to reach another room they walk through the doorways, and ride the links, on the way.
 let ROOMS=null,ROOM_ID={},ROUTE=null;
 const STAND_ROOM=[],SHOP_ROOM=[];
 function buildRooms(L){
@@ -96,7 +93,7 @@ function walk(p,v,dt){
 }
 // a 2D remote stand: passengers wait by its bus gate in the terminal ([x, y, 1 if the lounge is below the gate else -1])
 // and ride a bus along its road out to the stairs
-const busGate=i=>XF[i].nose&&STAND_KIND[i]==='remote'?LAY.stands[i].gate:null;
+const busGate=i=>STAND_KIND[i]==='remote'?LAY.stands[i].gate:null;
 const roomWalk=p=>ROOMS&&p.room!=null&&ROOMS[p.room].walk||1;
 function inPoly(P,x,y){let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){const [xi,yi]=P[i],[xj,yj]=P[j];if((yi>y)!==(yj>y)&&x<(xj-xi)*(y-yi)/(yj-yi)+xi)c=!c}return c}
 // What's wrong with a 2D layout, if anything: planes touching each other or a building, lounges and shops outside
