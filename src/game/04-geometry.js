@@ -55,7 +55,7 @@ const faultRisk=w=>clamp((w-5)*0.035,0,0.5);
 function demandNow(){const h=(G.clock/60)%24;return h>=5&&h<9?1.2:h>=9&&h<16?0.95:h>=16&&h<20?1.15:h>=20&&h<23?0.9:0.6}
 function demandName(){const h=(G.clock/60)%24;return h>=5&&h<9?'MORNING PEAK':h>=9&&h<16?'DAYTIME':h>=16&&h<20?'EVENING PEAK':h>=20&&h<23?'LATE':'NIGHT'}
 // passport desks and e-gates stand in the wall between the immigration hall and reclaim; carousels fill the reclaim hall
-const boothPos=i=>({x:724+i*14,y:SEC_LINE}),egatePos=i=>({x:846+i*12,y:SEC_LINE}),carX=i=>760+(i%4)*120,carY=i=>i%8<4?630:672; // stands past the eighth share a carousel
+const boothPos=i=>({x:724+i*14,y:SEC_LINE}),egatePos=i=>({x:846+i*12,y:SEC_LINE}),carX=i=>760+(carOf(i)%4)*120,carY=i=>carOf(i)%8<4?630:672; // each arriving flight's carousel (45-baggage.js)
 // queue places: one shared object, refilled on each call, as the queues read it straight away every step
 const SLOT={x:0,y:0},slot=(x,y)=>{SLOT.x=x;SLOT.y=y;return SLOT};
 // the queues sit where they always did against their desks and lanes, so each takes as long to walk as before

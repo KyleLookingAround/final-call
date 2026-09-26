@@ -126,7 +126,12 @@ How each system works is in `docs/SYSTEMS.md`: levels and the Masterplan, routes
 
   - **Arrivals** (`44-arrivals.js`): `updateImmigration` (passport desks and e-gates), `afterControl`, `exitTarget`, and the steps from the concourse to the way out.
 
-  - **Baggage** (`45-baggage.js`): `updateBelt` takes checked bags to the baggage hall, where they count as ready for the hold (`F.bagsIn`); `updateReclaimBelt` brings arriving bags to the carousel (`A.reclaim`).
+  - **Baggage** (`45-baggage.js`, Terminal › Baggage). Bags are counts per flight at each stage (`F.bg`, `A.bg`, the queues in `R.bag`); only a sample is drawn.
+    - `updateBelt`: checked bags go from the belt through screening (one in 20 to the search room), the sorter (`bagsys` sets its speed) and make-up to tug trains, which take them through the tunnel to the stand, where they count as ready for the hold (`F.bagsIn`).
+    - Make-up positions go to flights earliest departure first. Other flights' bags wait in the early bag store, or circle the sorter and take its capacity; when that's full, the sorter backs up.
+    - A flight that's ready to go after its departure time leaves behind bags that haven't reached a tug (`leaveBags`): `F.checkedTotal` drops, and each costs a courier and some rating (`bags`), counted in `G.bagMiss` and the day's report.
+    - Transfer bags (`A.xb`, set in `newFlight`) come off first and go through screening and the sorter to their next flight, so tight connections can miss.
+    - `updateReclaimBelt`: arriving bags go by tug to the hall and onto the flight's carousel (`A.car`, from `carOf`, which `carX`/`carY` follow), up to 45 bags a carousel. The board shows ON BELT n, or BAGS LATE while a full carousel holds them up.
 
   - **Market place** (`46-market.js`): `airside` decides between a shop and the gate, with `toShop`, `toGate` and the shop steps.
 
