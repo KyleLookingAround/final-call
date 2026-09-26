@@ -57,13 +57,14 @@ function renderPanel(){
     h+=`<div class="segs">${[['gates','Gates'],['fleet','Fleet'],['methods','Boarding']].map(([id,n])=>`<button class="chip${sub===id?' on':''}" data-gsub="${id}">${n}</button>`).join('')}</div>`;
     if(sub==='gates'){
       if(G.builds.length)h+=`<div class="report">Building: ${G.builds.map(b=>`<b>${b.label}</b> ${Math.ceil(b.done-G.clock)}m`).join(' · ')} · crews ${buildSlots()-G.builds.length}/${buildSlots()} free</div>`;
-      G.stands.forEach((st,i)=>{
-        if(i===4&&G.level>=PIER.lvl){
+      const firstPier=STAND_ORDER.find(k=>STAND[k].pier),nextI=STAND_ORDER.find(k=>!G.stands[k].built);
+      STAND_ORDER.forEach(i=>{const st=G.stands[i];
+        if(i===firstPier&&G.level>=PIER.lvl){
           if(!G.pierB){const bld=isBuilding('pier:B'),ok=G.level>=PIER.lvl;
             h+=`<div class="stand locked" id="pierB"><div class="sh"><div><span class="gate">B</span><span class="rt">Pier B</span></div>${bld?'<button class="buy" disabled>Building</button>':ok?`<button class="buy" data-pierbuy="1" data-cost="${PIER.cost}">${money(PIER.cost)}</button>`:`<button class="buy" disabled>Level ${PIER.lvl+1}</button>`}</div>${bld?buildLine('pier:B'):`<div class="rd">${ok?`Room for four more gates, including widebodies. ${Math.round(buildMins(PIER.build)/60*10)/10} h to build, ${money(250)}/h to run.`:`Unlocks at ${lvlName(PIER.lvl)}.`}</div>`}</div>`}
           else h+=`<div class="sec">Pier B<span>widebody gates</span></div>`;
         }
-        if(!st.built){const nextI=G.stands.findIndex(x=>!x.built);if(i===nextI&&(G.level>=STAND[i].lvl||isBuilding('stand:'+i))&&(!STAND[i].pier||G.pierB))h+=standLockedCard(i);else if(i===nextI&&G.level<STAND[i].lvl)h+=`<p class="note soon">Next gate unlocks at ${lvlName(STAND[i].lvl)}.</p>`;return}
+        if(!st.built){if(i===nextI&&(G.level>=STAND[i].lvl||isBuilding('stand:'+i))&&(!STAND[i].pier||G.pierB))h+=standLockedCard(i);else if(i===nextI&&G.level<STAND[i].lvl)h+=`<p class="note soon">Next gate unlocks at ${lvlName(STAND[i].lvl)}.</p>`;return}
         const F=R.st[i].F,mChips=METHODS.filter(m=>G.methods[m.id]).map(m=>`<button class="chip${st.method===m.id?' on':''}" data-method="${i}:${m.id}">${m.name}</button>`).join('');
         const who=F?(F.partner?`<span class="pdot" style="background:${F.partner.col}"></span>${F.partner.name} · ${F.ac.short}`:`${F.ac.name} #${F.fleetIdx+1}`):'Waiting for an aircraft';
         const gs=G.gstats[i]||[];
@@ -235,7 +236,7 @@ function loanPreview(){
 }
 $('#panel').addEventListener('input',e=>{if(e.target.id==='loanRange')loanPreview()});
 function upBuyable(k){const u=UPG[k];return G.lv[k]<capOf(k)&&!upLocked(k)&&(!u.req||u.req())&&!isBuilding('up:'+k)}
-function standBuyable(i){const s=STAND[i];return !G.stands[i].built&&(i===0||G.stands[i-1].built)&&G.level>=s.lvl&&(!s.pier||G.pierB)&&!isBuilding('stand:'+i)}
+function standBuyable(i){const s=STAND[i],o=STAND_ORDER.indexOf(i);return o>=0&&!G.stands[i].built&&(o===0||G.stands[STAND_ORDER[o-1]].built)&&G.level>=s.lvl&&(!s.pier||G.pierB)&&!isBuilding('stand:'+i)}
 function affordableIn(tab){
   let n=0;
   for(const k in UPG){if(UPG[k].tab===tab&&upBuyable(k)&&G.cash>=upCost(k))n++}

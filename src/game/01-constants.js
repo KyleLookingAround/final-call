@@ -1,6 +1,6 @@
 /* ================= constants ================= */
-const NG=8,H=640,SEATW=15,AISLE=16,CABIN_TOP=110,CABIN_MAX=250,TERM_Y=446,SEC_Y=522,LAND_B=614,LAND_R=1232,GAP=0.95,SPACING=8.5;
-const SIDX=[...Array(NG).keys()];
+const NG=12,NU=20,H=640,SEATW=15,AISLE=16,CABIN_TOP=110,CABIN_MAX=250,TERM_Y=446,SEC_Y=522,LAND_B=614,LAND_R=1232,GAP=0.95,SPACING=8.5;
+const SIDX=[0,1,2,3,4,5,6,7],STAND_ORDER=[0,1,2,3,4,5,6,7]; // the current layout's stands, and the order they're bought in
 // the airport's layout: these arrays hold the current layout's stands and shop units (39-layouts.js fills them in place)
 let W=2480; // world width
 const STAND_X=[170,470,770,1070,1370,1670,1970,2270];

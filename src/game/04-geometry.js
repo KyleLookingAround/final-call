@@ -55,5 +55,5 @@ function secSlot(i){if(i>=85)return slot(296+(i%3)*3,604);const per=17,r=Math.fl
 const ftSlot=i=>slot(FT_X,Math.min(606,553+i*8));
 function spotPos(i,j){return {x:STAND_X[i]-138+(j%16)*9,y:456+Math.floor(j/16)*8.5}}
 const shopX=j=>SHOP_X[j];
-const standOpen=i=>!STAND[i].pier||G.pierB,shopOpen=j=>SHOP_PH[j]<2||G.pierB;
+const standOpen=i=>i<STAND.length&&(!STAND[i].pier||G.pierB),shopOpen=j=>j<SHOP_X.length&&(SHOP_PH[j]<2||G.pierB);
 

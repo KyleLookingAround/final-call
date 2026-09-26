@@ -34,7 +34,8 @@ for(let h=0;h<hours;h+=6){
 }
 const fin=await m.evaluate(()=>B.run(1,0.1)),sv=await m.evaluate(()=>window.SAVES||{});
 // a fingerprint of the whole saved state: two runs with the same seed and the same game give the same one
-const gJson=await m.evaluate(()=>JSON.stringify({...__sim.G,savedAt:0})); // savedAt is wall-clock time, not game statewriteFileSync(join(root,`build/state-${seed}.json`),gJson);
+// savedAt is wall-clock time, not game state, so it's left out
+const gJson=await m.evaluate(()=>JSON.stringify({...__sim.G,savedAt:0}));writeFileSync(join(root,`build/state-${seed}.json`),gJson);
 const state=createHash('sha256').update(gJson).digest('hex').slice(0,16);
 mkdirSync(join(root,'build/saves'),{recursive:true});for(const k in sv)writeFileSync(join(root,'build/saves/L'+k+'.json'),sv[k]);
 console.log('SEED',seed);console.log('LVLAT',JSON.stringify(fin.lvlAt));console.log('STATE',state);console.log('ERR',JSON.stringify(errs.slice(0,5)));

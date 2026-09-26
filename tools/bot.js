@@ -30,9 +30,9 @@ window.BOT=function(opts){
     }
     {const fr=g.fleet.filter(f=>!f.sold&&S.AIRCRAFT[f.type].freighter).length,want=opts.freighters===false?0:Math.floor(S.builtCount()/4);if(S.has('ac:7')&&fr<want&&g.cash>S.AIRCRAFT[7].cost*2+reserve)S.buyAircraft(7)}
     // stands & pier
-    for(let i=0;i<8;i++){if(S.standBuyable(i)&&S.canBuild()&&g.cash>=S.STAND[i].cost*1.1+reserve){S.buyStand(i)}}
+    for(const i of S.STAND_ORDER){if(S.standBuyable(i)&&S.canBuild()&&g.cash>=S.STAND[i].cost*1.1+reserve){S.buyStand(i)}}
     if(!g.pierB&&!S.isBuilding('pier:B')&&g.level>=S.PIER.lvl&&S.canBuild()&&g.cash>=S.PIER.cost*1.1)S.buyPier();
-    let goal=0;for(let i=0;i<8;i++)if(S.standBuyable(i)){goal=S.STAND[i].cost;break}
+    let goal=0;for(const i of S.STAND_ORDER)if(S.standBuyable(i)){goal=S.STAND[i].cost;break}
     if(!goal&&!g.pierB&&!S.isBuilding('pier:B')&&g.level>=S.PIER.lvl)goal=S.PIER.cost;
     const lim=goal?goal*(opts.saveFrac??0.12):1e18;
     // methods
@@ -40,7 +40,8 @@ window.BOT=function(opts){
     const bm=[...S.METHODS].reverse().find(m=>g.methods[m.id]);if(bm)g.stands.forEach(s=>s.method=opts.method||bm.id);
     g.stands.forEach(s=>{if(s.built&&!s.rear&&g.cash>=1500+reserve&&S.buy(450))s.rear=true});
     // shops
-    g.shops.forEach((sh,j)=>{if(!S.standOpen(j)||!g.stands[j].built)return;
+    // a shop unit opens once the stands around it are built: unit j of n goes with the (j*stands/n)th stand bought
+    g.shops.forEach((sh,j)=>{if(!S.shopOpen(j)||S.builtCount()<=Math.floor(j*S.SIDX.length/S.SHOP_X.length))return;
       if(!sh){if(goal&&goal<g.cash*0.5)return;let pick=-1;S.SHOPS.forEach((t,k)=>{if(S.has('shop:'+t.id)&&g.cash>=t.cost*2+reserve)pick=k});if(pick>=0&&S.buy(S.SHOPS[pick].cost))g.shops[j]={type:pick,lvl:0,earned:0,spent:S.SHOPS[pick].cost}}
       else if(sh.lvl<4){const c=S.shopUpCost(sh);if(g.cash>=c*2.5+reserve&&S.buy(c)){sh.spent+=c;sh.lvl++}}});
     // fares: raise when rating sags, drift back when it's healthy
