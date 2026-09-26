@@ -1,8 +1,12 @@
 /* ================= constants ================= */
-const NG=8,W=2480,H=640,SEATW=15,AISLE=16,CABIN_TOP=110,CABIN_MAX=250,TERM_Y=446,SEC_Y=522,LAND_B=614,LAND_R=1232,GAP=0.95,SPACING=8.5;
+const NG=8,H=640,SEATW=15,AISLE=16,CABIN_TOP=110,CABIN_MAX=250,TERM_Y=446,SEC_Y=522,LAND_B=614,LAND_R=1232,GAP=0.95,SPACING=8.5;
 const SIDX=[...Array(NG).keys()];
+// the airport's layout: these arrays hold the current layout's stands and shop units (39-layouts.js fills them in place)
+let W=2480; // world width
 const STAND_X=[170,470,770,1070,1370,1670,1970,2270];
+const STAND_DY=[0,0,0,0,0,0,0,0]; // how far each stand's plane sits back from the concourse
 const GATES=['A1','A2','A3','A4','B1','B2','B3','B4'];
+const SHOP_X=STAND_X.map(x=>x+22),SHOP_PH=[1,1,1,1,2,2,2,2],SHOP_NAME=GATES.slice(); // shop units: left edge, phase (2 needs Pier B), label
 const STAND=[
   {cost:0,build:0,lvl:0},{cost:400,build:30,lvl:0},{cost:3000,build:60,lvl:1},{cost:12000,build:90,lvl:3},
   {cost:80000,build:120,lvl:4,pier:1},{cost:150000,build:150,lvl:4,pier:1},{cost:300000,build:180,lvl:6,pier:1},{cost:500000,build:210,lvl:6,pier:1}];

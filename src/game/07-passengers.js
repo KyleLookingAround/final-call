@@ -46,7 +46,7 @@ function finishCheckin(p,x){
 }
 function airside(p,x){
   p.x=x;p.y=516;
-  const F=p.F,left=F.std-G.clock,built=[];G.shops.forEach((s,j)=>{if(s&&standOpen(j))built.push(j)});
+  const F=p.F,left=F.std-G.clock,built=[];G.shops.forEach((s,j)=>{if(s&&shopOpen(j))built.push(j)});
   if(p.leader){const L=p.leader;if((L.state==='toShop'||L.state==='shop')&&G.shops[L.shop]&&left>15){p.state='toShop';p.shop=L.shop;p.tx=clamp(L.tx+(rnd()-0.5)*16,shopX(L.shop),shopX(L.shop)+116);p.ty=499+(rnd()-0.5)*4;return}toGate(p);return}
   if(left>15&&built.length){
     for(let k=built.length-1;k>0;k--){const j=Math.floor(rnd()*(k+1));[built[k],built[j]]=[built[j],built[k]]}

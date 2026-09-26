@@ -103,8 +103,8 @@ function renderPanel(){
     h+=segs('sSub',[['prices','Prices'],['shops','Shops'],['landside','Landside']]);
     h+=`<p class="note">Passengers with 15+ minutes to spare may stop at a shop. Long-haul flyers spend more.</p>`;
     G.shops.forEach((s,j)=>{
-      if(!standOpen(j))return;
-      h+=`<div class="shopcard"><div class="sh"><div><span class="gate" style="background:var(--surface2);color:var(--muted)">${GATES[j]}</span><span class="rt">${s?SHOPS[s.type].name:'Empty unit'}</span></div>${s?`<span class="live">${money(s.earned||0)} earned</span>`:''}</div>`;
+      if(!shopOpen(j))return;
+      h+=`<div class="shopcard"><div class="sh"><div><span class="gate" style="background:var(--surface2);color:var(--muted)">${SHOP_NAME[j]}</span><span class="rt">${s?SHOPS[s.type].name:'Empty unit'}</span></div>${s?`<span class="live">${money(s.earned||0)} earned</span>`:''}</div>`;
       if(s){const t=SHOPS[s.type],max=s.lvl>=4,c=shopUpCost(s);
         h+=`<div class="row" style="border:0;padding:0">${svg(t.ic)}<div><div class="rt">Level ${s.lvl+1}${pips(s.lvl+1,5)}</div><div class="rd"><b>${money(t.spend*Math.pow(1.25,s.lvl))}</b> a visit (short-haul). ${Math.round(t.pull*100)}% of passers-by stop.</div></div><button class="buy${max?' chipd':''}" ${max?'disabled':`data-shopup="${j}" data-cost="${c}"`}>${max?'MAX':money(c)}</button></div><div class="sh"><span class="rd" style="margin:0">Close it to build something else here. You get back ${money(shopValue(s))}.</span><button class="buy sell" data-shopsell="${j}">Close</button></div>`;
       } else {
@@ -243,7 +243,7 @@ function affordableIn(tab){
   if(tab==='region')n+=regionAffordable();
   if(tab==='office')n+=TECH.filter(T=>techState(T)==='ready').length;
   if(tab==='routes')n+=CITIES.filter(c=>!routeOpen(c[0])&&has('rt:'+c[2])&&G.cash>=ROUTE_FEE[c[2]]).length?1:0;
-  if(tab==='sales')G.shops.forEach((s,j)=>{if(!standOpen(j))return;if(!s&&G.cash>=SHOPS[0].cost)n++;else if(s&&s.lvl<4&&G.cash>=shopUpCost(s))n++});
+  if(tab==='sales')G.shops.forEach((s,j)=>{if(!shopOpen(j))return;if(!s&&G.cash>=SHOPS[0].cost)n++;else if(s&&s.lvl<4&&G.cash>=shopUpCost(s))n++});
   return n;
 }
 function stars(r){const n=clamp(Math.round(r/20),0,5);return `<span class="stars">${'★'.repeat(n)}<span class="off">${'★'.repeat(5-n)}</span></span> <small style="font-size:11px;color:var(--muted)">${Math.round(r)}</small>`}

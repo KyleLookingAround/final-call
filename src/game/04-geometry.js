@@ -1,9 +1,9 @@
 /* ================= geometry ================= */
 function mkPath(pts){const segs=[];let L=0;for(let i=0;i<pts.length-1;i++){const a=pts[i],b=pts[i+1],len=Math.hypot(b[0]-a[0],b[1]-a[1]);segs.push({a,b,len,start:L});L+=len}return {pts,segs,len:L}}
 function ptAt(p,s){s=clamp(s,0,p.len);for(const g of p.segs){if(s<=g.start+g.len+1e-6){const t=g.len?(s-g.start)/g.len:0;return [g.a[0]+(g.b[0]-g.a[0])*t,g.a[1]+(g.b[1]-g.a[1])*t]}}const e=p.pts[p.pts.length-1];return [e[0],e[1]]}
-function geom(ac){
+function geom(ac,dy=0){
   const blocks=ac.blocks,cols=blocks.reduce((a,b)=>a+b,0),nA=blocks.length-1,total=cols*SEATW+nA*AISLE;
-  const pitch=Math.min(16,CABIN_MAX/ac.rows),fw=total/2+7,rowsStart=CABIN_TOP+16,end=rowsStart+ac.rows*pitch+12;
+  const top=CABIN_TOP+dy,pitch=Math.min(16,CABIN_MAX/ac.rows),fw=total/2+7,rowsStart=top+16,end=rowsStart+ac.rows*pitch+12;
   const seatXs=[],aisleX=[],colA=[],colS=[],colCt=[],colBlk=[];let x=-total/2;
   blocks.forEach((n,b)=>{for(let s=0;s<n;s++){seatXs.push(x+SEATW/2);x+=SEATW}if(b<nA){aisleX.push(x+AISLE/2);x+=AISLE}});
   let start=0;
@@ -16,8 +16,8 @@ function geom(ac){
     }
     start+=n;
   });
-  return {cols,nA,pitch,fw,rowsStart,end,seatXs,aisleX,colA,colS,colCt,colBlk,fd:{x:-fw,y:CABIN_TOP+8},rd:{x:-fw,y:end-6},
-    P0:(CABIN_TOP+8-rowsStart)/pitch-0.5,P1:(end-6-rowsStart)/pitch-0.5,
+  return {cols,nA,pitch,fw,top,rowsStart,end,seatXs,aisleX,colA,colS,colCt,colBlk,fd:{x:-fw,y:top+8},rd:{x:-fw,y:end-6},
+    P0:(top+8-rowsStart)/pitch-0.5,P1:(end-6-rowsStart)/pitch-0.5,
     wingY:rowsStart+ac.rows*pitch*0.36,chord:Math.max(38,ac.rows*pitch*0.26),span:ac.span,holdY:rowsStart+ac.rows*pitch*0.78};
 }
 function paths(i,g){
@@ -54,6 +54,6 @@ function ciSlot(i){if(i>=165)return slot(14+(i%4)*3,562+(i%7)*3);const per=33,r=
 function secSlot(i){if(i>=85)return slot(296+(i%3)*3,604);const per=17,r=Math.floor(i/per),k=i%per;return slot(r%2===0?302+k*8:302+(per-1-k)*8,553+r*12)}
 const ftSlot=i=>slot(FT_X,Math.min(606,553+i*8));
 function spotPos(i,j){return {x:STAND_X[i]-138+(j%16)*9,y:456+Math.floor(j/16)*8.5}}
-const shopX=j=>STAND_X[j]+22;
-const standOpen=i=>i<4||G.pierB;
+const shopX=j=>SHOP_X[j];
+const standOpen=i=>!STAND[i].pier||G.pierB,shopOpen=j=>SHOP_PH[j]<2||G.pierB;
 

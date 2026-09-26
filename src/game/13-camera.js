@@ -37,8 +37,8 @@ function tapAt(px,py){
   if(wy>764&&wx<340&&(airKind('tram')||R.tram.x!=null)){setTab('region');return}
   if(wy>LAND_B+2){R.sSub='landside';setTab('sales');return}
   if(wy<SEC_Y){
+    if(wy>TERM_Y&&SHOP_X.some((x,j)=>wx>=x&&wx<=x+118&&shopOpen(j))){goTo('sales','.shopcard');return}
     const i=STAND_X.findIndex(sx=>Math.abs(wx-sx)<150);if(i<0)return;
-    if(wy>TERM_Y&&wx>=shopX(i)&&wx<=shopX(i)+118&&standOpen(i)){goTo('sales','.shopcard');return}
     selectStand(i,true);if(i===0)R.tourTap=true;
   } else if(wx<LAND_R)setTab('terminal');else{R.sSub='landside';setTab('sales')}
 }

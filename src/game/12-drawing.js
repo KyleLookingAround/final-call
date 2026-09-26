@@ -13,7 +13,7 @@ function hatch(x,y,w,h,prog,label){
 }
 function bprog(id){const b=buildOf(id);return b?clamp((G.clock-b.start)/(b.done-b.start),0,1):0}
 function drawPlane(F,sx,offY,tow,alpha){
-  const g=F.geo,ac=F.ac,fw=g.fw,top=CABIN_TOP,end=g.end;
+  const g=F.geo,ac=F.ac,fw=g.fw,top=g.top,end=g.end;
   ctx.save();ctx.globalAlpha=alpha??1;ctx.translate(sx,offY);
   ctx.fillStyle='#A9B3BC';
   for(const s of [-1,1]){
@@ -55,7 +55,7 @@ function drawStandApron(i){
     return;
   }
   ctx.strokeStyle='rgba(255,199,44,.4)';ctx.lineWidth=2;ctx.setLineDash([10,8]);ctx.beginPath();ctx.moveTo(sx,32);ctx.lineTo(sx,TERM_Y-8);ctx.stroke();ctx.setLineDash([]);
-  ctx.strokeStyle='rgba(255,199,44,.5)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(sx-26,44);ctx.lineTo(sx+26,44);ctx.stroke();
+  ctx.strokeStyle='rgba(255,199,44,.5)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(sx-26,44+STAND_DY[i]);ctx.lineTo(sx+26,44+STAND_DY[i]);ctx.stroke();
   ctx.font='800 26px "Saira Condensed","Arial Narrow",sans-serif';ctx.fillStyle='rgba(255,199,44,.16)';ctx.textAlign='right';ctx.textBaseline='alphabetic';ctx.fillText(GATES[i],sx+140,TERM_Y-12);
   if(S.out)drawPlane(S.out.F,sx,S.out.offY,false,S.out.alpha);
   const F=S.F;if(F&&F.plane.state!=='wait'&&F.plane.state!=='approach')drawPlane(F,sx,F.plane.offY,F.plane.state==='inbound',F.plane.alpha??1);
@@ -96,9 +96,11 @@ function drawTerminal(D){
     sign(x0,516,'AIRPORT HOTEL')}
   for(const i of SIDX){
     if(!standOpen(i))continue;
-    const built=G.stands[i].built;
-    ctx.fillStyle=built?'#252C33':'#1F242A';
+    ctx.fillStyle=G.stands[i].built?'#252C33':'#1F242A';
     for(let j=0;j<80;j++){const s=spotPos(i,j);ctx.fillRect(s.x-3,s.y-3,6,6)}
+  }
+  for(let i=0;i<SHOP_X.length;i++){
+    if(!shopOpen(i))continue;
     const s=G.shops[i],x=shopX(i);
     if(s){
       const t=SHOPS[s.type];ctx.fillStyle='#242A31';ctx.fillRect(x,452,118,40);ctx.fillStyle=t.col;ctx.fillRect(x,490,118,3);
@@ -167,7 +169,7 @@ function drawPax(vx0,vx1){
 }
 function statusCol(s){if(s==='DEPLANING'||s==='LANDED'||s==='AT GATE')return '#5CC8FF';if(s==='ARRIVED')return '#6BE39A';if(s==='EXPECTED'||s==='COMPLETE')return '#909AA4';return s==='CARGO'||s==='LOADING'?'#D9A066':s==='BOARDING'||s==='GO TO GATE'?'#6BE39A':s==='FINAL CALL'||s==='BAGGAGE'?'#FFC72C':s==='DELAYED'||s==='TECH DELAY'||s==='CREW DELAY'?'#FF7A8A':s==='CLOSED'?'#5CC8FF':'#909AA4'}
 function gateBadge(i){
-  const sx=STAND_X[i],F=R.st[i].F,x=sx-146,y=34,w=96,h=F?60:30,sel=i===R.sel;
+  const sx=STAND_X[i],F=R.st[i].F,x=sx-146,y=34+STAND_DY[i],w=96,h=F?60:30,sel=i===R.sel;
   ctx.fillStyle='rgba(10,12,15,.84)';rrect(x,y,w,h,4);ctx.fill();
   if(sel){ctx.strokeStyle='#FFC72C';ctx.lineWidth=1.2;rrect(x+.5,y+.5,w-1,h-1,4);ctx.stroke()}
   ctx.fillStyle=sel?'#FFC72C':'#3A424B';ctx.fillRect(x+6,y+6,20,13);

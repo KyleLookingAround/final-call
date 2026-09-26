@@ -1,6 +1,6 @@
 # Airport layouts
 
-Issue: #7 · Status: Proposed
+Issue: #7 · Status: Approved
 
 Bundled with the performance work below, at the owner's request.
 
