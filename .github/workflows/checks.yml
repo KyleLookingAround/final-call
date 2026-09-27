@@ -7,6 +7,11 @@ on:
 permissions:
   contents: read
 
+# a newer push to the same PR cancels the older run
+concurrency:
+  group: checks-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check:
     runs-on: ubuntu-latest
