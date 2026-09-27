@@ -10,7 +10,7 @@ The airport looks like a real one seen from above, not a diagram: painted apron 
 
 - **Apron markings.** Yellow lead-in lines curving onto each stand, stop bars and stand numbers painted on the ground, red safety lines round each stand, taxiway centre lines with blue edge lights, runway threshold and aiming-point markings.
 - **Day and night.** A dawn and dusk colour grade (warm, then blue) on top of today's darkness curve; floodlight masts on the apron that light up at dusk; lit windows in the terminal; runway and taxiway edge lights; planes' navigation and beacon lights at night.
-- **Roofs.** Zoomed out, the terminal and its piers have roofs (with plant, skylights and the layout's own shape), so the airport reads as buildings. Zooming in, they fade away between about 0.9× and 1.3× zoom to show the halls and passengers inside. Hidden rooms (not yet built) have no roof.
+- **Roofs.** Zoomed out, the terminal and its piers have roofs (with plant, skylights and the layout's own shape), so the airport reads as buildings. Zooming in, they fade away between about 0.6× and 0.95× zoom to show the halls and passengers inside, clear at the airport view's 1× starting zoom (owner's choice, #51). Hidden rooms (not yet built) have no roof.
 - **Better planes.** Engines under the wings, a shadow on the apron, the airline's colour on the tail and engines, wingtip lights at night; the same on the runway's small planes.
 - **Weather you can see.** Rain streaks and puddles that shine under the lights, snow that settles on the apron and grass and is cleared from stands, fog banks, cloud shadows drifting over, and a windsock.
 - **Vehicles on the apron.** A tug at pushback, a fuel truck, a catering truck and baggage tractors with carts at each turnaround, driving between the stand and the service road. They come from what the stand is doing, not from new rules.
@@ -71,7 +71,7 @@ One run varies by about ±0.05×, so a part measures its cost as the median of t
    - apron markings and lighting (`docs/briefs/real-airport-markings.md`);
    - better planes (`docs/briefs/real-airport-planes.md`);
    - roofs (`docs/briefs/real-airport-roofs.md`).
-3. **Second batch, two parts**, once the first has merged: weather you can see (`docs/briefs/real-airport-weather.md`) and vehicles on the apron (`docs/briefs/real-airport-vehicles.md`). Both at the cheaper model (experiment [C]).
+3. **Second batch, two parts:** weather you can see (`docs/briefs/real-airport-weather.md`) and vehicles on the apron (`docs/briefs/real-airport-vehicles.md`). Both at the cheaper model (experiment [C]). The owner chose on 27 Sep 2026 to run this batch alongside the first instead of after it merges.
 4. **Bring it together** in one last PR: screenshots of every layout by day and night, the What's new entry and version, link previews (`npm run preview`), `docs/SYSTEMS.md`, and the speed of all five parts together against the budget.
 
 ## Files

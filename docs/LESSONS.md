@@ -4,12 +4,48 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 ## #47 Runbook experiment [E]: a fresh review before opening · 27 Sep 2026
 
-- **Numbers:** session `session_016m4g3NhqFbyAZLveBkhwDn`, estimate $4: $1.72 and 129k of 1M context by the time checks came back. Created 11:51, PR opened 11:55 (four minutes), Checks green at 12:01 (six minutes). One commit; CI green first time. No Balance run: no game code. No questions for the owner.
+- **Numbers:** session `session_016m4g3NhqFbyAZLveBkhwDn`, estimate $4: $1.72 and 129k of 1M context by the time checks came back, $4.01 by the second merge-in. Created 11:51, PR opened 11:55 (four minutes), Checks green at 12:01 (six minutes). No Balance run: no game code. No questions for the owner.
 - **The trial review:** run on its own PR, as the brief asked. A fresh helper agent, given the diff against `main`, the brief and the project notes, reported no bugs, no broken rules, and no doc lines outside the diff left stale — it checked the README, `docs/SYSTEMS.md` and step cross-references by hand, the class of miss #39 showed. It flagged one non-defect (the new `docs/ROADMAP.md` bullet has no tracking issue, unlike its neighbours), and needed no fixes.
 - **Went well:** the review cost was small next to the review it stood in for doing later or not at all: about 96k of the session's tokens and a few minutes, against a $4 budget.
 - **Lessons:**
   - First trial found nothing, so it doesn't yet show whether the step catches a real miss; measured on the next five PRs (`docs/ROADMAP.md`), including PRs with game code where a broken rule or a stale check is more likely.
-  - `main` moved a long way (several PRs) while this PR sat open with nobody watching it, and it needed a merge before it would go in, as several other entries below already warn.
+  - `main` moved a long way (many PRs, several sessions merging at once) while this PR sat open, needing two separate merges before it would go in — matching what #46, #49 and #51's entries below already say about a busy `main`. The first push's CI also never started (no check runs at all on its head commit); a second push after the second merge is what finally triggered it.
+
+## Systems review · 27 Sep 2026
+
+- **Numbers:** session `session_016cnDJAUK5qfd7mjnFwXcDo`, estimate $15: `usage.cost_usd` was not reported by the time the PR opened (the usual early reading). Started 13:39; the three bot runs on `main` ran side by side in the background from the first minute (about 12 minutes) while the docs and the core files were read; four helper agents mapped the region, the terminal's hooks, the UI and the tools in parallel (about 4 minutes each) and their reports were read in place of the files. Docs only, so no Balance run.
+- **Lessons:**
+  - The bot's six-hourly `why` field and a 30-line script gave every number Part 1 needed (rating causes over the run, which requirement holds each level, cash floors), as #57's session found. → No change yet: a `--why` summary in the bot would save the next session that script, and is a tools change outside this brief.
+  - A play of the bot's saves showed what the logs can't: five departures on the board all to New York, partners flying every short-haul route, four bus lines run at one service an hour carrying nobody. → Reviews of the game logic should play a save at three levels and read the board, the Routes tab's report and the Region tab; a 60-line Playwright script does it in a minute.
+  - `Object.assign(window.__sim,SIMX)` copies a getter's value, which is the whole of the `__sim.AF_Y` bug the planes part met; `ROOF` has the same bug. → Refactor step 1 in the spec, with a build rule to catch the next one.
+  - The `graph` check refuses a link to a file that doesn't exist yet, so a spec naming a proposed new file has to describe it rather than link it. No change: the check is right, and the wording is easy.
+  - `main` gained the approved terminal-place spec (#49) minutes after this session branched. → Fetch and reset onto `main` again before the first commit, as the lessons for #43 and #49 already say.
+## #51 Clear roofs at the starting zoom · 27 Sep 2026
+
+- **Numbers:** session `session_01DNpd2NAxxaMbr4nBX4SbvS`, estimate $3: `usage.cost_usd` still missing from `get_session` at the first stopping point (the pattern the game logic ideas session hit already), rate limit status stayed `allowed` throughout. Created 13:18, code plus checks plus screenshots plus the preview image done by 13:26.
+- **Lessons:**
+  - The owner's answer to #51 was already sitting on the issue as a comment by the time this session read it, so no `needs-owner` issue or wait was needed — reading the issue's own comments first (not just its body) before assuming a question is still open is worth doing every time.
+  - The starting camera zoom (`R.cam.z`, default `1`) isn't saved and isn't touched anywhere on the normal boot path into the airport view, so "clear at the default zoom" only needed proving for one number, not per device; the one path that sets a different starting zoom (`resize()`'s first-run branch) only fires for a view other than `airport` and only zooms further out, which is the safe direction already. Worth a line in `docs/SYSTEMS.md` if roofs come up again, so the next session doesn't re-derive it.
+  - The `roofs` check's "gone zoomed in" case used to zoom to 1.6× just to clear the old fade's top end with margin; moving it to exactly 1× turned the same assertion into a direct test of the issue itself (roofs gone at the real starting zoom) rather than an arbitrary point further out. → No playbook change, just a reminder that a check's test points are worth re-picking against what they're actually proving, not just re-validating against a moved constant.
+  - `npm run preview`'s screenshot is taken at the airport view's default zoom, so this change altered it for real (halls and colour visible where a grey roof panel was); the earlier lesson about only committing the regenerated image after a visible change applied cleanly here.
+  - `main` moved twice more while this PR's checks ran (#53, then #49), each adding a `docs/LESSONS.md` conflict; merging `main` in again right before the final merge attempt (not only when CI first went green) is what #49's own lesson below already says to do.
+
+## #49 The terminal as a place: the spec, checks planned first · 27 Sep 2026
+
+- **Numbers:** session `session_01Dvkimw2SjgEvPiF7DhWQKb`, estimate $8: $3.96 and 219k of 1M context at the merge ($3.24 at the first check-in; `get_session` gave no cost when the PR opened). Started 11:51, PR opened 11:57, approved by the owner through the coordinator at about 13:20 (under 1½ hours after the question opened, so no default was taken), merged about 13:35. CI green on every push (Checks about 6 minutes). Three merges of `main`, each with a LESSONS conflict from entries added at the top by both sides, the last one found only when the squash-merge was refused. → Merge `main` in straight before merging, not only when CI goes green.
+- **The knowledge graph:** three queries (`42-terminal.js`, `50-scene.js`, `perf`) were enough. It read `42-terminal.js`, `50-scene.js`, `tools/checks/scene.mjs` and the end of `check.mjs` whole, and grepped for the rest. `perf` again named the simulation's functions but not the group's budgets; those came from the check itself.
+- **Lessons:**
+  - The idea board's page shows only the questions. The owner's answers are in its database (`feedback/round2`), read with `ArtifactData`, not the Artifact read. → Say so in any brief that points at the idea board.
+  - Measuring showed the real airport's shares leave this bundle about 0.02× of drawing headroom. Budgets set before a bundle is built should add up across bundles, not start fresh. → The spec makes its groundwork win room back before any part spends it.
+  - `perf` on this machine gave Midfield 0.129×, against 0.244× in the real airport's spec. Numbers from different machines don't compare. → The spec records the machine and asks each part for the median of three runs on its branch and on `main`.
+
+## #60 Idea board, September 2026 · 27 Sep 2026
+
+- **Numbers:** session `session_01JryZpLH3H7sVAKb1DwUm61`, estimate $10: about $2.70 by the time the ratings were recorded, 180k of 1M context. Board published 12:44; the owner rated all 60 ideas by 13:12 and said "done"; ratings read back and recorded the same afternoon.
+- **Went well:** reusing the first board's look, votes, notes and saved state (one shared document, written as the owner goes) meant the owner rated sixty ideas in under half an hour with nothing to relearn. An order view for loved and liked ideas gave the roadmap its order straight from the board.
+- **Lessons:**
+  - One idea on the board, Fast track, was already in the game ("already have it"). A search for `fast.?track` missed `'Fast track lane'` because of the space. → No change to the playbooks: when checking whether an idea is built, search `UPG` names in `01-constants.js` for each word of the idea, not a joined pattern.
+  - The PR tool added a "Generated by" footer to the description, and the Description check caught it within ten seconds; editing the description cleared it without a push. The check did its job.
 
 ## Game logic ideas · 27 Sep 2026
 

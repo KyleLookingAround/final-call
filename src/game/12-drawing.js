@@ -28,12 +28,7 @@ function drawStandApron(i){
     mono(STAND[i].lvl>G.level?`Needs ${LEVELS[STAND[i].lvl].name}`:'For sale · '+money(STAND[i].cost),lx,ly+20,'#56606A',11,'center');
     return;
   }
-  ctx.save();standCtx(i);
-  ctx.strokeStyle='rgba(255,199,44,.4)';ctx.lineWidth=2;ctx.setLineDash([10,8]);ctx.beginPath();ctx.moveTo(0,ay+ah);ctx.lineTo(0,FACE_Y+16);ctx.stroke();ctx.setLineDash([]);
-  const bar=FACE_Y+16;ctx.strokeStyle='rgba(255,199,44,.5)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-26,bar);ctx.lineTo(26,bar);ctx.stroke();
-  ctx.restore();
-  ctx.font='800 26px "Saira Condensed","Arial Narrow",sans-serif';ctx.fillStyle='rgba(255,199,44,.16)';ctx.textBaseline='alphabetic';
-  toW(i,112,ay+ah-24);ctx.textAlign='center';ctx.fillText(GATES[i],WP.x,WP.y+9);
+  // a built stand's paint (lead-in, stop bar, safety lines, number) is on the apron layer: 51-markings.js
   if(S.out)drawPlane(S.out.F,i,S.out.offY,false,S.out.alpha);
   const F=S.F;if(F&&F.plane.state!=='wait'&&F.plane.state!=='approach')drawPlane(F,i,F.plane.offY,F.plane.state==='inbound',F.plane.alpha??1);
 }
@@ -139,11 +134,7 @@ function drawAirfield(d){
       if(r===1&&isBuilding('up:runway2')){hatch(20,y-h/2,W-40,h,bprog('up:runway2'),'BUILDING RUNWAY');continue}
       ctx.strokeStyle='#2B3238';ctx.lineWidth=1.5;ctx.setLineDash([6,6]);ctx.strokeRect(20,y-h/2,W-40,h);ctx.setLineDash([]);mono('SECOND RUNWAY · FOR SALE',W/2,y+4,'#4A535D',10,'center');continue}
     ctx.fillStyle='#0B0E11';ctx.fillRect(20,y-h/2,W-40,h);
-    ctx.strokeStyle='rgba(236,232,223,.45)';ctx.lineWidth=1.5;ctx.setLineDash([16,14]);ctx.beginPath();ctx.moveTo(90,y);ctx.lineTo(W-90,y);ctx.stroke();ctx.setLineDash([]);
-    ctx.fillStyle='rgba(236,232,223,.55)';for(let k=0;k<5;k++){const yy=y-h/2+4+k*(h-8)/4.5;ctx.fillRect(26,yy,18,2);ctx.fillRect(W-44,yy,18,2)}
-    ctx.font='800 13px "Saira Condensed","Arial Narrow",sans-serif';ctx.fillStyle='rgba(236,232,223,.4)';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText(G.lv.runway2?(r?'09R':'09L'):'09',62,y+1);ctx.fillText(G.lv.runway2?(r?'27L':'27R'):'27',W-62,y+1);
-    if(d>0){ctx.fillStyle=`rgba(255,236,190,${0.35+d})`;for(let x=24;x<W-20;x+=40){ctx.fillRect(x,y-h/2-1,2,2);ctx.fillRect(x,y+h/2-1,2,2)}}
+    rwyMarks(y,h,r); // its markings, and its edge lights by night: 51-markings.js
     if(R.fx.snow>G.clock){ctx.fillStyle='rgba(236,240,245,.12)';ctx.fillRect(20,y-h/2,W-40,h)}
   }
   // tower, fire station, fuel farm, solar farm
@@ -193,14 +184,13 @@ function draw(){
   ctx.fillStyle='#14171B';ctx.fillRect(0,Y0,W,Y1-Y0);
   const d=V.d;drawAirfield(d);layer('airfield');
   ctx.strokeStyle='#1A1E23';ctx.lineWidth=1;ctx.beginPath();for(let x=0;x<=W;x+=50){ctx.moveTo(x+.5,AF_Y+32);ctx.lineTo(x+.5,TERM_Y)}for(let y=AF_Y+50;y<TERM_Y;y+=50){ctx.moveTo(0,y+.5);ctx.lineTo(W,y+.5)}ctx.stroke();
-  ctx.fillStyle='#101316';ctx.fillRect(0,AF_Y,W,32);ctx.strokeStyle='rgba(255,199,44,.55)';ctx.lineWidth=1.5;ctx.setLineDash([12,10]);ctx.beginPath();ctx.moveTo(0,AF_Y+16);ctx.lineTo(W,AF_Y+16);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#101316';ctx.fillRect(0,AF_Y,W,32); // its centre line and edge lights: 51-markings.js
   drawPlanApron();layer('apron');
   for(const i of SIDX){const b=standBox(i);if(b[0]+b[2]<vx0||b[0]>vx1)continue;drawStandApron(i)}
   layer('stands');
   for(const i of SIDX)drawBridge(i);
   layer('bridges');
   lightPass();layer('lit');
-  if(R.fx.snow>G.clock){ctx.fillStyle='rgba(230,236,244,.05)';ctx.fillRect(0,Y0,W,TERM_Y-Y0);ctx.fillStyle='rgba(240,244,250,.6)';const t=performance.now()/1000;for(let k=0;k<160;k++){const x=(k*157.3+t*20*(1+(k%3)))%W,y=Y0+((k*97.1+t*40*(1+(k%4)*0.3))%(TERM_Y-Y0));ctx.fillRect(x,y,1.6,1.6)}}
   drawTerminal(D);drawPlanOver();drawLinks();
   if(pol('ads')){ctx.fillStyle='#E5484D';for(let x=60;x<W-100;x+=560){ctx.fillRect(x,TERM_Y-3,220,10);ctx.font='800 9px "Saira Condensed",sans-serif';ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('FIZZCO · FIZZCO · FIZZCO',x+110,TERM_Y+2.5);ctx.fillStyle='#E5484D'}}
   layer('terminal');
@@ -214,9 +204,6 @@ function draw(){
   w=sign(16,SEC_LINE+4,'SECURITY');mono(`${R.secQ.length+R.ftQ.length} · ~${Math.round(secWait)} min`,16+w+5,SEC_LINE+13,secWait>12?'#FF7A8A':'#909AA4',9);
   const arW=R.arrQ.length*D.passT/(D.officers+D.egates*1.6);w=sign(708,SEC_Y+4,'PASSPORTS');mono(`${R.arrQ.length} waiting · ~${Math.round(arW)} min`,708+w+5,SEC_Y+13,arW>12?'#FF7A8A':'#909AA4',9);
   layer('signs');
-  drawFog(0,Y0,W,TERM_Y-Y0+120,0.3);
-  if(R.fx.rain>G.clock){const tt=performance.now()/1000,st=R.fx.storm>G.clock;ctx.fillStyle=`rgba(20,30,50,${st?0.22:0.1})`;ctx.fillRect(0,Y0,W,Y1-Y0);ctx.strokeStyle='rgba(170,195,225,.35)';ctx.lineWidth=1;ctx.beginPath();for(let i=0;i<220;i++){const px=(i*97.3+tt*60)%W,py=Y0+((i*53.1+tt*260)%(Y1-Y0));ctx.moveTo(px,py);ctx.lineTo(px-4,py+12)}ctx.stroke();
-    if(st&&Math.sin(tt*3.1)>0.992){ctx.fillStyle='rgba(255,250,230,.25)';ctx.fillRect(0,Y0,W,Y1-Y0)}if(st)sign(W/2-80,AF_Y-12,'STORM · RUNWAY CLOSED','#FFC72C')}
   if(R.fx.strike>G.clock){const tt=performance.now()/300;for(let k=0;k<9;k++){const px=320+k*20,py=740+Math.sin(tt+k)*1.5;ctx.fillStyle='#ECE8DF';ctx.beginPath();ctx.arc(px,py,2.6,0,Math.PI*2);ctx.fill();ctx.fillStyle='#E5484D';ctx.fillRect(px-5,py-14+Math.sin(tt*1.3+k),10,6);ctx.fillStyle='#8C97A1';ctx.fillRect(px-0.4,py-8,0.8,6)}sign(320,712,'ON STRIKE','#E5484D','#fff')}
   layer('weather');
   for(const f of R.floaters){
