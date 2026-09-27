@@ -1,13 +1,22 @@
 /* ================= state ================= */
-const DEFAULT=()=>({cash:25,rep:60,flown:0,flights:0,ontime:0,streak:0,bestStreak:0,earned:0,paxSeated:0,level:0,pierB:false,builds:[],day:1,dstat:null,lastDay:null,
-  lv:Object.fromEntries(Object.keys(UPG).map(k=>[k,0])),
-  methods:{random:true},
-  layout:'classic',lounges:false,stands:[...Array(NG).keys()].map(i=>({built:i===0,ac:i===0?0:null,method:'random',rear:false,route:'mixed'})),
-  open:{desks:null,lanes:null,officers:null},auto:true,wageMul:1,loan:0,gstats:[...Array(NG)].map(()=>[]),
-  fleet:[{type:0,st:'base',readyAt:0,wear:0}],shops:Array(NU).fill(null),
-  fare:1,name:'Northwind',livery:0,clock:360,flightNo:101,history:[],best:{},reports:Array(NG).fill(null),
-  sound:true,tab:'stands',goal:0,lines:{},infra:{},tod:{},stn:{},lineSeq:0,goalV:2,dev:{},pop:{},evq:[],evDone:0,revBy:{transit:0,transitOps:0,region:0,wages:0,upkeep:0,interest:0,assets:0,fares:0,inbound:0,landside:0,cargo:0,bags:0,shops:0,fast:0,priority:0,bonus:0,costs:0},hours:[],arrReports:Array(NG).fill(null),
-  savedAt:0,rate:0,lastDest:'',tech:{},pts:0,ptBought:0,pv:2,gdone:{},routes:{DUB:{f:1},EDI:{f:1},AMS:{f:1}},rs:{},crews:[{free:0,back:0,duty:0,res:0},{free:0,back:0,duty:0,res:0}],tour:{s:0},nv3:1,set:{tips:true,msgs:'all',pops:'all',goal:true,badges:true,recs:true,autoLines:true,autoFares:true,autoCrews:true,autoDuty:true,chal:true,sndAnn:'on',sndVoice:true,sndAmb:true,sndFx:true,lvlCard:true}});
+// every saved field of G → () => its default: one list for new games (DEFAULT) and for older saves without the field
+// (resetAll, 22-save.js). The terminal's parts add theirs from their own files, as TERM_FIELDS (42-terminal.js).
+const FIELDS={
+  cash:()=>25,rep:()=>60,flown:()=>0,flights:()=>0,ontime:()=>0,streak:()=>0,bestStreak:()=>0,earned:()=>0,paxSeated:()=>0,level:()=>0,pierB:()=>false,
+  builds:()=>[],day:()=>1,dstat:()=>null,lastDay:()=>null,lv:()=>Object.fromEntries(Object.keys(UPG).map(k=>[k,0])),methods:()=>({random:true}),
+  layout:()=>'classic',lounges:()=>false,
+  stands:()=>[...Array(NG).keys()].map(i=>({built:i===0,ac:i===0?0:null,method:'random',rear:false,route:'mixed'})),
+  open:()=>({desks:null,lanes:null,officers:null}),auto:()=>true,wageMul:()=>1,loan:()=>0,gstats:()=>[...Array(NG)].map(()=>[]),
+  fleet:()=>[{type:0,st:'base',readyAt:0,wear:0}],shops:()=>Array(NU).fill(null),fare:()=>1,name:()=>'Northwind',livery:()=>0,clock:()=>360,
+  flightNo:()=>101,history:()=>[],best:()=>({}),reports:()=>Array(NG).fill(null),sound:()=>true,tab:()=>'stands',goal:()=>0,lines:()=>({}),
+  infra:()=>({}),tod:()=>({}),stn:()=>({}),lineSeq:()=>0,goalV:()=>2,dev:()=>({}),pop:()=>({}),evq:()=>[],evDone:()=>0,
+  revBy:()=>({transit:0,transitOps:0,region:0,wages:0,upkeep:0,interest:0,assets:0,fares:0,inbound:0,landside:0,cargo:0,bags:0,shops:0,fast:0,priority:0,bonus:0,costs:0}),
+  hours:()=>[],arrReports:()=>Array(NG).fill(null),savedAt:()=>0,rate:()=>0,lastDest:()=>'',tech:()=>({}),pts:()=>0,ptBought:()=>0,pv:()=>2,
+  gdone:()=>({}),routes:()=>({DUB:{f:1},EDI:{f:1},AMS:{f:1}}),rs:()=>({}),crews:()=>[{free:0,back:0,duty:0,res:0},{free:0,back:0,duty:0,res:0}],
+  tour:()=>({s:0}),nv3:()=>1,
+  set:()=>({tips:true,msgs:'all',pops:'all',goal:true,badges:true,recs:true,autoLines:true,autoFares:true,autoCrews:true,autoDuty:true,chal:true,sndAnn:'on',sndVoice:true,sndAmb:true,sndFx:true,lvlCard:true}),
+};
+const DEFAULT=()=>{const s={};for(const k in FIELDS)s[k]=FIELDS[k]();return s};
 const SET=()=>G.set||{};
 let G=DEFAULT();
 const mkStandRT=()=>({F:null,out:null,bridge:[[],[]],aisle:[[],[],[],[]],dAisle:[[],[],[],[]],dBridge:[[],[]],scanT:[0,0],spots:new Array(80).fill(null),ext:0,geo:null,P:null});
