@@ -17,7 +17,8 @@
 //   perf     how fast a level 9 airport simulates (against a calibration run, so machines compare), and how
 //            much of a phone's CPU the game uses at 8x with the CPU slowed 4x
 //   ...      and a group for each file in tools/checks/, named after it (terminal: the halls and the way through them)
-// Every page is seeded (window.__seed), so a failure repeats when you run it again.
+// Every page is seeded (window.__seed), so a failure repeats when you run it again. Checks written before their code are
+// listed in tools/checks/pending.txt: they print PEND while they fail, and fail once they pass until their line comes out.
 // Exit code 1 if anything fails. Screenshots of failures go to build/check/.
 import {chromium} from 'playwright';
 import {readFileSync,readdirSync,mkdirSync,statSync} from 'node:fs';
@@ -29,7 +30,16 @@ mkdirSync(out,{recursive:true});
 const only=process.argv[2];
 const exe=process.env.CHROMIUM_PATH;
 const browser=await chromium.launch(exe?{executablePath:exe}:{});
-const results=[];const ok=(name,pass,info)=>{results.push([name,pass]);console.log(`${pass?'PASS':'FAIL'}  ${name}${info?'  '+info:''}`)};
+// pending checks (tools/checks/pending.txt): written before the code they test. One per line, a check's full name or a group
+// and '*' ("floors: *"); '#' starts a comment. A failing pending check prints PEND and isn't counted as a failure; one that
+// passes fails, so the part that makes it pass takes its line out and switches it on
+const PENDING=readFileSync(join(root,'tools/checks/pending.txt'),'utf8').split('\n').map(l=>l.replace(/#.*/,'').trim()).filter(Boolean);
+const groupOf=name=>name.split(':')[0].trim(),seenPend=new Set();
+const pending=name=>{const hit=PENDING.find(l=>l===name||l===groupOf(name)+': *');if(hit)seenPend.add(hit);return !!hit};
+const results=[];const ok=(name,pass,info)=>{
+  if(pending(name)){if(pass){results.push([name,false]);console.log(`FAIL  ${name}  pending, but passes: switch it on (take its line out of tools/checks/pending.txt)${info?'  '+info:''}`)}
+    else{results.push([name,true,'pend']);console.log(`PEND  ${name}${info?'  '+info:''}`)}return}
+  results.push([name,pass]);console.log(`${pass?'PASS':'FAIL'}  ${name}${info?'  '+info:''}`)};
 const ignorable=m=>/fonts\.(googleapis|gstatic)|ERR_TUNNEL|ERR_NAME_NOT_RESOLVED|net::/.test(m);
 
 // seed: the game's random seed; still: no frame loop, so only the check moves the game on
@@ -113,6 +123,9 @@ if(!only||only==='rules'){
       const built=S.G.lounges;S.G.lounges=false;S.G.cash=cash;S.switchLayout('classic');
       t('rules: mobile lounges keep remote boarding quick in rain, and are built as a project',bus<lounge&&bought&&built,`in rain: buses ${bus}, lounges ${lounge}`)}
     {const v=S.UPDATES.map(u=>u.v);t('rules: What\'s new versions run newest first and match the history',v.every((x,i)=>i===0||x<v[i-1])&&v[0]===HIST_TOP,`newest ${v[0]}, history ${HIST_TOP}`)}
+    {// the sim hook reads live values: a let the game reassigns is exposed through a getter, not copied once at load
+      const a=S.AF_Y,top=S.LAYOUTS.mid.top;S.applyLayout('mid');const mid=S.AF_Y;const fl=S.R.floor;S.R.floor='roof';S.draw();const roof=S.ROOF,rooms=S.ROOMS;S.R.floor=fl;S.applyLayout(S.G.layout);
+      t('rules: the sim hook reads live values (AF_Y after a layout change, ROOF after a frame on the roof)',mid===top&&a!==mid&&roof!=null&&rooms!=null,`AF_Y ${a} → ${mid} (Midfield's top ${top}), ROOF ${roof?'set':'null'}`)}
     {const s1=JSON.stringify(S.G);S.resetAll(JSON.parse(s1));const g2=S.G,g1=JSON.parse(s1);
       bad=Object.keys(g1).filter(k=>k!=='savedAt'&&JSON.stringify(g1[k])!==JSON.stringify(g2[k])); // savedAt is when it was last saved
       t('rules: loading a save twice changes nothing',!bad.length,few(bad))}
@@ -363,9 +376,13 @@ if(!only||only==='share'){
 }
 // more groups, one file each in tools/checks/ (a group is named after its file): each exports a default async function
 // that gets the helpers above and reports through ok(name, pass, info)
+// A group that throws (a pending group whose code doesn't exist yet) reports one line for the whole group
 for(const f of readdirSync(join(root,'tools/checks')).filter(f=>f.endsWith('.mjs')).sort()){const g=f.slice(0,-4);
-  if(!only||only===g)await (await import(pathToFileURL(join(root,'tools/checks',f)).href)).default({open,ok,saveText,saves,newest,browser,root,out});}
+  if(!only||only===g)try{await (await import(pathToFileURL(join(root,'tools/checks',f)).href)).default({open,ok,saveText,saves,newest,browser,root,out})}
+    catch(e){const msg=String(e&&e.message||e).split('\n')[0].slice(0,200);ok(`${g}: *`,false,'the group stopped: '+msg)}}
 await browser.close();
-const failed=results.filter(r=>!r[1]).length;
-console.log(`\n${results.length-failed}/${results.length} passed`);
+// on a full run, every line in pending.txt must name a check that ran, so a renamed check can't sit there unnoticed
+if(!only)for(const l of PENDING)if(!seenPend.has(l)){results.push([l,false]);console.log(`FAIL  ${l}  is listed in tools/checks/pending.txt, but no check has that name`)}
+const pend=results.filter(r=>r[2]==='pend').length,failed=results.filter(r=>!r[1]).length;
+console.log(`\n${results.length-failed-pend}/${results.length-pend} passed${pend?`, ${pend} pending`:''}`);
 process.exit(failed?1:0);

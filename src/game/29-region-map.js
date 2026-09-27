@@ -40,13 +40,16 @@ function drawRegion(){
   for(const pid in PLACES){const pl=PLACES[pid];if(pl.kind==='air'||pl.kind==='far')continue;const rr=(pl.kind==='city'?110:pl.kind==='town'?45:26)*Math.sqrt(clamp(placePop(pid)/pl.pop,1,2.2));
     ctx.strokeStyle='#22282E';ctx.lineWidth=Math.max(1.2,minW);for(let a=0;a<(pl.kind==='city'?10:5);a++){const an=a*Math.PI*2/(pl.kind==='city'?10:5)+pl.x*0.01;ctx.beginPath();ctx.moveTo(pl.x,pl.y);ctx.lineTo(pl.x+Math.cos(an)*rr,pl.y+Math.sin(an)*rr*0.8);ctx.stroke()}
     if(pl.kind==='city'){for(const r2 of [40,80]){ctx.beginPath();ctx.ellipse(pl.x,pl.y,r2,r2*0.8,0,0,Math.PI*2);ctx.stroke()}}}
-  const B=regionBlocks();
+  const B=regionBlocks(),lit=[]; // lit windows, kept to draw over the night tint so they shine rather than dim with it
   for(const pid in B){const pl=PLACES[pid],n=Math.round(B[pid].length*clamp(placePop(pid)/(pl.pop*2.2),0,1)*(pl.kind==='city'?2:1));
     for(let i=0;i<Math.min(n,B[pid].length);i++){const b=B[pid][i];ctx.fillStyle=b.r<40&&pl.kind==='city'?'#48515A':b.s<0.3?'#3A424B':'#323940';ctx.fillRect(b.x,b.y,b.w,b.h);
-      if(dk>0.1&&b.lit<0.55){ctx.fillStyle=`rgba(255,214,140,${0.55*dk*2})`;ctx.fillRect(b.x+b.w*0.3,b.y+b.h*0.3,Math.max(1,b.w*0.25),Math.max(1,b.h*0.25))}}}
-  {const SB=stationBlocks();for(const n in SB){const c=Math.round(SB[n].length*clamp((G.tod&&G.tod[n])||0,0,1));for(let i=0;i<c;i++){const b=SB[n][i];ctx.fillStyle=b.s<0.4?'#525C66':'#444D56';ctx.fillRect(b.x,b.y,b.w,b.h);if(dk>0.1&&b.lit<0.7){ctx.fillStyle=`rgba(255,220,160,${0.6*dk*2})`;ctx.fillRect(b.x+b.w*0.25,b.y+b.h*0.25,Math.max(1,b.w*0.3),Math.max(1,b.h*0.3))}}}}
+      if(dk>0.1&&b.lit<0.55)lit.push(b.x+b.w*0.3,b.y+b.h*0.3,Math.max(1,b.w*0.25),Math.max(1,b.h*0.25))}}
+  {const SB=stationBlocks();for(const n in SB){const c=Math.round(SB[n].length*clamp((G.tod&&G.tod[n])||0,0,1));for(let i=0;i<c;i++){const b=SB[n][i];ctx.fillStyle=b.s<0.4?'#525C66':'#444D56';ctx.fillRect(b.x,b.y,b.w,b.h);if(dk>0.1&&b.lit<0.7)lit.push(b.x+b.w*0.25,b.y+b.h*0.25,Math.max(1,b.w*0.3),Math.max(1,b.h*0.3))}}}
   // development sites
   for(const P of PLOTS)if(plotOpen(P))drawPlot(P,t,k);
+  // night falls on the land, under the network and labels so they stay readable; windows shine over it
+  if(dk>0){ctx.fillStyle=`rgba(4,8,22,${dk*1.2})`;ctx.fillRect(0,0,RW,RH);
+    ctx.fillStyle=`rgba(255,214,140,${Math.min(1,dk*1.8)})`;for(let i=0;i<lit.length;i+=4)ctx.fillRect(lit[i],lit[i+1],lit[i+2],lit[i+3])}
   // the network: airport, track, lines
   drawRegionAirport(t,k);drawInfra(k);drawBuilds(t,k);drawNetLines(t,k);
   // stops, places and labels
@@ -60,8 +63,6 @@ function drawRegion(){
     if(dtm<240&&dtm>-210){const pulse=(Math.sin(t*3)+1)/2;ctx.strokeStyle=`rgba(255,199,44,${0.4+0.4*pulse})`;ctx.lineWidth=Math.max(2,2*minW);ctx.beginPath();ctx.arc(P.x,P.y,26+pulse*6,0,Math.PI*2);ctx.stroke();
       lblBg(`${EVT[e.type].label.toUpperCase()} · ${hhmm(e.at)} · ${num(e.att)}`,P.x,P.y+40,'#FFC72C',10);
       const n=Math.min(40,Math.round(e.att/1000));for(let i=0;i<n;i++){const a=i*2.4+t*0.3,r=16+(i%5)*3;ctx.fillStyle=i%3?'#ECE8DF':'#FFC72C';ctx.fillRect(P.x+Math.cos(a)*r,P.y+Math.sin(a)*r,1.8,1.8)}}}
-  if(dk>0){ctx.fillStyle=`rgba(4,8,22,${dk*0.55})`;ctx.fillRect(0,0,RW,RH)}
-  // vehicles on top of the night tint so they stay visible
   drawNetVehicles(k);drawStations(t,k);drawDraft(t,k);
   drawRegionLive(t,k);drawSky(k);drawLowmere(t,k);drawWeatherCells(k);
   if(pol('ads'))lblBg('FIZZCO',910,562,'#FF7A8A',11);
