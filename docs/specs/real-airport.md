@@ -71,7 +71,7 @@ One run varies by about ±0.05×, so a part measures its cost as the median of t
    - apron markings and lighting (`docs/briefs/real-airport-markings.md`);
    - better planes (`docs/briefs/real-airport-planes.md`);
    - roofs (`docs/briefs/real-airport-roofs.md`).
-3. **Second batch, two parts**, once the first has merged: weather you can see (`docs/briefs/real-airport-weather.md`) and vehicles on the apron (`docs/briefs/real-airport-vehicles.md`). Both at the cheaper model (experiment [C]).
+3. **Second batch, two parts:** weather you can see (`docs/briefs/real-airport-weather.md`) and vehicles on the apron (`docs/briefs/real-airport-vehicles.md`). Both at the cheaper model (experiment [C]). The owner chose on 27 Sep 2026 to run this batch alongside the first instead of after it merges.
 4. **Bring it together** in one last PR: screenshots of every layout by day and night, the What's new entry and version, link previews (`npm run preview`), `docs/SYSTEMS.md`, and the speed of all five parts together against the budget.
 
 ## Files
