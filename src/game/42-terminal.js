@@ -60,3 +60,36 @@ function drawTerminalHalls(D){
   mono('BAGGAGE HALL',(bx0+bx1)/2,540,'#56606A',8.5,'center');
   for(const r of TERM_ROOMS)if(r.name&&!r.sign&&roomOn(r)){const [x0,y0]=r.poly[0];mono(r.name,x0+8,y0+10,'#56606A',8.5)}
 }
+
+function drawTerminal(D){
+  drawRooms();drawTerminalHalls(D);
+  const ciW=R.ciQ.length*D.checkin/(D.desks+D.kiosks*0.6),seW=R.secQ.length*D.sec/D.lanes,tint=w=>w>15?'rgba(255,122,138,.11)':w>8?'rgba(255,199,44,.07)':null;
+  let tc=tint(ciW);if(tc){ctx.fillStyle=tc;ctx.fillRect(8,680,552,LAND_B-680)}
+  tc=tint(seW);if(tc){ctx.fillStyle=tc;ctx.fillRect(8,SEC_LINE,552,80)}
+  tc=tint(R.arrQ.length*D.passT/(D.officers+D.egates*1.6));if(tc){ctx.fillStyle=tc;ctx.fillRect(700,SEC_Y,540,SEC_LINE-SEC_Y)}
+  ctx.fillStyle='#101316';ctx.fillRect(0,LAND_B+2,W,H-LAND_B-2);
+  for(const i of SIDX){
+    if(!standOpen(i))continue;
+    ctx.fillStyle=G.stands[i].built?'#252C33':'#1F242A';
+    for(let j=0;j<80;j++){const s=spotPos(i,j);ctx.fillRect(s.x-3,s.y-3,6,6)}
+  }
+  if(G.lv.mover&&G.pierB&&LAY.track){ctx.strokeStyle='#2A3037';ctx.lineWidth=3;ctx.beginPath();LAY.track.forEach(([x,y],k)=>k?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke()} // its cars: drawPax
+  // bags on the belt behind the check-in desks (check-in and security draw themselves: 43-departures.js)
+  ctx.fillStyle='#D9A066';for(const b of R.belt)ctx.fillRect(b.x-2,684.5,4,4);
+  ctx.fillStyle='#FFC72C';for(const i of SIDX)if(G.stands[i].built){const F=R.st[i].F;
+    const bg=busGate(i);if(bg){ctx.fillRect(bg[0]-2.5,bg[1]+bg[2]*4-2.5,5,5)}
+    else{faceW(i,-118,FACE_Y-6);ctx.fillRect(WP.x-2.5,WP.y-2.5,5,5);if(F&&F.rear){faceW(i,-150,FACE_Y-6);ctx.fillRect(WP.x-2.5,WP.y-2.5,5,5)}}}
+  for(const f of TERM_DRAW)f(D);
+}
+// FIZZCO banners along the terminal's apron wall while advertising is on (Office › Policies)
+function drawAds(){if(!pol('ads'))return;ctx.fillStyle='#E5484D';for(let x=60;x<W-100;x+=560){ctx.fillRect(x,TERM_Y-3,220,10);ctx.font='800 9px "Saira Condensed",sans-serif';ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('FIZZCO · FIZZCO · FIZZCO',x+110,TERM_Y+2.5);ctx.fillStyle='#E5484D'}}
+// each queue's length and wait, signed in its hall; the doors in and out on the forecourt
+function drawQueueSigns(D){
+  const ciWait=R.ciQ.length*D.checkin/(D.desks+D.kiosks*0.6),secWait=R.secQ.length*D.sec/D.lanes;
+  sign(190,LAND_B+6,'ENTRANCE ↑');sign(946,LAND_B+6,'EXIT ↓');
+  let w=sign(16,LAND_B+6,'CHECK-IN');mono(`${R.ciQ.length} · ~${Math.round(ciWait)} min`,16+w+5,LAND_B+15,ciWait>12?'#FF7A8A':'#909AA4',9);
+  w=sign(16,SEC_LINE+4,'SECURITY');mono(`${R.secQ.length+R.ftQ.length} · ~${Math.round(secWait)} min`,16+w+5,SEC_LINE+13,secWait>12?'#FF7A8A':'#909AA4',9);
+  const arW=R.arrQ.length*D.passT/(D.officers+D.egates*1.6);w=sign(708,SEC_Y+4,'PASSPORTS');mono(`${R.arrQ.length} waiting · ~${Math.round(arW)} min`,708+w+5,SEC_Y+13,arW>12?'#FF7A8A':'#909AA4',9);
+}
+LAYER.terminal.push(V=>drawTerminal(V.D),drawPlanOver,drawLinks,drawAds); // the layout's escalator tubes, tent roof and links: 40-layout-drawing.js
+LAYER.signs.push(V=>drawQueueSigns(V.D));

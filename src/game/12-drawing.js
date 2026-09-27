@@ -51,26 +51,6 @@ function drawBridge(i){
   if(F&&F.rear){ctx.strokeStyle='#56616B';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);ctx.beginPath();F.P.rear.pts.forEach((p,k)=>k?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke();ctx.setLineDash([])}
   // the baggage cart is drawn with the rest of the turnaround's vehicles: 55-vehicles.js
 }
-function drawTerminal(D){
-  drawRooms();drawTerminalHalls(D);
-  const ciW=R.ciQ.length*D.checkin/(D.desks+D.kiosks*0.6),seW=R.secQ.length*D.sec/D.lanes,tint=w=>w>15?'rgba(255,122,138,.11)':w>8?'rgba(255,199,44,.07)':null;
-  let tc=tint(ciW);if(tc){ctx.fillStyle=tc;ctx.fillRect(8,680,552,LAND_B-680)}
-  tc=tint(seW);if(tc){ctx.fillStyle=tc;ctx.fillRect(8,SEC_LINE,552,80)}
-  tc=tint(R.arrQ.length*D.passT/(D.officers+D.egates*1.6));if(tc){ctx.fillStyle=tc;ctx.fillRect(700,SEC_Y,540,SEC_LINE-SEC_Y)}
-  ctx.fillStyle='#101316';ctx.fillRect(0,LAND_B+2,W,H-LAND_B-2);
-  for(const i of SIDX){
-    if(!standOpen(i))continue;
-    ctx.fillStyle=G.stands[i].built?'#252C33':'#1F242A';
-    for(let j=0;j<80;j++){const s=spotPos(i,j);ctx.fillRect(s.x-3,s.y-3,6,6)}
-  }
-  if(G.lv.mover&&G.pierB&&LAY.track){ctx.strokeStyle='#2A3037';ctx.lineWidth=3;ctx.beginPath();LAY.track.forEach(([x,y],k)=>k?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke()} // its cars: drawPax
-  // bags on the belt behind the check-in desks (check-in and security draw themselves: 43-departures.js)
-  ctx.fillStyle='#D9A066';for(const b of R.belt)ctx.fillRect(b.x-2,684.5,4,4);
-  ctx.fillStyle='#FFC72C';for(const i of SIDX)if(G.stands[i].built){const F=R.st[i].F;
-    const bg=busGate(i);if(bg){ctx.fillRect(bg[0]-2.5,bg[1]+bg[2]*4-2.5,5,5)}
-    else{faceW(i,-118,FACE_Y-6);ctx.fillRect(WP.x-2.5,WP.y-2.5,5,5);if(F&&F.rear){faceW(i,-150,FACE_Y-6);ctx.fillRect(WP.x-2.5,WP.y-2.5,5,5)}}}
-  for(const f of TERM_DRAW)f(D);
-}
 function paxColor(p){
   if(LAND_ST.has(p.state))return p.fast||p.biz?'#F5D08A':LAND_C;
   return GROUPC[groupOf(p)];
@@ -183,67 +163,20 @@ function drawAirfield(d){
   mono(`RUNWAY · ${arrs.length} holding to land · ${deps.length} waiting to take off`,30,Y0+19,R.rwy.q.length>=3?'#FF7A8A':'#909AA4',9.5);
   ctx.restore();
 }
-function drawLandside(D){ // outside: the road, station and stops sit LAND_DY lower than they were drawn before the halls
-  ctx.fillStyle='#15191D';ctx.fillRect(0,H,W,Y1-H);
-  ctx.save();ctx.translate(0,LAND_DY);
-  ctx.fillStyle='#0F1215';ctx.fillRect(0,642,W,22);ctx.strokeStyle='rgba(236,232,223,.25)';ctx.lineWidth=1;ctx.setLineDash([10,10]);ctx.beginPath();ctx.moveTo(0,653);ctx.lineTo(W,653);ctx.stroke();ctx.setLineDash([]);
-  if(G.lv.rail){
-    ctx.fillStyle='#262C33';ctx.fillRect(16,696,300,16);ctx.fillStyle='#FFC72C';ctx.fillRect(16,711,300,1.5);
-    ctx.strokeStyle='#4A545E';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(0,722);ctx.lineTo(318,722);ctx.moveTo(0,734);ctx.lineTo(318,734);ctx.stroke();
-    ctx.fillStyle='#2F363E';for(let x=4;x<318;x+=9)ctx.fillRect(x,720,3,16);ctx.fillStyle='#7A3A42';ctx.fillRect(316,718,5,20);
-    const T=R.train;if(T.x!=null){const nc=T.cars||3,cw=Math.min(88,300/nc);for(let c=0;c<nc;c++){ctx.fillStyle=T.col||'#3E6A8C';rrect(T.x+c*cw,720,cw-4,16,T.nose&&c===nc-1?8:3);ctx.fill();ctx.fillStyle='#A9D2F0';for(let w=0;w<Math.floor((cw-12)/12);w++)ctx.fillRect(T.x+c*cw+8+w*12,724,6,4)}}
-    sign(16,676,'RAILWAY STATION');mono(!vehFreq('train')&&T.state==='away'?'no trains running · build a rail line on the Region tab':T.state==='away'?`next train ${Math.ceil(T.t)} min · ${R.platform.length} aboard`:'train in',110,686,'#909AA4',9);
-  } else if(isBuilding('up:rail'))hatch(16,676,302,86,bprog('up:rail'),'BUILDING STATION');
-  else {ctx.strokeStyle='#2B3238';ctx.lineWidth=1.5;ctx.setLineDash([6,6]);ctx.strokeRect(16,676,302,86);ctx.setLineDash([]);mono('RAILWAY STATION · FOR SALE',167,724,'#4A535D',10,'center')}
-  drawStopVehicles();
-  ctx.restore();
-  const cap=carCap();let occ=0;
-  for(let b=0;b<cap;b++){const q=BAY(b);ctx.strokeStyle='#262C32';ctx.lineWidth=1;ctx.strokeRect(q.x-4.5+.5,q.y-7+.5,9,14);
-    if(R.lot[b]>G.clock){occ++;ctx.fillStyle=['#6E7883','#8C97A1','#5C6670','#A7A296','#4F6478'][b%5];rrect(q.x-3.5,q.y-6,7,12,2);ctx.fill()}}
-  sign(334,668+LAND_DY,'CAR PARK');mono(`${occ}/${cap} spaces`,390,678+LAND_DY,occ>=cap?'#FF7A8A':'#909AA4',9);
-}
 function darkness(){const h=(G.clock/60)%24;if(h<5||h>=21)return 0.5;if(h<7)return 0.5*(7-h)/2;if(h>=19)return 0.5*(h-19)/2;return 0}
 function draw(){
   if(R.view==='region'){drawRegion();return}
   if(R.view==='world'){drawWorld();return}
-  const D=derived(),k=R.baseK*R.cam.z,s=k*R.dpr,cam=R.cam;
-  ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='#0F1215';ctx.fillRect(0,0,cv.width,cv.height);
-  ctx.setTransform(s,0,0,s,-cam.x*s,-cam.y*s);
-  const V=sceneView(D),vx0=V.x0,vx1=V.x1; // the layers and the lighting pass: 50-scene.js
-  ctx.fillStyle='#14171B';ctx.fillRect(0,Y0,W,Y1-Y0);
-  const d=V.d;drawAirfield(d);layer('airfield');
-  ctx.strokeStyle='#1A1E23';ctx.lineWidth=1;ctx.beginPath();for(let x=0;x<=W;x+=50){ctx.moveTo(x+.5,AF_Y+32);ctx.lineTo(x+.5,TERM_Y)}for(let y=AF_Y+50;y<TERM_Y;y+=50){ctx.moveTo(0,y+.5);ctx.lineTo(W,y+.5)}ctx.stroke();
-  ctx.fillStyle='#101316';ctx.fillRect(0,AF_Y,W,32); // its centre line and edge lights: 51-markings.js
-  drawPlanApron();layer('apron');
-  for(const i of SIDX){const b=standBox(i);if(b[0]+b[2]<vx0||b[0]>vx1)continue;drawStandApron(i)}
-  layer('stands');
-  for(const i of SIDX)drawBridge(i);
-  layer('bridges');
-  lightPass();layer('lit');
-  drawTerminal(D);drawPlanOver();drawLinks();
-  if(pol('ads')){ctx.fillStyle='#E5484D';for(let x=60;x<W-100;x+=560){ctx.fillRect(x,TERM_Y-3,220,10);ctx.font='800 9px "Saira Condensed",sans-serif';ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('FIZZCO · FIZZCO · FIZZCO',x+110,TERM_Y+2.5);ctx.fillStyle='#E5484D'}}
-  layer('terminal');
-  drawLandside(D);layer('landside');
-  drawPax(vx0,vx1);layer('pax');layer('roofs');
-  for(const i of SIDX){if(G.stands[i].built)gateBadge(i)}
-  const ciWait=R.ciQ.length*D.checkin/(D.desks+D.kiosks*0.6),secWait=R.secQ.length*D.sec/D.lanes;
-  // each queue's length and wait, signed in its hall; the doors in and out on the forecourt
-  sign(190,LAND_B+6,'ENTRANCE ↑');sign(946,LAND_B+6,'EXIT ↓');
-  let w=sign(16,LAND_B+6,'CHECK-IN');mono(`${R.ciQ.length} · ~${Math.round(ciWait)} min`,16+w+5,LAND_B+15,ciWait>12?'#FF7A8A':'#909AA4',9);
-  w=sign(16,SEC_LINE+4,'SECURITY');mono(`${R.secQ.length+R.ftQ.length} · ~${Math.round(secWait)} min`,16+w+5,SEC_LINE+13,secWait>12?'#FF7A8A':'#909AA4',9);
-  const arW=R.arrQ.length*D.passT/(D.officers+D.egates*1.6);w=sign(708,SEC_Y+4,'PASSPORTS');mono(`${R.arrQ.length} waiting · ~${Math.round(arW)} min`,708+w+5,SEC_Y+13,arW>12?'#FF7A8A':'#909AA4',9);
-  layer('signs');
-  if(R.fx.strike>G.clock){const tt=performance.now()/300;for(let k=0;k<9;k++){const px=320+k*20,py=740+Math.sin(tt+k)*1.5;ctx.fillStyle='#ECE8DF';ctx.beginPath();ctx.arc(px,py,2.6,0,Math.PI*2);ctx.fill();ctx.fillStyle='#E5484D';ctx.fillRect(px-5,py-14+Math.sin(tt*1.3+k),10,6);ctx.fillStyle='#8C97A1';ctx.fillRect(px-0.4,py-8,0.8,6)}sign(320,712,'ON STRIKE','#E5484D','#fff')}
-  layer('weather');
-  for(const f of R.floaters){
-    if(f.x<vx0-60||f.x>vx1+60)continue;
-    const life=f.big?2.2:1,a=1-f.t/life;
-    ctx.globalAlpha=clamp(a*1.4,0,1);ctx.textAlign='center';ctx.textBaseline='alphabetic';
-    ctx.font=f.big?'700 15px "Saira Condensed",sans-serif':'600 9px "IBM Plex Mono",monospace';
-    const y=f.y-f.t*(f.big?10:14);
-    if(f.big){const w=ctx.measureText(f.text).width+14;ctx.fillStyle='rgba(10,12,15,.85)';rrect(f.x-w/2,y-14,w,20,3);ctx.fill()}
-    ctx.fillStyle=f.col;ctx.fillText(f.text,f.x,y);ctx.globalAlpha=1;
-  }
-  layer('top');
+  sceneView(derived());for(let j=0;j<LAYERS.length;j++)layer(LAYERS[j]); // the frame's view and the layers: 50-scene.js
 }
-
+// the ground under everything, and the airfield: runways, the tower, the fire station, fuel and solar farms
+LAYER.airfield.push(V=>{ctx.fillStyle='#14171B';ctx.fillRect(0,Y0,W,Y1-Y0);drawAirfield(V.d)});
+// the apron's grid and the taxiway along its top (its centre line and edge lights: 51-markings.js), and the layout's own
+// apron furniture (40-layout-drawing.js)
+LAYER.apron.push(()=>{
+  ctx.strokeStyle='#1A1E23';ctx.lineWidth=1;ctx.beginPath();for(let x=0;x<=W;x+=50){ctx.moveTo(x+.5,AF_Y+32);ctx.lineTo(x+.5,TERM_Y)}for(let y=AF_Y+50;y<TERM_Y;y+=50){ctx.moveTo(0,y+.5);ctx.lineTo(W,y+.5)}ctx.stroke();
+  ctx.fillStyle='#101316';ctx.fillRect(0,AF_Y,W,32);drawPlanApron()});
+LAYER.stands.push(V=>{for(const i of SIDX){const b=standBox(i);if(b[0]+b[2]<V.x0||b[0]>V.x1)continue;drawStandApron(i)}});
+LAYER.bridges.push(()=>{for(const i of SIDX)drawBridge(i)});
+LAYER.pax.push(V=>drawPax(V.x0,V.x1));
+LAYER.signs.push(()=>{for(const i of SIDX){if(G.stands[i].built)gateBadge(i)}}); // each queue's sign follows: 42-terminal.js
