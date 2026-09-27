@@ -1,6 +1,12 @@
 /* ================= WHAT'S NEW: every version's new features, shown after an update and from Settings or Help ================= */
 // Newest first. Add an entry with each release; the checks make sure the newest one matches docs/HISTORY.md.
 const UPDATES=[
+  {v:31,title:'Looks like a real airport',points:[
+    'Planes have engines in their airline’s colours, shadows on the apron, and wingtip lights and beacons at night.',
+    'Fuel and catering trucks, baggage tractors and pushback tugs work each turnaround.',
+    'Painted stands, taxi lines and runway markings. After dark, floodlights, edge lights and lit terminal windows; dawn and dusk tint the airfield.',
+    'The Roof button on the map steps up to the terminal’s roof and back down to the halls, at any zoom.',
+    'Rain leaves puddles, snow settles everywhere but the stands, fog rolls in, cloud shadows drift over, and a windsock stands by the runway.']},
   {v:30,title:'A card for each new level',points:[
     'Reaching a level opens a card with what it has just unlocked: gates, more upgrade levels, new plans and what each brings, and new places to go.',
     'Every line links straight there: the Masterplan, the Region, the World map, each upgrade and each gate.',
