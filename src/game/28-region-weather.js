@@ -27,7 +27,22 @@ function drawWeatherCells(k){
     if(k>0.3)lblBg(c.type.toUpperCase(),c.x,c.y-c.r*0.6,c.type==='storm'?'#FFC72C':'#CDD4DA',9);
   }
 }
-function news(t){(G.news||(G.news=[])).unshift({d:dayOf(G.clock),t:hhmm(G.clock),m:t});G.news.length=Math.min(G.news.length,14)}
+const NEWS_INCIDENT=/^A (signal failure|wire fault) stopped (\S+) for [\d.]+ min\.$/;
+function news(t){
+  const L=G.news||(G.news=[]),d=dayOf(G.clock),top=L[0],m=NEWS_INCIDENT.exec(t);
+  if(m&&top&&top.d===d){
+    const f=top.fold||(()=>{const p=NEWS_INCIDENT.exec(top.m);return p&&{kinds:[p[1]],codes:[p[2]]}})();
+    if(f){
+      if(!f.kinds.includes(m[1]))f.kinds.push(m[1]);
+      if(!f.codes.includes(m[2]))f.codes.push(m[2]);
+      const label=f.kinds.length>1?'Signal and wire faults':f.kinds[0]==='signal failure'?'Signal failures':'Wire faults';
+      top.fold=f;top.t=hhmm(G.clock);
+      top.m=`${label} have stopped ${f.codes.join(', ').replace(/, ([^,]*)$/,' and $1')} today.`;
+      return;
+    }
+  }
+  L.unshift({d,t:hhmm(G.clock),m:t});L.length=Math.min(L.length,14);
+}
 function regionEvent(){
   const Ls=Object.values(G.lines||{}).filter(L=>!lineDown(L));if(!Ls.length)return false;
   const sea=seasonOf(dayOf(G.clock)).name,dur=m=>G.lv.control?m/2:m,R2=R.fx.line||(R.fx.line={});
