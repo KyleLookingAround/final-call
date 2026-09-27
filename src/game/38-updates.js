@@ -1,6 +1,10 @@
 /* ================= WHAT'S NEW: every version's new features, shown after an update and from Settings or Help ================= */
 // Newest first. Add an entry with each release; the checks make sure the newest one matches docs/HISTORY.md.
 const UPDATES=[
+  {v:30,title:'A card for each new level',points:[
+    'Reaching a level opens a card with what it has just unlocked: gates, more upgrade levels, new plans and what each brings, and new places to go.',
+    'Every line links straight there: the Masterplan, the Region, the World map, each upgrade and each gate.',
+    'The game waits while it’s open. Turn it off in Office › Settings › Notifications.']},
   {v:29,title:'The airport sounds like one',points:[
     'The terminal calls your flights: boarding, gate calls, final calls and gate changes, each with a chime and its words along the foot of the board.',
     'Now and then a voice reads a final call or a gate change.',

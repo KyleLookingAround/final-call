@@ -66,7 +66,7 @@ Much of the work runs overnight. A question nobody answers costs hours, so:
 
 Worth it only when the feature has parts that can live in different files. The terminal (issue #17) was built this way; these are its lessons.
 
-1. **Groundwork first, merged.** One PR lays the shared structure the parts plug into: tables and hooks, a file per part, a check group per part. It leaves `STATE` identical on seeds 1–3. Merge it, then start every part from `main`. Parts started from the unmerged branch look conflicted everywhere once it's squash-merged (the `steward` playbook has the fix).
+1. **Groundwork first, merged.** One PR lays the shared structure the parts plug into: tables and hooks, a file per part, a check group per part. It leaves `PLAY` identical on seeds 1–3. Merge it, then start every part from `main`. Parts started from the unmerged branch look conflicted everywhere once it's squash-merged (the `steward` playbook has the fix).
 2. **Two or three at a time.** Every session draws on the same five-hour usage limit. Five parts plus the coordinator used it up within the hour, and the rest ran as overage. Start a batch just after the limit resets.
 3. **Each part's brief says:**
    - its files, the shared hooks it may add, and that its notes stay in its own bullet;

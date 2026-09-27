@@ -212,6 +212,7 @@ const SETTINGS=[
   ['pops','Map pop-ups','Money, on-time and delay labels that float over the airport and region.',[['all','All'],['big','Big only'],['off','Off']]],
   ['goal','Goal bar','The next goal, under your cash and rating.',[[true,'On'],[false,'Off']]],
   ['recs','Recommendations','Suggested lines, routes, fares and planes at the top of the Region and Routes tabs.',[[true,'On'],[false,'Off']]],
+  ['lvlCard','Level-up card','When the airport reaches a new level, a card shows what it has unlocked, with links straight there. The game waits while it’s open.',[[true,'On'],[false,'Off']]],
   ['badges','Badges','NEW labels on tabs, counts of things you can afford, and points on the Masterplan button.',[[true,'On'],[false,'Off']]],
 ];
 function settingsHTML(){
@@ -320,7 +321,7 @@ $('#panel').addEventListener('click',e=>{
   if(d.news){openNews(true,false);return}
   if(d.set){const i=d.set.indexOf(':'),k=d.set.slice(0,i);G.set[k]=JSON.parse(d.set.slice(i+1));applySettings();renderPanel();return}
   if(d.gap){try{localStorage.setItem(GAPKEY,d.gap)}catch(e){}applyGap();renderPanel();return}
-  if(d.setall){const q=d.setall==='quiet';Object.assign(G.set,q?{tips:false,msgs:'off',pops:'off',goal:false,badges:false,recs:false}:{tips:true,msgs:'all',pops:'all',goal:true,badges:true,recs:true});applySettings();renderPanel();return}
+  if(d.setall){const q=d.setall==='quiet';Object.assign(G.set,q?{tips:false,msgs:'off',pops:'off',goal:false,badges:false,recs:false,lvlCard:false}:{tips:true,msgs:'all',pops:'all',goal:true,badges:true,recs:true,lvlCard:true});applySettings();renderPanel();return}
   if(d.sound!=null){ensureAudio();G.sound=d.sound==='1';syncSound();renderPanel();save();return}
   if(d.research){if(research(d.research)){renderPanel();renderPlanBtn();save()}return}
   if(d.buypt){if(buyPoint()){renderPanel();renderPlanBtn();save()}return}
