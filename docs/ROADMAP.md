@@ -47,6 +47,7 @@ How sessions work, not the game. Each one is small, measured and recorded in `do
 
 ## Ideas (not agreed)
 
+- **Idea board, September 2026** (`docs/briefs/idea-board-2.md`): sixty ideas across every part of the game, including #57's game-logic ideas, waiting for the owner's ratings at https://claude.ai/artifact/V2P2XmKqadk6ggPQLgghE4. The results will go here and in `docs/ideas/board-2026-09.md`.
 - **Let the transport manager build.** An opt-in chip that lets it buy its top suggestion within a budget. Left out of version 27, where it only suggests.
 - **Fares that riders notice.** In the region model, dearer line fares pay on almost every line, so the manager picks premium nearly everywhere. Riders could weigh fares more, so cheap fares win flyers on airport lines.
 - **Timetables by time of day.** More services at the peaks than at midday or late evening.
