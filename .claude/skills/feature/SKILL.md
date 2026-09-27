@@ -43,13 +43,19 @@ Work through these steps in order. Small fixes (a label, a nit, an obvious bug) 
 - `docs/ROADMAP.md`: move the item along.
 - `docs/decisions/`: add a record if the change sets a rule other changes must follow.
 
-## 6. Ship
+## 6. A fresh review before opening
+
+- Before opening the PR, start one fresh reviewer that hasn't seen the work: a helper agent (`Agent`) or the `code-review` skill, at medium effort. Give it the diff against `main`, the brief and the project notes, and ask for bugs; broken rules (the owner's preferences, saved fields, `rnd()`, `R.sim`, UK English); lines outside the diff the change makes wrong (the README, code comments, the project notes, `docs/SYSTEMS.md`); and anything in the PR's title or description that the project notes don't allow.
+- Fix what you agree with. Say in the PR what the review found and what was fixed or left, without naming the tool or saying "AI" or "assistant".
+- Helpers are for reviewing and reading, never for building: building stays in separate sessions with their own PRs.
+
+## 7. Ship
 
 - Commit with a short imperative subject in plain words; add a body when the reason isn't obvious. No attribution lines; the project notes list what messages must leave out.
 - `git push -u origin feature/<short-name>`, then open a PR with a plain title, filling in `.github/pull_request_template.md`. Check the description afterwards and remove anything added that the template doesn't have.
 - Follow the `steward` playbook until the PR is green, then merge it yourself with Squash and merge; `main` publishes to GitHub Pages.
 
-## 7. Learn
+## 8. Learn
 
 - If a bug got through to players, add the check that would have caught it, in the same PR as the fix.
 - After the merge, look back at the session that built it (the `steward` playbook's last step) and log it in `docs/LESSONS.md`.

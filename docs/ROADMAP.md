@@ -35,6 +35,7 @@ How sessions work, not the game. Each one is small, measured and recorded in `do
   - **Needs-owner queue**: an issue labelled `needs-owner` with a default taken after 12 hours; the session carries on meanwhile. Measure: hours idle waiting on answers (six overnight last time).
   - **Cost budget per brief**: `usage.cost_usd` against the brief's estimate at each stopping point; past twice it, a reason and a trim. Measure: sessions over twice their estimate, and cost per PR (the four-PR session cost $16.60 and used 417k of context).
   - **Parts together** (`.github/workflows/parts.yml`): `main` plus every open `part:<feature>` PR, checked together on each push, hourly and on demand, with one comment per part. Measure: how soon a combination problem shows (the terminal's showed only when brought together), and the time from the last part's merge to green. Balance tables can follow.
+- **[E] A fresh review before opening** (`docs/decisions/ADR-2026-09-27-reviewer-step.md`): before a PR opens, a fresh helper reviews the diff for bugs, broken rules and lines outside the diff the change makes wrong. Measure on the next five PRs: findings that CI or a later review would otherwise have caught, and the review's cost.
 - **During "Looks like a real airport":** cheaper effort for routine work and one or two parts.
 - **After it merges:** faster CI (cached Chromium, and only the touched check groups on drafts).
 - **For "The terminal as a place":** write the checks first.
