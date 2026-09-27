@@ -12,6 +12,7 @@
 //            desktop screenshot of each goes in build/shots/
 //   share    the link preview: tags filled in, preview image and icon present, the right size and small enough
 //   news     What's new opens once for an older save and not again, never for a new game, and from Settings
+//   graph    the map in tools/graph.mjs: doc links resolve and each docs/SYSTEMS.md system names its files
 //   perf     how fast a level 9 airport simulates (against a calibration run, so machines compare), and how
 //            much of a phone's CPU the game uses at 8x with the CPU slowed 4x
 //   ...      and a group for each file in tools/checks/, named after it (terminal: the halls and the way through them)
@@ -319,6 +320,14 @@ if(!only||only==='perf'){
   const secs=z.Timestamp-a.Timestamp;
   ok('perf: phone at 8x, CPU slowed 4x, sixteen stands',!errs.length,`${((c1-c0)/secs).toFixed(1)} of 8 game minutes a second, game code ${Math.round((z.ScriptDuration-a.ScriptDuration)/secs*100)}% of the CPU`+(errs.length?' '+errs[0]:''));
   await ctx.close()}
+}
+if(!only||only==='graph'){
+  // the map in tools/graph.mjs: every doc link resolves, every docs/SYSTEMS.md section names its files; a system file changed
+  // on this branch without its section is a warning only
+  const {build,check}=await import('./graph.mjs'),g=build(),{errs,warns}=check(g);
+  for(const w of warns)console.log('WARN  graph: '+w);
+  ok('graph: doc links resolve and every system section names its files',!errs.length,errs.slice(0,3).join('; '));
+  ok('graph: it maps every game file, check group and saved field',Object.keys(g.files).length>=40&&Object.keys(g.checks).length>=15&&Object.keys(g.saved).length>=50,`${Object.keys(g.files).length} files, ${Object.keys(g.checks).length} check groups, ${Object.keys(g.saved).length} saved fields`);
 }
 if(!only||only==='share'){
   // what chat apps and social sites read when the link is shared (dist/index.html, as published)

@@ -17,3 +17,4 @@ Short records of decisions that shape the code, so later changes know what they 
 | [ADR-2026-09-26-stand-frames-and-rooms](ADR-2026-09-26-stand-frames-and-rooms.md) | Stands have their own frames, and airside is rooms joined by doorways |
 | [ADR-2026-09-26-managers-decide-by-value](ADR-2026-09-26-managers-decide-by-value.md) | Managers decide by measured value, a little at a time |
 | [ADR-2026-09-26-terminal-halls-and-parts](ADR-2026-09-26-terminal-halls-and-parts.md) | The terminal is halls, and its parts plug in |
+| [ADR-2026-09-27-knowledge-graph](ADR-2026-09-27-knowledge-graph.md) | A map of the code and docs, generated from the source (an experiment) |

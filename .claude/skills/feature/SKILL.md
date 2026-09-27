@@ -20,7 +20,7 @@ Work through these steps in order. Small fixes (a label, a nit, an obvious bug) 
 
 ## 3. Build
 
-- Find the code with the file table in the project notes, then search `src/game/` by name.
+- Find the code with `node tools/graph.mjs <name>` (a system, file, function, hook, saved field or check group): it lists the files, functions, hooks, checks, fields, decisions and lessons that relate. Then read only those.
 - A new system gets its own numbered file before `99-start.js`.
 - New saved state: a default in `DEFAULT()`, handling for its absence in `resetAll`. Never rename or remove saved fields.
 - Randomness that can change the game uses `rnd()`. `Math.random()` only on cosmetic lines ending with `// cosmetic`.
@@ -36,6 +36,8 @@ Work through these steps in order. Small fixes (a label, a nit, an obvious bug) 
 - If a check fails, reproduce it (pages are seeded, so it repeats) and fix the cause. Never weaken or skip a check to get green.
 
 ## 5. Keep the docs true
+
+- A new system gets a section in `docs/SYSTEMS.md` whose heading names its files, and the spec's first line lists its PRs; `npm run check -- graph` fails on a broken link or a section without files, and warns when a system's file changed but its section didn't.
 
 - Project notes: anything about how the code works that changed.
 - `docs/ROADMAP.md`: move the item along.
