@@ -11,6 +11,7 @@ description: Drive a Final Call pull request to green and merged - reading CI fa
 - Every page is seeded, so a failure repeats locally: `npm run check -- <group>` (the groups are listed in the project notes).
 - A line number from an error in the built page: `node tools/where.mjs <line>`.
 - Fix the cause. Never skip, weaken or delete a check to get green, and never push an empty commit to re-run CI.
+- Playwright's Chromium is cached, keyed on the pinned version in the project notes; a run that installs it from scratch (a cache miss, or the first run after a version bump) is not itself a failure.
 
 ## Balance workflow (`balance.yml`)
 

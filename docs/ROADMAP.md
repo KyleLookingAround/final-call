@@ -39,12 +39,11 @@ How sessions work, not the game. Each one is small, measured and recorded in `do
   - **Cost budget per brief**: `usage.cost_usd` against the brief's estimate at each stopping point; past twice it, a reason and a trim. Measure: sessions over twice their estimate, and cost per PR (the four-PR session cost $16.60 and used 417k of context).
   - **Parts together** (`.github/workflows/parts.yml`): `main` plus every open `part:<feature>` PR, checked together on each push, hourly and on demand, with one comment per part. Measure: how soon a combination problem shows (the terminal's showed only when brought together), and the time from the last part's merge to green. Balance tables can follow.
 - **During "Looks like a real airport":** cheaper effort for routine work and one or two parts.
-- **After it merges:** faster CI (cached Chromium, and only the touched check groups on drafts).
+- **[B] Faster CI, first half: cached Chromium** (`docs/briefs/ci-cache.md`, done). `checks.yml`, `balance.yml`, `parts.yml` and `health.yml` cache `~/.cache/ms-playwright`, keyed on the pinned version, and skip the download on a hit. Measured in `docs/LESSONS.md`: a small saving on `checks.yml`, none worth noting on `balance.yml` (system library installation dominates the setup time either way). Muddies experiment [A]'s time-to-green from the commit it names.
+- **After it merges:** [B]'s second half (only the touched check groups on drafts).
 - **For "The terminal as a place":** write the checks first.
 
 ## Next
-
-- **Feedback from players.** A "Send feedback" link in Help that opens a prefilled issue. No tracking.
 
 ## Ideas (not agreed)
 
@@ -60,6 +59,7 @@ How sessions work, not the game. Each one is small, measured and recorded in `do
 ## Done
 
 - **A Ko-fi link** (spec `docs/specs/kofi-link.md`). A quiet "Buy me a Ko-fi" button in What's new, Settings and the level-up card, opening `https://ko-fi.com/kylemck` in a new tab. Never on the airport view, the board or in the guided start. For the next release's notes.
+- **A feedback link in Help.** A "Send feedback" link, shown only on GitHub Pages, opens a new GitHub issue for the repo with the version, level, layout, game day, screen size and device type filled into the body. No tracking. For the next release's notes.
 - **Weekly health check.** The "Health check" workflow (`.github/workflows/health.yml`) runs the checks and the bot on seeds 1–3 against `main` weekly and on demand, opening or updating an issue labelled `health` when something drifts, and closing it once a later run is clean.
 - **Saves on the device only.** The game is published only on GitHub Pages, so saves across devices through the old hosting page, their Settings message and that page's hooks are gone. Settings › Your save says the game saves on this device, and save codes still move an airport between devices. The old keys are cleared on load. For the next release's notes.
 - **Version 28: a real terminal** (#17). Halls in the order real airports use them: check-in islands, bag drop and a security hall with search tables; immigration with e-gates, a domestic channel, customs and an arrivals hall with meeters; a baggage hall with a sorter, tug trains and shared carousels; a market place with shops people walk into, gate calls and gate lounges; and an airport hotel. Built in five parts side by side (#18, #19, #21, #22, #23, #24) and brought together in one.
