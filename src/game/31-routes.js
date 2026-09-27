@@ -85,3 +85,31 @@ function routesClick(d){
   if(d.rlook){R.wSel=d.rlook;if(R.view!=='world')setView('world');const C=CITY[d.rlook],[x,y]=cityXY(C),c=R.cam;c.z=Math.max(c.z,zMin()*1.6);const k=viewK();c.tx=x-R.sw/k/2;c.ty=y-R.sh/k/2;renderPanel();return true}
   return false;
 }
+/* ---------- route demand and the dispatcher: how many people want to fly each route, how full a flight will be, where each plane goes ---------- */
+function rsOf(c){const rs=G.rs||(G.rs={});const s=rs[c]||(rs[c]={s:0,p:0,v:0,n:0,t:G.clock,tp:0,tv:0,tn:0,lf:0});const dt=G.clock-s.t;if(dt>0){const k=Math.exp(-dt/1440);s.s*=k;s.p*=k;s.v*=k;s.n*=k;if(s.c)s.c*=k;s.t=G.clock}return s}
+const attract=()=>0.36+G.rep/100*0.5+0.022*G.lv.marketing+(R.fx.rush>G.clock?0.15:0)+(G.lv.rail?0.06:0);
+const fareEl=m=>Math.exp(-1.3*(1-0.12*G.lv.loyalty)*(m-1));
+function regionMul(C){const r=R.reg;if(!r)return 1;let m=(1+r.T)*(1-0.12*r.cong)*(1+r.surge)*(1+C.biz*r.biz+(1-C.biz)*r.leis);if(r.hsr){if(C.tier<=1)m*=0.85;else if(C.tier>=3)m*=1.12}return m}
+// how many seats a day the route can fill (the market), and how willing each traveller is right now
+const cityMarket=(c,fi)=>{const C=CITY[c];return TIERBASE[C.tier]*C.size*(1+0.03*G.lv.marketing)*regionMul(C)*(promoOn(c)?1.25:1)*SEA_MUL[C.sea][seaIdx()]*rivKeep(c,fi)};
+function cityWill(c,fm){const C=CITY[c];return attract()*regionMul(C)*(1+(demandNow()-1)*(0.3+2*C.biz))*(1.15-0.45*C.biz)*SEA_MUL[C.sea][seaIdx()]*(promoOn(c)?1.15:1)*fareSplit(G.fare*(fm??RFARE[routeFareIx(c)]))[0]}
+// cheaper fares win extra travellers; dearer fares lose some even when flights would otherwise sell out
+const fareSplit=m=>m<1?[fareEl(m),1]:[1,fareEl(m)];
+const paxLF=(c,fm,sat)=>{const m=G.fare*(fm??RFARE[routeFareIx(c)]);const lf=clamp(cityWill(c,fm)*(sat??1),0.08,1)*fareSplit(m)[1];return isFinite(lf)?clamp(lf,0.05,1):0.7};
+const cityFare=c=>{const C=CITY[c];return TIER_FARE[C.tier]*(1+0.5*(C.biz-0.35))*RFARE[routeFareIx(c)]};
+function routeLF(c,seats,fi){const sat=Math.min(1,cityMarket(c,fi)/Math.max(1,rsOf(c).s+seats));return paxLF(c,RFARE[fi??routeFareIx(c)],sat)}
+// the fare that earns most on a route right now
+function bestFare(c){const s=rsOf(c),seats=s.n>0.5?Math.max(40,s.s/Math.max(1,s.n)):150,cur=routeFareIx(c);let best=cur,bv=RFARE[cur]*routeLF(c,0,cur);for(let i=0;i<3;i++){const v=RFARE[i]*routeLF(c,0,i);if(v>bv*1.03){bv=v;best=i}}return best}
+function loadFactor(c){if(c)return routeLF(c,0);const ks=Object.keys(G.routes||{});if(!ks.length)return 0.7;let t=0;for(const k of ks)t+=routeLF(k,150);return t/ks.length}
+const routeOp=(ac,c)=>ac.op*(0.35+0.65*TRIP[CITY[c].tier]/TRIP[ac.tier]);
+// the dispatcher: send each plane where it earns most per hour, among the routes it can reach
+function pickRoute(ac){
+  let best=null,bs=-1e18;const seats=ac.rows*ac.blocks.reduce((x,y)=>x+y,0);
+  for(const c in (G.routes||{})){const C=CITY[c];if(!C||C.tier>ac.tier)continue;
+    const sc=ac.freighter?-TRIP[C.tier]*(0.8+rnd()*0.4):(seats*routeLF(c,seats)*cityFare(c)*G.fare-routeOp(ac,c)*fuelMul())/(TRIP[C.tier]+45)*(0.92+rnd()*0.16);
+    if(sc>bs){bs=sc;best=c}}
+  return best;
+}
+function openRoute(c){const C=CITY[c];if(!C||routeOpen(c)||!has('rt:'+C.tier)||!buy(ROUTE_FEE[C.tier]))return false;(G.routes||(G.routes={}))[c]={f:1};rsOf(c);if(!R.sim)toast(`New route: ${C.name}. Planes will start flying there.`,null,null,'goal',5);return true}
+function promoteRoute(c){if(!has('feat:promo')||!routeOpen(c)||promoOn(c)||!buy(promoCost(c)))return false;G.routes[c].promo=G.clock+1440;return true}
+const arrivalRate=F=>2*(1+0.15*G.lv.marketing)*Math.sqrt(F.seatsN/48)*(R.fx.rush>G.clock?1.3:1)*(G.lv.rail?1.1:1);

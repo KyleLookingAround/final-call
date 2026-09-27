@@ -43,7 +43,7 @@ Playbooks for each part are in `.claude/skills/`: `feature` (issue to merged PR,
 
 - `npm run build`: builds `dist/index.html` and `build/test.html`, which has `window.__sim` exposed. It needs no dependencies. It fails, naming the file and line, on a syntax error, a top-level name declared twice, a `</script>` inside the game, duplicate top-level function names, a lost marker, or a top-level `let` exposed to the checks without a getter.
 - `node tools/where.mjs <line>` turns a line number from an error in `dist/index.html` or `build/test.html` into `src/game/<file>:<line>`.
-- `npm install` once (web sessions do it at start-up through `.claude/hooks/session-start.sh`), then `npm run check`, about 1–2 minutes with Playwright and Chromium. `npm run check -- <group>` runs one group: `sim`, `rules`, `saves`, `layout`, `sheet` (with the full-screen drawer), `tour`, `transport`, `shots`, `share`, `layouts`, `news`, `graph`, `brief` (session briefs, `docs/briefs/`), `perf`, and one per file in `tools/checks/` (`terminal`, each terminal part's, `sound`, `levelup`, `scene`, the real airport's `markings`, `roofs`, `weather` and `vehicles`, `feedback`, and the terminal as a place's `plans`, `floors`, `windows`, `decor` and `terrace`). What each covers is in `docs/SYSTEMS.md`. Checks written before their code are listed in `tools/checks/pending.txt` and print `PEND` until they pass; a part takes its lines out when it builds them. Every page is seeded, so a failure repeats. When you change a rule on purpose, update its check in the same PR; add a check when you add a rule.
+- `npm install` once (web sessions do it at start-up through `.claude/hooks/session-start.sh`), then `npm run check`, about 1–2 minutes with Playwright and Chromium. `npm run check -- <group>` runs one group: `sim`, `rules`, `saves`, `layout`, `sheet` (with the full-screen drawer), `tour`, `transport`, `shots`, `share`, `layouts`, `news`, `graph`, `brief` (session briefs, `docs/briefs/`), `perf`, and one per file in `tools/checks/` (`terminal`, each terminal part's, `sound`, `levelup`, `scene`, the real airport's `markings`, `roofs`, `weather` and `vehicles`, `feedback`, and the terminal as a place's `plans`, `floors`, `windows`, `decor` and `terrace`, and `effects`, the rating and money ledger). What each covers is in `docs/SYSTEMS.md`. Checks written before their code are listed in `tools/checks/pending.txt` and print `PEND` until they pass; a part takes its lines out when it builds them. Every page is seeded, so a failure repeats. When you change a rule on purpose, update its check in the same PR; add a check when you add a rule.
 - Playwright is pinned to 1.56.1, whose Chromium (build 1194) the web image already has. If Chromium is missing, run `npx playwright install chromium`, or set `CHROMIUM_PATH` to an existing Chromium binary. Change the pin only together with the lock file. CI caches `~/.cache/ms-playwright`, keyed on this pin, across `checks.yml`, `balance.yml`, `parts.yml` and `health.yml`; a version bump pays for one cache miss, then hits again.
 - For UI changes, look at the result. `npm run check -- shots` covers the three main views; for anything else, write a small Playwright script in `build/` (git-ignored) that opens `build/test.html` at phone (390×844, `hasTouch`, `isMobile`), tablet (768×1024) and desktop (1440×900) sizes, then screenshots it and reads the images.
 - For economy or progression changes, run the bot on seeds 1, 2 and 3: `npm run bot -- 1150 --seed 2` (3–4 minutes each; run them side by side in the background with `nohup … > build/bot-2.log 2>&1 &`). It ends with `LVLAT {level: game hour}`, `STATE` (a fingerprint of the whole end state), `PLAY` (the same without settings and the What's new version seen), `ERR [...]` and a table against `tools/baseline.json`. A change meant to leave the game as it is must leave `PLAY` identical on seeds 1–3 against a build of `main` (and `STATE` too, unless it adds a setting or a What's new entry). On a PR, the "Balance" workflow runs seeds 1–3 both ways (keeping Classic and rebuilding) and puts the tables in the run's summary: read those rather than repeating the runs locally, unless you are tuning. Bot options are in `docs/SYSTEMS.md`.
@@ -72,13 +72,15 @@ The game is one strict IIFE, split into files in `src/game/`. The build joins th
 | Files | What's in them |
 | --- | --- |
 | `00-random` | `rnd()`, the seeded random generator the simulation uses |
-| `01-constants` to `04-geometry` | Constants and level data, the Masterplan (`TECH`), state (`G`, `R`, `DEFAULT`), airport geometry |
+| `01-constants` to `03-state` | Constants and level data, the Masterplan (`TECH`), state (`G`, `R`, `DEFAULT`) |
+| `04-effects` | The effects ledger: `effect(kind, cause, amount, at)` behind `repAdj`, `earn` and `spend`, the rating's causes (`REPWHY`, `REPLBL`, `repRecent`) and floaters |
+| `04-geometry` | Airport geometry |
 | `05-flights` to `11-main-update` | Flights, sound, passengers, stands, construction/levels/days, events and toasts, `update()` |
 | `12-drawing` to `14-board` | Drawing the airport, the camera, the departures board |
 | `15-panel` to `21-layout` | Side panel, advisor, help/keys/speed, Masterplan UI, phone bottom sheet, full screen, layout |
 | `22-save`, `23-boot` | Saving and migrating (`resetAll`), boot and the frame loop |
 | `24-region-places` to `30-region-ui` | The region: places and stations, helpers, the journey network, events and line building, weather, map drawing, the Region tab |
-| `31-routes` to `36-guided-start` | Routes and the world map, managers and recommendations, Lowmere, airline operations, records/stamps/challenges, guided start |
+| `31-routes` to `36-guided-start` | Routes, their demand and fares, the dispatcher (`pickRoute`) and the world map, managers and recommendations, Lowmere, airline operations, records/stamps/challenges, guided start |
 | `37-update-check` | Tells a player on the published site when a new version is ready, and reloads to it |
 | `38-updates` | What's new: the `UPDATES` list (every version, newest first) and its card |
 | `39-layouts`, `40-layout-drawing` | Airport layouts: the `LAYOUTS` table, rebuilding and switching, the Airfield › Layout tab; remote stands, buses, rooms, shop units and each layout's buildings |
@@ -94,14 +96,14 @@ The game is one strict IIFE, split into files in `src/game/`. The build joins th
 | `55-vehicles` | Fuel and catering trucks, baggage tractors and pushback tugs at each turnaround (`vehicleWork`) |
 | `99-start` | The `/*SIM_HOOK*/` marker and the call that starts the game |
 
-Some functions sit where they were first written rather than where their name suggests (`pickRoute` is in `03-state.js`), so search `src/game/` by name.
+Some functions sit where they were first written rather than where their name suggests (`wageBill` is in `10-events-toasts.js`), so search `src/game/` by name.
 
 `src/shell.html` holds the CSS, the HTML skeleton and a `/*GAME*/` placeholder inside the only `<script>`.
 
 ### State
 
 - **`G` and `R`.** `G` is the saved state (JSON in `localStorage['final-call-save-v2']`). `R` is runtime only.
-- **New and old saves.** `DEFAULT()` builds a new game. `resetAll(state)` loads and migrates any older save. When you add state, give it a default in `DEFAULT()` and handle its absence in `resetAll`. Never rename or remove saved fields, because old saves must keep loading.
+- **New and old saves.** `FIELDS` (`03-state.js`) lists every saved field with its default; `DEFAULT()` builds a new game from it, and `resetAll(state)` gives an older save's missing fields the same defaults, then runs `MIGRATIONS` (`22-save.js`), an ordered list of `{when, up, note}`. When you add state, add its line to `FIELDS` (a terminal part uses `TERM_FIELDS`, the same table), and a step at the end of `MIGRATIONS` only if older saves need more than the default. Never rename or remove saved fields, because old saves must keep loading; the `migrate` check fails if any save in `tools/saves/` loads differently.
 - **Saves stay on the device.** The only other localStorage key is `final-call-topgap`, the phone camera band. The old `final-call-cloud` and `final-call-device` keys are cleared on load.
 
 ### Time

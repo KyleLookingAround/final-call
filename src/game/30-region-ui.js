@@ -56,7 +56,9 @@ function regionPanel(){
   let h=`<div class="segs" role="tablist">${[['lines','Transport'],['sites','Development'],['overview','Overview']].map(([id,n])=>`<button class="chip${sub===id?' on':''}" data-rsub="${id}">${n}</button>`).join('')}</div>`;
   if(sub==='lines'){
     const Ls=sortedLines();
-    if(Ls.length){const p=r.rev-r.ops;h+=`<div class="report"><b>${num(r.riders)}</b> riders/h · <b>${Math.round(r.share*100)}%</b> of flyers · demand <b>+${Math.round(r.T*100)}%</b> · profit <b style="color:${p<0?'var(--bad)':'var(--good)'}">${money(p)}</b>/h</div>`}
+    if(Ls.length){const p=r.rev-r.ops;h+=`<div class="report"><b>${num(r.riders)}</b> riders/h · <b>${Math.round(r.share*100)}%</b> of flyers · demand <b>+${Math.round(r.T*100)}%</b> · profit <b style="color:${p<0?'var(--bad)':'var(--good)'}">${money(p)}</b>/h`;
+      const busy=Ls.filter(L=>r.lines[L.id]&&r.lines[L.id].riders>=0.5).sort((a,b)=>r.lines[b.id].riders-r.lines[a.id].riders);
+      if(busy.length)h+=`<br>Busiest: ${busy.slice(0,3).map(L=>`<b>${lineCode(L)}</b> ${num(r.lines[L.id].riders)}`).join(' · ')}`;h+=`</div>`}
     else h+=`<p class="note">Draw lines between stations. Links to the airport bring flyers; links between towns carry commuters and ease traffic.</p>`;
     if(!R.draft)h+=transportRecs();
     h+=R.draft?draftCard():`<button class="buy newline" data-newline="">+ New line</button>`;
@@ -124,10 +126,12 @@ function stationCard(n,r){
   return h+`</div>`;
 }
 function buildCard(b){const M=MODES[b.mode];return `<div class="lcard" id="line-${b.lid}"><div class="lh"><span class="lbadge" style="--c:${b.col}">${M.L}${b.num}</span><div><div class="rt">${NODES[b.stops[0]].n} – ${NODES[b.stops[b.stops.length-1]].n}</div><div class="rd">${M.name} · ${Math.ceil(b.done-G.clock)} min to go</div></div><span class="pill" style="--c:var(--sign)">BUILDING</span></div><div class="prog"><i style="width:${bprog(b.id)*100}%;background:var(--sign)"></i></div></div>`}
+// another line with riders that stops at two or more of this one's stations, so riders take it instead
+const quickerLine=(L,r)=>Object.values(G.lines||{}).some(o=>o!==L&&r.lines[o.id]&&r.lines[o.id].riders>=0.5&&L.stops.filter(n=>o.stops.includes(n)).length>=2);
 function lineCard(L,r){
   const M=MODES[L.mode],st=r.lines[L.id],sel=R.regSel===L.id,down=lineDown(L),eb=buildOf('line:'+L.id),ev=!down&&evExtra(L);
   let pill=null;if(replOn(L.id))pill=['BUSES','var(--good)'];else if(down)pill=['STOPPED','var(--bad)'];else if(eb)pill=[eb.up?'UPGRADING':'EXTENDING','var(--sign)'];else if(ev)pill=[EVT[ev.type].label.toUpperCase(),'var(--good)'];else if(st&&st.f===0)pill=['NO SERVICE','var(--muted)'];else if(st&&st.load>1)pill=['FULL','var(--bad)'];else if(st&&st.load>0.85)pill=['BUSY','var(--sign)'];
-  let h=`<div class="lcard${sel?' sel':''}" id="line-${L.id}"><button class="lhb" data-lsel="${L.id}" aria-expanded="${sel}"><span class="lbadge" style="--c:${L.col}">${lineCode(L)}</span><div><div class="rt">${lineName(L)}</div><div class="rd">${M.name} · every ${Math.round(60/L.freq)} min${st?` · ${num(st.riders)} riders/h`:''}</div></div>${pill?`<span class="pill" style="--c:${pill[1]}">${pill[0]}</span>`:`<span class="chev">${sel?'⌃':'⌄'}</span>`}</button>`;
+  let h=`<div class="lcard${sel?' sel':''}" id="line-${L.id}"><button class="lhb" data-lsel="${L.id}" aria-expanded="${sel}"><span class="lbadge" style="--c:${L.col}">${lineCode(L)}</span><div><div class="rt">${lineName(L)}</div><div class="rd">${M.name} · every ${Math.round(60/L.freq)} min${st?` · ${num(st.riders)} riders/h${st.f>0&&st.riders<0.5&&quickerLine(L,r)?', a quicker line takes them':''}`:''}</div></div>${pill?`<span class="pill" style="--c:${pill[1]}">${pill[0]}</span>`:`<span class="chev">${sel?'⌃':'⌄'}</span>`}</button>`;
   if(!sel)return h+`</div>`;
   if(eb)h+=`<div class="rd">${eb.up?`Becoming ${MODES[eb.mode].name.toLowerCase()} line ${MODES[eb.mode].L}${eb.num}, ${lineName({stops:eb.stops})}`:`Extending to ${lineName({stops:eb.stops})}`} · ${Math.ceil(eb.done-G.clock)} min to go.</div><div class="prog"><i style="width:${bprog(eb.id)*100}%;background:var(--sign)"></i></div>`;
   if(ev)h+=`<div class="rd">Extra services for the ${EVT[ev.type].label.toLowerCase()} while the crowds travel.</div>`;
