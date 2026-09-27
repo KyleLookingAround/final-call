@@ -7,11 +7,13 @@ description: Drive a Final Call pull request to green and merged - reading CI fa
 
 ## Checks workflow (`checks.yml`)
 
-- It runs `npm run check` on every PR that isn't a draft, and a newer push cancels the older run. Run `npm run check` locally before pushing rather than using CI to find failures. Failure screenshots are in the `check-failures` artifact; `screenshots` is kept on every run.
+- It runs `npm run check` on every non-draft PR (a draft only runs the groups its changes touch, below), and a newer push cancels the older run. Failure screenshots are in the `check-failures` artifact; `screenshots` is kept on every run.
 - Every page is seeded, so a failure repeats locally: `npm run check -- <group>` (the groups are listed in the project notes).
 - A line number from an error in the built page: `node tools/where.mjs <line>`.
 - Fix the cause. Never skip, weaken or delete a check to get green, and never push an empty commit to re-run CI.
 - Playwright's Chromium is cached, keyed on the pinned version in the project notes; a run that installs it from scratch (a cache miss, or the first run after a version bump) is not itself a failure.
+- Open PRs as drafts while iterating, so Checks only runs the groups the change touches (`tools/touched.mjs`); mark the PR ready for review, which re-runs every group, before merging.
+- GitHub runs no `pull_request` workflow at all while a PR's `mergeable_state` is `dirty`: a push that sits with zero runs, not even queued, for several minutes is a merge conflict with `main`, not a platform glitch. Check `mergeable_state` before waiting on CI, and merge `main` in as soon as it shows `dirty`.
 
 ## Balance workflow (`balance.yml`)
 
