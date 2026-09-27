@@ -17,6 +17,10 @@ permissions:
 
 jobs:
   bot:
+    # a newer push to the same PR cancels this seed's older run
+    concurrency:
+      group: balance-${{ github.event.pull_request.number || github.ref }}-${{ matrix.seed }}-${{ matrix.layouts }}
+      cancel-in-progress: true
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
