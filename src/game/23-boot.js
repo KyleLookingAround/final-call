@@ -9,7 +9,7 @@ function frame(now){
   if(R.cashShown==null)R.cashShown=G.cash;R.cashShown+=(G.cash-R.cashShown)*Math.min(1,rdt*9);if(Math.abs(G.cash-R.cashShown)<0.005)R.cashShown=G.cash;
   const cs=money(R.cashShown);if(cs!==R.cashTxt){R.cashTxt=cs;$('#sCash').textContent=cs;$('#fsCash').textContent=cs}
   uiT+=rdt;if(uiT>0.25){uiT=0;refreshUI();renderTip();updateBoard();soundTick();lvlTick();checkGoals();if(G.tour&&!G.tour.done)tourStep();fitHud();tickToasts(0.25*(R.speed>0?1:0));
-    const fc=wxForecast(),ev=pol('curfew')&&nightWin()?'CURFEW':R.fx.storm>G.clock?'STORM':R.fx.strike>G.clock?'STRIKE':fc&&fc.eta<60?`${fc.type.toUpperCase()} IN ${Math.max(1,Math.round(fc.eta))}M`:R.fx.rain>G.clock?'RAIN':R.fx.snow>G.clock?'SNOW':R.fx.fog>G.clock?'FOG':R.fx.fuelUp>G.clock?'FUEL SPIKE':R.fx.rush>G.clock?'RUSH':R.fx.sick>G.clock?'STAFF SHORT':'';const tag=ev||demandName();const el=$('#fxTag');if(el.textContent!==tag){el.textContent=tag;el.style.color=ev?'var(--bad)':tag.includes('PEAK')?'var(--sign)':''}}
+    const fc=wxForecast(),ev=pol('curfew')&&nightWin()?'CURFEW':weather.on('storm')?'STORM':weather.on('strike')?'STRIKE':fc&&fc.eta<60?`${fc.type.toUpperCase()} IN ${Math.max(1,Math.round(fc.eta))}M`:weather.on('rain')?'RAIN':weather.on('snow')?'SNOW':weather.on('fog')?'FOG':weather.on('fuelUp')?'FUEL SPIKE':weather.on('rush')?'RUSH':weather.on('sick')?'STAFF SHORT':'';const tag=ev||demandName();const el=$('#fxTag');if(el.textContent!==tag){el.textContent=tag;el.style.color=ev?'var(--bad)':tag.includes('PEAK')?'var(--sign)':''}}
   requestAnimationFrame(frame);
 }
 function start(data){
