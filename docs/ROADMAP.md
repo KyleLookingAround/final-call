@@ -7,6 +7,8 @@ What's being worked on, what's next, and ideas not yet agreed. Anything here get
 - **Sound** (#27, spec `docs/specs/sound.md`, version 29): flight announcements with the words on the board, occasional spoken calls, and ambience that follows the camera.
 - **Level-up screen** (#29, spec `docs/specs/level-up.md`, version 30): a card for each new level with what it unlocked.
 
+- **Looks like a real airport** (#37, spec `docs/specs/real-airport.md`): the groundwork (drawing layers and a lighting pass, no change to play) first, then the parts two or three at a time from their briefs in `docs/briefs/`: apron markings and lighting, better planes and roofs; then weather you can see and vehicles on the apron.
+
 ## The owner's order of bundles
 
 From the idea board. Each bundle gets an issue and a spec before work starts.
