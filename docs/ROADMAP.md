@@ -36,7 +36,8 @@ How sessions work, not the game. Each one is small, measured and recorded in `do
   - **Cost budget per brief**: `usage.cost_usd` against the brief's estimate at each stopping point; past twice it, a reason and a trim. Measure: sessions over twice their estimate, and cost per PR (the four-PR session cost $16.60 and used 417k of context).
   - **Parts together** (`.github/workflows/parts.yml`): `main` plus every open `part:<feature>` PR, checked together on each push, hourly and on demand, with one comment per part. Measure: how soon a combination problem shows (the terminal's showed only when brought together), and the time from the last part's merge to green. Balance tables can follow.
 - **During "Looks like a real airport":** cheaper effort for routine work and one or two parts.
-- **After it merges:** faster CI (cached Chromium, and only the touched check groups on drafts).
+- **[B] Faster CI, first half: cached Chromium** (`docs/briefs/ci-cache.md`, done). `checks.yml`, `balance.yml` and `parts.yml` cache `~/.cache/ms-playwright`, keyed on the pinned version, and skip the download on a hit. Measured in `docs/LESSONS.md`; muddies experiment [A]'s time-to-green from the commit it names.
+- **After it merges:** [B]'s second half (only the touched check groups on drafts).
 - **For "The terminal as a place":** write the checks first.
 
 ## Next
