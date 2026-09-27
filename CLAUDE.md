@@ -80,7 +80,7 @@ The game is one strict IIFE, split into files in `src/game/`. The build joins th
 | `15-panel` to `21-layout` | Side panel, advisor, help/keys/speed, Masterplan UI, phone bottom sheet, full screen, layout |
 | `22-save`, `23-boot` | Saving and migrating (`resetAll`), boot and the frame loop |
 | `24-region-places` to `30-region-ui` | The region: places and stations, helpers, the journey network, events and line building, weather, map drawing, the Region tab |
-| `31-routes` to `36-guided-start` | Routes and the world map, managers and recommendations, Lowmere, airline operations, records/stamps/challenges, guided start |
+| `31-routes` to `36-guided-start` | Routes, their demand and fares, the dispatcher (`pickRoute`) and the world map, managers and recommendations, Lowmere, airline operations, records/stamps/challenges, guided start |
 | `37-update-check` | Tells a player on the published site when a new version is ready, and reloads to it |
 | `38-updates` | What's new: the `UPDATES` list (every version, newest first) and its card |
 | `39-layouts`, `40-layout-drawing` | Airport layouts: the `LAYOUTS` table, rebuilding and switching, the Airfield › Layout tab; remote stands, buses, rooms, shop units and each layout's buildings |
@@ -96,7 +96,7 @@ The game is one strict IIFE, split into files in `src/game/`. The build joins th
 | `55-vehicles` | Fuel and catering trucks, baggage tractors and pushback tugs at each turnaround (`vehicleWork`) |
 | `99-start` | The `/*SIM_HOOK*/` marker and the call that starts the game |
 
-Some functions sit where they were first written rather than where their name suggests (`pickRoute` is in `03-state.js`), so search `src/game/` by name.
+Some functions sit where they were first written rather than where their name suggests (`wageBill` is in `10-events-toasts.js`), so search `src/game/` by name.
 
 `src/shell.html` holds the CSS, the HTML skeleton and a `/*GAME*/` placeholder inside the only `<script>`.
 
