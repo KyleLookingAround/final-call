@@ -8,11 +8,11 @@ Reaching a level is the game's big moment, but today it's a toast that fades. A 
 
 ## What they see
 
-- A card like What's new's: "Now a City Airport", the cash reward and the plan points, then short groups:
+- A card in the board's style: a sign-yellow level tag, the level's name large, and a ladder of all nine levels with the new ones lit (and the next level named). Two tiles show the cash reward and the plan points. Then short groups of icon rows, each with a line on what it does:
   - **At the airport:** new gates and Pier B (Gates tab), more upgrade levels, named (each upgrade's tab);
   - **New plans in the Masterplan**, each with what it gives: upgrades, aircraft, routes and their cities, transport modes, layouts, sites and shops;
   - **Opens up:** the Region and the World map (level 1), Lowmere's airport and buying it, consultants, weekly challenges and the night-flights policy.
-- Every line with somewhere to go is a link: the Masterplan, the Region, the World map, each upgrade's tab, each gate. Following one closes the card. A **Masterplan** button and a **Play** button sit at the foot.
+- Every line with somewhere to go is a link: the Masterplan, the Region, the World map, each upgrade's tab, each gate. Following one closes the card. A **Masterplan** button (with the points to spend) and a **Play** button stay at the foot while the list scrolls. Upgrade chips are grouped by their tab. The card rises in, the tag stamps and the new levels light in turn, unless the player prefers reduced motion.
 - If two or more levels come at once (fast speeds, a welcome-back catch-up), one card covers them all: "Now a City Airport (two levels up)", with both levels' unlocks.
 - It fits a 320 px phone (full width, scrolling inside), landscape phones and the camera band, like What's new.
 

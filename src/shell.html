@@ -437,11 +437,60 @@ table.rtab th{font:600 10px/1 var(--mono);color:var(--muted);text-align:right;pa
 .upd ul{margin:8px 0 0;padding-left:20px;color:var(--muted);font-size:14px;line-height:1.45}
 .newsgo{margin:14px 0 0;text-align:right}
 /* the level-up card (49-levelup.js) */
-.lvsub{margin-top:6px!important}
-.lvsub b{color:var(--sign)}
-.lvgo{display:grid;gap:2px;width:100%;text-align:left;border:0;border-top:1px solid var(--line);background:none;padding:9px 2px;font:600 15px/1.3 var(--body);color:var(--text)}
-.lvgo span{font-weight:400;font-size:13.5px;color:var(--muted)}
-.lvgo:hover b{color:var(--sign)}
+.lvcard{width:min(600px,100%);max-height:100%;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.55)}
+.lvhero{position:relative;flex:none;background:radial-gradient(120% 140% at 0% 0%,rgba(255,199,44,.16),transparent 55%),var(--board);border-bottom:1px solid #22272D;padding:18px 20px 16px;overflow:hidden}
+.lvhero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:repeating-linear-gradient(90deg,var(--sign) 0 18px,transparent 18px 34px);opacity:.55}
+.lvhero .close{position:absolute;top:12px;right:12px;border:0;background:rgba(255,255,255,.06);border-radius:6px;width:34px;height:34px;font:600 16px/1 var(--mono);color:var(--muted)}
+.lvkick{display:flex;align-items:center;gap:8px;font:700 12px/1 var(--disp);letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.lvkick .tag{background:var(--sign);color:var(--signInk);padding:4px 6px 3px;border-radius:2px;letter-spacing:.12em}
+.lvkick .up{color:var(--sign)}
+.lvhero h2{margin:10px 44px 0 0;font:800 clamp(30px,8vw,46px)/.95 var(--disp);letter-spacing:.03em;text-transform:uppercase;color:var(--text)}
+.lvhero h2 small{display:block;font:600 14px/1 var(--disp);letter-spacing:.2em;color:var(--sign);margin-bottom:6px}
+.lvladder{display:grid;grid-template-columns:repeat(9,1fr);gap:4px;margin-top:16px}
+.lvladder i{height:6px;border-radius:2px;background:#262C33}
+.lvladder i.had{background:#6E5A1C}
+.lvladder i.now{background:var(--sign);box-shadow:0 0 10px rgba(255,199,44,.7)}
+.lvends{display:flex;justify-content:space-between;margin-top:6px;font:600 10.5px/1 var(--mono);color:#5E6873;letter-spacing:.04em;text-transform:uppercase}
+.lvbody{flex:1 1 auto;min-height:0;overflow:auto;padding:14px 20px 6px}
+.lvtiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.lvtile{display:grid;gap:4px;text-align:left;border:1px solid var(--line);background:var(--surface2);border-radius:10px;padding:11px 12px 10px;color:var(--text)}
+.lvtile b{font:600 22px/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--good)}
+.lvtile.pts b{color:var(--sign)}
+.lvtile span{font:700 10.5px/1.2 var(--disp);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+button.lvtile:hover{border-color:var(--sign)}
+.lvsec{margin:18px 0 6px;display:flex;align-items:baseline;gap:8px;font:700 11px/1 var(--disp);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.lvsec em{font-style:normal;font-family:var(--mono);letter-spacing:0;color:#5E6873}
+.lvgo{display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:12px;align-items:center;width:100%;text-align:left;border:0;background:none;padding:9px 6px;color:var(--text)}
+.lvgo+.lvgo{border-top:1px solid var(--line)}
+.lvgo .ic{width:36px;height:36px;border-radius:8px;display:grid;place-items:center;background:var(--surface2);border:1px solid var(--line)}
+.lvgo .ic svg,.lvchip svg{width:20px;height:20px;fill:none;stroke:var(--sign);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.lvgo .tx{display:grid;gap:2px;min-width:0}
+.lvgo b{font:600 15px/1.25 var(--body)}
+.lvgo .tx span{font-size:13px;line-height:1.35;color:var(--muted)}
+.lvgo .br{font:700 9.5px/1 var(--disp);letter-spacing:.14em;text-transform:uppercase;color:var(--champ);margin-right:6px}
+.lvgo .go{font:600 16px/1 var(--mono);color:#5E6873}
+.lvgo:hover{background:var(--surface2)}.lvgo:hover .go{color:var(--sign)}
+.lvgrp{margin:8px 0 2px;font:600 10.5px/1 var(--mono);color:#6E7883;text-transform:uppercase;letter-spacing:.06em}
+.lvchips{display:flex;flex-wrap:wrap;gap:6px}
+.lvchip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface2);border-radius:999px;padding:5px 11px 5px 7px;font:600 12px/1 var(--mono);color:var(--text)}
+.lvchip svg{width:16px;height:16px}
+.lvchip:hover{border-color:var(--sign);color:var(--sign)}
+.lvfoot{flex:none;display:flex;gap:8px;justify-content:flex-end;padding:12px 20px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--surface)}
+.lvfoot button{border-radius:8px;padding:11px 16px 10px;font:600 14px/1 var(--mono);white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.lvplan{border:1.5px solid var(--sign);background:none;color:var(--sign)}
+.lvplay{border:1.5px solid var(--sign);background:var(--sign);color:var(--signInk);min-width:96px}
+@media (max-width:420px){.lvhero{padding:16px 16px 14px}.lvbody{padding:12px 16px 6px}.lvfoot{padding-inline:16px}.lvfoot button{flex:1}.lvtile b{font-size:19px}}
+@media (max-width:360px){.lvpts{display:none}}
+@media (max-height:520px){.lvhero{padding:12px 18px 12px}.lvhero h2{font-size:26px;margin-top:6px}.lvhero h2 small{display:inline;margin:0 8px 0 0;font-size:12px}.lvladder{margin-top:8px}.lvends{display:none}.lvtile{padding:8px 11px 7px}.lvtile b{font-size:17px}.lvbody{padding-top:10px}.lvfoot{padding-block:8px}.lvfoot button{padding-block:9px 8px}}
+@media (max-width:899px){#lvlup{padding:calc(12px + var(--topgap)) 12px 12px}}
+@media not (prefers-reduced-motion:reduce){
+  #lvlup:not([hidden]) .lvcard{animation:lvin .42s cubic-bezier(.2,.9,.3,1.15) both}
+  #lvlup:not([hidden]) .lvkick .tag{animation:lvstamp .5s .18s cubic-bezier(.3,1.6,.5,1) both}
+  #lvlup:not([hidden]) .lvladder i.now{animation:lvlight .5s both;animation-delay:calc(.3s + var(--k)*.12s)}
+}
+@keyframes lvin{from{opacity:0;transform:translateY(18px) scale(.96)}}
+@keyframes lvstamp{from{opacity:0;transform:scale(1.8) rotate(-8deg)}}
+@keyframes lvlight{from{background:#262C33;box-shadow:none}}
 .linkb{border:0;background:none;padding:0;color:var(--sign);font:inherit;text-decoration:underline;cursor:pointer}
 @media (max-width:899px){.plan{padding:0}.pcard{width:100%;height:100%;max-height:none;border-radius:0;border:0;padding-top:max(14px,env(safe-area-inset-top))}}
 
@@ -566,10 +615,10 @@ body.fs .cam{max-width:calc(100% - 172px)}
   </div>
 </div>
 <div class="help" id="lvlup" hidden role="dialog" aria-modal="true" aria-labelledby="lvlT">
-  <div class="hcard lvcard">
-    <div class="ptop"><h2 id="lvlT">Now a Local Airport</h2><button class="close" data-lvclose aria-label="Close">×</button></div>
-    <div id="lvlList"></div>
-    <p class="newsgo"><button class="chip" data-lvgo="plan">Masterplan</button> <button class="buy" data-lvclose>Play</button></p>
+  <div class="lvcard">
+    <header class="lvhero" id="lvlHero"></header>
+    <div class="lvbody" id="lvlList"></div>
+    <footer class="lvfoot"><button class="lvplan" data-lvgo="plan" id="lvlPlan">Open the Masterplan</button><button class="lvplay" data-lvclose>Play</button></footer>
   </div>
 </div>
 <div class="help" id="news" hidden role="dialog" aria-modal="true" aria-labelledby="newsT">

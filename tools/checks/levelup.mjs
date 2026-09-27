@@ -2,7 +2,7 @@
 // lists only what has just unlocked; each link lands on the right tab; two levels at once make one card; the setting,
 // the guided start and the headless sim keep it closed; and it fits phones, tablets and desktops.
 const EASY=()=>{const S=__sim;window.easy=(...ns)=>{for(const n of ns)S.LEVELS[n].req={pax:0,rep:0,gates:1}};
-  window.card=()=>{const el=document.querySelector('#lvlup');return el.hidden?null:{title:el.querySelector('#lvlT').textContent,text:el.querySelector('#lvlList').textContent,go:[...el.querySelectorAll('#lvlList [data-lvgo]')].map(b=>b.dataset.lvgo)}}};
+  window.card=()=>{const el=document.querySelector('#lvlup');return el.hidden?null:{title:el.querySelector('#lvlT').textContent.replace(/^(Now an?)/,'$1 '),text:el.textContent,go:[...el.querySelectorAll('#lvlList [data-lvgo]')].map(b=>b.dataset.lvgo)}}};
 export default async function({open,ok}){
   {const {ctx,page,errs}=await open(undefined,null,false,{still:true});await page.evaluate(EASY);
     const r=await page.evaluate(()=>{const S=__sim,G=S.G,R=S.R,out={};G.tour={done:1};S.setSpeed(4);
@@ -47,9 +47,9 @@ export default async function({open,ok}){
     const {ctx,page,errs}=await open({width:w,height:h},null,touch,{still:true});
     await page.evaluate(()=>{try{localStorage.setItem('final-call-topgap','medium')}catch(e){};if(typeof applyGap==='function')applyGap()});
     const r=await page.evaluate(()=>{const S=__sim;S.G.tour={done:1};document.querySelector('#coach').hidden=true;document.querySelector('#spot').hidden=true;S.R.lvlCard={from:3,to:5};S.lvlTick();
-      const c=document.querySelector('#lvlup .hcard').getBoundingClientRect(),x=document.querySelector('#lvlup .close').getBoundingClientRect(),gap=document.querySelector('#topgap').getBoundingClientRect();
+      const c=document.querySelector('#lvlup .lvcard').getBoundingClientRect(),x=document.querySelector('#lvlup .close').getBoundingClientRect(),gap=document.querySelector('#topgap').getBoundingClientRect();
       return {l:c.left,r:c.right,t:c.top,b:c.bottom,closeTop:x.top,gap:document.querySelector('#topgap').hidden?0:gap.bottom,page:document.documentElement.scrollWidth,vh:innerHeight}});
-    await page.screenshot({path:`build/shots/levelup-${name}.png`});
+    await page.waitForTimeout(1200);await page.screenshot({path:`build/shots/levelup-${name}.png`});
     ok(`levelup: the card fits a ${name} screen`,r.l>=0&&r.r<=w&&r.page<=w&&r.closeTop>=r.gap&&r.b<=r.vh+1&&!errs.length,JSON.stringify(r)+(errs.length?' '+errs[0]:''));
     await ctx.close();
   }
