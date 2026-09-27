@@ -11,7 +11,7 @@ function advise(){
     if(worst){const [w,v]=worst,msg=`Your rating fell ${Math.round(-v)} points in the last 3 hours from ${REPWHY[w][0]}.`;
       a=REPWHY[w][2]?{text:msg+REPWHY[w][2],go:['region','.lcard'],label:'Region'}:up(msg,REPWHY[w][1])||(REPWHY[w][1].length?{text:msg+' Nothing left to upgrade for it, so raise ticket prices to thin the crowds.',go:['sales','[data-fare="1"]'],label:'Prices'}:null)}}
   if(!a&&R.reg&&R.reg.lines){const h=hour();if(h>=8&&h<20)for(const L of sortedLines()){const l=R.reg.lines[L.id];if(l&&l.f>0&&l.riders<3&&l.ops>15&&!buildOf('line:'+L.id)){a={text:`${lineCode(L)} (${lineName(L)}) carries almost nobody. Reroute it, or close it to save ${money(l.ops)} an hour.`,go:['region',`[data-lsel="${L.id}"]`],label:'Lines'};break}}}
-  if(!a&&G.dstat&&(G.dstat.crewDl||0)>=2&&SET().autoCrews===false)a={text:`Flights waited for a crew ${G.dstat.crewDl} times today.`,go:['stands','[data-crewhire]'],label:'Crews'};
+  if(!a&&dayVal(G.dstat,'crewDl')>=2&&SET().autoCrews===false)a={text:`Flights waited for a crew ${G.dstat.crewDl} times today.`,go:['stands','[data-crewhire]'],label:'Crews'};
   if(!a&&R.rwy.q.length>=3)a=up(`${R.rwy.q.length} aircraft are waiting for the runway.`,['atc']);
   if(!a){const f=G.fleet.find(f=>!f.sold&&(f.wear||0)>8&&f.st!=='gate');if(f)a={text:`${AIRCRAFT[f.type].short}s are overdue a service.`,go:['stands',`[data-servicet="${f.type}"]`],label:'Service'}}
   if(!a&&secW>7)a=up(`Security queue is about ${Math.round(secW)} min.`,['lanes','sectech']);

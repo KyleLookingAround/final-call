@@ -10,6 +10,8 @@ const TERM_SUBS=[['dep','Departures'],['arr','Arrivals'],['staff','Staff']]; // 
 const TERM_SECS={dep:['Check-in','Security'],arr:['Arrivals'],staff:['Concourse','Staff']}; // which upgrade sections each shows
 const TERM_PANEL={}; // sub-tab → [() => html]: cards shown under a Terminal sub-tab's upgrades, or 'sales:shops' and 'sales:landside'
 const TERM_CLICK=[],TERM_MINUTE=[],TERM_DAY=[],TERM_DRAW=[]; // (data, button) → true if handled; every game minute; every day; drawing, after the halls
+// the parts' minute and day hooks run as one entry each in the clocks' MINUTE and DAY tables (02-clocks.js)
+clock(MINUTE,'TERM_MINUTE',1,0,()=>{for(const f of TERM_MINUTE)f()});clock(DAY,'TERM_DAY',1,0,()=>{for(const f of TERM_DAY)f()});
 const TERM_SPAWN=[],TERM_EXIT=[]; // (p) → true if it has placed a new departing passenger (a hotel guest), or sent an arriving one somewhere (the hotel)
 const TERM_FIELDS=FIELDS; // saved field → () => its default, for new games and for older saves without it (03-state.js)
 const SIMX={}; // functions the checks reach through window.__sim, added by each part

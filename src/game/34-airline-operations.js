@@ -12,9 +12,10 @@ function pickCrew(trip){let fit=null,fresh=null;for(const c of G.crews){if(c.res
 function crewReady(i,F){
   if(F.partner||F.crew)return true;
   const c=pickCrew(TRIP[(CITY[F.city]||F.ac).tier]);if(c){F.crew=c;return true}
-  if(!F.crewWait){F.crewWait=G.clock;toW(i,0,CABIN_TOP-24);floater('CREW DELAY',WP.x,WP.y,'#FF7A8A',true);if(G.dstat)G.dstat.crewDl=(G.dstat.crewDl||0)+1;if(SET().autoCrews!==false)hireCrew(true)}
+  if(!F.crewWait){F.crewWait=G.clock;toW(i,0,CABIN_TOP-24);floater('CREW DELAY',WP.x,WP.y,'#FF7A8A',true);dayAdd('crewDl');if(SET().autoCrews!==false)hireCrew(true)}
   return false;
 }
+dayStat('crewDl','crew delays');
 function crewAway(F,back){const c=F.crew;if(!c)return;c.res=0;c.back=back;c.duty+=back-G.clock;if(c.duty>=CREW_DUTY-50){c.free=back+crewRest(back);c.duty=0}else c.free=back+10}
 function hireCrew(quiet){const fee=crewFee();if(G.cash<fee)return false;spend(fee,'costs');G.crews.push(mkCrew(G.clock+(quiet?30:20)));if(!quiet&&!R.sim)toast(`Crew hired. They report for duty in 20 min.`,null,null,'goal',4);return true}
 function releaseCrew(){const k=G.crews.findIndex(c=>!c.res&&c.back<=G.clock);if(k<0||G.crews.length<=1)return false;G.crews.splice(k,1);return true}
@@ -23,6 +24,7 @@ function crewTick(){ // the fleet manager keeps enough crews for the fleet
   while(G.crews.length<t&&G.cash>=crewFee()*2)hireCrew(true);
   if(G.crews.length>t+2)releaseCrew();
 }
+clock(HOUR,'crewTick',30,0,crewTick);
 // knock-on: weather and slots at the far end can bring a plane back late
 function farDelay(C){const w=seasonOf(dayOf(G.clock)).name==='Winter',p=(0.05+0.02*C.tier+(w?0.05:0))*(has('feat:occ')?0.5:1);if(rnd()>=p)return 0;return Math.round((10+rnd()*35*(1+0.25*C.tier))*(has('feat:occ')?0.6:1))}
 // overnight checks: at 03:00 planes parked at base are serviced
@@ -30,8 +32,10 @@ function nightChecks(){
   if(!pol('checks'))return;const due=G.fleet.filter(f=>!f.sold&&f.st==='base'&&(f.wear||0)>=4);if(!due.length)return;
   const k=0.8*(1-0.1*G.lv.hangar);let cost=0,n=0;for(const f of due){const c=Math.round(serviceCost(f)*k);if(G.cash<c)break;spend(c,'costs');cost+=c;f.wear=0;n++}
   if(n&&!R.sim){toW(0,200,CABIN_TOP-70);floater(`OVERNIGHT CHECKS · ${n} PLANE${n>1?'S':''} · ${money(cost)}`,WP.x,WP.y,'#5CC8FF',true)}
-  if(G.dstat)G.dstat.checks=(G.dstat.checks||0)+n;
+  dayAdd('checks',n);
 }
+dayStat('checks','planes given overnight checks');
+clock(NIGHT,'nightChecks',1440,180,nightChecks);
 function crewPanel(){
   const s=crewState(),t=crewTarget(),auto=SET().autoCrews!==false;
   return `<div class="sec">Crews<span>wages ${money(s.n*crewWage())} an hour</span></div>

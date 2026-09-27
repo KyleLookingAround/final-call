@@ -23,7 +23,8 @@ export function build(){
     const funcs=uniq([...all(s,/^function\s+(\w+)/gm),...all(s,/^(?:const|let)\s+(\w+)\s*=\s*(?:\([^)]*\)|\w+)\s*=>/gm)]);
     const names=uniq(all(s,/^(?:const|let)\s+(\w+)\s*=/gm).concat(all(s,/^(?:const|let)\s+\w+\s*=[^;]*?,\s*(\w+)\s*=/gm))).filter(n=>!funcs.includes(n));
     const hooks=uniq([...all(s,/\b((?:PAX_STEP|ARR_STEP|TERM_PANEL|TERM_FIELDS|SIMX)\.\w+)\s*=/g),...all(s,/\b(TERM_(?:CLICK|MINUTE|DAY|DRAW|SPAWN|EXIT))\.push\(/g),
-      ...all(s,/\bUPG\.(\w+)\s*=/g).map(k=>'UPG.'+k)]);
+      ...all(s,/\bUPG\.(\w+)\s*=/g).map(k=>'UPG.'+k),...[...s.matchAll(/\bclock\((MINUTE|HOUR|NIGHT|DAY),'(\w+)'/g)].map(m=>m[1]+'.'+m[2]),
+      ...all(s,/\bdayStat\('(\w+)'/g).map(k=>'DAY_STATS.'+k)]);
     files[f]={funcs,names,hooks};for(const n of [...funcs,...names])(defs[n]||(defs[n]=[])).push(f);
   }
   // upgrades declared in the UPG table, and the file each belongs to
@@ -85,6 +86,7 @@ export function query(g,q){
   if(sv.length){for(const k of sv){out.push(`saved field ${k}`);add('used in',g.saved[k])}return out}
   const hook=Object.entries(g.files).filter(([,F])=>F.hooks.some(h=>h===q||h.endsWith('.'+q)||h===q.replace(/\.push$/,''))).map(([f])=>f);
   if(g.defs[q]||hook.length){const at=(g.defs[q]||[]).concat(hook);out.push(`${g.defs[q]?'name':'hook'} ${q}`);add(g.defs[q]?'defined in':'registered by',at);add('used in',users(q).filter(f=>!at.includes(f)));
+    add('hooks',Object.entries(g.files).flatMap(([f,F])=>F.hooks.filter(h=>h.startsWith(q+'.')).map(h=>`${h.slice(q.length+1)} (${f})`))); // a clock or DAY_STATS: what each file registers
     add('checks',checksCalling([q]));const d=docsFor(at.map(f=>'src/game/'+f));add('systems',d.sys);add('decisions',d.dec);return out}
   // anything else: names and files that contain it
   add('names like it',Object.keys(g.defs).filter(n=>n.toLowerCase().includes(lo)).slice(0,20));add('systems like it',Object.keys(g.systems).filter(k=>k.toLowerCase().includes(lo)));

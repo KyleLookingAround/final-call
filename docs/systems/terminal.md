@@ -9,7 +9,7 @@
   - `PAX_STEP[state]` and `ARR_STEP[state]` move departing and arriving passengers each update;
   - `TERM_SUBS` and `TERM_SECS` set the Terminal tab's sub-tabs and their upgrade sections, and `TERM_PANEL[sub]` adds cards (also `'sales:shops'` and `'sales:landside'`);
   - `TERM_SPAWN` can place a new departing passenger (a hotel guest), and `TERM_EXIT` can send an arriving one somewhere other than out;
-  - `TERM_CLICK`, `TERM_MINUTE`, `TERM_DAY` and `TERM_DRAW` handle clicks, every game minute, every day and drawing;
+  - `TERM_CLICK`, `TERM_MINUTE`, `TERM_DAY` and `TERM_DRAW` handle clicks, every game minute, every day and drawing (`TERM_MINUTE` and `TERM_DAY` each run as one entry of the clocks' `MINUTE` and `DAY` tables);
   - `TERM_FIELDS` gives saved fields their defaults for new games and older saves (it is `FIELDS`, the one table of saved fields; see Saves);
   - `SIMX` exposes functions to the checks, and a part's checks go in `tools/checks/<part>.mjs`;
   - new upgrades go in the part's file with `Object.assign(UPG,{...})`.
