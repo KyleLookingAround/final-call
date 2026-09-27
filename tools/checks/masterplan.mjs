@@ -27,14 +27,16 @@ export default async function({open,ok}){
       const oneEach=recs.every(T=>{
         const card=document.querySelector(`#planBody .tnode[data-node="${T.id}"]`);
         return card&&card.classList.contains('s-rec')&&card.querySelector('.trec')&&
-          card.querySelector('.td').textContent===S.planUnlockLine(T);
+          card.querySelector('.td').textContent===S.planUnlockLine(T)&&!card.querySelector('.tu');
       });
+      // the recommended line never says less than the normal card's separate unlock list would
+      const noLoss=recs.every(T=>T.u.map(S.itemName).filter(x=>x!==T.n).every(n=>S.planUnlockLine(T).includes(n)));
       // it only marks plans that are actually ready to approve, and never a locked or already-approved one
       const soundly=recs.every(T=>S.techState(T)==='ready');
-      return {branches:branches.length,recs:recs.length,badges,oneEach,soundly};
+      return {branches:branches.length,recs:recs.length,badges,oneEach,noLoss,soundly};
     });
     ok('masterplan: one recommended plan per category, worded like the level-up card',
-      r.recs>0&&r.badges===r.recs&&r.oneEach&&r.soundly,JSON.stringify(r));
+      r.recs>0&&r.badges===r.recs&&r.oneEach&&r.noLoss&&r.soundly,JSON.stringify(r));
     if(errs.length)ok('masterplan: no page errors (recommendation)',false,errs[0]);
     await ctx.close();
   }

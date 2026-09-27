@@ -75,7 +75,7 @@ function itemName(key){const [k,v]=key.split(':');
 // display only: the one plan per category that looks best to approve next, and the line saying what it unlocks,
 // worded like the level-up card. Changes no cost, effect or unlock — the bot and managers still buy by state alone.
 function recommendedTech(b){const rs=TECH.filter(T=>T.b===b&&techState(T)==='ready');return rs.length?rs.reduce((a,c)=>c.t<a.t?c:a):null}
-function planUnlockLine(T){const x=T.u.filter(k=>/^(ac|rt|mode):/.test(k)).map(k=>k.startsWith('rt:')?`${itemName(k)}: ${lvlCities(+k.slice(3))}`:itemName(k));return T.d+(x.length?' '+x.join(' · ')+'.':'')}
+function planUnlockLine(T){const un=T.u.map(k=>k.startsWith('rt:')?`${itemName(k)}: ${lvlCities(+k.slice(3))}`:itemName(k)).filter(x=>x!==T.n);return T.d+(un.length?' '+un.join(' · ')+'.':'')}
 function research(id){const T=TECH_BY[id];if(!T||techState(T)!=='ready')return false;G.pts-=T.c;(G.tech||(G.tech={}))[id]=1;
   const nt=new Set(G.newTabs||[]);for(const k of T.u){const [a,v]=k.split(':');if(a==='up'&&UPG[v])nt.add(UPG[v].tab);else if(a==='ac'||a==='meth')nt.add('stands');else if(a==='rt'||a==='feat')nt.add('routes');else if(a==='shop')nt.add('sales');else if(a==='mode'||a==='dev'||a==='stn')nt.add('region')}G.newTabs=[...nt];
   if(!R.sim){toast(`Approved: ${T.n}. ${T.u.map(itemName).join(', ')}.`,null,null,'goal',6);kaching();renderTabs();renderPlanBtn()}return true}
