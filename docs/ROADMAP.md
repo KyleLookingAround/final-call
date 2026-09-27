@@ -56,6 +56,10 @@ How sessions work, not the game. Each one is small, measured and recorded in `do
 - **Speed on older phones.** A check that fails if a level 9 airport draws too slowly on a throttled phone profile.
 - **Page size budget.** A check on the size of `dist/index.html`, which grows with every feature.
 - **Accessibility.** Route and line colours that work for colour-blind players, and a larger-text option.
+- **Game logic ideas** (`docs/ideas/game-logic.md`): twelve ideas from the bot on seeds 1–3, ranked. The top three:
+  - **A rating that reflects the last day.** The rating is full from the first day, so nothing that costs rating costs anything.
+  - **Airlines that choose you.** Partner airlines with a mood from their turnarounds, who add flights or leave.
+  - **Levels that ask for something new.** One ask per level from 4, so levels 7–9 aren't a wait for passengers flown.
 
 ## Done
 
