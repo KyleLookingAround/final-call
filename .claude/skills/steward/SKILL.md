@@ -11,6 +11,7 @@ description: Drive a Final Call pull request to green and merged - reading CI fa
 - Every page is seeded, so a failure repeats locally: `npm run check -- <group>` (the groups are listed in the project notes).
 - A line number from an error in the built page: `node tools/where.mjs <line>`.
 - Fix the cause. Never skip, weaken or delete a check to get green, and never push an empty commit to re-run CI.
+- Playwright's Chromium is cached, keyed on the pinned version in the project notes; a run that installs it from scratch (a cache miss, or the first run after a version bump) is not itself a failure.
 
 ## Balance workflow (`balance.yml`)
 
@@ -56,7 +57,7 @@ When several branches were built side by side (the `feature` playbook's "Splitti
 
 - `npm run build` and `npm run check` pass locally.
 - The commit message is a plain imperative subject with no attribution lines; the commit hook enforces this.
-- The PR title and description are plain and follow the template.
+- The PR title and description are plain and follow the template. The Description check (`.github/workflows/description.yml`) enforces this; the tools may add a footer when a PR opens, so read the description back once it's up.
 
 ## Done
 

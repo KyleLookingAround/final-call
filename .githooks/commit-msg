@@ -3,6 +3,7 @@
 # Removes Co-authored-by / session / "generated with" lines that name Claude or Anthropic,
 # then refuses the commit if the message still mentions either.
 # Enabled per clone with: git config core.hooksPath .githooks
+# The same patterns, for a PR's title and description: .github/workflows/description.yml
 msg="$1"
 tmp="$msg.clean"
 grep -viE '^[[:space:]]*(co-authored-by:.*(claude|anthropic)|claude-session:|.*generated (with|by) .*claude|.*claude\.(ai|com)/)' "$msg" > "$tmp" || true

@@ -2,6 +2,45 @@
 
 After a PR merges, look back at the session that built it: what it cost, what slowed it, and what would have saved time or credits (the `steward` playbook's last step). Newest first. A lesson marked → changed something, and says where.
 
+## #46 Runbook experiment [B], first half: cache Playwright's Chromium · 27 Sep 2026
+
+- **Cache is in from:** commit `32eb850` (this PR's only commit). Experiment [A]'s time-to-green for "Looks like a real airport" reads slower before that commit and faster after it for a reason unrelated to that experiment.
+- **Numbers:** session `session_01AyFszbdxXR98QAxraKjCua`, estimate $5: about $2.70 by the time the PR was ready to merge. PR opened 11:54, one re-run from the Actions tab to get a cache hit (no code push needed); CI green both times. `main` moved repeatedly while this PR was open (roughly ten sessions pushing at once), so the branch needed several merges, all but one a `docs/LESSONS.md` conflict, before it would go in.
+- **The measurement itself is the lesson:** caching `~/.cache/ms-playwright` saved a few seconds on `checks.yml`'s `check` job (32s → 29s setup) and nothing measurable on `balance.yml`'s `bot` job (28s → 32s, noise). The Playwright browser download this cache skips was already fast in this environment; `install-deps`'s `apt-get` install of system libraries, which the cache doesn't touch, takes most of the 20–30s either way, cache hit or miss.
+  - → Kept anyway (never slower, one less network dependency), but the second half of [B] and the weekly health check should not assume this cache is a meaningful speed-up on its own. A bigger win, if one is wanted, would cache the `apt` packages `install-deps` installs, not just the browser binary.
+  - → Measuring "before" from `main`'s own recent PRs (rather than only this PR's runs) caught that the before/after difference was mostly run-to-run noise, not a real change; worth doing for any future timing claim.
+  - → With this many sessions merging into `main` at once, a squash-merge attempt can fail with a conflict moments after the branch looked mergeable; retry the merge-in rather than assuming the first fetch is still current.
+
+## A feedback link in Help · 27 Sep 2026
+
+- **Numbers:** session `session_01RcMyepPjoZed4Nu662QwAW`, estimate $6. Started from a checked brief with no questions for the owner; every check passed first time, including the new `feedback` group.
+- **Went well:** the graph queries in the brief (`openHelp`, `17-help-keys-speed.js`, `38-updates.js`) named the file, its functions and where the version lives, so no wider search was needed. Faking the served location with a route interception (rather than trying to override `window.location`) let the check exercise the GitHub Pages path without real network.
+- **Lesson:** `npm run preview` regenerates the link-preview image from a live save's current camera state, so it changes on every run even without a visual change; a PR that didn't touch drawing had nothing to gain from committing a new one. → No change: only commit the regenerated image after a PR that actually changes how the game looks, and check the diff isn't just run-to-run noise first.
+
+## #45 Weekly health check · 27 Sep 2026
+
+- **Numbers:** session `session_012PGwZ7jVPui6Xc9weMjmjt`, estimate $6: $4.01 and 205k of 1M context when the PR opened. Created 11:37, PR opened 11:53 (16 minutes, most of it writing and testing `tools/health.mjs` locally against a short bot run before touching CI); Checks green first time in about 7 minutes. No Balance run: no game code. `main` moved three times while this PR was open, so the branch needed two merges (one, this one, with a `docs/LESSONS.md` conflict) before pushing.
+- **Lessons:**
+  - `workflow_dispatch` can't be triggered on a branch until the workflow file is on the default branch, so "prove it with a manual run on the branch before merging" isn't possible for a brand-new workflow, only for one already on `main`. → No change to a playbook (out of this brief's files to touch): a brief adding a new workflow should ask for proof right after merging instead, and this entry is the record for the next one that does.
+  - Recomputing the bot's own `lvlAt` against a baseline read from an override, rather than trusting the bot's own precomputed `rows`, cost one extra small script but made the forced-drift test straightforward to prove without ever touching `tools/baseline.json`.
+
+## Coordinator playbook · 27 Sep 2026
+
+- **Numbers, this session:** session `session_01AvgXx1pvHYkeuWni23ymZz`, estimate $4: cost and context read 0 while the PR was being built, the usual early reading (`#28` and earlier lessons). One PR, no questions for the owner.
+- **Numbers, the retired coordinator:** session `session_01Y9W4q52Eb4JdVy18E9pk5o`: $176 and 642k of 1M context, over 25 hours (26 Sep 10:18 to 27 Sep 11:11).
+- **Lessons:**
+  - Nothing in the runbook said how a coordinator itself starts, sweeps, talks to an idle session, or hands off to the next one; it only said to keep it light. → A `coordinator` playbook (`.claude/skills/coordinator/SKILL.md`), pointed to from the `feature` playbook's "Keep the coordinator light" and the project notes' playbook list.
+  - `ListAgents` and `SendMessage` don't reach an idle cloud session; `create_trigger` with `persistent_session_id` and a near `run_once_at` does. → In the new playbook, so the next coordinator doesn't have to rediscover it.
+
+## #43 Description check · 27 Sep 2026
+
+- **Numbers:** session `session_01AoXGiU2yJ1jzRSxvJm7cpK`, estimate $4: `usage.cost_usd` and context still read 0 at merge, as in #28's entry below. No game code, so no bot run.
+- **Went well:** `.githooks/commit-msg`'s own patterns carried straight over to `actions/github-script`, and `parts.yml` was a ready template for a checkout-free job. The very first proof run needed no staging: the PR opened with a real tool footer (the bug this brief was written for), and the new check caught it and named the line unprompted.
+- **Lessons:**
+  - Three PRs (#38, #39, #41) had opened with a tool footer before anyone checked for it on the PR itself, only on commits. → The Description check now catches it at `opened`, `edited`, `reopened` and `synchronize`, so editing the description re-runs it without a push.
+  - Listing workflow runs by file name, filtered, kept showing only the first two runs for several minutes after later edits and a push — long enough to look like `edited` had stopped firing. The PR's own check runs (`pull_request_read` → `get_check_runs`) showed the true, current state throughout. → Read a PR's live checks from the PR itself, not a separate runs listing, when timing matters.
+  - `main` moved three times (#40, #41, #42) while this branch was open, all but one touching this file. → Fetch and merge `main` again right before opening a PR that's been sitting on a branch a while, not only right after branching.
+
 ## #39 Saves on the device only · 27 Sep 2026
 
 - **Numbers:** done by the terminal's finishing session, at the owner's request, between features. PR opened 11:25, merged 11:32. One push after it opened (a docs wording fix); CI green first time. Bot STATE identical to main on seeds 1–3.
