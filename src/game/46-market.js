@@ -50,7 +50,7 @@ TERM_MINUTE.push(()=>{
   const D=derived(),n=R.standN||(R.standN=[]);
   for(const i of SIDX){n[i]=0;const F=R.st[i].F;if(!F||F.freighter||F.called!=null)continue;const lead=callLead(i,D);if(F.boardStart!=null?G.clock-F.boardStart>=-lead:boardEta(F,D)<=lead)F.called=G.clock}
   for(const p of R.pax)if(p.state==='gate'&&p.spot<0)n[p.stand]++;
-  for(const i of SIDX)if(n[i]>=15)repAdj(-0.0005*Math.min(n[i],60)/15,'lounge');
+  for(const i of SIDX)if(n[i]>=15)repAdj(-0.0005*Math.min(n[i],60)/15,'lounge',i);
   if(R.lastMin%60===0){R.awayH=R.away||[];R.away=[]}
 });
 
@@ -150,7 +150,7 @@ function dfPath(p,k){const [x0,y0,x1,y1]=mktPlan().df;return [[p.dx,y1-10],[x1-8
 PAX_STEP.df=(p,dt,D)=>{
   const q=dfPath(p,p.di);if(!moveTo(p,q[0],q[1],D.cwalk*p.spd*0.6,dt))return;
   if(++p.di<5)return;
-  if(rnd()<0.3*PTYPE[p.type||'lei'].shop&&!p.kid){const v=4*(1+0.6*p.F.ac.tier)*(G.lv.mall?1.4:1);G.dfEarned=(G.dfEarned||0)+v;earn(v,'shops',p.x,p.y-6,'#F5D08A',p.F)}
+  if(rnd()<0.3*PTYPE[p.type||'lei'].shop&&!p.kid){const v=4*(1+0.6*p.F.ac.tier)*(G.lv.mall?1.4:1);G.dfEarned=(G.dfEarned||0)+v;earn(v,'shops',p.x,p.y-6,'#F5D08A',p.F,p.stand)}
   p.nv=0;nextAct(p,true);
 };
 PAX_STEP.toShop=(p,dt,D)=>{
@@ -179,7 +179,7 @@ PAX_STEP.shop=(p,dt)=>{
 };
 function leaveShop(p){
   const s=G.shops[p.shop];
-  if(s){const F=p.F,frac=clamp(1-Math.max(0,p.t)/p.t0,0.3,1),v=SHOPS[s.type].spend*(LAY.shopBonus&&LAY.shopBonus[SHOPS[s.type].id]||1)*Math.pow(1.25,s.lvl)*(1+0.6*F.ac.tier)*frac*(G.lv.mall?1.4:1);s.earned=(s.earned||0)+v;earn(v,'shops',p.x,p.y-6,'#F5D08A',F)}
+  if(s){const F=p.F,frac=clamp(1-Math.max(0,p.t)/p.t0,0.3,1),v=SHOPS[s.type].spend*(LAY.shopBonus&&LAY.shopBonus[SHOPS[s.type].id]||1)*Math.pow(1.25,s.lvl)*(1+0.6*F.ac.tier)*frac*(G.lv.mall?1.4:1);s.earned=(s.earned||0)+v;earn(v,'shops',p.x,p.y-6,'#F5D08A',F,p.stand)}
   p.nv=(p.nv||0)+1;p.state='outShop';p.sl=-1;R.occOut=true;shopPt(p.shop,p.su,47);p.tx=WP.x;p.ty=WP.y;
 }
 PAX_STEP.outShop=(p,dt)=>{if(moveTo(p,p.tx,p.ty,60*p.spd,dt))nextAct(p,false)};

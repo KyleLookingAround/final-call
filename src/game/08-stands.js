@@ -13,9 +13,9 @@ function updateStand(i,dt,D){
   else if(pl.state==='boarding'){
     if(!F.manifest.length&&!F.straggler&&F.seated>=F.booked&&F.hold>=F.checkedTotal-1e-6&&F.arr.sent>=F.arr.bags&&!(F.xferWait>0)&&F.fault<=0&&crewReady(i,F)){pl.state='closing';pl.t=0.8;settle(i)}
   }
-  else if(pl.state==='closing'){if(pol('curfew')&&nightWin()){F.curfewHeld=true;pl.t=0.2}pl.t-=dt;if(pl.t<=0){S.out={F,t:0,offY:0,alpha:1};R.rwy.q.push({type:'dep',F,stand:i});{const fl=G.fleet[F.fleetIdx];if(fl&&!fl.sold){fl.st='away';fl.dep=G.clock;const dl=CITY[F.city]?farDelay(CITY[F.city]):0;fl.late=dl;fl.back=G.clock+tripMins(CITY[F.city]||F.ac)+dl;crewAway(F,fl.back);fl.dest=F.dest[0];fl.trips=(fl.trips||0)+1;fl.gate=null}}if(STAND_KIND[i]==='remote'&&!G.lounges)repAdj(-0.1,'bus');S.F=null;S.idleT=0;return}}
+  else if(pl.state==='closing'){if(pol('curfew')&&nightWin()){F.curfewHeld=true;pl.t=0.2}pl.t-=dt;if(pl.t<=0){S.out={F,t:0,offY:0,alpha:1};R.rwy.q.push({type:'dep',F,stand:i});{const fl=G.fleet[F.fleetIdx];if(fl&&!fl.sold){fl.st='away';fl.dep=G.clock;const dl=CITY[F.city]?farDelay(CITY[F.city]):0;fl.late=dl;fl.back=G.clock+tripMins(CITY[F.city]||F.ac)+dl;crewAway(F,fl.back);fl.dest=F.dest[0];fl.trips=(fl.trips||0)+1;fl.gate=null}}if(STAND_KIND[i]==='remote'&&!G.lounges)repAdj(-0.1,'bus',i);S.F=null;S.idleT=0;return}}
   if(pl.state==='boarding'&&F.xferWait>0&&pol('xfer')==='leave'&&G.clock>=F.std){
-    const m=F.xferWait;spend(m*F.fare*0.5,'costs');F.booked-=m;F.xferWait=0;F.xferCancelled=true;repAdj(-1,'missed');toW(i,0,CABIN_TOP-24);floater(`LEFT ${m} CONNECTING`,WP.x,WP.y,'#FF7A8A',true);
+    const m=F.xferWait;spend(m*F.fare*0.5,'costs',i);F.booked-=m;F.xferWait=0;F.xferCancelled=true;repAdj(-1,'missed',i);toW(i,0,CABIN_TOP-24);floater(`LEFT ${m} CONNECTING`,WP.x,WP.y,'#FF7A8A',true);
   }
   const docked=pl.state==='deplaning'||pl.state==='turnaround'||pl.state==='boarding'||pl.state==='closing';
   S.ext=clamp(S.ext+(docked?dt:-dt)*1.6,0,1);
@@ -27,7 +27,7 @@ function updateStand(i,dt,D){
   if(F.manifest.length){F.spawnT-=dt;const rate=arrivalRate(F);while(F.spawnT<=0&&F.manifest.length){const L=F.manifest.pop(),pt=[L];while(F.manifest.length&&F.manifest[F.manifest.length-1].leader===L)pt.push(F.manifest.pop());spawnParty(pt);F.spawnT+=pt.length>1?1.6/rate:1/rate}}
   if(F.straggler&&G.clock>=F.stragglerAt){spawn(F.straggler);F.straggler=null}
   if(F.straggler&&pol('late')==='close'&&pl.state==='boarding'&&F.seated>=F.booked-1&&G.clock>=F.std){
-    if(F.straggler.checked)F.checkedTotal--;F.booked--;spend(F.fare,'costs');F.straggler=null;repAdj(-1.5,'missed');toW(i,0,CABIN_TOP-24);floater('DOORS CLOSED',WP.x,WP.y,'#FFC72C',true);
+    if(F.straggler.checked)F.checkedTotal--;F.booked--;spend(F.fare,'costs',i);F.straggler=null;repAdj(-1.5,'missed',i);toW(i,0,CABIN_TOP-24);floater('DOORS CLOSED',WP.x,WP.y,'#FFC72C',true);
   }
   // gate scanners, one per door
   if(pl.state==='boarding'){
@@ -40,7 +40,7 @@ function updateStand(i,dt,D){
       for(const p of gateQueue(i)){if(p.state==='gate'&&p.lane===door&&p.F===F){const k=keyOf(p);if(k<bk){bk=k;best=p}}}
       if(best){
         if(F.firstScan==null)F.firstScan=G.clock;
-        if(best.prio)earn(F.fare*0.4,'priority',null,null,null,F);
+        if(best.prio)earn(F.fare*0.4,'priority',null,null,null,F,i);
         best.state='bridge';best.s=0;if(best.spot>=0)S.spots[best.spot]=null;best.spot=-1;br.push(best);S.scanT[door]=D.scan;
           if(bus&&(S.busN=(S.busN||0)+1)>=40){S.busN=0;S.busT=5}
       } else S.scanT[door]=0;
@@ -135,7 +135,7 @@ function finishArrival(p){
   hotelStay(p);
   if(A.cleared>=A.n&&!A.done){
     A.done=true;const avg=A.waitSum/A.n,mins=G.clock-(A.started??G.clock),pat=patience();
-    if(avg<8+pat)repAdj(0.8,'arrivals');else if(avg>18+pat)repAdj(-Math.min(4,(avg-18-pat)*0.2),'arrivals');
+    if(avg<8+pat)repAdj(0.8,'arrivals',A.stand);else if(avg>18+pat)repAdj(-Math.min(4,(avg-18-pat)*0.2),'arrivals',A.stand);
     if(isNight()&&R.reg&&R.reg.share>0.08&&!Object.values(G.lines||{}).some(L=>L.night))repAdj(-Math.min(2.5,R.reg.share*8),'stranded');
     G.arrReports[A.stand]={tag:A.code+A.no,from:A.from,n:A.n,avg,mins:Math.round(mins),bags:A.bags};
     floater(`${A.code}${A.no} CLEARED · ${Math.round(mins)} MIN`,970,738,avg>18+pat?'#FF7A8A':'#9FC2E0',true);
@@ -156,20 +156,20 @@ function sit(p){
   F.occ[idx]=groupOf(p);F.seated++;p.phase='done';p.state='sitting';
   {const sX=seatX(F,p.col),rY=rowY(F,p.row);p.tx=wx(p.stand,sX,rY);p.ty=wy(p.stand,sX,rY)}
   F.waitSum+=p.wait;F.waitN++;G.paxSeated++;countPax(false);
-  if(p.type==='prm')repAdj(G.lv.assist?0.25+0.1*G.lv.assist:-0.5,'care');if(p.type==='work'&&!F.partner)G.bizFlown=(G.bizFlown||0)+1;
-  {const v=(F.fare||F.ac.fare*G.fare)*(p.row<F.bRows?3:1);if(F.partner)earn(v*partnerCut(),'handling',p.tx,p.ty-4,'#9FC2E0',F);else earn(v,'fares',p.tx,p.ty-4,null,F);if(pol('ads'))earn(0.3*(1+0.4*F.ac.tier),'ads')}tick();
+  if(p.type==='prm')repAdj(G.lv.assist?0.25+0.1*G.lv.assist:-0.5,'care',p.stand);if(p.type==='work'&&!F.partner)G.bizFlown=(G.bizFlown||0)+1;
+  {const v=(F.fare||F.ac.fare*G.fare)*(p.row<F.bRows?3:1);if(F.partner)earn(v*partnerCut(),'handling',p.tx,p.ty-4,'#9FC2E0',F,p.stand);else earn(v,'fares',p.tx,p.ty-4,null,F,p.stand);if(pol('ads'))earn(0.3*(1+0.4*F.ac.tier),'ads')}tick();
 }
 function settle(i){
   const F=R.st[i].F,late=F.curfewHeld?0:Math.max(0,Math.floor(G.clock)-F.std),onTime=late<=0,fx=wx(i,0,CABIN_TOP-40),fy=wy(i,0,CABIN_TOP-40),pat=patience();
   let bonus=0;
-  if(onTime){bonus=F.partner?0:Math.round(F.rev*0.2*100)/100;if(bonus)earn(bonus,'bonus',null,null,null,F);repAdj(2.5,'punctual');G.ontime++;G.streak++;G.bestStreak=Math.max(G.bestStreak,G.streak);floater(bonus?'ON TIME  +'+money(bonus):'ON TIME',fx,fy,'#FFC72C',true);kaching()}
-  else{repAdj(-Math.min(8,1.5+late*0.2),'late');G.streak=0;floater(`LATE ${late} MIN`,fx,fy,'#FF7A8A',true);tone(220,0.35,0.04,'sawtooth')}
+  if(onTime){bonus=F.partner?0:Math.round(F.rev*0.2*100)/100;if(bonus)earn(bonus,'bonus',null,null,null,F,i);repAdj(2.5,'punctual',i);G.ontime++;G.streak++;G.bestStreak=Math.max(G.bestStreak,G.streak);floater(bonus?'ON TIME  +'+money(bonus):'ON TIME',fx,fy,'#FFC72C',true);kaching()}
+  else{repAdj(-Math.min(8,1.5+late*0.2),'late',i);G.streak=0;floater(`LATE ${late} MIN`,fx,fy,'#FF7A8A',true);tone(220,0.35,0.04,'sawtooth')}
   const wait=F.waitN?F.waitSum/F.waitN:0;
-  if(F.freighter){}else if(wait<5+pat)repAdj(1,'queues');else if(wait>12+pat)repAdj(-Math.min(5,(wait-12-pat)*0.25),'queues');
-  if(F.cargo)earn((F.partner?partnerCut():1)*(F.freighter?(F.cargo+F.arr.bags)*CARGO_RATE():F.cargo*F.ac.fare*0.8)*(G.lv.cargohub?2:1)*(1+devSum('cargo')+0.15*Object.values(G.lines||{}).filter(L=>L.freight).length),'cargo',null,null,null,F);
-  const op=F.partner?0:(F.op??F.ac.op*fuelMul());if(op)spend(op,'costs');else earn(F.ac.op*0.6,'handling',null,null,null,F);
+  if(F.freighter){}else if(wait<5+pat)repAdj(1,'queues',i);else if(wait>12+pat)repAdj(-Math.min(5,(wait-12-pat)*0.25),'queues',i);
+  if(F.cargo)earn((F.partner?partnerCut():1)*(F.freighter?(F.cargo+F.arr.bags)*CARGO_RATE():F.cargo*F.ac.fare*0.8)*(G.lv.cargohub?2:1)*(1+devSum('cargo')+0.15*Object.values(G.lines||{}).filter(L=>L.freight).length),'cargo',null,null,null,F,i);
+  const op=F.partner?0:(F.op??F.ac.op*fuelMul());if(op)spend(op,'costs',i);else earn(F.ac.op*0.6,'handling',null,null,null,F,i);
   {const fl=G.fleet[F.fleetIdx];if(fl)fl.wear=(fl.wear||0)+F.ac.wear*(1-0.25*G.lv.hangar)}
-  if(nightWin()&&!pol('curfew')){const nz=(1-0.3*G.lv.insul)*(F.freighter?1.5:1)*(1+0.25*G.level);G.noiseDay=(G.noiseDay||0)+nz;R.noiseT=G.clock;repAdj(-0.4*nz,'noise')}
+  if(nightWin()&&!pol('curfew')){const nz=(1-0.3*G.lv.insul)*(F.freighter?1.5:1)*(1+0.25*G.level);G.noiseDay=(G.noiseDay||0)+nz;R.noiseT=G.clock;repAdj(-0.4*nz,'noise',i)}
   if(!F.partner&&F.city&&!F.freighter){const rs=rsOf(F.city),lf=F.booked/F.seatsN;rs.p+=F.booked;rs.v+=F.rev;rs.n++;rs.c=(rs.c||0)+op;rs.tp+=F.booked;rs.tv+=F.rev;rs.tn++;rs.tc=(rs.tc||0)+op;rs.lf=rs.tn>1?rs.lf*0.7+lf*0.3:lf}
   G.flights++;G.flown+=F.booked;if(G.dstat){const ds=G.dstat,h=Math.floor(G.clock/60)%24;ds.flights++;if(onTime)ds.ontime++;if(!F.freighter&&F.booked>=F.seatsN)ds.full=(ds.full||0)+1;if(h>=23||h<5)ds.night=(ds.night||0)+1;if(onTime&&R.fx.snow>G.clock)ds.snowOT=(ds.snowOT||0)+1}
   const mins=Math.max(1,G.clock-(F.firstScan??F.boardStart??F.start));

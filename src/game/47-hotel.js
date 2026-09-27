@@ -77,7 +77,7 @@ function hotelStranded(){
 function strand(i,F){
   if(F.freighter||F.stranded||G.clock<F.std+60)return;
   {F.stranded=true;const n=F.booked,until=checkOut();let own=0;while(own<n&&hotelBook('strand',until))own++;const city=n-own;
-    if(own)spend(own*roomRate(1)*0.3,'costs');if(city){spend(city*roomRate(1)*1.2,'costs');G.hotelBook.city+=city;repAdj(-Math.min(2.5,city*0.02),'stranded')}else repAdj(0.3,'stranded');
+    if(own)spend(own*roomRate(1)*0.3,'costs',i);if(city){spend(city*roomRate(1)*1.2,'costs',i);G.hotelBook.city+=city;repAdj(-Math.min(2.5,city*0.02),'stranded',i)}else repAdj(0.3,'stranded',i);
     toW(i,0,CABIN_TOP-24);floater(city?`HELD OVERNIGHT · ${city} TO CITY HOTELS`:`HELD OVERNIGHT · ${own} ROOMS`,WP.x,WP.y,city?'#FF7A8A':'#FFD696',true);
   }
 }
