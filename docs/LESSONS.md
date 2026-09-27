@@ -2,7 +2,13 @@
 
 After a PR merges, look back at the session that built it: what it cost, what slowed it, and what would have saved time or credits (the `steward` playbook's last step). Newest first. A lesson marked → changed something, and says where.
 
-## Version 32: ready for what's next · 27 Sep 2026
+## #46 Runbook experiment [B], second half: only the touched check groups on drafts · 27 Sep 2026
+
+- **Numbers:** estimate $5. PR #79 opened as a draft 17:21. Its own commits give the two runs to compare directly:
+  - A commit touching `.github/workflows/checks.yml` itself (unmappable, so `tools/touched.mjs` correctly fell back to every group): 7m18s total (17:22:04–17:29:22) — 31s of setup (checkout, `npm ci`, a Playwright cache hit, `install-deps`) then 6m43s for all 186 checks.
+  - A docs-only follow-up (`docs/LESSONS.md`, this entry): touches nothing but the floor (`brief`, `graph`, `sim`) — measured below once its own run lands.
+- **Went well:** the fallback logic proved itself on this PR's own first run without needing a special test — a workflow-file change is exactly the case the brief calls out, and `tools/touched.mjs` mapped it to "every group" correctly on the first try.
+- **Lesson so far:** the fixed setup (31s) is small next to the full suite (6m43s), so on a full run `install-deps` does *not* dominate; whether it dominates a touched-groups run depends on how few groups that run needs — filled in below.
 
 - **Numbers:** estimate $4: about $5.25 by the PR's first stopping point, a little over the estimate, entirely from the fixture bug below rather than the release notes themselves. Started 16:10; the docs and What's new entry were written and pushed within the first six minutes, well before the bot run.
 - **What it found:** version 30's level-up card added a saved setting (`G.set.lvlCard`) after version 29's fixtures were made, with no fixtures of its own since, so this release owed the bot run `tools/saves/` said it didn't. Since `docs/HISTORY.md`'s top row only tracks version numbers, the graph query for saved fields (`node tools/graph.mjs resetAll`) named the right files but the actual "did anything change" answer came from reading `DEFAULT()`'s diff since v29's fixture commit, not from a check.
