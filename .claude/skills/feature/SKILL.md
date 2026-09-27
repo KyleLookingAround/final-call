@@ -34,6 +34,7 @@ Work through these steps in order. Small fixes (a label, a nit, an obvious bug) 
 - `npm run check -- shots`, then read `build/shots/*.png` (phone, tablet, desktop). For other screens, write a Playwright script in `build/`.
 - Economy or progression: follow the `balance` playbook.
 - If a check fails, reproduce it (pages are seeded, so it repeats) and fix the cause. Never weaken or skip a check to get green.
+- **Pending checks** (`tools/checks/pending.txt`): when your code makes a pending check pass, the run fails with `pending, but passes`. Take its line out in the same PR, which switches it on. Change a pre-written check only to fix a mistake in it, and say what and why in the PR; loosening a pass mark needs the coordinator. `TP_ALL=1` plays the checks that otherwise wait for their code.
 
 ## 5. Keep the docs true
 
