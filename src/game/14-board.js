@@ -6,8 +6,8 @@ setInterval(()=>{for(const el of FLAPS){let busy=false;for(const c of el._cells)
 function statusText(F){
   const pl=F.plane;
   if(F.freighter){if(pl.state==='boarding')return F.fault>0?'TECH DELAY':F.crewWait&&!F.crew?'CREW DELAY':G.clock>F.std?'DELAYED':'LOADING';return pl.state==='closing'?'CLOSED':'CARGO'}
-  if(pl.state==='wait'||pl.state==='approach'||pl.state==='inbound'||pl.state==='deplaning'||pl.state==='turnaround')return G.clock>=F.std-30?'GO TO GATE':'CHECK-IN';
-  if(pl.state==='boarding'){if(F.fault>0)return 'TECH DELAY';if(F.crewWait&&!F.crew)return 'CREW DELAY';if(G.clock>F.std)return 'DELAYED';if(F.seated>=F.booked&&F.hold<F.checkedTotal)return 'BAGGAGE';if(G.clock>=F.std-10)return 'FINAL CALL';return 'BOARDING'}
+  if(pl.state==='wait'||pl.state==='approach'||pl.state==='inbound'||pl.state==='deplaning'||pl.state==='turnaround')return gateCallText(F);
+  if(pl.state==='boarding'){if(!isCalled(F))return gateCallText(F);if(F.fault>0)return 'TECH DELAY';if(F.crewWait&&!F.crew)return 'CREW DELAY';if(G.clock>F.std)return 'DELAYED';if(F.seated>=F.booked&&F.hold<F.checkedTotal)return 'BAGGAGE';if(G.clock>=F.std-10)return 'FINAL CALL';return 'BOARDING'}
   return 'CLOSED';
 }
 let boardSig='';
@@ -32,7 +32,7 @@ function updateBoard(){
     const i=+r.dataset.stand,F=R.st[i].F,q=r._q;if(!q)return;
     if(!F){setFlaps(q('std'),'');setFlaps(q('flt'),'');setFlaps(q('dest'),'');q('city').textContent='';setFlaps(q('gate'),GATES[i]);setFlaps(q('st'),gateStatus(i)==='INBOUND'?'INBOUND':'NO SERVICE');return}
     if(R.bm==='arr'){const A=F.arr,s=arrStatus(F);setFlaps(q('std'),hhmm(A.sta));setFlaps(q('flt'),A.code+A.no);setFlaps(q('dest'),A.from[0]);q('city').textContent=A.from[1];setFlaps(q('gate'),GATES[i]);setFlaps(q('st'),s);q('st').classList.remove('late');return}
-    setFlaps(q('std'),hhmm(F.std));setFlaps(q('flt'),F.code+F.no);setFlaps(q('dest'),F.dest[0]);q('city').textContent=F.dest[1];setFlaps(q('gate'),GATES[i]);
+    setFlaps(q('std'),hhmm(F.std));setFlaps(q('flt'),F.code+F.no);setFlaps(q('dest'),F.dest[0]);q('city').textContent=F.dest[1];setFlaps(q('gate'),isCalled(F)?GATES[i]:'');
     const s=statusText(F);setFlaps(q('st'),s);q('st').classList.toggle('late',s==='DELAYED'||s==='TECH DELAY');
   });
 }

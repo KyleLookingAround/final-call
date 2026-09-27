@@ -35,15 +35,16 @@ export default async function({open,ok,saveText}){
     A1.reclaim=45;A1.bg.fed=0;A1.bags=Math.max(A1.bags,90);A1.bg.hall=0;A2.reclaim=0;A2.bg.fed=0;A2.bags=Math.max(A2.bags,30);A2.bg.hall=30;A2.bg.stall=0;
     const pax=R.pax;R.pax=[];for(let k=0;k<30;k++)S.update(0.1);R.pax=pax.concat(R.pax);const r={a1:S.bagStatus(A1),a2:S.bagStatus(A2)};R.sim=false;return r});
   ok('baggage: bags held up by another flight’s on the carousel show BAGS LATE',c.a2==='BAGS LATE'&&c.a1!=='BAGS LATE',JSON.stringify(c));
-  // a tight transfer: the next flight is ready to go before the bag gets there
+  // a tight transfer: the next flight is ready to go before the bag gets there. Couriers are paid from costs, two fares a
+  // bag; the till's cash can rise meanwhile from shops
   const t=await page.evaluate(()=>{const S=__sim,G=S.G,R=S.R;R.sim=true;G.lv.bagsys=0;
     let A=null,F2=null;for(let k=0;k<600*10&&!F2;k++){S.update(0.1);for(const i of S.SIDX){const F=R.st[i].F;if(F&&F.arr.xb&&!F.arr.started){A=F.arr;F2=A.xb.find(x=>R.st[x.i].F===x&&!x.bg?.cut);if(F2)break}}}
     if(!F2){R.sim=false;return {none:true}}
-    const cash=G.cash,miss=G.bagMiss||0,xin=S.bagRT().xin||0;
+    const cost=G.revBy.costs||0,miss=G.bagMiss||0,xin=S.bagRT().xin||0;
     F2.manifest.length=0;F2.straggler=null;F2.seated=F2.booked;F2.plane.state='boarding';F2.std=G.clock;
     for(let k=0;k<60;k++)S.update(0.1); // it waits five minutes for bags on their way
-    R.sim=false;return {miss:(G.bagMiss||0)-miss,f2:F2.bg?F2.bg.miss:0,paid:cash-G.cash,xin:(S.bagRT().xin||0)-xin}});
-  ok('baggage: a tight transfer misses its flight, and a courier takes it on',!t.none&&t.f2>=1&&t.miss>=1&&t.paid>0,JSON.stringify(t));
+    R.sim=false;return {miss:(G.bagMiss||0)-miss,f2:F2.bg?F2.bg.miss:0,paid:(G.revBy.costs||0)-cost,owed:((G.bagMiss||0)-miss)*F2.fare*2,xin:(S.bagRT().xin||0)-xin}});
+  ok('baggage: a tight transfer misses its flight, and a courier takes it on',!t.none&&t.f2>=1&&t.miss>=1&&t.paid>=t.owed-1e-6,JSON.stringify(t));
   await ctx.close();
   // early bags: with fewer make-up positions than flights, later flights' bags wait in the store, or circle the sorter without one
   const e=await (async()=>{const {ctx,page}=await open(undefined,saveText('v27-L9.json'),false,{still:true});
