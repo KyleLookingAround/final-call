@@ -1,5 +1,5 @@
 // The airport view's drawing layers and lighting pass (src/game/50-scene.js, docs/specs/real-airport.md): every layer
-// draws once a frame, in order, and only in the airport view; the lighting pass darkens the apron at night and adds its
+// draws once a frame, in order, and only in the airport view; draw() calls nothing but the layers; the lighting pass darkens the apron at night and adds its
 // lights; drawing never changes the game; and how long a frame takes to draw, against a calibration run (so machines
 // compare) and the speed budget the real airport's parts share.
 const DRAW_BUDGET=0.55; // draw ms a frame over calibration ms, in each scene. Main before the real airport: 0.30-0.36x;
