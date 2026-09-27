@@ -1,14 +1,16 @@
 /* ================= late runners, and a passenger's story ================= */
-// Final call comes 12 minutes before departure while the plane boards: shops send their last browsers out and security
-// stops searching bags (46-market.js, 43-departures.js). From then anyone of that flight still walking to the gate runs.
+// Final call comes 12 minutes before departure while the plane boards, when shops send their last browsers out and
+// security stops searching bags (46-market.js, 43-departures.js), or sooner once nearly everyone else is aboard. From
+// then anyone of that flight still walking to the gate runs.
 // Once everyone else is seated after the departure time, the gate holds a little for runners who started before it,
 // then closes its door on them; the board shows GATE CLOSING while they run. Latecomers who reach the airside after the
 // departure time run too, but the gate waits for them as it always has.
 // Every departing passenger also has a story, told by a card when tapped: who they are, where they've been today and
 // how they feel about it. Runners and stories are runtime only, kept off the passengers themselves (WeakMaps), so the
 // passengers keep their one shape (05-flights.js seatPax) and nothing is saved.
-const RUN_AT=12,RUN_CLOSING=5,RUN_MUL=1.8,RUN_PRM=1.2,RUN_TOP=300,RUN_MISS=-0.6; // minutes before departure; pace; rating
-const RUN_HOLD={wait:3,close:1},DAWDLE=0.05; // minutes the gate holds for runners once the rest are seated, by the Late passengers policy; shoppers who browse on past the call
+const RUN_AT=12,RUN_CLOSING=5,RUN_MUL=1.8,RUN_PRM=1.2,RUN_TOP=280,RUN_MISS=-0.6; // minutes before departure; pace (top: the best walking pace, so the drawn catch-up stays under the movement check's 330); rating
+const RUN_HOLD={wait:3,close:1}; // minutes the gate holds for runners once the rest are seated, by the Late passengers policy
+const DAWDLE=0.05,FC_LEFT=3; // odds a shopper browses on past the gate call; final call comes early with this many others left to board
 const TALES=new WeakMap(),RUNS=new WeakMap(); // passenger → their story; flight → its runners {list, n (can miss), holdAt}
 const RUN_LOG={started:0,boarded:0,missed:0}; // what the checks read
 Object.assign(REPWHY,{runner:['passengers who ran for their gate and missed it',['walkway','mover'],' Calling gates earlier (Office › Policies) gives shoppers more time.']});REPLBL.runner='Runners who missed their flight';
@@ -35,7 +37,7 @@ onLeave('toShop',p=>{if(p.state==='shop'&&G.shops[p.shop])note(p,'shop',SHOPS[G.
 onLeave('toMkt',p=>{if(p.state!=='mkt')return;const t=tale(p),e=t.ev[t.ev.length-1];if(e&&e[1]==='mkt'&&e[2]===p.act)return;note(p,'mkt',p.act,p.act==='wc'?0:p.sl<0?-0.3:0.4)});
 
 /* ---------- runners ---------- */
-function runsOf(F){let r=RUNS.get(F);if(!r){r={list:[],n:0,holdAt:null,called:false};RUNS.set(F,r)}return r}
+function runsOf(F){let r=RUNS.get(F);if(!r){r={list:[],n:0,holdAt:null,called:false,fc:false,daw:[]};RUNS.set(F,r)}return r}
 function startRun(p,t,F){
   t.run=G.clock<F.std?1:2;const r=runsOf(F);r.list.push(p);if(t.run===1)r.n++;RUN_LOG.started++;note(p,'run',p.stand,-1);
 }
@@ -43,8 +45,8 @@ function endRun(p,t,how){const r=RUNS.get(p.F),k=r?r.list.indexOf(p):-1;if(k>=0)
 const runPace=(p,D)=>{const v=D.cwalk*p.spd*walkMul(p),m=p.type==='prm'?RUN_PRM:RUN_MUL;return Math.max(v,Math.min(v*m,RUN_TOP))};
 // to the gate: at a walk, or at a run after final call
 {const f=PAX_STEP.toGate;PAX_STEP.toGate=(p,dt,D)=>{
-  const F=p.F;
-  if(G.clock>=F.std-RUN_AT&&F.plane.state==='boarding'){const t=tale(p);if(!t.run)startRun(p,t,F);
+  const F=p.F; // only a late shopper can be called before the last 12 minutes, so only they need the flight's runners looked up
+  if((G.clock>=F.std-RUN_AT||p.late&&RUNS.get(F)?.fc)&&F.plane.state==='boarding'){const t=tale(p);if(!t.run)startRun(p,t,F);
     if(t.run<3){if(walk(p,runPace(p,D),dt)){p.state='gate';PAX_STEP.gate(p,0);endRun(p,t,3);RUN_LOG.boarded++;note(p,'gate',p.stand,1.2)}return}}
   f(p,dt,D);if(p.state==='gate')note(p,'gate',p.stand,0.2);
 }}
@@ -59,13 +61,21 @@ function missRun(p,i){
 // When a gate is called, a few of its passengers in the shops lose track of time and browse on until final call, when
 // the shop sends them out (46-market.js, p.late): they're the runners. A look over the passengers once per call.
 function dawdle(F){
-  for(const p of R.pax)if(p.F===F&&p.state==='shop'&&!p.late&&!p.inbound&&rnd()<DAWDLE){p.late=true;p.t=Math.max(p.t,F.std-G.clock)}
+  const d=runsOf(F).daw;
+  for(const p of R.pax)if(p.F===F&&p.state==='shop'&&!p.late&&!p.inbound&&rnd()<DAWDLE){p.late=true;p.t=Math.max(p.t,F.std-G.clock);d.push(p)}
+}
+// Final call: 12 minutes before departure, or sooner once all but a few are aboard, so dawdlers never hold a plane that
+// would otherwise leave early. Then the dawdlers leave their shops and run.
+function finalCall(F,r){
+  if(r.fc||F.plane.state!=='boarding'||G.clock<F.std-RUN_AT&&!(r.daw.length&&F.seated>=F.booked-r.daw.length-FC_LEFT))return;
+  r.fc=true;for(const p of r.daw)if(p.state==='shop'&&p.F===F)leaveShop(p);r.daw.length=0;
 }
 // every game minute: the gates just called, then, once everyone else is seated after the departure time, hold the gate
 // and close it on the runners
 TERM_MINUTE.push(()=>{
   for(const i of SIDX){const F=R.st[i].F;if(!F||F.freighter)continue;const r=runsOf(F);
     if(!r.called&&F.called!=null){r.called=true;if(G.clock-F.called<1.5)dawdle(F)}
+    finalCall(F,r);
     if(!r.n)continue;
     if(F.plane.state!=='boarding'||G.clock<F.std||F.manifest.length||F.straggler||F.seated<F.booked-r.n){r.holdAt=null;continue}
     if(r.holdAt==null)r.holdAt=G.clock;
@@ -74,7 +84,7 @@ TERM_MINUTE.push(()=>{
     toW(i,0,CABIN_TOP-24);floater('GATE CLOSED',WP.x,WP.y,'#FF7A8A',true);r.holdAt=null;
   }
 });
-BOARD_STATUS.push(F=>{const r=RUNS.get(F);return r&&r.list.length&&G.clock>=F.std-RUN_CLOSING?'GATE CLOSING':null});
+BOARD_STATUS.push(F=>{const r=RUNS.get(F);return r&&r.list.length&&(G.clock>=F.std-RUN_CLOSING||G.clock<F.std-RUN_AT)?'GATE CLOSING':null});
 
 /* ---------- drawing: speed lines behind each runner, and a ring on the passenger whose story is open ---------- */
 LAYER.pax.push(()=>{
@@ -160,4 +170,4 @@ PAX_TAP.push((wx,wy,k)=>{
   if(!best){closeStory();return false}
   openStory(best);return true;
 });
-Object.assign(SIMX,{RUN_LOG,RUN_AT,taleOf:p=>TALES.get(p),runsOf:F=>RUNS.get(F),taleLines,storyHTML,openStory,closeStory,missRun});
+Object.assign(SIMX,{RUN_LOG,RUN_AT,RUN_TOP,taleOf:p=>TALES.get(p),runsOf:F=>RUNS.get(F),taleLines,storyHTML,openStory,closeStory,missRun});
