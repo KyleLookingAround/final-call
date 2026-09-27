@@ -1,6 +1,6 @@
 # Systems review: how the systems connect, and how to make choices interesting
 
-Issue: #65 · Status: Proposed · PRs: #66
+Issue: #65 · Status: Approved · PRs: #66
 
 A plan, not a change to the game. The owner asked for the game's systems to work smoothly together and interact in meaningful ways, so that choices are interesting, and is open to refactoring the code and reworking systems to get there. Written 27 Sep 2026 from `main` at version 30 (after #49 and #53; brief: `docs/briefs/systems-review.md`). Three parts: how the systems connect today, design proposals that link them, and the refactors that make those possible, then a recommended order. Nothing here is built until the owner approves it on the issue.
 
@@ -414,7 +414,7 @@ Ranked steps, each small enough for one session and one PR, each a pure refactor
 6. **Proposal 10** (managers that trade) with refactor 10, before bundle 5.
 7. Then the bundles in the owner's order: bundle 4 with proposal 3 and #57 idea 4; bundle 5 with proposals 6 and 7, #57 idea 2 and board 18; bundle 6 with proposals 4 and 5.
 
-What the owner decides on the issue: whether to approve this order, or to move a proposal up or out. The default after 12 hours is to leave this spec Proposed and build nothing from it.
+The owner approved this order in full on 27 Sep 2026 (#65).
 
 ## Speed
 
