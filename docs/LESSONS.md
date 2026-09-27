@@ -2,6 +2,13 @@
 
 After a PR merges, look back at the session that built it: what it cost, what slowed it, and what would have saved time or credits (the `steward` playbook's last step). Newest first. A lesson marked → changed something, and says where.
 
+## Game logic ideas · 27 Sep 2026
+
+- **Numbers:** session `session_01DdCEFGD4zwqgzUBqSVLz86`, estimate $8; the cost wasn't reported yet when the PR opened (`usage.cost_usd` missing from `get_session`). Created 12:20; the three bot runs on `main` ran in the background while the code was read, and took about 12 minutes side by side. Docs only, so no Balance run.
+- **Lessons:**
+  - The bot's six-hourly snapshots already hold most of what a look at the game logic needs: cash, rating, the day's passengers, gates, supply against the market, idle stands and plans left. A 20-line script that divided each level requirement by its target at each snapshot showed which one holds each level back, without adding anything to the bot. No change: the brief kept `tools/` out, but a `--why` summary in the bot would save the next session that script.
+  - Reading `graph.mjs` for `update`, `checkLevel` and `dayTick` pointed at the right files first time; the long one-line functions meant reading with `cut -c` to keep the context small.
+
 ## #45 Weekly health check · 27 Sep 2026
 
 - **Numbers:** session `session_012PGwZ7jVPui6Xc9weMjmjt`, estimate $6: $4.01 and 205k of 1M context when the PR opened. Created 11:37, PR opened 11:53 (16 minutes, most of it writing and testing `tools/health.mjs` locally against a short bot run before touching CI); Checks green first time in about 7 minutes. No Balance run: no game code. `main` moved three times while this PR was open, so the branch needed two merges (one, this one, with a `docs/LESSONS.md` conflict) before pushing.
