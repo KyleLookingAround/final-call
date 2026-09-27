@@ -36,8 +36,8 @@ function regionEvent(){
   if(!opts.length)return false;const ev=pickOf(opts);
   if(ev==='signal'||ev==='wire'){const L=pickOf(ev==='signal'?rails:trams),m=dur(ev==='signal'?60:45),cost=Math.round(40+L.freq*MODES.bus.vh*6*(1+G.level));
     R2[L.id]=G.clock+m;(R.fx.why||(R.fx.why={}))[L.id]=ev==='signal'?'SIGNAL FAILURE':'WIRE FAULT';
-    if(pol('repl')&&G.cash>=cost){spend(cost,'transitOps');(R.fx.repl||(R.fx.repl={}))[L.id]=G.clock+m;news(`A ${R.fx.why[L.id].toLowerCase()} hit ${lineCode(L)}: replacement buses ran (${money(cost)}).`)}
-    else{repAdj(-2,'stranded');news(`A ${R.fx.why[L.id].toLowerCase()} stopped ${lineCode(L)} for ${m} min.`)}}
+    if(pol('repl')&&G.cash>=cost){spend(cost,'transitOps',L.id);(R.fx.repl||(R.fx.repl={}))[L.id]=G.clock+m;news(`A ${R.fx.why[L.id].toLowerCase()} hit ${lineCode(L)}: replacement buses ran (${money(cost)}).`)}
+    else{repAdj(-2,'stranded',L.id);news(`A ${R.fx.why[L.id].toLowerCase()} stopped ${lineCode(L)} for ${m} min.`)}}
   else if(ev==='roadworks'){const L=pickOf(roads),RE=routeEdges(L.mode,L.stops)||[];if(!RE.length)return false;R.fx.roadworks=G.clock+dur(150);R.fx.rwE=pickOf(RE).e.id}
   else if(ev==='leaves'){R.fx.leaves=G.clock+dur(240)}
   regionTick();return true;
