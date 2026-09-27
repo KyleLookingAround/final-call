@@ -28,12 +28,7 @@ function drawStandApron(i){
     mono(STAND[i].lvl>G.level?`Needs ${LEVELS[STAND[i].lvl].name}`:'For sale · '+money(STAND[i].cost),lx,ly+20,'#56606A',11,'center');
     return;
   }
-  ctx.save();standCtx(i);
-  ctx.strokeStyle='rgba(255,199,44,.4)';ctx.lineWidth=2;ctx.setLineDash([10,8]);ctx.beginPath();ctx.moveTo(0,ay+ah);ctx.lineTo(0,FACE_Y+16);ctx.stroke();ctx.setLineDash([]);
-  const bar=FACE_Y+16;ctx.strokeStyle='rgba(255,199,44,.5)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-26,bar);ctx.lineTo(26,bar);ctx.stroke();
-  ctx.restore();
-  ctx.font='800 26px "Saira Condensed","Arial Narrow",sans-serif';ctx.fillStyle='rgba(255,199,44,.16)';ctx.textBaseline='alphabetic';
-  toW(i,112,ay+ah-24);ctx.textAlign='center';ctx.fillText(GATES[i],WP.x,WP.y+9);
+  // a built stand's paint (lead-in, stop bar, safety lines, number) is on the apron layer: 51-markings.js
   if(S.out)drawPlane(S.out.F,i,S.out.offY,false,S.out.alpha);
   const F=S.F;if(F&&F.plane.state!=='wait'&&F.plane.state!=='approach')drawPlane(F,i,F.plane.offY,F.plane.state==='inbound',F.plane.alpha??1);
 }
@@ -54,10 +49,7 @@ function drawBridge(i){
   if(F&&F.rear&&e>0.5){ctx.fillStyle='#7F8A94';ctx.fillRect(g.rd.x-15,g.rd.y-5,13,10);ctx.strokeStyle='#4A545E';ctx.lineWidth=1;for(let k=1;k<4;k++){ctx.beginPath();ctx.moveTo(g.rd.x-15+k*3.3,g.rd.y-5);ctx.lineTo(g.rd.x-15+k*3.3,g.rd.y+5);ctx.stroke()}}
   ctx.restore();
   if(F&&F.rear){ctx.strokeStyle='#56616B';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);ctx.beginPath();F.P.rear.pts.forEach((p,k)=>k?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke();ctx.setLineDash([])}
-  if(F&&e>0.6&&(F.hold<F.bagsIn||F.arr.unloaded<F.arr.bags)){
-    const ph=(performance.now()/1000*0.45+i*0.3)%2,s=(ph<1?ph:2-ph)*F.P.cart.len,q=ptAt(F.P.cart,s);
-    ctx.fillStyle='#3A424B';ctx.fillRect(q[0]-5,q[1]-4,10,8);ctx.fillStyle='#D9A066';ctx.fillRect(q[0]-4,q[1]+6,8,7);ctx.fillRect(q[0]-4,q[1]+15,8,7);ctx.fillStyle='#FFC72C';ctx.fillRect(q[0]-1.5,q[1]-3,3,2);
-  }
+  // the baggage cart is drawn with the rest of the turnaround's vehicles: 55-vehicles.js
 }
 function drawTerminal(D){
   drawRooms();drawTerminalHalls(D);
@@ -142,11 +134,7 @@ function drawAirfield(d){
       if(r===1&&isBuilding('up:runway2')){hatch(20,y-h/2,W-40,h,bprog('up:runway2'),'BUILDING RUNWAY');continue}
       ctx.strokeStyle='#2B3238';ctx.lineWidth=1.5;ctx.setLineDash([6,6]);ctx.strokeRect(20,y-h/2,W-40,h);ctx.setLineDash([]);mono('SECOND RUNWAY · FOR SALE',W/2,y+4,'#4A535D',10,'center');continue}
     ctx.fillStyle='#0B0E11';ctx.fillRect(20,y-h/2,W-40,h);
-    ctx.strokeStyle='rgba(236,232,223,.45)';ctx.lineWidth=1.5;ctx.setLineDash([16,14]);ctx.beginPath();ctx.moveTo(90,y);ctx.lineTo(W-90,y);ctx.stroke();ctx.setLineDash([]);
-    ctx.fillStyle='rgba(236,232,223,.55)';for(let k=0;k<5;k++){const yy=y-h/2+4+k*(h-8)/4.5;ctx.fillRect(26,yy,18,2);ctx.fillRect(W-44,yy,18,2)}
-    ctx.font='800 13px "Saira Condensed","Arial Narrow",sans-serif';ctx.fillStyle='rgba(236,232,223,.4)';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText(G.lv.runway2?(r?'09R':'09L'):'09',62,y+1);ctx.fillText(G.lv.runway2?(r?'27L':'27R'):'27',W-62,y+1);
-    if(d>0){ctx.fillStyle=`rgba(255,236,190,${0.35+d})`;for(let x=24;x<W-20;x+=40){ctx.fillRect(x,y-h/2-1,2,2);ctx.fillRect(x,y+h/2-1,2,2)}}
+    rwyMarks(y,h,r); // its markings, and its edge lights by night: 51-markings.js
     if(R.fx.snow>G.clock){ctx.fillStyle='rgba(236,240,245,.12)';ctx.fillRect(20,y-h/2,W-40,h)}
   }
   // tower, fire station, fuel farm, solar farm
@@ -196,7 +184,7 @@ function draw(){
   ctx.fillStyle='#14171B';ctx.fillRect(0,Y0,W,Y1-Y0);
   const d=V.d;drawAirfield(d);layer('airfield');
   ctx.strokeStyle='#1A1E23';ctx.lineWidth=1;ctx.beginPath();for(let x=0;x<=W;x+=50){ctx.moveTo(x+.5,AF_Y+32);ctx.lineTo(x+.5,TERM_Y)}for(let y=AF_Y+50;y<TERM_Y;y+=50){ctx.moveTo(0,y+.5);ctx.lineTo(W,y+.5)}ctx.stroke();
-  ctx.fillStyle='#101316';ctx.fillRect(0,AF_Y,W,32);ctx.strokeStyle='rgba(255,199,44,.55)';ctx.lineWidth=1.5;ctx.setLineDash([12,10]);ctx.beginPath();ctx.moveTo(0,AF_Y+16);ctx.lineTo(W,AF_Y+16);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#101316';ctx.fillRect(0,AF_Y,W,32); // its centre line and edge lights: 51-markings.js
   drawPlanApron();layer('apron');
   for(const i of SIDX){const b=standBox(i);if(b[0]+b[2]<vx0||b[0]>vx1)continue;drawStandApron(i)}
   layer('stands');
