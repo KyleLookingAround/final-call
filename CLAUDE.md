@@ -30,8 +30,8 @@ Keep them true: a PR that changes how something works updates that topic's file 
 
 ## Publishing
 
-1. Push to `main`. The "Publish to GitHub Pages" workflow runs `node tools/build.mjs` and deploys `dist/`. CI needs no npm install.
-2. If this session can't push to `main`, push a branch and open a PR with a plain title and description. The "Checks" workflow runs on PRs. Sessions have the owner's standing permission to merge their own PRs with **Squash and merge** once checks are green, without waiting. Only a PR that needs the owner's judgement waits for them: a balance change beyond the baselines' tolerance, or a spec question the brief doesn't settle.
+1. Push to `main`. The "Publish to GitHub Pages" workflow runs `node tools/build.mjs` and deploys `dist/`, skipping pushes that only change docs, tools or playbooks. CI needs no npm install.
+2. If this session can't push to `main`, push a branch and open a PR with a plain title and description. The "Checks" workflow runs on PRs that aren't drafts, and a newer push cancels the older run: run `npm run check` locally first rather than using CI to find failures. Sessions have the owner's standing permission to merge their own PRs with **Squash and merge** once checks are green, without waiting. Only a PR that needs the owner's judgement waits for them: a balance change beyond the baselines' tolerance, or a spec question the brief doesn't settle.
 3. After pushing, confirm the run finished. The site is at `https://<owner>.github.io/<repo>/`.
 4. **Link previews.** After a change to how the game looks, run `npm run preview`, look at the image and icon it makes, and commit them (`docs/SYSTEMS.md`, "Link previews").
 
@@ -56,7 +56,7 @@ Every change goes round the same loop, and each round leaves something that make
 - `npm run check` (after `npm install`; web sessions do it at start-up) runs every check group, about 1–2 minutes; `npm run check -- <group>` runs one. Each group is a file in `tools/checks/`, listed with what it covers in `docs/SYSTEMS.md`. Every page is seeded, so a failure repeats. When you change a rule on purpose, update its check in the same PR; add a check when you add a rule.
 - On a **draft** PR, the Checks workflow only runs the groups the change touches (`docs/SYSTEMS.md`, "Checks"); mark it ready for review to run every group before it can be merged.
 - For UI changes, look at the result: `npm run check -- shots`, or a small Playwright script in `build/` at phone, tablet and desktop sizes (`docs/SYSTEMS.md`, "Checks").
-- For economy or progression changes, run the bot on seeds 1, 2 and 3 (the `balance` playbook, which holds the baselines). A change meant to leave the game as it is must leave `PLAY` identical on seeds 1–3 against a build of `main` (and `STATE` too, unless it adds a setting or a What's new entry). On a PR, the "Balance" workflow runs the seeds; read its tables rather than repeating the runs, unless you're tuning.
+- For economy or progression changes, run the bot on seeds 1, 2 and 3 (the `balance` playbook, which holds the baselines). A change meant to leave the game as it is must leave `PLAY` identical on seeds 1–3 against a build of `main` (and `STATE` too, unless it adds a setting or a What's new entry). On a PR, the "Balance" workflow runs the seeds once, when the PR opens or leaves draft; read its tables rather than repeating the runs, unless you're tuning. It doesn't rerun on each push: if the game code changes after that run, add the `balance` label (remove it first if it's there) to run it on the final code.
 - Keep pacing within about 15% of the baselines unless the owner asks for a change.
 
 ## Rules every change keeps
