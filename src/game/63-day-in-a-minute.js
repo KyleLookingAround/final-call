@@ -21,12 +21,12 @@ function dimSample(M){
   for(const p of R.pax){if(DIM_CABIN.has(p.state)||!(p.y>=Y0&&p.y<Y1&&p.x>=0&&p.x<W))continue;const k=Math.floor((p.y-Y0)/DIM_CELL)*cw+Math.floor(p.x/DIM_CELL);cells.set(k,(cells.get(k)||0)+1)}
   const heat=new Uint16Array(cells.size*2);let j=0;for(const [k,n] of cells){heat[j++]=k;heat[j++]=Math.min(n,65535)}
   const s=G.dstat||{},day=new Float64Array([dayVal(s,'flights'),dayVal(s,'pax'),dayVal(s,'ontime'),dayVal(s,'rev')-dayVal(s,'cost')]);
-  return {c:G.clock,cw,st,rw,q:new Int16Array([R.ciQ.length,R.secQ.length+R.ftQ.length,R.arrQ.length]),heat,day};
+  return {c:G.clock,cw,y0:Y0,st,rw,q:new Int16Array([R.ciQ.length,R.secQ.length+R.ftQ.length,R.arrQ.length]),heat,day};
 }
 function dayRec(){
   if(R.sim)return;
   const d=dayOf(G.clock);let M=R.dim;const last=M&&M.cur[M.cur.length-1];
-  if(!M||last&&(G.clock<last.c||G.clock-last.c>1440))M=R.dim={day:d,cur:[],cols:[],prev:null}; // a new game or another save: start again
+  if(!M||last&&(G.clock<last.c||G.clock-last.c>60))M=R.dim={day:d,cur:[],cols:[],prev:null}; // a new game, another save or a headless stretch: start again
   if(M.day!==d){
     const L=G.lastDay;
     M.prev=M.cur.length?{day:M.day,s:M.cur,cols:M.cols,fin:L&&L.day===M.day?[L.flights,L.pax,L.ontime,L.profit]:null}:null;
@@ -50,14 +50,16 @@ function dimPlay(){
   R.dimT={P,c0,c1,dur:DIM_SECS*(c1-c0)/1440,t0:performance.now(),j:0,f:0,clk:c0,speed:R.speed,view:R.view,cam:null,txt:''};
   if(R.sim)return true;
   if(R.view!=='airport')setView('airport');
-  const c=R.cam;R.dimT.cam={x:c.x,y:c.y,z:c.z};focus('all');
+  if(document.body.classList.contains('fs'))drawer(false); // full screen: the panel slides away so the map shows
+  const c=R.cam;R.dimT.cam={c,x:c.x,y:c.y,z:c.z};focus('all');
   setSpeed(0);const el=$('#dim');if(el){el.hidden=false;$('#stage').classList.add('dimming');$('#dimDay').textContent=`Day ${P.day}`}
   return true;
 }
 function dimStop(){
   const T=R.dimT;if(!T)return;R.dimT=null;if(R.sim)return;
   const el=$('#dim');if(el){el.hidden=true;$('#stage').classList.remove('dimming')}
-  if(T.cam){const c=R.cam;c.x=T.cam.x;c.y=T.cam.y;c.z=T.cam.z;c.tx=null;clampCam()}
+  if(R.view!=='airport')setView('airport'); // the airport's own camera, even if a tab moved the view meanwhile
+  if(T.cam){const c=T.cam.c;c.x=T.cam.x;c.y=T.cam.y;c.z=T.cam.z;c.tx=null;clampCam()}
   if(T.view!=='airport')setView(T.view);
   setSpeed(T.speed);
 }
@@ -112,14 +114,14 @@ function dimGlow(k){
   const rgb=['255,214,120','255,150,70','255,90,90'][k];g.addColorStop(0,`rgba(${rgb},1)`);g.addColorStop(1,`rgba(${rgb},0)`);x.fillStyle=g;x.fillRect(0,0,64,64);return DIM_HEAT[k]=cv2;
 }
 LAYER.pax.push(V=>{
-  const T=R.dimT;if(!T)return;const s=T.P.s[T.j],q=s.q,h=s.heat,cw=s.cw;
+  const T=R.dimT;if(!T)return;const s=T.P.s[T.j],q=s.q,h=s.heat,cw=s.cw,y0=s.y0;
   dimWash(0,TERM_Y,W,H-TERM_Y,0.7);
   const tint=n=>n>30?'rgba(255,122,138,.16)':n>15?'rgba(255,199,44,.11)':null;let tc;
   if(tc=tint(q[0])){ctx.fillStyle=tc;ctx.fillRect(8,680,552,LAND_B-680)}
   if(tc=tint(q[1])){ctx.fillStyle=tc;ctx.fillRect(8,SEC_LINE,552,80)}
   if(tc=tint(q[2])){ctx.fillStyle=tc;ctx.fillRect(700,SEC_Y,540,SEC_LINE-SEC_Y)}
   const r=DIM_CELL*1.3;
-  for(let j=0;j<h.length;j+=2){const k=h[j],n=h[j+1],x=(k%cw+0.5)*DIM_CELL,y=Y0+(Math.floor(k/cw)+0.5)*DIM_CELL;if(!inView(x,y,r))continue;
+  for(let j=0;j<h.length;j+=2){const k=h[j],n=h[j+1],x=(k%cw+0.5)*DIM_CELL,y=y0+(Math.floor(k/cw)+0.5)*DIM_CELL;if(!inView(x,y,r))continue;
     ctx.globalAlpha=clamp(0.12+n*0.05,0,0.75);ctx.drawImage(dimGlow(n>=12?2:n>=5?1:0),x-r,y-r,r*2,r*2)}
   ctx.globalAlpha=1;
 });
@@ -128,6 +130,10 @@ LAYER.signs.push(V=>{const T=R.dimT;if(!T)return;ctx.fillStyle='rgba(16,19,23,.8
 if(typeof document!=='undefined'&&$('#dim')){
   $('#panel').addEventListener('click',e=>{if(e.target.closest('[data-dim]'))dimPlay()});
   $('#dim').addEventListener('pointerdown',e=>{e.preventDefault();dimStop()});
-  document.addEventListener('keydown',e=>{if(!R.dimT)return;e.preventDefault();e.stopImmediatePropagation();if(e.key==='Escape'||e.key===' ')dimStop()},{capture:true});
+  // a tap anywhere else (a tab, the panel) stops it too, before the tap does its own thing
+  document.addEventListener('pointerdown',e=>{if(R.dimT&&!e.target.closest('#dim'))dimStop()},{capture:true});
+  // the game's own keys: Escape and Space stop it, the rest wait (typing in the panel and the browser's keys are left alone)
+  document.addEventListener('keydown',e=>{if(!R.dimT||e.ctrlKey||e.metaKey||e.altKey||e.target.closest&&e.target.closest('input,textarea'))return;
+    if(e.key==='Escape'||e.key===' '){e.preventDefault();e.stopImmediatePropagation();dimStop()}else if(e.key.length===1){e.preventDefault();e.stopImmediatePropagation()}},{capture:true});
 }
 Object.assign(SIMX,{dayRec,dimSample,dimBytes,dimReady,dimPlay,dimStop,dimFrame,dimBtn,DIM_CAP,DIM_EVERY});

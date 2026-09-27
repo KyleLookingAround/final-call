@@ -41,6 +41,8 @@ export default async function({open,ok,saveText,newest}){
       out.stopped=!R.dimT&&R.speed===2&&document.querySelector('#dim').hidden;
       // and a playback left to run out stops by itself
       S.dimPlay();R.dimT.t0=performance.now()-R.dimT.dur*1000-10;S.draw();out.ends=!R.dimT&&R.speed===2;
+      // and so does a tap on the panel's tabs, before the tab opens
+      S.dimPlay();document.querySelector('#tabs [data-tab]').dispatchEvent(new PointerEvent('pointerdown',{bubbles:true}));out.tabStops=!R.dimT&&R.view==='airport';
       out.gSame=JSON.stringify(G,NOCLOCK)===g0;R.speed=0;return out});
     out[name]=r;
     // a recording made on one layout still plays after moving to another (stands it doesn't know are left empty)
@@ -58,7 +60,7 @@ export default async function({open,ok,saveText,newest}){
     ok(`day-in-a-minute: the Office's button plays it, and every frame draws (${n})`,r.button&&r.playing&&!r.thrown&&r.hours>=20&&r.night&&r.clockMoves,
       r.thrown||`button ${r.button}, playing ${r.playing}, ${r.hours} hours lit, night ${r.night}, clock moves ${r.clockMoves}, ${r.lastFl} flights at the end`);
     if(r.otherLayout)ok('day-in-a-minute: it still plays after a change of layout',r.otherLayout==='ok',r.otherLayout);
-    ok(`day-in-a-minute: a tap stops it and puts the speed back; it stops by itself at the end (${n})`,r.stopped&&r.ends,`tap ${r.stopped}, end ${r.ends}`);
+    ok(`day-in-a-minute: a tap on it or the panel stops it and puts the speed back; it stops by itself at the end (${n})`,r.stopped&&r.ends&&r.tabStops,`tap ${r.stopped}, end ${r.ends}, a tab ${r.tabStops}`);
   }
   const same=runs.every(x=>x.G===runs[2].G&&x.r===runs[2].r)&&d.gSame&&p.gSame;
   ok('day-in-a-minute: G and the random stream are the same with and without recording and playback',same,
