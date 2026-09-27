@@ -2,13 +2,9 @@ name: Balance
 
 # The bot plays 1,150 game hours on three seeds and compares when it reaches each level with
 # tools/baseline.json, once keeping the Classic layout and once rebuilding into better layouts
-# (which should reach level 9 about 5-10% sooner). The repo is private, so every minute counts against the plan:
-# it runs when a PR that changes the game or the bot is labelled `balance` (keeping Classic) or `balance:rebuild`
-# (both ways), and on demand (both ways). To run it again after a later push, remove the label and add it back.
-# Sessions run the seeds locally, which is free; this is the confirming run for a change the owner will judge.
+# (which should reach level 9 about 5-10% sooner). Runs on PRs that change the game or the bot, and on demand.
 on:
   pull_request:
-    types: [opened, labeled]
     paths:
       - 'src/game/**'
       - 'tools/bot.js'
@@ -21,12 +17,7 @@ permissions:
 
 jobs:
   bot:
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      ((contains(github.event.pull_request.labels.*.name, 'balance') ||
-        contains(github.event.pull_request.labels.*.name, 'balance:rebuild')) &&
-       (github.event.action != 'labeled' || startsWith(github.event.label.name, 'balance')))
-    # on the job, so another label's skipped run can't cancel a run in progress
+    # a newer push to the same PR cancels this seed's older run
     concurrency:
       group: balance-${{ github.event.pull_request.number || github.ref }}-${{ matrix.seed }}-${{ matrix.layouts }}
       cancel-in-progress: true
@@ -36,7 +27,7 @@ jobs:
       fail-fast: false
       matrix:
         seed: [1, 2, 3]
-        layouts: ${{ fromJSON((github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'balance:rebuild')) && '[false, true]' || '[false]') }}
+        layouts: [false, true]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

@@ -1,41 +1,38 @@
-# ADR-2026-09-27: Spend CI minutes only where they confirm something
+# ADR-2026-09-27: A public repo, and CI that cancels superseded runs
 
 ## Status
 
-Accepted. Revisit if the repo goes public, where standard runners cost nothing.
+Accepted.
 
 ## Context
 
-The repo is private, so GitHub Actions minutes count against the plan's 3,000 a month. By 27 Sep, a day and a half after the repo was created, about 2,900 had gone. Balance used about 59% (six bot jobs of about four minutes, rerun on every push that touched the game) and Checks about 27% (128 runs, 44 of them reruns on the same branch). The hourly Parts together schedule would add about 720 a month on its own, since each run bills at least a minute. Sessions already run `npm run check` and the bot in their own containers, where minutes are free.
+While the repo was private, GitHub Actions minutes counted against the plan's 3,000 a month, and about 2,900 went in a day and a half. Balance used about 59% (six bot jobs on every push that touched the game) and Checks about 27% (128 runs, 44 of them reruns on the same branch). Every run of Parts together started a runner, even for PRs that weren't parts.
 
 ## Options Considered
 
-### Option 1: Make the repo public
-**Description:** Standard runners are free and unlimited on public repos.
+### Option 1: Keep it private and cut the runs
+**Description:** Balance only on a label, Checks skip drafts, no hourly Parts run, sessions confirm locally.
 
 **Pros:**
-- Nothing else changes.
+- Stays within the plan's minutes.
 
 **Cons:**
-- The code, issues, briefs and lessons become public. The owner's call, left for later.
+- PLAY-identical claims would rest on local runs, and sessions have one more step to remember.
 
-### Option 2: Run locally first; CI confirms once
-**Description:** Balance runs only on PRs labelled `balance` (keeping Classic) or `balance:rebuild` (both ways), and on demand. Checks skip drafts. Both cancel a run when a newer push arrives. Parts together drops its hourly schedule and skips PRs without a `part:` label before starting a runner. Sessions run the checks and seeds locally and report them in the PR.
+### Option 2: Make the repo public
+**Description:** Standard runners are free on public repos, so the workflows keep running as before.
 
 **Pros:**
-- Removes most of the spend: Balance runs once per PR that needs judging, at half the jobs by default.
-- Keeps every check; only when it runs changes.
+- Every PR keeps its automatic Balance and Checks runs.
 
 **Cons:**
-- PLAY-identical claims rest on the session's local runs unless someone adds the label.
-- One more step for sessions to remember (the label).
+- The code, issues, briefs and lessons are public.
 
 ## Decision
 
-Option 2, until the owner decides on Option 1.
+Option 2. The owner made the repo public on 27 Sep 2026. Two changes are kept because they cost nothing and shorten the queue: Checks and Balance cancel a run when a newer push to the same PR arrives, and Parts together skips PRs without a `part:` label before starting a runner.
 
 ## Consequences
 
-- Sessions run `npm run check` and seeds 1–3 locally before pushing, and put the bot's `LVLAT` and `PLAY` lines in the PR.
-- The `balance` label goes on once, when the code is final, for a change the owner will judge.
-- Parts are tested together on pushes to them and on demand, not hourly.
+- Runs are free, but runners are shared: the account runs a limited number of jobs at once, and a busy day of sessions still queues. Cancelling superseded runs keeps that queue short.
+- If the repo goes private again, Option 1 is the plan, and the numbers above are the baseline.

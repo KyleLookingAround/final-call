@@ -86,7 +86,8 @@ Worth it only when the feature has parts that can live in different files. The t
    - its files, the shared hooks it may add, and that its notes stay in its own bullet;
    - the functions and files to read first, so it doesn't explore the whole game;
    - its share of any shared budget. Measure the `perf` headroom on `main` and divide it between the parts, or they each spend all of it;
-   - for balance, run seeds 1–3 locally, report the tables and tune only outside 15% of the baselines. The rebalance happens once, with every part in, and only that last PR carries the `balance` label for the Balance workflow;
+   - for balance, report the Balance workflow's tables and tune only outside 15% of the baselines. The rebalance happens once, with every part in;
+   - to push and read the Balance workflow rather than run the seeds locally, unless it's tuning;
    - to open its PR, subscribe to the PR's events and end its turn, rather than wait for CI or the merge, and not to book its own check-ins. The coordinator reviews and merges one part at a time and keeps the only check-in; each part's session wakes only if its PR needs it.
 4. **Keep the coordinator light.** A long conversation re-reads its whole history on every turn, so it costs far more than a short one. Plan in the spec's "Order of work", start the coordinator fresh for each feature, and let PR notifications and one scheduled check-in wake it instead of polling. While the parts build, write the next spec. The `coordinator` playbook has the sweep, starting and retiring sessions, and how many run at once.
 5. **Bring it together** in one last PR: what spans the parts (each layout's version, the rebalance, screenshots, What's new, save fixtures, notes).

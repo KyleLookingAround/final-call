@@ -7,7 +7,7 @@ description: Drive a Final Call pull request to green and merged - reading CI fa
 
 ## Checks workflow (`checks.yml`)
 
-- It runs `npm run check` on every PR that isn't a draft, and a newer push cancels the older run. Run `npm run check` locally before pushing: CI minutes are limited on this private repo. Failure screenshots are in the `check-failures` artifact; `screenshots` is kept on every run.
+- It runs `npm run check` on every PR. Failure screenshots are in the `check-failures` artifact; `screenshots` is kept on every run.
 - Every page is seeded, so a failure repeats locally: `npm run check -- <group>` (the groups are listed in the project notes).
 - A line number from an error in the built page: `node tools/where.mjs <line>`.
 - Fix the cause. Never skip, weaken or delete a check to get green, and never push an empty commit to re-run CI.
@@ -15,7 +15,7 @@ description: Drive a Final Call pull request to green and merged - reading CI fa
 
 ## Balance workflow (`balance.yml`)
 
-- It runs the bot on seeds 1-3 only when a PR that touches `src/game/` or the bot carries the `balance` label (keeping Classic) or `balance:rebuild` (both ways), or on demand. CI minutes are limited on this private repo: run the seeds locally, and add the label once the code is final (remove and re-add it to run again). It fails only on errors; levels outside the baselines show as warnings.
+- It runs the bot on seeds 1-3 when a PR touches `src/game/` or the bot. It fails only on errors; levels outside the baselines show as warnings.
 - An `off` level needs a reason in the PR, or the owner's agreement and an updated `tools/baseline.json`. See the `balance` playbook.
 
 ## Review comments
@@ -40,7 +40,7 @@ Check that the PR's diff now shows only its own changes, and change its base to 
 
 When several branches were built side by side (the `feature` playbook's "Splitting a big feature across sessions"):
 
-- The Parts workflow (`parts.yml`) merges `main` and every open PR labelled `part:<feature>` into a temporary branch and runs `npm run check`, on each push to a part and on demand (Actions › Parts together › Run workflow). Its comment on each part's PR says whether they're green together, which part conflicts and in which files, and how long it has been red. Fix a combination problem in the part that caused it, before merging any of them.
+- The Parts workflow (`parts.yml`) merges `main` and every open PR labelled `part:<feature>` into a temporary branch and runs `npm run check`, on each push to a part, hourly and on demand (Actions › Parts together › Run workflow). Its comment on each part's PR says whether they're green together, which part conflicts and in which files, and how long it has been red. Fix a combination problem in the part that caused it, before merging any of them.
 - Merge them one at a time, each once it's green. Before merging the next, bring it up to date with `main` and run `npm run check` again.
 - If the parts started from a groundwork branch that was then squash-merged, GitHub shows conflicts across the whole groundwork, because it can't tell the squashed commit is the same work. Check that it is (`git diff <groundwork tip> <squashed commit>` prints nothing), then tell git so without rewriting the part's history:
 

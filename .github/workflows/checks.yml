@@ -1,21 +1,19 @@
 name: Checks
 
-# Skips draft PRs (run `npm run check` locally, which is free) and cancels a run when a newer push arrives.
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
 
 permissions:
   contents: read
 
+# a newer push to the same PR cancels the older run
 concurrency:
   group: checks-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
   check:
-    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
