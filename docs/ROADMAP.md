@@ -8,6 +8,7 @@ What's being worked on, what's next, and ideas not yet agreed. Anything here get
 - **Level-up screen** (#29, spec `docs/specs/level-up.md`, version 30): a card for each new level with what it unlocked.
 
 - **The terminal as a place** (#48, spec `docs/specs/terminal-place.md`, approved): two floors, windows, decor that comes with the building, local character, a roof terrace with spotters, and each layout's own floor plan. Its checks are written first (experiment [D]), then groundwork after the real airport merges, then the parts.
+- **Systems review** (#65, spec `docs/specs/systems-review.md`, proposed): how the systems connect today, ten proposals that link them so choices are interesting, and ten pure refactors ranked with their checks, in a recommended order that waits for the owner's approval.
 
 ## The owner's order of bundles
 
