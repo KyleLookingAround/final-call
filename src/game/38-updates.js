@@ -1,5 +1,5 @@
 /* ================= WHAT'S NEW: every version's new features, shown after an update and from Settings or Help ================= */
-// Newest first. Add an entry with each release; the checks make sure the newest one matches docs/HISTORY.md.
+// Newest first. Only a release adds an entry, folding in the fragments in src/updates.d/ (the release playbook); the checks make sure the newest one matches docs/HISTORY.md.
 const UPDATES=[
   {v:32,title:'Ready for what’s next',points:[
     'A toast appears when a new version is published while you’re playing: Update now saves and reloads to it, Later brings it back an hour on.',

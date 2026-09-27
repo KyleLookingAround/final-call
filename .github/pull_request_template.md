@@ -13,5 +13,5 @@
 - [ ] Economy or progression change: bot run on seeds 1–3, results below (the Balance workflow also runs)
 - [ ] New saved fields have a default in `DEFAULT()` and are handled in `resetAll`; older saves still load
 - [ ] Rules changed on purpose have their `rules` check updated; new rules have a check
-- [ ] Project notes, `docs/ROADMAP.md` and (for a release) `docs/HISTORY.md` are up to date
+- [ ] The notes for what changed (`docs/systems/`, a playbook or the project notes) are up to date; the roadmap item (`docs/roadmap.d/`) and any What's new entry (`src/updates.d/`) are their own files
 - [ ] A fresh review before opening: what it found and what changed
