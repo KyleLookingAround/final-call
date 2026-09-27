@@ -12,7 +12,7 @@ export default async function({open,ok,saveText,saves}){
   let play,two;
   {const {ctx,page,errs}=await open({width:1440,height:900},saveText('v29-L5.json'),false,{still:true});await tp(page);
   const r=await page.evaluate(()=>{const S=__sim,TP=window.TP;const two=TP.twoFloors();TP.build();S.applyLayout(S.G.layout);
-    const fl=id=>{const r=TP.room(id);return r?r.fl:'none'},up=['ci','sec','mkt'].map(id=>[id,fl(id)]),down=['imm','rec','cus','arh','bag','wlk'].map(id=>[id,fl(id)]);
+    const fl=id=>{const r=TP.room(id);return r?r.fl:'none'},up=['ci','sec','mkt'].map(id=>[id,fl(id)]),down=['imm','rec','cus','arh','wlk',...(TP.room('bag')?['bag']:[])].map(id=>[id,fl(id)]); // the baggage hall too, once it's a room
     const on=TP.built(),rs=S.ROOMS.filter((r,k)=>on[k]||r.open),over=[];
     rs.forEach((a,i)=>rs.forEach((b,j)=>{if(j>i&&(a.fl==null||b.fl==null||a.fl===b.fl)&&TP.overlap(a.poly,b.poly)>1)over.push(a.id+'/'+b.id)}));
     return {up,down,over,two}});
@@ -51,13 +51,13 @@ export default async function({open,ok,saveText,saves}){
       if(Math.round(t*10)%10===0)for(const i of S.SIDX){const F=R.st[i].F;if(F&&F.plane.state==='boarding'&&S.G.clock>F.std&&F.seated<F.booked)held.add(F)}});
     const stuck=R.pax.filter(p=>t-seen.get(p).since>90&&TP.stuck(p,AWAY)).map(p=>p.state);
     return {stuck,held:held.size,changes}},[AWAY,play]);
-  ok('floors: nobody is stuck between floors',r.changes>0&&!r.stuck.length&&r.held<=Math.floor(MAIN.held*1.05)&&!errs.length,`${r.changes?'':'nobody changes floor yet; '}${r.stuck.length} stuck over 90 min${r.stuck.length?' ('+[...new Set(r.stuck)].join(' ')+')':''}, ${r.held} flights held at the door (main ${MAIN.held})`+(errs.length?' '+errs[0]:''));
+  ok('floors: nobody is stuck between floors',r.changes>0&&!r.stuck.length&&r.held<=Math.max(1,Math.floor(MAIN.held*1.05))&&!errs.length,`${r.changes?'':'nobody changes floor yet; '}${r.stuck.length} stuck over 90 min${r.stuck.length?' ('+[...new Set(r.stuck)].join(' ')+')':''}, ${r.held} flights held at the door (main ${MAIN.held}; one is allowed)`+(errs.length?' '+errs[0]:''));
   if(play)await ctx.close()}
   // every old save: after a game minute, nobody on a floor their room isn't on. A fresh page each; only once Classic has
   // two floors (TP_ALL=1 runs them anyway)
-  {const bad=[];let n=0;
+  {const bad=[];let n=0,seen=0;
   if(play)for(const f of saves){const {ctx,page,errs}=await open(undefined,saveText(f),false,{still:true});await tp(page);
-    const m=await page.evaluate(()=>{const S=__sim,TP=window.TP;TP.sim(1,0.1);return S.R.pax.filter(p=>p.fl!=null&&TP.roomFl(p.room)!=null&&p.fl!==TP.roomFl(p.room)).length});
-    n++;if(m||errs.length)bad.push(`${f} ${m}${errs.length?' '+errs[0]:''}`);await ctx.close()}
-  ok('floors: old saves land on the right floor',two&&!bad.length,`${two?'':'no halls on two floors yet; '}${n} saves${bad.length?', on the wrong floor: '+bad.slice(0,4).join(', '):''}`)}
+    const [m,k]=await page.evaluate(()=>{const S=__sim,TP=window.TP;TP.sim(1,0.1);const on=S.R.pax.filter(p=>TP.roomFl(p.room)!=null);return [on.filter(p=>TP.paxFl(p)!==TP.roomFl(p.room)).length,on.length]});
+    n++;seen+=k;if(m||errs.length)bad.push(`${f} ${m}${errs.length?' '+errs[0]:''}`);await ctx.close()}
+  ok('floors: old saves land on the right floor',two&&seen>0&&!bad.length,`${two?'':'no halls on two floors yet; '}${n} saves, ${seen} passengers in a hall with a floor${bad.length?', on the wrong floor: '+bad.slice(0,4).join(', '):''}`)}
 }

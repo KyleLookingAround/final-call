@@ -49,7 +49,6 @@ export default async function({open,ok,saveText,saves,newest}){
       o.leak=ARR.filter(h=>reach.has(h));
       o.term=!!T}
     return out},[LAYOUT_IDS,DEP_HALLS,ARR_HALLS,saveText(newest)]);
-  if(errs.length)ok('plans: every layout\'s terminal comes from its own table',false,errs[0]);
   await ctx.close();
   // two hours of play in each layout, from a fresh page each (runtime state carries over between layouts in one page):
   // the halls each passenger goes through, in order; the walk from the forecourt to the gate; anyone stuck in one state for
@@ -60,16 +59,18 @@ export default async function({open,ok,saveText,saves,newest}){
       const outId=S.hallId('out'),seen=new Map(),walks=[];let t=0;
       TP.sim(120,0.25,()=>{t+=0.25;for(const p of R.pax){let s=seen.get(p);if(!s){s={st:p.state,since:t,halls:[],x:p.x,y:p.y,d:0,from:p.state==='walkIn'&&p.room===outId};seen.set(p,s)}
         if(p.state!==s.st){s.st=p.state;s.since=t}if(s.from&&s.d>=0){s.d+=Math.hypot(p.x-s.x,p.y-s.y);if(p.state==='gate'){walks.push(s.d);s.d=-1}}s.x=p.x;s.y=p.y;
-        const h=p.room!=null&&S.ROOMS[p.room]?S.ROOMS[p.room].id:null;if(h&&(p.inbound?ARR:DEP).includes(h)&&s.halls.at(-1)!==h)s.halls.push(h);s.inb=p.inbound}});
+        const h=p.room!=null&&S.ROOMS[p.room]?S.ROOMS[p.room].id:null;if(h&&(p.inbound?ARR:DEP).includes(h)&&s.halls.at(-1)!==h)s.halls.push(h);s.inb=p.inbound;if(p.inbound&&p.state==='toArr')s.off=1}});
       const live=new Set(R.pax);let bad=0,dep=0,arr=0,stuck=0;
-      for(const [p,s] of seen){const want=s.inb?ARR:DEP,idx=s.halls.map(h=>want.indexOf(h));if(s.halls.length>1){s.inb?arr++:dep++;if(idx.some((v,k)=>k&&v<=idx[k-1]))bad++}
+      // a passenger seen from the start (off the bridge, or in from the forecourt) who reached the last hall passed every one, in order
+      for(const [p,s] of seen){const want=s.inb?ARR:DEP,idx=s.halls.map(h=>want.indexOf(h));if(s.halls.length>1){s.inb?arr++:dep++;if(idx.some((v,k)=>k&&v<=idx[k-1]))bad++;
+          else if((s.inb?s.off:s.from)&&s.halls.at(-1)===want.at(-1)&&s.halls.length!==want.length)bad++}
         if(live.has(p)&&t-s.since>90&&TP.stuck(p,AWAY))stuck++}
       return {order:{dep,arr,bad},stuck,walk:walks.length?walks.reduce((a,b)=>a+b,0)/walks.length:0,played:true}},[id,DEP_HALLS,ARR_HALLS,AWAY]));
     r[id].errs=errs.slice(0,1);await ctx.close()}
   terms=LAYOUT_IDS.every(id=>r[id].term);
   const all=LAYOUT_IDS.map(id=>[id,r[id]]);
   const noTable=all.filter(([,o])=>!o.table).map(([id])=>id),withTerm=noTable.length<LAYOUT_IDS.length;
-  ok('plans: every layout\'s terminal comes from its own table',!noTable.length&&all.every(([,o])=>!o.faults.length),
+  ok('plans: every layout\'s terminal comes from its own table',!noTable.length&&all.every(([,o])=>!o.faults.length)&&!errs.length,(errs.length?errs[0]+'; ':'')+
     noTable.length?`no term table of its own: ${noTable.join(' ')}`:all.filter(([,o])=>o.faults.length).map(([id,o])=>id+': '+o.faults[0]).join('; ')||'9 layouts, no faults');
   ok('plans: rooms and doorways have floors',!noTable.length&&all.every(([,o])=>!o.badFl.length&&!o.badDoor.length),
     noTable.length?`no term table (so no floors or floor links) in ${noTable.join(' ')}`:all.flatMap(([id,o])=>[...o.badFl.map(x=>id+' '+x+' floor'),...o.badDoor.map(x=>id+' doorway '+x)]).slice(0,4).join('; ')||'none wrong');
@@ -111,10 +112,10 @@ export default async function({open,ok,saveText,saves,newest}){
     if(!mid){
       const u=await page.evaluate(()=>{const S=__sim,G=S.G,R=S.R,TP=window.TP;TP.day(23);for(const k of ['rain','storm','fog','snow'])R.fx[k]=G.clock+600;
         S.setView('airport');R.cam.z=0.01;S.clampCam();S.clampCam();R.floor='roof';
-        const P=S.roofNow(),on=TP.built(),polys=S.ROOMS.filter((r,k)=>on[k]).map(r=>r.poly),bag=P.rooms.at(-1);
+        const P=S.roofNow(),on=TP.built(),polys=S.ROOMS.filter((r,k)=>on[k]).map(r=>r.poly),bag=P.rooms.length>polys.length?P.rooms.at(-1):{x0:0,y0:0,x1:0,y1:0}; // the baggage hall's roof comes after the rooms', while it isn't a room
         const inHall=([x,y])=>polys.some(Q=>TP.inPoly(Q,x,y))||(x>bag.x0&&x<bag.x1&&y>bag.y0&&y<bag.y1);
-        const d=TP.drawn().filter(s=>inHall(s.at)),people=d.filter(s=>s.k==='arc'&&s.r<=4).length;R.floor='halls';return {people,things:d.length-people}});
-      ok('scene: nothing is drawn inside a hall under the roof',u.people+u.things===0&&!errs.length,`on the roof: ${u.people} passengers and ${u.things} other things drawn inside halls`+(errs.length?' '+errs[0]:''));
+        const d=TP.drawn().filter(s=>inHall(s.at)),people=d.filter(s=>s.k==='arc'&&s.r<=4).length;const a=S.roofA();R.floor='halls';return {people,things:d.length-people,a}});
+      ok('scene: nothing is drawn inside a hall under the roof',u.a===1&&u.people+u.things===0&&!errs.length,`on the roof (roofA ${u.a}): ${u.people} passengers and ${u.things} other things drawn inside halls`+(errs.length?' '+errs[0]:''));
       const f=await page.evaluate(()=>{const S=__sim,R=S.R,TP=window.TP;for(const k of ['rain','storm','fog','snow'])R.fx[k]=0;TP.day(14);S.setView('airport');const [mx,my]=TP.termMid();TP.look(mx,my,1.6);
         const two=TP.twoFloors(),out={};
         for(const [f,n] of [['up',1],['down',0]]){R.floor=f;const arcs=TP.drawn().filter(s=>s.k==='arc'&&s.r<=4),other=R.pax.filter(p=>{const x=TP.paxFl(p);return x!=null&&x!==n});

@@ -34,25 +34,27 @@ export default async function({open,ok,saveText}){
     const spot=()=>R.spot||0,dry=()=>{for(const k of ['rain','storm','snow'])R.fx[k]=0};
     const seats=a=>a.rows*a.blocks.reduce((x,y)=>x+y,0),big=S.AIRCRAFT.filter(a=>!a.freighter).reduce((a,b)=>seats(b)>seats(a)?b:a);
     const find=()=>S.SIDX.map(i=>R.st[i].F).find(F=>F&&!F.landed),next=()=>{let F=find(),n=0;while(!F&&n++<600){dry();R.sim=true;S.update(0.1);R.sim=false;F=find()}return F}; // the next flight still to land
-    const land=F=>{let n=0;while(F&&!F.landed&&n++<600){dry();S.R.sim=true;S.update(0.1);S.R.sim=false}return !!(F&&F.landed)};
-    const toasts0=R.toasts.length,said=()=>R.toasts.slice(toasts0).filter(t=>/spott|terrace|enthusiast/i.test(t.text)||t.text.includes(big.short)).length;
+    const land=(F,loud)=>{let n=0;while(F&&!F.landed&&n++<600){dry();R.sim=!loud;S.update(0.1);R.sim=false}return !!(F&&F.landed)};
+    // toasts only happen outside the headless sim, so the rare arrival plays with R.sim off and every toast pushed is noted
+    const told=[],hear=()=>{if(!R.toasts.heard){R.toasts.heard=1;const push=R.toasts.push;R.toasts.push=function(...t){told.push(...t);return push.apply(this,t)}}};
+    const loud=(min)=>{for(let i=0;i<min*10;i++){dry();hear();S.update(0.1)}},said=()=>told.filter(t=>/spott|terrace|enthusiast/i.test(t.text)||t.text.includes(big.short)).length;
     // the night
     TP.day(1.5);dry();TP.sim(30,0.1);const night=spot();
     // a rare arrival at about 14:00, then back to normal, then an ordinary one
-    TP.day(13.5);dry();TP.sim(20,0.1,dry);const before=spot();let F=next();if(F)F.ac=big;const landedRare=land(F);TP.sim(30,0.1,dry);const rare=spot();
-    let back=Infinity;for(let m=0;m<150;m+=10){TP.sim(10,0.1,dry);back=Math.min(back,Math.abs(spot()-before))}const saidRare=said();
+    TP.day(13.5);dry();TP.sim(20,0.1,dry);const before=spot();let F=next();if(F)F.ac=big;G.set.msgs='all';hear();const landedRare=land(F,true);loud(30);const rare=spot();
+    let back=Infinity;for(let m=0;m<150;m+=10){TP.sim(10,0.1,dry);back=Math.min(back,Math.abs(spot()-before))}const saidRare=said(),toldAll=told.length;
     const before2=spot();const F2=next();const landedOrd=land(F2);TP.sim(30,0.1,dry);const ord=spot();
     // rain against dry at 14:00
     TP.day(14);dry();TP.sim(30,0.1,dry);const dryN=spot();TP.sim(30,0.1,()=>{R.fx.rain=G.clock+60});const rainN=spot();dry();
     // three busy hours: nobody in a queue is a spotter; the drawing shows at most 40; the takings against the income
     const e0=G.earned,t0=G.revBy.terrace||0;let queued=0;TP.day(12);TP.sim(180,0.1,()=>{for(const Q of [R.ciQ,R.secQ,R.ftQ,R.arrQ])for(const p of Q)if(p&&p.spotter)queued++});
     const take=(G.revBy.terrace||0)-t0,income=G.earned-e0;S.setView('airport');R.floor='roof';S.draw();const drawn=R.spotDrawn;R.floor='halls';
-    return {night,before,rare,back,landedRare,saidRare,before2,ord,landedOrd,dryN,rainN,queued,drawn,take,income,big:big.short}},!!process.env.TP_ALL);
+    return {night,before,rare,back,landedRare,saidRare,before2,ord,landedOrd,toldAll,dryN,rainN,queued,drawn,take,income,big:big.short}},!!process.env.TP_ALL);
   const has=!!r&&r.rare>0,none='no UPG.terrace yet';
   ok('terrace: spotters crowd for something rare',has&&r.landedRare&&r.rare>=12&&r.rare>=3*r.before&&r.landedOrd&&Math.abs(r.ord-r.before2)<=0.2*Math.max(1,r.before2)&&r.back<=0.2*Math.max(1,r.before)&&!errs.length,
     r?`${r.landedRare?'':'the rare arrival never landed; '}${r.landedOrd?'':'the ordinary one never landed; '}${r.before} before the ${r.big}, ${r.rare} after it (12 or more, and three times before); ${r.before2} before an ordinary one, ${r.ord} after (within 20%); back to within ${r.back===Infinity?'-':r.back} of before in three hours`:none);
   ok('terrace: fewer at night and in rain',has&&r.night<=2&&r.dryN>0&&r.rainN<=r.dryN/2,r?`${r.night} at 02:00 (2 or fewer); at 14:00 ${r.dryN} dry, ${r.rainN} in rain (half or fewer)`:none);
-  ok('terrace: the crowd is the only sign',has&&r.rare>r.before&&!r.saidRare,r?`${r.saidRare} toasts about spotters or the ${r.big}; the crowd went from ${r.before} to ${r.rare}`:none);
+  ok('terrace: the crowd is the only sign',has&&r.rare>r.before&&!r.saidRare,r?`${r.saidRare} toasts about spotters or the ${r.big} (of ${r.toldAll} while it landed); the crowd went from ${r.before} to ${r.rare}`:none);
   ok('terrace: spotters stay on the roof',has&&!r.queued&&r.drawn!=null&&r.drawn<=40,r?`${r.queued} spotters in the terminal's queues over three hours, ${r.drawn==null?'no R.spotDrawn':r.drawn+' drawn'} (40 or fewer)`:none);
   ok('terrace: small takings',has&&r.take>0&&r.take<=0.02*r.income,r?`${Math.round(r.take)} from the terrace of ${Math.round(r.income)} earned over three hours (${r.income?(r.take/r.income*100).toFixed(2):0}%, 2% or less)`:none);
   }await ctx.close()}

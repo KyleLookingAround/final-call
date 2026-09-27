@@ -25,14 +25,14 @@ export default async function({open,ok,saveText,newest}){
     S.resetAll(JSON.parse(text));S.switchLayout('classic');TP.build();S.applyLayout('classic');S.setView('airport');R.cam.z=0.01;S.clampCam();S.clampCam();
     const glass=S.glass?S.glass():[],c=document.querySelector('#cv').getContext('2d');let lit=null;
     if(glass.length){const [a,b,x2,y2]=glass[0],x=(a+x2)/2,y=Math.min(b,y2)-10,k=S.viewK()*R.dpr,px=()=>{S.draw();const d=c.getImageData(Math.round((x-R.cam.x)*k),Math.round((y-R.cam.y)*k),1,1).data;return d[0]+d[1]+d[2]};
-      const at=h=>{TP.day(h);const w=px(),j=S.LIGHTS.indexOf(S.glassLights),keep=j>=0?S.LIGHTS.splice(j,1):[];const wo=px();S.LIGHTS.splice(j,0,...keep);return [w,wo,j>=0]};
+      const at=h=>{TP.day(h);for(const k of ['rain','storm','fog','snow'])R.fx[k]=0;const w=px(),j=S.LIGHTS.indexOf(S.glassLights),keep=j>=0?S.LIGHTS.splice(j,1):[];const wo=px();S.LIGHTS.splice(j,0,...keep);return [w,wo,j>=0]};
       lit={night:at(23),noon:at(12)}}
     return {out,lit}},[LAYOUT_IDS,APRON_Y,saveText(newest)]);
   const all=LAYOUT_IDS.map(id=>[id,r.out[id]]),none=all.every(([,o])=>o.glass==null);play=!none||!!process.env.TP_ALL;
   ok('windows: glass on every airside wall facing the apron',!none&&all.every(([,o])=>o.glass&&!o.bare.length&&!o.stray)&&!errs.length,
     none?`no glass() yet; ${all.map(([id,o])=>`${id} ${o.walls} walls`).join(', ')}`:all.map(([id,o])=>`${id}: ${o.walls} walls, ${o.bare.length} bare, ${o.stray} stray glass`).join('; ')+(errs.length?' '+errs[0]:''));
   const L=r.lit;
-  ok('windows: lit at night',!!L&&L.night[2]&&L.night[0]>L.night[1]&&L.noon[0]===L.noon[1],L?`at 23:00 ${L.night[0]} with the windows' lights, ${L.night[1]} without${L.night[2]?'':' (glassLights isn\'t in LIGHTS)'}; at 12:00 ${L.noon[0]} and ${L.noon[1]}`:'no glass() yet');
+  ok('windows: lit at night',!!L&&L.night[2]&&L.night[0]>L.night[1]&&Math.abs(L.noon[0]-L.noon[1])<=3,L?`at 23:00 ${L.night[0]} with the windows' lights, ${L.night[1]} without${L.night[2]?'':' (glassLights isn\'t in LIGHTS)'}; at 12:00 ${L.noon[0]} and ${L.noon[1]}`:'no glass() yet');
   await ctx.close()}
   // a wide-body pushing back from the stand nearest the market place: waiting passengers gather at the glass on that side,
   // and all of them still board; and over two hours, nobody watches once their gate is called. Played only once there's

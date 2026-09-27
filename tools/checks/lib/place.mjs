@@ -37,7 +37,8 @@ export function install(){
   // a passenger who has been in one state a long time counts as stuck unless they're in the hotel, on a plane or on the way
   // in (but just off a bridge counts), or waiting at a gate for a flight not yet due (boarding can open two hours early)
   TP.stuck=(p,AWAY)=>!p.hotel&&!/hot/.test(p.state)&&(!AWAY.includes(p.state)||p.state==='toArr')&&!(p.state==='gate'&&!(p.F&&S.G.clock>p.F.std));
-  TP.twoFloors=()=>{const h=TP.halls();return h.some(r=>r.fl===0)&&h.some(r=>r.fl===1)};
+  // two floors in play: the halls stacked, check-in upstairs and immigration below (floors on rooms alone aren't enough)
+  TP.twoFloors=()=>{const a=TP.room('ci'),b=TP.room('imm');return !!(a&&b&&a.fl===1&&b.fl===0)};
   // rooms that exist yet, as the roofs see them (roomOn and not the open forecourt)
   TP.built=()=>{const P=S.roofNow();return S.ROOMS.map((r,k)=>P&&P.on[k]==='1')};
   // fully built: every stand, Pier B, every shop unit, the hotel

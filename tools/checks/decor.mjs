@@ -29,13 +29,15 @@ export default async function({open,ok,saveText}){
     const inWay={},wide={};
     for(const id of ids){S.resetAll(JSON.parse(texts['v29-L9.json']));S.switchLayout(id);TP.build();S.applyLayout(id);const ds=items(),pts=[];
       const P=(x,y,r)=>pts.push([x,y,r]);
-      if(!missing.length){for(let i=0;i<8;i++){P(S.deskX(i),707,10);P(S.laneX(i),600,10);const b=S.boothPos(i),e=S.egatePos(i);P(b.x,b.y,8);P(e.x,e.y,8);P(S.carX(i)-40,S.carY(i),14);P(S.carX(i),S.carY(i),14);P(S.carX(i)+40,S.carY(i),14)}
-        for(let i=0;i<4;i++)P(S.kioskX(i),707,8);
+      const deskY=i=>S.deskY?S.deskY(i):707,laneY=i=>S.laneY?S.laneY(i):600,kioskY=i=>S.kioskY?S.kioskY(i):707; // Classic's today; deskY, laneY and kioskY once a layout moves them
+      if(!missing.length){for(let i=0;i<8;i++){P(S.deskX(i),deskY(i),10);P(S.laneX(i),laneY(i),10);const b=S.boothPos(i),e=S.egatePos(i);P(b.x,b.y,8);P(e.x,e.y,8);P(S.carX(i)-40,S.carY(i),14);P(S.carX(i),S.carY(i),14);P(S.carX(i)+40,S.carY(i),14)}
+        for(let i=0;i<4;i++)P(S.kioskX(i),kioskY(i),8);
         for(let q=0;q<6;q++)for(let j=0;j<40;j++){const s=S.qSlot(q,j);if(s)P(s.x,s.y,4)}
         for(const [f,n] of [[S.secSlot,90],[S.ftSlot,8],[S.egSlot,78],[S.arrSlot,172]])for(let i=0;i<n;i++){const s=f(i);P(s.x,s.y,4)}}
       for(const d of TP.doors())P(d[2],d[3],(d[4]||8)+4);
-      // the walks: 8 units either side of the straight line between any two doorways of one room
-      const segs=[];for(const r of S.ROOMS){const ds2=TP.doors().filter(d=>d[0]===r.id||d[1]===r.id);for(let a=0;a<ds2.length;a++)for(let b=a+1;b<ds2.length;b++)segs.push([ds2[a][2],ds2[a][3],ds2[b][2],ds2[b][3]])}
+      // the walks: 8 units either side of the straight line between any two doorways of one hall (not the concourse or
+      // the forecourt, which people cross every way)
+      const hallSet=new Set(TP.hallIds()),segs=[];for(const r of S.ROOMS.filter(r=>hallSet.has(r.id)&&!r.open)){const ds2=TP.doors().filter(d=>d[0]===r.id||d[1]===r.id);for(let a=0;a<ds2.length;a++)for(let b=a+1;b<ds2.length;b++)segs.push([ds2[a][2],ds2[a][3],ds2[b][2],ds2[b][3]])}
       const hitPt=d=>pts.some(([x,y,rr])=>x+rr>d.x0&&x-rr<d.x1&&y+rr>d.y0&&y-rr<d.y1);
       const hitSeg=d=>segs.some(([a,b,c,e])=>{const n=Math.max(1,Math.ceil(Math.hypot(c-a,e-b)/4));for(let k=0;k<=n;k++){const x=a+(c-a)*k/n,y=b+(e-b)*k/n;if(x>d.x0-8&&x<d.x1+8&&y>d.y0-8&&y<d.y1+8)return true}return false});
       inWay[id]=ds.filter(d=>hitPt(d)||hitSeg(d)).map(d=>d.kind+' in '+d.hall).slice(0,3);
