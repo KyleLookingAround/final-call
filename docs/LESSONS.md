@@ -2,6 +2,16 @@
 
 After a PR merges, look back at the session that built it: what it cost, what slowed it, and what would have saved time or credits (the `steward` playbook's last step). Newest first. A lesson marked → changed something, and says where.
 
+## Systems review · 27 Sep 2026
+
+- **Numbers:** session `session_016cnDJAUK5qfd7mjnFwXcDo`, estimate $15: `usage.cost_usd` was not reported by the time the PR opened (the usual early reading). Started 13:39; the three bot runs on `main` ran side by side in the background from the first minute (about 12 minutes) while the docs and the core files were read; four helper agents mapped the region, the terminal's hooks, the UI and the tools in parallel (about 4 minutes each) and their reports were read in place of the files. Docs only, so no Balance run.
+- **Lessons:**
+  - The bot's six-hourly `why` field and a 30-line script gave every number Part 1 needed (rating causes over the run, which requirement holds each level, cash floors), as #57's session found. → No change yet: a `--why` summary in the bot would save the next session that script, and is a tools change outside this brief.
+  - A play of the bot's saves showed what the logs can't: five departures on the board all to New York, partners flying every short-haul route, four bus lines run at one service an hour carrying nobody. → Reviews of the game logic should play a save at three levels and read the board, the Routes tab's report and the Region tab; a 60-line Playwright script does it in a minute.
+  - `Object.assign(window.__sim,SIMX)` copies a getter's value, which is the whole of the `__sim.AF_Y` bug the planes part met; `ROOF` has the same bug. → Refactor step 1 in the spec, with a build rule to catch the next one.
+  - The `graph` check refuses a link to a file that doesn't exist yet, so a spec naming a proposed new file has to describe it rather than link it. No change: the check is right, and the wording is easy.
+  - `main` gained the approved terminal-place spec (#49) minutes after this session branched. → Fetch and reset onto `main` again before the first commit, as the lessons for #43 and #49 already say.
+
 ## #49 The terminal as a place: the spec, checks planned first · 27 Sep 2026
 
 - **Numbers:** session `session_01Dvkimw2SjgEvPiF7DhWQKb`, estimate $8: $3.96 and 219k of 1M context at the merge ($3.24 at the first check-in; `get_session` gave no cost when the PR opened). Started 11:51, PR opened 11:57, approved by the owner through the coordinator at about 13:20 (under 1½ hours after the question opened, so no default was taken), merged about 13:35. CI green on every push (Checks about 6 minutes). Three merges of `main`, each with a LESSONS conflict from entries added at the top by both sides, the last one found only when the squash-merge was refused. → Merge `main` in straight before merging, not only when CI goes green.
