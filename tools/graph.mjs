@@ -27,10 +27,10 @@ export function build(){
   }
   // upgrades declared in the UPG table, and the file each belongs to
   const upg=all(src['01-constants.js'],/^\s{2}(\w+):\{tab:'/gm);files['01-constants.js'].hooks=uniq(files['01-constants.js'].hooks.concat(upg.map(k=>'UPG.'+k)));
-  // saved fields: DEFAULT()'s top-level keys, G.set's, and TERM_FIELDS'
-  const dm=src['03-state.js'].match(/const DEFAULT=\(\)=>\(\{([\s\S]*?)\}\);\n/),top=[];
+  // saved fields: FIELDS' top-level keys (DEFAULT() is built from it), G.set's, and TERM_FIELDS'
+  const dm=src['03-state.js'].match(/const FIELDS=\{([\s\S]*?)\n\};\n/),top=[];
   if(dm){let d=0,key='';for(const ch of dm[1]){if('{(['.includes(ch))d++;else if('})]'.includes(ch))d--;else if(d===0&&ch===','){key='';continue}if(d===0&&/[\w$]/.test(ch))key+=ch;else if(d===0&&ch===':'&&key){top.push(key);key='#'}}}
-  const setKeys=all((src['03-state.js'].match(/set:\{([^}]*)\}/)||['',''])[1],/(\w+):/g);
+  const setKeys=all((src['03-state.js'].match(/set:(?:\(\)=>\()?\{([^}]*)\}/)||['',''])[1],/(\w+):/g);
   const termFields=Object.values(files).flatMap(x=>x.hooks).filter(h=>h.startsWith('TERM_FIELDS.')).map(h=>h.slice(12));
   const saved={};for(const k of uniq(top.filter(k=>k!=='#'))){saved['G.'+k]=Object.keys(src).filter(f=>new RegExp('\\bG\\.'+k+'\\b').test(src[f]))}
   for(const k of setKeys)saved['G.set.'+k]=Object.keys(src).filter(f=>new RegExp(`\\bG\\.set\\.${k}\\b|SET\\(\\)\\.${k}\\b|'${k}'`).test(src[f]));

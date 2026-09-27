@@ -102,7 +102,7 @@ Some functions sit where they were first written rather than where their name su
 ### State
 
 - **`G` and `R`.** `G` is the saved state (JSON in `localStorage['final-call-save-v2']`). `R` is runtime only.
-- **New and old saves.** `DEFAULT()` builds a new game. `resetAll(state)` loads and migrates any older save. When you add state, give it a default in `DEFAULT()` and handle its absence in `resetAll`. Never rename or remove saved fields, because old saves must keep loading.
+- **New and old saves.** `FIELDS` (`03-state.js`) lists every saved field with its default; `DEFAULT()` builds a new game from it, and `resetAll(state)` gives an older save's missing fields the same defaults, then runs `MIGRATIONS` (`22-save.js`), an ordered list of `{when, up, note}`. When you add state, add its line to `FIELDS` (a terminal part uses `TERM_FIELDS`, the same table), and a step at the end of `MIGRATIONS` only if older saves need more than the default. Never rename or remove saved fields, because old saves must keep loading; the `migrate` check fails if any save in `tools/saves/` loads differently.
 - **Saves stay on the device.** The only other localStorage key is `final-call-topgap`, the phone camera band. The old `final-call-cloud` and `final-call-device` keys are cleared on load.
 
 ### Time
