@@ -16,38 +16,6 @@ function hatchLabel(cx,cy,prog,label){
   ctx.fillStyle='#232930';ctx.fillRect(cx-66,cy+3,132,5);ctx.fillStyle='#FFC72C';ctx.fillRect(cx-66,cy+3,132*prog,5);
 }
 function bprog(id){const b=buildOf(id);return b?clamp((G.clock-b.start)/(b.done-b.start),0,1):0}
-function drawPlane(F,i,offY,tow,alpha){
-  const g=F.geo,ac=F.ac,fw=g.fw,top=g.top,end=g.end;
-  ctx.save();ctx.globalAlpha=alpha??1;standCtx(i);ctx.translate(0,offY);
-  ctx.fillStyle='#A9B3BC';
-  for(const s of [-1,1]){
-    const sw=g.span*0.55;
-    ctx.beginPath();ctx.moveTo(s*fw,g.wingY);ctx.lineTo(s*(fw+g.span),g.wingY+sw);ctx.lineTo(s*(fw+g.span),g.wingY+sw+11);ctx.lineTo(s*fw,g.wingY+g.chord);ctx.closePath();ctx.fill();
-    ctx.fillStyle='#7F8A94';rrect(s*(fw+g.span*0.45)-5,g.wingY+sw*0.45-10,10,24,4);ctx.fill();ctx.fillStyle='#A9B3BC';
-    ctx.beginPath();ctx.moveTo(s*6,end+10);ctx.lineTo(s*(fw*0.8+14),end+32);ctx.lineTo(s*(fw*0.8+14),end+40);ctx.lineTo(s*6,end+34);ctx.closePath();ctx.fill();
-  }
-  ctx.fillStyle='#CDD4DA';ctx.beginPath();ctx.moveTo(-fw,top+10);
-  ctx.bezierCurveTo(-fw,top-30,-fw*0.55,top-62,0,top-64);ctx.bezierCurveTo(fw*0.55,top-62,fw,top-30,fw,top+10);
-  ctx.lineTo(fw,end);ctx.bezierCurveTo(fw,end+22,10,end+46,0,end+48);ctx.bezierCurveTo(-10,end+46,-fw,end+22,-fw,end);ctx.closePath();ctx.fill();
-  ctx.fillStyle='#22303C';ctx.beginPath();ctx.moveTo(-fw*0.55,top-30);ctx.quadraticCurveTo(0,top-50,fw*0.55,top-30);ctx.lineTo(fw*0.5,top-25);ctx.quadraticCurveTo(0,top-41,-fw*0.5,top-25);ctx.closePath();ctx.fill();
-  const liv=F.liv||livery();
-  ctx.strokeStyle=liv;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(0,end+8);ctx.lineTo(0,end+46);ctx.stroke();
-  ctx.fillStyle=liv;ctx.fillRect(-fw,top+2,3,end-top-6);ctx.fillRect(fw-3,top+2,3,end-top-6);
-  ctx.fillStyle='#252B32';rrect(-fw+4,top,fw*2-8,end-top-2,4);ctx.fill();
-  ctx.fillStyle='#2F363E';for(const ax of g.aisleX)ctx.fillRect(ax-AISLE/2+2,g.rowsStart-4,AISLE-4,ac.rows*g.pitch+8);
-  const gx=g.aisleX[0]+AISLE/2;ctx.fillStyle='#39414A';ctx.fillRect(gx,top+3,fw-4-gx,9);ctx.fillRect(gx,end-12,fw-4-gx,8);
-  const sh=Math.max(3.5,g.pitch-2.4),sw=SEATW-3;
-  for(let r=0;r<ac.rows;r++){
-    const y=rowY(F,r)-sh/2,biz=r<F.bRows;
-    if(F.freighter){const lo=F.checkedTotal?F.hold/F.checkedTotal:0,un=F.arr.bags?1-F.arr.unloaded/F.arr.bags:0,full=Math.max(lo,un)*ac.rows;ctx.fillStyle=r<full?'#B07A45':'#2F363E';rrect(g.seatXs[0]-sw/2,y,g.seatXs[g.cols-1]-g.seatXs[0]+sw,sh,1.5);ctx.fill();if(r<full){ctx.fillStyle='rgba(0,0,0,.25)';ctx.fillRect(0-0.5,y,1,sh)}continue}
-    for(let c=0;c<g.cols;c++){const o=F.occ[r*g.cols+c];ctx.fillStyle=o>=0?GROUPC[o]:(F.occIn&&F.occIn[r*g.cols+c]>=0)?'#4F6478':(biz?'#4A4131':'#39414A');rrect(g.seatXs[c]-sw/2,y,sw,sh,Math.min(2,sh/3));ctx.fill()}
-  }
-  if(F.bRows){const y=g.rowsStart+F.bRows*g.pitch;ctx.strokeStyle='#8A7A55';ctx.lineWidth=1;ctx.setLineDash([2,2]);ctx.beginPath();ctx.moveTo(-fw+6,y);ctx.lineTo(fw-6,y);ctx.stroke();ctx.setLineDash([])}
-  ctx.fillStyle='#FFC72C';ctx.fillRect(g.fd.x-1,g.fd.y-5,3,10);if(F.rear)ctx.fillRect(g.rd.x-1,g.rd.y-5,3,10);
-  ctx.fillStyle='#8C97A1';ctx.fillRect(fw-2,g.holdY-5,3,10);
-  if(tow){ctx.strokeStyle='#5A646E';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,top-64);ctx.lineTo(0,top-74);ctx.stroke();ctx.fillStyle='#3A424B';rrect(-8,top-86,16,12,2);ctx.fill();ctx.fillStyle='#FFC72C';ctx.fillRect(-2,top-84,4,3)}
-  ctx.restore();
-}
 // a stand's markings and plane, drawn in its own frame; words stay upright at the matching world place
 function drawStandApron(i){
   const st=G.stands[i],S=R.st[i],[ax,ay,aw,ah]=standArea(i);
@@ -86,10 +54,7 @@ function drawBridge(i){
   if(F&&F.rear&&e>0.5){ctx.fillStyle='#7F8A94';ctx.fillRect(g.rd.x-15,g.rd.y-5,13,10);ctx.strokeStyle='#4A545E';ctx.lineWidth=1;for(let k=1;k<4;k++){ctx.beginPath();ctx.moveTo(g.rd.x-15+k*3.3,g.rd.y-5);ctx.lineTo(g.rd.x-15+k*3.3,g.rd.y+5);ctx.stroke()}}
   ctx.restore();
   if(F&&F.rear){ctx.strokeStyle='#56616B';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);ctx.beginPath();F.P.rear.pts.forEach((p,k)=>k?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke();ctx.setLineDash([])}
-  if(F&&e>0.6&&(F.hold<F.bagsIn||F.arr.unloaded<F.arr.bags)){
-    const ph=(performance.now()/1000*0.45+i*0.3)%2,s=(ph<1?ph:2-ph)*F.P.cart.len,q=ptAt(F.P.cart,s);
-    ctx.fillStyle='#3A424B';ctx.fillRect(q[0]-5,q[1]-4,10,8);ctx.fillStyle='#D9A066';ctx.fillRect(q[0]-4,q[1]+6,8,7);ctx.fillRect(q[0]-4,q[1]+15,8,7);ctx.fillStyle='#FFC72C';ctx.fillRect(q[0]-1.5,q[1]-3,3,2);
-  }
+  // the baggage cart is drawn with the rest of the turnaround's vehicles: 55-vehicles.js
 }
 function drawTerminal(D){
   drawRooms();drawTerminalHalls(D);
@@ -160,13 +125,6 @@ function gateBadge(i){
   if(ctx.measureText(left).width+ctx.measureText(rt).width+6>w-12){left=left.replace('on approach','approach').replace('taxiing in','taxi in').replace('towing in','tow in').replace('cleaning','clean');if(ctx.measureText(left).width+ctx.measureText(rt).width+6>w-12&&m>=0)rt=`${m}m`}
   mono(left,x+6,y+54,F.fault>0?'#FF7A8A':'#909AA4',8.5);
   mono(rt,x+w-6,y+54,m<0?'#FF7A8A':m<=10?'#FFC72C':'#909AA4',8.5,'right');
-}
-function miniPlane(x,y,ang,sc,alpha,col){
-  ctx.save();ctx.translate(x,y);ctx.rotate(ang);ctx.scale(sc,sc);ctx.globalAlpha=alpha??1;ctx.fillStyle=col||'#CDD4DA';
-  rrect(-14,-2.4,28,4.8,2.4);ctx.fill();
-  for(const s of [-1,1]){ctx.beginPath();ctx.moveTo(3,s*2);ctx.lineTo(-4,s*13);ctx.lineTo(-7.5,s*13);ctx.lineTo(-3.5,s*2);ctx.closePath();ctx.fill();
-    ctx.beginPath();ctx.moveTo(-10,s*1.5);ctx.lineTo(-14,s*6);ctx.lineTo(-16,s*6);ctx.lineTo(-14,s*1);ctx.closePath();ctx.fill()}
-  ctx.fillStyle=livery();ctx.fillRect(-14.5,-0.7,5,1.4);ctx.restore();
 }
 function drawAirfield(d){
   ctx.save();ctx.translate(0,AF_Y);const Y0=-180; // drawn where Classic has it, then moved up to the layout's runway
