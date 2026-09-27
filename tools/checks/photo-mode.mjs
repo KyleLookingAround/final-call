@@ -14,15 +14,17 @@ export default async function({open,ok,saveText,newest}){
     const r=await page.evaluate(CHROME=>{const S=__sim,R=S.R;S.toast('A toast to hide');S.setSpeed(0);S.setSpeed(1);
       const shown=q=>{const e=document.querySelector(q);if(!e)return false;const b=e.getBoundingClientRect();return b.width>0&&b.height>0&&getComputedStyle(e).visibility!=='hidden'},
         seen=()=>Object.fromEntries(CHROME.map(q=>[q,shown(q)])),inside=q=>{const b=document.querySelector(q).getBoundingClientRect();return b.width>0&&b.left>=0&&b.top>=0&&b.right<=innerWidth+0.5&&b.bottom<=innerHeight+0.5};
-      const before=seen(),button=inside('#photob');
-      document.querySelector('#photob').click();
+      // the camera button sits in the top bar, except on a phone (up to 600 px wide), where How to play has it instead
+      const before=seen(),narrow=innerWidth<=600,button=narrow?!shown('#photob'):inside('#photob');
+      if(narrow){document.querySelector('#helpb').click();document.querySelector('#photoHelp').click()}else document.querySelector('#photob').click();
+      const help=document.querySelector('#help').hidden;
       const cv=document.querySelector('#cv').getBoundingClientRect(),during=seen(),bar=inside('#photobar'),
         full=Math.abs(cv.width-innerWidth)<1&&Math.abs(cv.height-innerHeight)<1,on=!!R.photo;
       document.querySelector('#photobar [data-ph="done"]').click();
-      return {before,button,during,bar,full,on,after:seen(),off:R.photo==null}},CHROME);
+      return {before,button,help,during,bar,full,on,after:seen(),off:R.photo==null}},CHROME);
     const left=Object.keys(r.during).filter(q=>r.during[q]),lost=Object.keys(r.before).filter(q=>r.before[q]&&!r.after[q]);
-    ok(`photo-mode: entering hides every panel on a ${name}`,r.button&&r.on&&!left.length&&r.bar&&r.full&&!errs.length,
-      left.length?'still shown: '+left.join(', '):!r.button?'the camera button is off screen':!r.bar?'the photo bar is off screen':!r.full?'the map does not fill the screen':errs[0]||'');
+    ok(`photo-mode: entering hides every panel on a ${name}`,r.button&&r.help&&r.on&&!left.length&&r.bar&&r.full&&!errs.length,
+      left.length?'still shown: '+left.join(', '):!r.button?'the camera button is off screen, or in the top bar on a phone':!r.help?'How to play stayed open':!r.bar?'the photo bar is off screen':!r.full?'the map does not fill the screen':errs[0]||'');
     ok(`photo-mode: leaving brings the panels back on a ${name}`,r.off&&!lost.length&&r.before['.hud'],lost.length?'not back: '+lost.join(', '):'');
     await ctx.close();
   }
@@ -65,8 +67,8 @@ export default async function({open,ok,saveText,newest}){
 
   // on a phone, the click a tap sends after leaving lands where the panels have come back: it must reach none of them
   {const {ctx,page,errs}=await open({width:390,height:844},saveText(newest),true,{still:true});
-    const t0=await page.evaluate(()=>{const S=__sim;document.querySelector('#photob').click();return {view:S.R.view,speed:S.R.speed,snd:S.G.sound,tab:S.G.tab,on:!!S.R.photo}});
-    const out=[];for(const [fx,fy] of [[0.9,0.3],[0.5,0.2],[0.5,0.75]]){await page.evaluate(()=>{if(!__sim.R.photo)document.querySelector('#photob').click()});
+    const t0=await page.evaluate(()=>{const S=__sim;S.photoOn();return {view:S.R.view,speed:S.R.speed,snd:S.G.sound,tab:S.G.tab,on:!!S.R.photo}});
+    const out=[];for(const [fx,fy] of [[0.9,0.3],[0.5,0.2],[0.5,0.75]]){await page.evaluate(()=>{if(!__sim.R.photo)__sim.photoOn()});
       await page.touchscreen.tap(390*fx,844*fy);await page.waitForTimeout(700);out.push(await page.evaluate(()=>{const S=__sim;return {off:!S.R.photo,view:S.R.view,speed:S.R.speed,snd:S.G.sound,tab:S.G.tab}}))}
     const bad=out.find(o=>!o.off||o.view!==t0.view||o.speed!==t0.speed||o.snd!==t0.snd||o.tab!==t0.tab);
     ok('photo-mode: a tap on a phone leaves, and its click reaches nothing that comes back under it',t0.on&&!bad&&!errs.length,JSON.stringify(bad||t0)+(errs[0]||''));

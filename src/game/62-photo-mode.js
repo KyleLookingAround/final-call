@@ -69,6 +69,7 @@ function photoSave(){
   down();
 }
 $('#photob').addEventListener('click',photoOn);
+$('#photoHelp').addEventListener('click',()=>{openHelp(false);photoOn()}); // on a phone, where the top bar has no room for the camera button
 $('#photobar').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.ph;
   if(k==='time'||k==='sky')photoStep(k);else if(k==='pause'){setSpeed(R.speed===0?(R.lastSpeed||1):0);renderPhotoBar()}else if(k==='shoot')photoSave();else if(k==='done')photoOff()});
 // a tap on the map leaves (a drag or pinch still frames it); caught before the map's own tap, which would pick a stand or a tab

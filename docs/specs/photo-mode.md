@@ -10,7 +10,7 @@ Players start sharing the game on 28 Sep. Photo mode lets them hide the panels, 
 
 ## What they see
 
-- A camera button in the view controls (the bar with the speeds, Region and Full screen), on every screen size.
+- A camera button in the view controls (the bar with the speeds, Region and Full screen) on tablets and larger screens. On a phone (up to 600 px wide) the top bar keeps its room, as the owner asked on 27 Sep 2026: **Photo mode** is a link at the top of How to play instead.
 - Pressing it hides the board, the side panel, the phone sheet, the speed bar, the camera chips, toasts, the tip and the paused tag. The map fills the screen.
 - A small bar at the foot of the screen, clear of the phone's home bar: **Time** (Now, Dawn, Noon, Dusk, Night), **Sky** (Now, Clear, Rain, Fog, Snow), **Pause**, a round **shutter**, and **Done**. Each of Time and Sky is one button that steps to the next choice, so the bar fits a 320 px phone in one row.
 - Drag and pinch still frame the view. A tap on the map, **Done** or Esc leaves and brings every panel back as it was.
