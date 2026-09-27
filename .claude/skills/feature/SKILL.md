@@ -62,7 +62,9 @@ Much of the work runs overnight. A question nobody answers costs hours, so:
 - If something is truly ambiguous, take the safer option (the one easier to undo, or that changes the game less), say so in the PR, and carry on.
 - Stop and ask only for something irreversible or outside the brief.
 - Where anything in the repo conflicts with the brief, the brief wins for that session; fix the conflict in the repo in the same PR.
-- At each stopping point (a PR opened or merged, a spec written), check the session's usage (`get_session`). If the limit is reached, schedule a resume for just after it resets instead of running on overage.
+- At each stopping point (a PR opened or merged, a spec written), check the session's usage (`get_session`). If the limit is reached, schedule a resume for just after it resets instead of running on overage. Its `rate_limit_info` is reliable; its context and cost figures read 0, so don't rely on them to judge a session's cost.
+- **One PR-sized item per session.** When an item merges, the session that merged it writes the next item's brief and starts a fresh session for it (`create_session`), rather than carrying on with its own history. Keep two items in one session only when they share code and the second can be built while the first's CI runs (Sound and the level-up card did).
+- In a long-lived checkout, run `git status` before committing and stage paths by name: switching branches carries untracked and newly ignored files across.
 
 ## Splitting a big feature across sessions
 

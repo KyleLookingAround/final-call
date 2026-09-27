@@ -2,6 +2,20 @@
 
 After a PR merges, look back at the session that built it: what it cost, what slowed it, and what would have saved time or credits (the `steward` playbook's last step). Newest first. A lesson marked → changed something, and says where.
 
+## One session for four PRs (#28, #30, #32, #33) · 27 Sep 2026
+
+- **Numbers:** one session built Sound, the level-up card, the knowledge graph and the level-up redesign, from 06:11 to about 07:20. Every PR was green first time. The session record gave no cost or context figures, so the cost of carrying the history can't be measured, only reasoned about.
+- **Lessons:**
+  - The knowledge graph shared no code with the game work and came with a self-contained brief, but was built in the same conversation, which re-read Sound's and the level-up's history on every turn and every CI wake. → One PR-sized item per session: the session that merges an item starts a fresh one for the next (`feature` playbook). Sound and the level-up card together were fine: they shared code, and the second was built while the first's CI ran.
+  - The graph branch's build left `docs/graph.json` in the checkout; switching to the redesign branch, which didn't ignore it yet, and staging `docs` whole committed it. Caught by reading the PR's file list before merging. → Check `git status` and stage paths by name in a long-lived checkout (`feature` playbook).
+  - `get_session` reports 0 context and no cost, so "check your usage" can only see the rate limit. → The cost-budget experiment needs another measure before it starts.
+
+## #32 Knowledge graph · 27 Sep 2026
+
+- **Numbers:** built in the same session; opened 06:58, merged 07:07. No pushes after it opened; CI green first time.
+- **Went well:** its first run found nine `docs/SYSTEMS.md` sections that named no files, and it has already warned that the redesign changed `49-levelup.js` without its section.
+- **Lesson:** a query answers in 200–800 bytes against 41 KB of notes; whether sessions use it, and what it saves, is measured on "Looks like a real airport".
+
 ## #30 Level-up card · 27 Sep 2026
 
 - **Numbers:** the same session as #28. It was built while #28's CI ran, opened at 06:45 and merged at about 06:58. No pushes after it opened, and CI was green first time. The session record still gives no cost or context figures.
