@@ -40,7 +40,7 @@ Playbooks for each part are in `.claude/skills/`: `feature` (issue to merged PR,
 
 - `npm run build`: builds `dist/index.html` and `build/test.html`, which has `window.__sim` exposed. It needs no dependencies. It fails, naming the file and line, on a syntax error, a top-level name declared twice, a `</script>` inside the game, duplicate top-level function names or a lost marker.
 - `node tools/where.mjs <line>` turns a line number from an error in `dist/index.html` or `build/test.html` into `src/game/<file>:<line>`.
-- `npm install` once (web sessions do it at start-up through `.claude/hooks/session-start.sh`), then `npm run check`, about 1–2 minutes with Playwright and Chromium. `npm run check -- <group>` runs one group: `sim`, `rules`, `saves`, `layout`, `sheet` (with the full-screen drawer), `tour`, `transport`, `shots`, `share`, `layouts`, `news`, `perf`, and one per file in `tools/checks/` (`terminal` and each part's). What each covers is in `docs/SYSTEMS.md`. Every page is seeded, so a failure repeats. When you change a rule on purpose, update its check in the same PR; add a check when you add a rule.
+- `npm install` once (web sessions do it at start-up through `.claude/hooks/session-start.sh`), then `npm run check`, about 1–2 minutes with Playwright and Chromium. `npm run check -- <group>` runs one group: `sim`, `rules`, `saves`, `layout`, `sheet` (with the full-screen drawer), `tour`, `transport`, `shots`, `share`, `layouts`, `news`, `perf`, and one per file in `tools/checks/` (`terminal`, each part's and `sound`). What each covers is in `docs/SYSTEMS.md`. Every page is seeded, so a failure repeats. When you change a rule on purpose, update its check in the same PR; add a check when you add a rule.
 - Playwright is pinned to 1.56.1, whose Chromium (build 1194) the web image already has. If Chromium is missing, run `npx playwright install chromium`, or set `CHROMIUM_PATH` to an existing Chromium binary. Change the pin only together with the lock file.
 - For UI changes, look at the result. `npm run check -- shots` covers the three main views; for anything else, write a small Playwright script in `build/` (git-ignored) that opens `build/test.html` at phone (390×844, `hasTouch`, `isMobile`), tablet (768×1024) and desktop (1440×900) sizes, then screenshots it and reads the images.
 - For economy or progression changes, run the bot on seeds 1, 2 and 3: `npm run bot -- 1150 --seed 2` (3–4 minutes each; run them side by side in the background with `nohup … > build/bot-2.log 2>&1 &`). It ends with `LVLAT {level: game hour}`, `STATE` (a fingerprint of the whole end state), `ERR [...]` and a table against `tools/baseline.json`. A change meant to leave the game as it is must leave `STATE` identical on seeds 1–3 against a build of `main`. On a PR, the "Balance" workflow runs seeds 1–3 both ways (keeping Classic and rebuilding) and puts the tables in the run's summary: read those rather than repeating the runs locally, unless you are tuning. Bot options are in `docs/SYSTEMS.md`.
@@ -79,6 +79,7 @@ The game is one strict IIFE, split into files in `src/game/`. The build joins th
 | `39-layouts`, `40-layout-drawing` | Airport layouts: the `LAYOUTS` table, rebuilding and switching, the Airfield › Layout tab; remote stands, buses, rooms, shop units and each layout's buildings |
 | `41-airside` | Stand frames (`XF`, `toW`, `toL`), airside rooms and doorways (`route`, `walk`), and `layoutFaults`, the fit check for 2D layouts |
 | `42-terminal` to `47-hotel` | The terminal: its halls and the tables the parts plug into, then departures (check-in, security), arrivals (immigration, reclaim, the way out), baggage, the market place (shops, the walk to the gate) and the hotel |
+| `48-sound` | Announcements for your flights, spoken calls and ambience, watched from the frame loop (`soundTick`); the tones are in `06-sound` |
 | `99-start` | The `/*SIM_HOOK*/` marker and the call that starts the game |
 
 Some functions sit where they were first written rather than where their name suggests (`pickRoute` is in `03-state.js`), so search `src/game/` by name.
@@ -96,6 +97,7 @@ Some functions sit where they were first written rather than where their name su
 ### Time
 
 `update(dt)` advances game minutes. The frame loop takes steps of up to 0.034 minutes, or 0.1 minutes at 4× and 8× (the bot's step size, a third of the work). These hooks run from it:
+- The frame loop, four times a second and never in `R.sim`: the board, the goal bar and `soundTick`, which watches the game without changing it.
 - Every game minute: `updateBuilds`, `dayTick`, `checkLevel`, `fleetTick`, `mgrStep` and the terminal's `TERM_MINUTE` hooks.
 - `managersTick` runs every 6 hours, `crewTick` every 30 minutes, and `recordsHour` and `mgrHour` every hour. `nightChecks` runs at 03:00.
 - `dayTick` runs `recordsDay`, `regionDay`, `rivalDay`, `chalDay` and the terminal's `TERM_DAY` hooks.

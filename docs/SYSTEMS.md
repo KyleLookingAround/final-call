@@ -16,7 +16,7 @@ The project notes (`CLAUDE.md`) hold what every change needs. This holds how eac
 - `share`: the link-preview tags are filled in, and the preview image (1200×630, under 300 KB) and home-screen icon are published;
 - `layouts`: every layout plays two hours fully built without errors, the Layout tab fits a 320 px phone, and each layout's screenshot goes in `build/shots/`;
 - `news`: What's new opens once for an older save and not again, never for a new game, and from Settings with every version. It waits for the page's state (`R.newsBoot`), not set times;
-- each file in `tools/checks/` is a group named after it (`terminal`: every layout's desks, lanes, passport desks, carousels and queues sit in their halls, and departing and arriving passengers each go through their own halls; `departures`, `arrivals`, `baggage`, `market` and `hotel`: each part of the terminal). It exports a function that gets the helpers (`open`, `ok`, `saveText`…);
+- each file in `tools/checks/` is a group named after it (`terminal`: every layout's desks, lanes, passport desks, carousels and queues sit in their halls, and departing and arriving passengers each go through their own halls; `departures`, `arrivals`, `baggage`, `market` and `hotel`: each part of the terminal; `sound`: announcements, spoken calls, each sound setting, the quiet night, nothing in the headless sim and the board's line at 320 px, with a stub audio context and speech synthesis). It exports a function that gets the helpers (`open`, `ok`, `saveText`…);
 - `perf`: how long a level 9 airport, and a fully built sixteen-stand Midfield, take to simulate, against a calibration run so machines compare (fails over its budget), and how close a CPU-throttled phone gets to full speed at 8× with each (reported only).
 
 ## The bot
@@ -49,10 +49,19 @@ When the link is shared, chat apps and social sites show `src/public/preview.jpg
 - **Settings** live in `G.set`, read through `SET()`:
   - notifications: `tips`, `msgs`, `pops`, `goal`, `recs`, `badges`;
   - managers: `autoLines`, `autoFares`, `autoCrews`, and `autoDuty` (the duty manager: hotel room prices);
-  - weekly challenges: `chal`.
+  - weekly challenges: `chal`;
+  - sound: `sndAnn` ('on', 'chime' or 'off'), `sndVoice`, `sndAmb`, `sndFx`, under the master switch `G.sound`.
   - Toasts follow `msgs` unless they reply to a tap in the last 900 ms. Floaters follow `pops`.
 
 ## Systems
+
+- **Sound** (`06-sound.js` for the tones, `48-sound.js` for the rest; spec `docs/specs/sound.md`).
+  - **Only from the frame loop.** `soundTick` runs four times a second from `frame()` (23-boot.js), never from `update()`, returns at once in `R.sim`, and never changes game state: what it has seen per flight is in a `WeakMap`, and everything else in `SND`, which isn't saved. Nothing sounds before the first tap, which starts `AC`.
+  - **Announcements** for your own flights (not `F.partner` or `F.freighter`): a gate call when `F.called` is first set (skipped if the board already reads BOARDING), boarding and final call when `statusText` first reads BOARDING or FINAL CALL, and a gate change when a called flight's `GATES` name changes (a layout switch today). A flight first seen mid-boarding (a load) is called only for what happens next. The queue keeps the newest of each kind per flight and drops any older than 30 real seconds; one plays at a time, its words on `#bann` for 8 seconds; at 4× and 8×, one every 20 seconds.
+  - **Spoken calls** use `speechSynthesis` with an en-GB voice where there is one: only final calls and gate changes, at 1× or 2×, while the page is visible, not at night, at most one every 5 real minutes.
+  - **Ambience** is looped noise through filters, one chain each for the hum, the rain and each runway's jet, whose gains follow the camera (`viewShare` of the halls, `R.cam.z`) and whose jets pan by the plane's place on screen. Hidden pages suspend `AC`.
+  - **Night** is 23:00–05:00: the hum drops to a third and only final calls are announced, unspoken.
+  - **Settings:** `sndAnn` 'chime' plays the chime without words or voice; `sndFx` silences the tills (`kaching`) and ticks; `G.sound` silences everything, though the words still show.
 
 - **Levels and Masterplan.** Level-ups and some goals give plan points. Consultants sell points from level 4. `GOALS` is a sequential list, and `curGoal()` returns the first goal that is unfinished and available.
 - **Routes.**

@@ -9,7 +9,7 @@ function updateStand(i,dt,D){
   else if(pl.state==='approach'){if(F.landed&&!S.out){pl.state='inbound';pl.t=0}}
   else if(pl.state==='inbound'){pl.t+=dt;const k=Math.min(1,pl.t/D.tow);pl.offY=220*Math.pow(1-k,3);pl.alpha=Math.min(1,k*3);if(k>=1){pl.alpha=1;pl.state='deplaning';pl.offY=0;F.arr.started=G.clock}}
   else if(pl.state==='deplaning'){if(F.arr.onboard<=0){pl.state='turnaround';pl.t=D.clean}}
-  else if(pl.state==='turnaround'){if(F.willFault&&!F.faultFired){F.faultFired=true;techFault(i,F)}pl.t-=dt;if(pl.t<=0){pl.state='boarding';F.boardStart=G.clock;chime()}}
+  else if(pl.state==='turnaround'){if(F.willFault&&!F.faultFired){F.faultFired=true;techFault(i,F)}pl.t-=dt;if(pl.t<=0){pl.state='boarding';F.boardStart=G.clock}}
   else if(pl.state==='boarding'){
     if(!F.manifest.length&&!F.straggler&&F.seated>=F.booked&&F.hold>=F.checkedTotal-1e-6&&F.arr.sent>=F.arr.bags&&!(F.xferWait>0)&&F.fault<=0&&crewReady(i,F)){pl.state='closing';pl.t=0.8;settle(i)}
   }

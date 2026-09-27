@@ -55,6 +55,13 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--sign);outline-o
 .hrow .dep{white-space:nowrap}
 .late{color:var(--bad)} .ok{color:var(--good)}
 .bempty{font:500 12px var(--mono);color:var(--muted)}
+/* an announcement's words along the foot of the board (48-sound.js); too long for the board, it scrolls */
+.board{position:relative;z-index:45}
+.bann{position:absolute;left:-1px;right:-1px;top:calc(100% - 4px);background:var(--board);border:1px solid #22272D;border-top:0;border-radius:0 0 6px 6px;padding:5px 10px 6px;overflow:hidden;white-space:nowrap;font:500 12px/1.2 var(--mono);letter-spacing:.04em;text-transform:uppercase;color:var(--sign);pointer-events:none;box-shadow:0 8px 16px rgba(0,0,0,.3)}
+.bann[hidden]{display:none}
+.bann span{display:inline-block}
+.bann.run span{animation:bann 7.6s linear forwards}
+@keyframes bann{0%,18%{transform:none}82%,100%{transform:translateX(var(--dx))}}
 
 /* stage */
 .stage{position:relative;flex:1 1 auto;min-height:0;border-radius:8px;overflow:hidden;background:#14171B}
@@ -506,6 +513,7 @@ body.fs .cam{max-width:calc(100% - 172px)}
     <div class="bcols"><span>Time</span><span>Flight</span><span class="dl" id="bDestH">Destination</span><span>Gate</span><span>Status</span></div>
     <div class="brows" id="brows"></div>
     <div id="hist"></div>
+    <div class="bann" id="bann" hidden aria-live="polite"><span></span></div>
   </header>
 
   <main class="stage" id="stage">
