@@ -11,6 +11,15 @@ After a PR merges, look back at the session that built it: what it cost, what sl
   - `Object.assign(window.__sim,SIMX)` copies a getter's value, which is the whole of the `__sim.AF_Y` bug the planes part met; `ROOF` has the same bug. → Refactor step 1 in the spec, with a build rule to catch the next one.
   - The `graph` check refuses a link to a file that doesn't exist yet, so a spec naming a proposed new file has to describe it rather than link it. No change: the check is right, and the wording is easy.
   - `main` gained the approved terminal-place spec (#49) minutes after this session branched. → Fetch and reset onto `main` again before the first commit, as the lessons for #43 and #49 already say.
+## #51 Clear roofs at the starting zoom · 27 Sep 2026
+
+- **Numbers:** session `session_01DNpd2NAxxaMbr4nBX4SbvS`, estimate $3: `usage.cost_usd` still missing from `get_session` at the first stopping point (the pattern the game logic ideas session hit already), rate limit status stayed `allowed` throughout. Created 13:18, code plus checks plus screenshots plus the preview image done by 13:26.
+- **Lessons:**
+  - The owner's answer to #51 was already sitting on the issue as a comment by the time this session read it, so no `needs-owner` issue or wait was needed — reading the issue's own comments first (not just its body) before assuming a question is still open is worth doing every time.
+  - The starting camera zoom (`R.cam.z`, default `1`) isn't saved and isn't touched anywhere on the normal boot path into the airport view, so "clear at the default zoom" only needed proving for one number, not per device; the one path that sets a different starting zoom (`resize()`'s first-run branch) only fires for a view other than `airport` and only zooms further out, which is the safe direction already. Worth a line in `docs/SYSTEMS.md` if roofs come up again, so the next session doesn't re-derive it.
+  - The `roofs` check's "gone zoomed in" case used to zoom to 1.6× just to clear the old fade's top end with margin; moving it to exactly 1× turned the same assertion into a direct test of the issue itself (roofs gone at the real starting zoom) rather than an arbitrary point further out. → No playbook change, just a reminder that a check's test points are worth re-picking against what they're actually proving, not just re-validating against a moved constant.
+  - `npm run preview`'s screenshot is taken at the airport view's default zoom, so this change altered it for real (halls and colour visible where a grey roof panel was); the earlier lesson about only committing the regenerated image after a visible change applied cleanly here.
+  - `main` moved twice more while this PR's checks ran (#53, then #49), each adding a `docs/LESSONS.md` conflict; merging `main` in again right before the final merge attempt (not only when CI first went green) is what #49's own lesson below already says to do.
 
 ## #49 The terminal as a place: the spec, checks planned first · 27 Sep 2026
 
@@ -20,6 +29,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
   - The idea board's page shows only the questions. The owner's answers are in its database (`feedback/round2`), read with `ArtifactData`, not the Artifact read. → Say so in any brief that points at the idea board.
   - Measuring showed the real airport's shares leave this bundle about 0.02× of drawing headroom. Budgets set before a bundle is built should add up across bundles, not start fresh. → The spec makes its groundwork win room back before any part spends it.
   - `perf` on this machine gave Midfield 0.129×, against 0.244× in the real airport's spec. Numbers from different machines don't compare. → The spec records the machine and asks each part for the median of three runs on its branch and on `main`.
+
 ## #60 Idea board, September 2026 · 27 Sep 2026
 
 - **Numbers:** session `session_01JryZpLH3H7sVAKb1DwUm61`, estimate $10: about $2.70 by the time the ratings were recorded, 180k of 1M context. Board published 12:44; the owner rated all 60 ideas by 13:12 and said "done"; ratings read back and recorded the same afternoon.
