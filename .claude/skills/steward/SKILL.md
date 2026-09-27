@@ -7,7 +7,7 @@ description: Drive a Final Call pull request to green and merged - reading CI fa
 
 ## Checks workflow (`checks.yml`)
 
-- It runs `npm run check` on every PR. Failure screenshots are in the `check-failures` artifact; `screenshots` is kept on every run.
+- It runs `npm run check` on every PR that isn't a draft, and a newer push cancels the older run. Run `npm run check` locally before pushing rather than using CI to find failures. Failure screenshots are in the `check-failures` artifact; `screenshots` is kept on every run.
 - Every page is seeded, so a failure repeats locally: `npm run check -- <group>` (the groups are listed in the project notes).
 - A line number from an error in the built page: `node tools/where.mjs <line>`.
 - Fix the cause. Never skip, weaken or delete a check to get green, and never push an empty commit to re-run CI.
@@ -15,13 +15,21 @@ description: Drive a Final Call pull request to green and merged - reading CI fa
 
 ## Balance workflow (`balance.yml`)
 
-- It runs the bot on seeds 1-3 when a PR touches `src/game/` or the bot. It fails only on errors; levels outside the baselines show as warnings.
+- It runs the bot on seeds 1-3 once, when a PR that touches `src/game/` or the bot opens or leaves draft, and again whenever the `balance` label is added (remove it first if it's there). Before merging, if the game code changed after its last run, add the label to confirm the final code. It fails only on errors; levels outside the baselines show as warnings.
 - An `off` level needs a reason in the PR, or the owner's agreement and an updated `tools/baseline.json`. See the `balance` playbook.
 
 ## Review comments
 
 - Small, clear asks (a rename, a nit, a missing check): fix, push, and reply briefly.
 - Bigger asks or design questions: propose an approach to the owner before changing course.
+
+## Catching up with `main`
+
+- The Catch up workflow (`.github/workflows/catch-up.yml`) runs whenever `main` moves. It merges `main` into every open PR from this repo, rejoins the joined lists, and pushes if the merge was clean or the only conflicts were inside the joined lists. It never rebases or force-pushes. When a real conflict stops it, it comments once on the PR, naming the files, and leaves the branch alone.
+- Its pushes use the repo's token, which doesn't start `pull_request` workflows, so it starts Checks itself (never Balance: add the `balance` label before merging if the game code changed since Balance last ran). The Description check runs again at your next push or description edit. If the owner adds a `CATCH_UP_TOKEN` secret, its pushes start every workflow as usual.
+- So the branch on GitHub may be ahead of yours: `git pull --no-rebase origin <branch>` before you commit more, and never force-push over it.
+- After its comment, merge by hand: `git fetch origin main && git merge origin/main`, resolve what it named, and push. A conflict inside a joined list (between `<!-- joined:… -->` and `<!-- /joined:… -->`) needs nothing by hand: `node tools/join.mjs --write` rebuilds the list and clears it.
+- Count the merges from `main` your PR needed, by you and by the workflow, for the look back.
 
 ## Stacked PRs
 
@@ -40,7 +48,7 @@ Check that the PR's diff now shows only its own changes, and change its base to 
 
 When several branches were built side by side (the `feature` playbook's "Splitting a big feature across sessions"):
 
-- The Parts workflow (`parts.yml`) merges `main` and every open PR labelled `part:<feature>` into a temporary branch and runs `npm run check`, on each push to a part, hourly and on demand (Actions › Parts together › Run workflow). Its comment on each part's PR says whether they're green together, which part conflicts and in which files, and how long it has been red. Fix a combination problem in the part that caused it, before merging any of them.
+- The Parts workflow (`parts.yml`) merges `main` and every open PR labelled `part:<feature>` into a temporary branch and runs `npm run check`, on each push to a part and on demand (Actions › Parts together › Run workflow). Its comment on each part's PR says whether they're green together, which part conflicts and in which files, and how long it has been red. Fix a combination problem in the part that caused it, before merging any of them.
 - Merge them one at a time, each once it's green. Before merging the next, bring it up to date with `main` and run `npm run check` again.
 - If the parts started from a groundwork branch that was then squash-merged, GitHub shows conflicts across the whole groundwork, because it can't tell the squashed commit is the same work. Check that it is (`git diff <groundwork tip> <squashed commit>` prints nothing), then tell git so without rewriting the part's history:
 
@@ -67,7 +75,8 @@ Green checks, no conflicts, and every review thread answered. Then merge it your
 
 Every merged PR gets a short look back at the session that built it, so the next one costs less. Keep it to a few minutes.
 
-1. **Numbers.** From the session's record (`get_session`): what it cost against its brief's estimate, how much of its context it used, and when it started. Any hours spent waiting on the owner (a `needs-owner` issue's open time, or a question in the conversation). From the PR: when it opened and merged, how many pushes came after it opened, and any red CI runs.
+1. **Numbers.** From the session's record (`get_session`): what it cost against its brief's estimate, how much of its context it used, and when it started. Any hours spent waiting on the owner (a `needs-owner` issue's open time, or a question in the conversation). From the PR: when it opened and merged, how many pushes came after it opened, any red CI runs, and how many merges from `main` it needed (by hand, and by the Catch up workflow).
 2. **Friction.** What slowed it or needed someone else. Look at what it got stuck on, what the PR says it left undone or saw fail once, and what the merge needed: conflicts, scope fixes, a rebalance.
-3. **Record it** in `docs/LESSONS.md`: one entry per PR, a line per lesson.
-4. **Act on it** when a lesson would have saved real time or credits, or it comes up a second time. Change the playbook, brief, check or tool that would have prevented it, in the same PR as the entry. Otherwise the entry is enough.
+3. **Record it** in its own file, `docs/lessons/<pr>-<short-name>.md` (`main-<short-name>.md` for a change pushed straight to `main`), in the shape the others have: `# Title · date`, then **Numbers**, **Went well** and **Lessons**, a line per lesson. Never add it to `docs/LESSONS.md` itself: that list is joined from the folder.
+4. **Act on it** when a lesson would have saved real time or credits, or it comes up a second time. Change the playbook, brief, check or tool that would have prevented it, in the same PR as the entry, and mark the lesson with → and where. Otherwise the entry is enough.
+5. **The tidy.** Run `node tools/join.mjs`: its first line counts the lessons added since the last tidy. At 8 or more, fire the tidy Routine (`fire_trigger` with the id in the `coordinator` playbook), say so in the PR or commit that adds the lesson, and don't tidy by hand. Only one session fires it: if a tidy PR is already open (`feature/lessons-tidy-…`), leave it be.

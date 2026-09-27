@@ -1,7 +1,9 @@
 name: Checks
 
+# Not on draft PRs: run npm run check locally while a PR is a draft, and mark it ready for CI.
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
 
 permissions:
@@ -14,6 +16,7 @@ concurrency:
 
 jobs:
   check:
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
