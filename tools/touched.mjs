@@ -24,7 +24,7 @@ export function groupsFor(files,g=build()){
   for(const f of files){
     if(f==='tools/graph.mjs'){groups.add('graph');continue}
     if(f==='tools/brief.mjs'||f==='tools/touched.mjs'){groups.add('brief');continue}
-    if(f.startsWith('tools/checks/')&&f.endsWith('.mjs')){groups.add(f.slice('tools/checks/'.length,-4));continue}
+    if(/^tools\/checks\/[\w-]+\.mjs$/.test(f)){groups.add(f.slice('tools/checks/'.length,-4));continue}
     if(f.startsWith('src/game/')){
       const file=g.files[f.slice('src/game/'.length)];
       if(file)for(const c of checksCalling(g,file.funcs.concat(file.hooks.filter(h=>h.startsWith('SIMX.')).map(h=>h.slice(5)))))groups.add(c);

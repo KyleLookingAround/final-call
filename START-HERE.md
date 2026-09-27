@@ -55,7 +55,7 @@ If a session can only push to its own branch, it opens a PR instead of pushing t
 | --- | --- |
 | `src/game/*.js`, `src/shell.html` | The game's source: logic and drawing in numbered files, then CSS and HTML |
 | `tools/build.mjs` | Builds `dist/index.html` (published) and `build/test.html` (for tests) |
-| `tools/check.mjs` | Checks for crashes, old saves, every screen size, phone gestures and the guided start |
+| `tools/check.mjs`, `tools/checks/` | Checks for crashes, old saves, every screen size, phone gestures and the guided start, one group per file in `tools/checks/` |
 | `tools/run-bot.mjs`, `tools/bot.js` | A bot that plays for hundreds of game hours to check balance |
 | `tools/saves/` | Saves from older versions and every stage of the game, used by the checks |
 | `.github/workflows/pages.yml` | Publishes to GitHub Pages on every push to `main` |
