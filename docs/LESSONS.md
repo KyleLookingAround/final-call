@@ -2,6 +2,12 @@
 
 After a PR merges, look back at the session that built it: what it cost, what slowed it, and what would have saved time or credits (the `steward` playbook's last step). Newest first. A lesson marked → changed something, and says where.
 
+## #43 Description check · 27 Sep 2026
+
+- **Numbers:** session `session_01AoXGiU2yJ1jzRSxvJm7cpK`, estimate $4: cost and context TBD at merge. No game code, so no bot run.
+- **Went well:** `.githooks/commit-msg`'s own patterns carried straight over to `actions/github-script`, and `parts.yml` was a ready template for a checkout-free job.
+- **Lesson:** three PRs (#38, #39, #41) had opened with a tool footer before anyone checked for it on the PR itself, only on commits. → The Description check now catches it at `opened`, `edited`, `reopened` and `synchronize`, so editing the description re-runs it without a push.
+
 ## Real airport groundwork, spec and parts' briefs · 27 Sep 2026
 
 - **Numbers:** session `session_01FzgcmHBgyerAkkyLvdb5kW`, estimate $20: $1.55 and 149k of 1M context when the PR opened. Started 07:35; the session was resumed several times, so the wall-clock time says little. No questions for the owner.
