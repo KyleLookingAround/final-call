@@ -16,7 +16,9 @@ function planSummary(){
   return h;
 }
 function renderPlanBtn(){const b=$('#planb');if(!b)return;const n=G.pts||0,show=G.level>=1||n>0||Object.keys(G.tech||{}).length>0;if(b.hidden===show)b.hidden=!show;const c=b.querySelector('.pb');c.textContent=n;c.hidden=!n||SET().badges===false}
-function openPlan(){if(R.sim)return;const el=$('#plan');if(el.hidden){R.planPrev=R.speed;setSpeed(0)}el.hidden=false;renderPlan();$('#plan .close').focus();const r=$('#planBody .s-ready');if(r)r.scrollIntoView({block:'nearest'})}
+function openPlan(){if(R.sim)return;const el=$('#plan');if(el.hidden){R.planPrev=R.speed;setSpeed(0)}el.hidden=false;renderPlan();$('#plan .close').focus();
+  // scroll just enough to reveal the ready-to-approve heading, never the whole list: the header and buy-point button must stay in view
+  const r=$('#planBody [data-sec="ready"]')||$('#planBody .s-ready');if(r)r.scrollIntoView({block:'nearest'})}
 function closePlan(){const el=$('#plan');if(el.hidden)return;el.hidden=true;if(R.planPrev)setSpeed(R.planPrev);renderPlanBtn();if(G.tab==='office'||G.newTabs&&G.newTabs.length)renderTabs();renderPanel()}
 function renderPlan(){
   const el=$('#planBody');if(!el||$('#plan').hidden)return;const wide=el.clientWidth>=860;
@@ -31,7 +33,7 @@ function renderPlan(){
     const bs=R.planB||'all';
     h+=`<div class="chips pchips"><button class="chip${bs==='all'?' on':''}" data-planb="all">All</button>${BRANCHES.map(([b,n])=>{const r=vis.filter(T=>T.b===b&&techState(T)==='ready').length;return `<button class="chip${bs===b?' on':''}" data-planb="${b}">${n}${r&&pts?` <small>${r}</small>`:''}</button>`}).join('')}</div>`;
     const ns=vis.filter(T=>bs==='all'||T.b===bs),grp=[['Ready to approve',ns.filter(T=>techState(T)==='ready')],['Needs points or an earlier plan',ns.filter(T=>['pts','req'].includes(techState(T)))],[`At ${lvlName(Math.min(LEVELS.length-1,G.level+1))}`,ns.filter(T=>techState(T)==='level')]];
-    for(const [n,L] of grp)if(L.length)h+=`<div class="sec">${n}<span>${L.length}</span></div><div class="tlist">${L.map(T=>nodeCard(T,bs==='all',0,recIds.has(T.id))).join('')}</div>`;
+    for(const [n,L] of grp)if(L.length)h+=`<div class="sec"${n==='Ready to approve'?' data-sec="ready"':''}>${n}<span>${L.length}</span></div><div class="tlist">${L.map(T=>nodeCard(T,bs==='all',0,recIds.has(T.id))).join('')}</div>`;
     const dn=ns.filter(T=>techState(T)==='done');if(dn.length)h+=`<div class="sec">Approved<span>${dn.length}</span></div><div class="tdone">${dn.map(T=>`<span title="${T.u.map(itemName).join(', ')}">✓ ${T.n}</span>`).join('')}</div>`;
   }
   if(later)h+=`<p class="note soon">${later} more plans appear as your airport grows.</p>`;
