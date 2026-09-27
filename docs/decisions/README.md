@@ -18,4 +18,6 @@ Short records of decisions that shape the code, so later changes know what they 
 | [ADR-2026-09-26-managers-decide-by-value](ADR-2026-09-26-managers-decide-by-value.md) | Managers decide by measured value, a little at a time |
 | [ADR-2026-09-26-terminal-halls-and-parts](ADR-2026-09-26-terminal-halls-and-parts.md) | The terminal is halls, and its parts plug in |
 | [ADR-2026-09-27-knowledge-graph](ADR-2026-09-27-knowledge-graph.md) | A map of the code and docs, generated from the source (an experiment) |
+| [ADR-2026-09-27-roof-is-a-floor](ADR-2026-09-27-roof-is-a-floor.md) | The roof is a floor the player picks, never a zoom |
 | [ADR-2026-09-27-session-briefs](ADR-2026-09-27-session-briefs.md) | Sessions start from a checked brief, ask the owner through issues, keep to a cost budget, and parts are tested together (experiments) |
+| [ADR-2026-09-27-reviewer-step](ADR-2026-09-27-reviewer-step.md) | A fresh review before each PR opens (an experiment) |

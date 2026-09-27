@@ -14,3 +14,4 @@
 - [ ] New saved fields have a default in `DEFAULT()` and are handled in `resetAll`; older saves still load
 - [ ] Rules changed on purpose have their `rules` check updated; new rules have a check
 - [ ] Project notes, `docs/ROADMAP.md` and (for a release) `docs/HISTORY.md` are up to date
+- [ ] A fresh review before opening: what it found and what changed

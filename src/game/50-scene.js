@@ -31,4 +31,4 @@ function lightPass(){
 }
 // the apron's floodlight at each built stand
 LIGHTS.push(V=>{for(const i of SIDX){if(!G.stands[i].built)continue;toW(i,130,220);lamp(WP.x,WP.y,230,'255,214,150',0.2*V.d)}});
-Object.assign(SIMX,{grade,draw,clampCam,viewK,LAYERS,LAYER,LIGHTS,lamp,V,darkness,get AF_Y(){return AF_Y}});
+Object.assign(SIMX,{grade,draw,clampCam,viewK,LAYERS,LAYER,LIGHTS,lamp,V,darkness});

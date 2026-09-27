@@ -1,10 +1,12 @@
-/* ================= ROOFS: the terminal and its piers seen from above, cut away as you zoom in ================= */
-// Zoomed out, every hall and pier that's built has a roof, in its room's own shape, with plant and skylights, so the airport
-// reads as buildings. Between ROOF_Z[0] and ROOF_Z[1] camera zoom the roofs fade away to show the halls and passengers.
-// Rooms not built yet (a second phase before Pier B, the hotel before it's bought) have no roof. Drawing only: the roofs
-// follow ROOMS and roomOn() and change nothing; taps go through them as before (tapAt).
-const ROOF_Z=[0.9,1.3];
-const roofFade=z=>clamp((ROOF_Z[1]-z)/(ROOF_Z[1]-ROOF_Z[0]),0,1); // 1 zoomed out, 0 zoomed in
+/* ================= ROOFS: the terminal and its piers seen from above, a floor the player steps up to ================= */
+// The halls are never covered on their own: the roof is a floor (R.floor, runtime), picked with the Roof button on the map's
+// camera bar at any zoom (the owner's choice, 27 Sep 2026). On the roof, every hall and pier that's built has a roof in its
+// room's own shape, with plant and skylights. Rooms not built yet (a second phase before Pier B, the hotel before it's
+// bought) have no roof. Drawing only: the roofs follow ROOMS and roomOn() and change nothing; taps go through them as
+// before (tapAt).
+if(!R.floor)R.floor='halls'; // 'halls' or 'roof'; the terminal's two floors will split 'halls'
+const roofA=()=>R.floor==='roof'&&R.view==='airport'?1:0; // 1 on the roof, 0 on the halls
+function setFloor(f){if(R.floor===f)return;R.floor=f;renderCam()}
 let ROOF=null; // the current plan: {key, rooms:[{x0,y0,x1,y1,path,edge,sky:[…],plant:[…]}]}
 // a roof's parts in the room's own frame, along its longest wall: skylight strips down the middle and plant along one side,
 // each kept only if it sits wholly on the roof
@@ -30,7 +32,7 @@ function roofNow(){
   return ROOF={rs:ROOMS,on,rooms,all,deco:(LAY.decor||[]).filter(d=>d.t==='tent'||d.t==='tubes')};
 }
 function drawRoofs(V){
-  const a=roofFade(V.z);if(a<=0.01)return;const P=roofNow();if(!P)return;
+  const a=roofA();if(!a)return;const P=roofNow();if(!P)return;
   const vis=P.rooms.filter(r=>r.x1>=V.x0&&r.x0<=V.x1&&r.y1>=V.y0&&r.y0<=V.y1);if(!vis.length)return;
   const d=V.d,k=V.k,night=d/0.5; // 0 by day, 1 at night
   ctx.save();ctx.globalAlpha=a;ctx.lineJoin='miter';
@@ -50,4 +52,4 @@ function drawRoofs(V){
   ctx.restore();
 }
 LAYER.roofs.push(drawRoofs);
-Object.assign(SIMX,{roofFade,roofNow,ROOF_Z,drawRoofs,tapAt,shopHit,get ROOF(){return ROOF}});
+Object.assign(SIMX,{roofA,setFloor,renderCam,roofNow,drawRoofs,tapAt,shopHit,get ROOF(){return ROOF}});

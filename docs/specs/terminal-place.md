@@ -8,7 +8,7 @@ Bundle 3 of `docs/ROADMAP.md`, plus its follow-up, each layout's own terminal fl
 1. Two floors from the start, in every layout.
 2. Decor doesn't change the rating.
 3. The terrace is a Terminal upgrade from level 3, and its café earns at most 2% of a day's income.
-4. Zooming in shows departures (the upper floor) first.
+4. Departures (the upper floor) shows first. (Changed by the owner on 27 Sep 2026: floors are picked, not zoomed; see below.)
 5. The drawing budget stays 0.55×, and the groundwork wins room back.
 6. One part draws the other eight layouts' floor plans, split in two only if its brief finds it too big.
 
@@ -18,8 +18,8 @@ The terminal stops being one flat diagram shared by every layout. It becomes a b
 
 ## What they see
 
-- **Zoomed out** (roofs solid, from `docs/specs/real-airport.md`): the roof, and once it's built the terrace cut into it at the apron edge, with spotters on it. Nothing inside the halls is drawn under a solid roof.
-- **Zoomed in** (roofs faded, above about 1.3×): one floor at a time. A small floor chip on the map, **Departures ▲ / Arrivals ▼**, picks which. It shows only in the airport view, only when zoomed in, and only where a layout has two floors.
+- **Floors, at any zoom** (the owner, 27 Sep 2026: "I don't want to zoom in to see the customers… go up and down layers to see floors, roof as a floor"). One floor at a time, picked on the map's camera bar, never by zooming. Version 31 added the first stop, **Roof**, over the halls; this feature splits the halls in two, so the control goes **Roof / Departures / Arrivals**, up and down. It shows only in the airport view.
+- **On the roof:** the roofs, and once it's built the terrace cut into it at the apron edge, with spotters on it. Nothing inside the halls is drawn under the roof.
   - **Upper floor (departures):** check-in, security, the market place and the gate lounges. Passengers reach the stands by the air bridges.
   - **Lower floor (arrivals):** immigration, reclaim, customs, the arrivals hall, the baggage hall and the hotel walkway.
   - **Between floors:** the concourse links both. Escalators and a lift stand where they meet. Arriving passengers ride down, and families and those who need help take the lift.
@@ -36,14 +36,14 @@ The terminal stops being one flat diagram shared by every layout. It becomes a b
 
 - **Floors are a field on rooms.** A hall gets `fl` (0 lower, 1 upper); a room without it (the concourse, the forecourt) is on both. A doorway joins rooms on the same floor. A **floor link** (escalator or lift) is a doorway between floors with a capacity per minute; passengers queue for it like a door, and `p.famL` passengers take the lift. Routing (`route`, `walk`) is unchanged apart from treating links as doorways. Bags don't use floor links: the belts drop to the baggage hall.
 - **Each layout lists its own terminal** (`L.term`: halls, doorways, floor links and where each part's counters sit), in place of the shared `TERM_ROOMS` and `TERM_DOORS`. The groundwork moves today's plan into Classic's entry and gives the other layouts a copy, so nothing moves until the floor plans part. Everything that places a desk, lane, booth, carousel or queue reads the layout's table, not a constant.
-- **The view:** `R.floor` (runtime, `'up'` or `'down'`, defaulting to `'up'`) picks the floor drawn. The terminal's layers draw only the rooms and passengers on that floor. Nothing inside a hall is drawn where the roof is solid (`roofA`, the roofs part's opacity at the current zoom; the groundwork exposes it if the roofs part hasn't).
+- **The view:** `R.floor` (runtime; version 31 has `'halls'` and `'roof'`, and the groundwork replaces `'halls'` with `'up'` and `'down'`, defaulting to `'up'`) picks the floor drawn, through `setFloor` in `53-roofs.js`. The terminal's layers draw only the rooms and passengers on that floor. Nothing inside a hall is drawn on the roof (`roofA()` is 1).
 - **Spotters** are a count, not passengers: `R.spot` goes up and down with the hour, the weather and rare arrivals, and a sample of at most 40 is drawn. They never enter the terminal's queues. The terrace café earns a little per spotter.
 - **Windows** are edges of airside rooms that face the apron, worked out from each layout's rooms. A watcher is a passenger already waiting for their gate call, within reach of the glass. They go to the glass, stay until the plane has passed, and go back, and never after their gate is called.
 - **Decor** is worked out from the layout's rooms, what's built and the level. It is drawn only, never saved or placed, and has no effect on the rating (the owner's choice).
 - **Local names** come from `PLACES` in the region, picked with a hash of the unit's index, not with `rnd()`, so they never change the game.
 - **Unlocks:** two floors, windows, decor and local names from the start. The terrace is an upgrade from level 3, `G.lv.terrace`, hidden before. Each layout's plan comes with the layout.
 - **Managers and recommendations:** nothing to manage. The advisor's tips and the board's lines fly the camera to the right floor. The duty manager ignores the terrace.
-- **Fitting round the real airport:** roofs (0.9×–1.3× fade) decide when halls show. Two floors never draw under a solid roof, and the terrace is cut into the roof, drawn at every zoom. Window lights use `LIGHTS` and `lamp()`. Everything is in drawing layers (`LAYER.terminal`, `pax`, `roofs`, `lit`), with no new lines in `draw()`.
+- **Fitting round the real airport:** the floor picked decides when halls show, never the zoom. Two floors never draw under the roof, and the terrace is cut into the roof, drawn at every zoom. Window lights use `LIGHTS` and `lamp()`. Everything is in drawing layers (`LAYER.terminal`, `pax`, `roofs`, `lit`), with no new lines in `draw()`.
 
 ## Saved state
 
@@ -99,9 +99,9 @@ The checks-first PR writes all of these before any code. Each is named with its 
 **Groundwork (`plans` and `scene`):**
 - `plans: every layout's terminal comes from its own table`. Setup: a new game, each of the nine layouts in turn with `switchLayout`, fully built. Measure: the rooms merged into `ROOMS` equal that layout's `L.term` halls, and `layoutFaults()` is empty. Pass: nine layouts, no faults.
 - `plans: rooms and doorways have floors`. Setup: as above. Measure: every hall's `fl` is 0, 1 or absent; every doorway joins two rooms that share a floor, or is a floor link. Pass: none wrong.
-- `scene: nothing is drawn inside a hall under a solid roof`. Setup: the worst scene (zoomed out, `v29-L9.json`, night, storm). Measure: spy on `TERM_DRAW` and on the `pax` layer, and count passengers and furniture drawn inside a hall where `roofA` is 1. Pass: 0.
+- `scene: nothing is drawn inside a hall under the roof`. Setup: the worst scene (zoomed out, `v29-L9.json`, night, storm) with `R.floor='roof'`. Measure: spy on `TERM_DRAW` and on the `pax` layer, and count passengers and furniture drawn inside a hall where `roofA` is 1. Pass: 0.
 - `scene: one floor at a time`. Setup: zoomed in at 1.6×, `R.floor='up'`, then `'down'`. Measure: passengers drawn whose room is on the other floor. Pass: 0 each way.
-- `plans: the floor chip`. Setup: the airport view zoomed out, zoomed in, and the region view, on a 320×568 phone and 1440×900. Measure: the chip is shown only zoomed in, in the airport view, where the layout has two floors. Its box sits inside the canvas, clear of the camera band (`#topgap`) and the bottom sheet's handle. Tapping it switches `R.floor`. Pass: all.
+- `plans: the floor chip`. Setup: the airport view zoomed out, zoomed in, and the region view, on a 320×568 phone and 1440×900. Measure: the floor control is shown in the airport view at every zoom, and not in the region view; Roof, Departures and Arrivals where the layout has two floors. Its box sits inside the canvas, clear of the camera band (`#topgap`) and the bottom sheet's handle. Tapping each stop sets `R.floor`. Pass: all.
 
 **Two floors (`floors`):**
 - `floors: departures upstairs, arrivals below`. Setup: Classic, fully built. Measure: `ci`, `sec` and `mkt` have `fl` 1; `imm`, `rec`, `cus`, `arh`, the baggage hall and `wlk` have `fl` 0; no two rooms on one floor overlap (intersection area 0). Pass: all.

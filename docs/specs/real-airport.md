@@ -1,16 +1,16 @@
 # Looks like a real airport
 
-Issue: #37 · Status: Approved (the owner approved it in advance, in the brief of 27 Sep 2026, `docs/briefs/real-airport.md`) · PRs: groundwork (added as they open)
+Issue: #37 · Status: Approved (the owner approved it in advance, in the brief of 27 Sep 2026, `docs/briefs/real-airport.md`) · Built (version 31) · PRs: groundwork #38; parts #53 markings, #50 planes, #52 roofs (and #63), #61 weather, #55 vehicles; brought together in the version 31 PR
 
 ## What the player gets
 
-The airport looks like a real one seen from above, not a diagram: painted apron markings, day and night with lights that come on at dusk, roofs over the terminal that cut away as you zoom in, planes with engines, shadows and their airline's tail, weather you can see on the ground, and vehicles working the turnarounds. It stays a top-down view, not isometric, and it changes nothing about how the game plays.
+The airport looks like a real one seen from above, not a diagram: painted apron markings, day and night with lights that come on at dusk, roofs over the terminal that you step up to as a floor, planes with engines, shadows and their airline's tail, weather you can see on the ground, and vehicles working the turnarounds. It stays a top-down view, not isometric, and it changes nothing about how the game plays.
 
 ## What they see
 
 - **Apron markings.** Yellow lead-in lines curving onto each stand, stop bars and stand numbers painted on the ground, red safety lines round each stand, taxiway centre lines with blue edge lights, runway threshold and aiming-point markings.
 - **Day and night.** A dawn and dusk colour grade (warm, then blue) on top of today's darkness curve; floodlight masts on the apron that light up at dusk; lit windows in the terminal; runway and taxiway edge lights; planes' navigation and beacon lights at night.
-- **Roofs.** Zoomed out, the terminal and its piers have roofs (with plant, skylights and the layout's own shape), so the airport reads as buildings. Zooming in, they fade away between about 0.9× and 1.3× zoom to show the halls and passengers inside. Hidden rooms (not yet built) have no roof.
+- **Roofs.** On the roof, the terminal and its piers have roofs (with plant, skylights and the layout's own shape), so the airport reads as buildings. Changed on 27 Sep 2026 by the owner: the halls and passengers are never covered on their own; the roof is a floor the player steps up to with the **Roof** button on the map's camera bar, at any zoom (it replaced the zoom fade and #51's move of it; `docs/decisions/ADR-2026-09-27-roof-is-a-floor.md`). Hidden rooms (not yet built) have no roof.
 - **Better planes.** Engines under the wings, a shadow on the apron, the airline's colour on the tail and engines, wingtip lights at night; the same on the runway's small planes.
 - **Weather you can see.** Rain streaks and puddles that shine under the lights, snow that settles on the apron and grass and is cleared from stands, fog banks, cloud shadows drifting over, and a windsock.
 - **Vehicles on the apron.** A tug at pushback, a fuel truck, a catering truck and baggage tractors with carts at each turnaround, driving between the stand and the service road. They come from what the stand is doing, not from new rules.
@@ -61,7 +61,7 @@ One run varies by about ±0.05×, so a part measures its cost as the median of t
 ## Checks
 
 - The `scene` group (`tools/checks/scene.mjs`): every layer draws once a frame, in order, and only in the airport view; the lighting pass darkens the apron at night and a lamp lights its spot; drawing never changes the game (the same seed plays the same with frames drawn as without); drawing speed in three scenes against the budget.
-- Each part adds its own checks to `scene` or its own file in `tools/checks/`: markings present on built stands only; roofs drawn when zoomed out and gone when zoomed in, never over a room not yet built; lights only at night; vehicles only at stands with a turnaround; weather drawn only while it's on (`R.fx`).
+- Each part adds its own checks to `scene` or its own file in `tools/checks/`: markings present on built stands only; roofs drawn only on the roof floor, at any zoom, never over a room not yet built; lights only at night; vehicles only at stands with a turnaround; weather drawn only while it's on (`R.fx`).
 - Screenshots: `shots` plus each part's own at phone, tablet and desktop, by day, at dusk and at night, zoomed out and in.
 
 ## Order of work
@@ -71,7 +71,7 @@ One run varies by about ±0.05×, so a part measures its cost as the median of t
    - apron markings and lighting (`docs/briefs/real-airport-markings.md`);
    - better planes (`docs/briefs/real-airport-planes.md`);
    - roofs (`docs/briefs/real-airport-roofs.md`).
-3. **Second batch, two parts**, once the first has merged: weather you can see (`docs/briefs/real-airport-weather.md`) and vehicles on the apron (`docs/briefs/real-airport-vehicles.md`). Both at the cheaper model (experiment [C]).
+3. **Second batch, two parts:** weather you can see (`docs/briefs/real-airport-weather.md`) and vehicles on the apron (`docs/briefs/real-airport-vehicles.md`). Both at the cheaper model (experiment [C]). The owner chose on 27 Sep 2026 to run this batch alongside the first instead of after it merges.
 4. **Bring it together** in one last PR: screenshots of every layout by day and night, the What's new entry and version, link previews (`npm run preview`), `docs/SYSTEMS.md`, and the speed of all five parts together against the budget.
 
 ## Files
