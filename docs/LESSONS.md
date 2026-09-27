@@ -10,6 +10,12 @@ After a PR merges, look back at the session that built it: what it cost, what sl
   - The graph branch's build left `docs/graph.json` in the checkout; switching to the redesign branch, which didn't ignore it yet, and staging `docs` whole committed it. Caught by reading the PR's file list before merging. → Check `git status` and stage paths by name in a long-lived checkout (`feature` playbook).
   - `get_session` reports 0 context and no cost, so "check your usage" can only see the rate limit. → The cost-budget experiment needs another measure before it starts.
 
+## #33 Level-up redesign · 27 Sep 2026
+
+- **Numbers:** asked for by the owner at about 07:00; opened 07:07, merged 07:15. One push after it opened, which removed the stray `docs/graph.json`; CI green both times.
+- **Went well:** screenshots at five sizes, plus one scrolled to the chips, caught an overflowing footer button at 320 px and a cramped landscape header before the PR opened.
+- **Lesson:** screenshots taken with the frame loop stopped don't always show a scroll made just before them. → No change: wait a moment after scrolling, as `build/` scripts now do.
+
 ## #32 Knowledge graph · 27 Sep 2026
 
 - **Numbers:** built in the same session; opened 06:58, merged 07:07. No pushes after it opened; CI green first time.
