@@ -23,8 +23,8 @@ function tourStep(){
   // some steps sit beside other chrome (the stats row, the tab bar): keep clear of that too, not just the spotlighted rect
   const avr=(S.av||[]).map(sel=>document.querySelector(sel)).filter(Boolean).map(el=>el.getBoundingClientRect());
   const pt=Math.min(r.top,...avr.map(a=>a.top)),pb=Math.max(r.bottom,...avr.map(a=>a.bottom));
-  const ch=c.offsetHeight,below=pb+pd+10,above=pt-pd-10-ch;let top=below+ch<vh-8?below:above>8?above:Math.min(vh-ch-8,Math.max(8,r.top+r.height/2-ch/2));
-  if(top<r.top+r.height&&top+ch>r.top&&r.height>vh*0.4)top=Math.max(8,vh-ch-12);
+  const ch=c.offsetHeight,below=pb+pd+10,above=pt-pd-10-ch;let top=below+ch<vh-8?below:above>8?above:Math.min(vh-ch-8,Math.max(8,pt+(pb-pt)/2-ch/2));
+  if(top<pb&&top+ch>pt&&pb-pt>vh*0.4)top=Math.max(8,vh-ch-12);
   c.style.top=top+'px';c.style.left=clamp(r.left+r.width/2-cw/2,12,vw-cw-12)+'px';
 }
 function tourNext(){G.tour.s++;R.tourTap=false;if(G.tour.s>=TOUR.length){G.tour.done=1;save()}tourStep()}
