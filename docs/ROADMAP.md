@@ -5,7 +5,7 @@ What's being worked on, what's next, and ideas not yet agreed. Anything here get
 ## Now
 
 - **Sound** (#27, spec `docs/specs/sound.md`, version 29): flight announcements with the words on the board, occasional spoken calls, and ambience that follows the camera.
-- **Level-up screen** (the owner's addition, next): a card for each new level with what it unlocked.
+- **Level-up screen** (#29, spec `docs/specs/level-up.md`, version 30): a card for each new level with what it unlocked.
 
 ## The owner's order of bundles
 

@@ -6,7 +6,7 @@
 //   npm run bot -- 1150 '{"recs":true}'      (also follows the transport manager's best suggestion)
 // The same seed and the same code always give the same run, so a difference between two
 // versions is the code's doing. Compare a few seeds before calling a balance change good.
-// Prints one JSON line per 6 game hours, then LVLAT {level: hour reached}, STATE <fingerprint>, ERR [...], and a
+// Prints one JSON line per 6 game hours, then LVLAT {level: hour reached}, STATE <fingerprint>, PLAY <fingerprint without settings>, ERR [...], and a
 // table against tools/baseline.json. Writes build/bot-<seed>.json (-layouts and -recs added for those options), and
 // saves reached at each level to build/saves/L<n>.json for checks and screenshots (not with either option).
 import {chromium} from 'playwright';
@@ -39,8 +39,11 @@ const fin=await m.evaluate(()=>B.run(1,0.1)),sv=await m.evaluate(()=>window.SAVE
 // savedAt is wall-clock time, not game state, so it's left out
 const gJson=await m.evaluate(()=>JSON.stringify({...__sim.G,savedAt:0}));writeFileSync(join(root,`build/state-${tag}.json`),gJson);
 const state=createHash('sha256').update(gJson).digest('hex').slice(0,16);
+// PLAY: the same, less the player's settings and the What's new version seen, which a release changes without changing
+// how the game plays; a UI-only change must leave PLAY identical
+const play=createHash('sha256').update(JSON.stringify({...JSON.parse(gJson),set:0,seen:0})).digest('hex').slice(0,16);
 if(!opts.layouts&&!opts.recs){mkdirSync(join(root,'build/saves'),{recursive:true});for(const k in sv)writeFileSync(join(root,'build/saves/L'+k+'.json'),sv[k])}
-console.log('SEED',seed);console.log('LVLAT',JSON.stringify(fin.lvlAt));console.log('STATE',state);console.log('ERR',JSON.stringify(errs.slice(0,5)));
+console.log('SEED',seed);console.log('LVLAT',JSON.stringify(fin.lvlAt));console.log('STATE',state);console.log('PLAY',play);console.log('ERR',JSON.stringify(errs.slice(0,5)));
 await b.close();
 
 // against the baseline: inside the range is ok, within the tolerance of it is near, beyond that is off

@@ -436,6 +436,12 @@ table.rtab th{font:600 10px/1 var(--mono);color:var(--muted);text-align:right;pa
 .upd .uv{font:600 11px var(--mono);color:var(--muted);margin-right:6px}
 .upd ul{margin:8px 0 0;padding-left:20px;color:var(--muted);font-size:14px;line-height:1.45}
 .newsgo{margin:14px 0 0;text-align:right}
+/* the level-up card (49-levelup.js) */
+.lvsub{margin-top:6px!important}
+.lvsub b{color:var(--sign)}
+.lvgo{display:grid;gap:2px;width:100%;text-align:left;border:0;border-top:1px solid var(--line);background:none;padding:9px 2px;font:600 15px/1.3 var(--body);color:var(--text)}
+.lvgo span{font-weight:400;font-size:13.5px;color:var(--muted)}
+.lvgo:hover b{color:var(--sign)}
 .linkb{border:0;background:none;padding:0;color:var(--sign);font:inherit;text-decoration:underline;cursor:pointer}
 @media (max-width:899px){.plan{padding:0}.pcard{width:100%;height:100%;max-height:none;border-radius:0;border:0;padding-top:max(14px,env(safe-area-inset-top))}}
 
@@ -557,6 +563,13 @@ body.fs .cam{max-width:calc(100% - 172px)}
   <div class="hcard pcard">
     <div class="ptop"><h2 id="planT">Masterplan</h2><button class="close" data-planclose aria-label="Close">×</button></div>
     <div id="planBody"></div>
+  </div>
+</div>
+<div class="help" id="lvlup" hidden role="dialog" aria-modal="true" aria-labelledby="lvlT">
+  <div class="hcard lvcard">
+    <div class="ptop"><h2 id="lvlT">Now a Local Airport</h2><button class="close" data-lvclose aria-label="Close">×</button></div>
+    <div id="lvlList"></div>
+    <p class="newsgo"><button class="chip" data-lvgo="plan">Masterplan</button> <button class="buy" data-lvclose>Play</button></p>
   </div>
 </div>
 <div class="help" id="news" hidden role="dialog" aria-modal="true" aria-labelledby="newsT">

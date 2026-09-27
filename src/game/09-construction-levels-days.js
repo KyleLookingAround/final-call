@@ -42,7 +42,7 @@ function checkLevel(){
   if(levelChecks(n).every(([_,v,t])=>v>=t)){
     G.level=n;earn(LEVELS[n].reward,'bonus');G.pts=(G.pts||0)+LVL_PTS(n);
     {const nt=new Set(G.newTabs||[]);nt.add('office');if(STAND.some(x=>x.lvl===n)||PIER.lvl===n)nt.add('stands');if(n===1)nt.add('region');G.newTabs=[...nt]}
-    if(!R.sim){toast(`Now ${aL(n,1)}! +${money(LEVELS[n].reward)} and <b>${LVL_PTS(n)} plan points</b> to spend.`,[{label:'Open the Masterplan',fn:()=>openPlan()},{label:'Later',fn:()=>{}}],null,'goal',14);fanfare();
+    if(!R.sim){if(!lvlUp(n))toast(`Now ${aL(n,1)}! +${money(LEVELS[n].reward)} and <b>${LVL_PTS(n)} plan points</b> to spend.`,[{label:'Open the Masterplan',fn:()=>openPlan()},{label:'Later',fn:()=>{}}],null,'goal',14);fanfare();
       renderTabs();renderPanel();$('#lvlName').textContent=LEVELS[n].name;renderPlanBtn()}
   }
 }
