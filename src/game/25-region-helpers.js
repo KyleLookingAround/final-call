@@ -38,7 +38,7 @@ const devOn=opt=>!!G.dev&&Object.values(G.dev).includes(opt);
 function devSum(key){let s=0;for(const p in (G.dev||{})){const d=DEV[G.dev[p]];if(d&&d[key])s+=d[key]}return s}
 function devLocalMul(pid){let m=1;PLOTS.forEach(pl=>{if(pl.place===pid){const d=devAt(pl.id);if(d&&d.locals)m+=d.locals-1}});return m}
 const anyMode=m=>Object.values(G.lines||{}).some(L=>L.mode===m);
-const replOn=id=>((R.fx.repl||{})[id]||0)>G.clock;
+const replOn=id=>weather.on('repl',id);
 const serves=(L,n)=>L.stops.includes(n)&&(n===L.stops[0]||n===L.stops[L.stops.length-1]||!(L.skip||[]).includes(n));
 const linesAt=n=>Object.values(G.lines||{}).filter(L=>serves(L,n));
 const lineCode=L=>MODES[L.mode].L+L.num;
@@ -46,11 +46,11 @@ const lineName=L=>`${NODES[L.stops[0]].n} – ${NODES[L.stops[L.stops.length-1]]
 const plotNode=id=>{const P=PLOTS.find(p=>p.id===id);return P?P.node:null};
 const effKind=L=>replOn(L.id)?'bus':RLBL[MODES[L.mode].kind];
 const sortedLines=()=>Object.values(G.lines||{}).sort((a,b)=>MODE_ORDER.indexOf(a.mode)-MODE_ORDER.indexOf(b.mode)||a.num-b.num);
-const rwOn=eid=>(R.fx.roadworks||0)>G.clock&&R.fx.rwE===eid;
+const rwOn=eid=>weather.on('roadworks')&&weather.edge()===eid;
 function regCong(){return R.reg&&isFinite(R.reg.cong)?R.reg.cong:0.3}
 function lineDown(L){
-  if(!L)return true;if(((R.fx.line||{})[L.id]||0)>G.clock&&!replOn(L.id))return true;
-  if(L.mode==='water'){if(R.fx.fog>G.clock)return true;for(const {e} of (routeEdges(L.mode,L.stops)||[])){const m=ptOn(e.P,e.len/2),w=wxAt(m[0],m[1]);if(w&&(w.c.type==='fog'||w.c.type==='storm'))return true}}
+  if(!L)return true;if(weather.on('line',L.id)&&!replOn(L.id))return true;
+  if(L.mode==='water'){if(weather.on('fog'))return true;for(const {e} of (routeEdges(L.mode,L.stops)||[])){const m=ptOn(e.P,e.len/2),w=wxAt(m[0],m[1]);if(w&&(w.c.type==='fog'||w.c.type==='storm'))return true}}
   return false;
 }
 function lineFreq(L,nominal){if(!L)return 0;let f=L.freq;if(!nominal&&evExtra(L)){const fq=MODES[L.mode].freqs;f=fq[Math.min(fq.length-1,Math.max(0,fq.indexOf(f))+2)]} // the manager's extra services while event crowds travel
@@ -60,7 +60,7 @@ function edgeMins(L,e,M,rb){ // minutes for one vehicle to cover a corridor righ
   const road=M.kind==='road',w=R.reg&&R.reg.ewx?R.reg.ewx[e.id]:null;let v=M.spd;
   if(road){v*=e.road===2?(M===MODES.coach?1.15:1.25):(M===MODES.coach?0.75:1);const ce=R.reg&&R.reg.ce&&R.reg.ce[e.id]!=null?R.reg.ce[e.id]:regCong();v*=(1-0.4*ce)*(rwOn(e.id)?0.6:1)}else if(e.spd)v*=e.spd;
   if(w){if((w==='snow'||w==='storm')&&(road||M.kind==='track'))v*=0.7;else if(w==='rain'&&road)v*=0.85}
-  if(!rb&&L.mode==='rail'&&(R.fx.leaves||0)>G.clock)v*=0.75;
+  if(!rb&&L.mode==='rail'&&weather.on('leaves'))v*=0.75;
   if(G.lv.control)v*=1.08;
   const tm=rb?null:trackOf(L.mode),ov=tm&&R.reg&&R.reg.over?R.reg.over[e.id+':'+tm]||0:0;if(ov>1)v/=Math.sqrt(ov);
   return (e.len+(e.extra||0))/v;
