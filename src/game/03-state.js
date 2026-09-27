@@ -54,15 +54,15 @@ const seasonOf=d=>SEASONS[Math.floor(((d-1)%12)/3)];
 const patience=()=>2*G.lv.wifi+(G.lv.icon?4:0);
 const SPD=()=>[1.1,1,0.9][pol('pay')];
 function derived(){
-  const l=G.lv,fog=R.fx.fog>G.clock,snow=R.fx.snow>G.clock;
-  const strike=R.fx.strike>G.clock,half=n=>strike?Math.max(1,Math.ceil(n/2)):n;
+  const l=G.lv,fog=weather.on('fog'),snow=weather.on('snow');
+  const strike=weather.on('strike'),half=n=>strike?Math.max(1,Math.ceil(n/2)):n;
   const rwFog=fog?(l.ils?1.08:1.5):1,rwSnow=snow?1.3:1,snowClean=snow?8*(1-0.3*l.deice):0;
   return {desks:half(staffed('desks')),kiosks:l.kiosks,online:0.12*l.online,checkin:EF.checkin(l.training)*SPD(),kiosk:EF.kiosk(l.training),
     officers:half(staffed('officers')),egates:l.egates,passT:0.95*Math.pow(0.93,l.training)*SPD(),egateT:0.35,
-    lanes:Math.max(1,half(staffed('lanes'))-(R.fx.sick>G.clock?1:0)),sec:EF.sec(l.sectech)*SPD(),ft:l.fasttrack>0,ftBuy:0.06*l.ftsales,
+    lanes:Math.max(1,half(staffed('lanes'))-(weather.on('sick')?1:0)),sec:EF.sec(l.sectech)*SPD(),ft:l.fasttrack>0,ftBuy:0.06*l.ftsales,
     scan:EF.scan(l.scanners),walk:110*(1+0.2*l.walkway),cwalk:80*(1+0.2*l.walkway),aisleSpd:3.2,stow:EF.stow(l.bins),shuffle:1.6,
     bag:EF.bag(l.handlers)*(1+0.35*l.bagsys),clean:EF.clean(l.crew)*(fog?1.6:1)+snowClean,tow:EF.tow(l.tugs)*(fog?1.6:1),carryP:EF.carry(l.bagfee),prioP:0.05*l.priority,
-    rush:R.fx.rush>G.clock,fog,snow,land:EF.land(l.atc)*rwFog*rwSnow*(l.tower?0.8:1),takeoff:EF.tko(l.atc)*rwFog*rwSnow*(l.tower?0.8:1),runways:1+l.runway2,patience:patience()};
+    rush:weather.on('rush'),fog,snow,land:EF.land(l.atc)*rwFog*rwSnow*(l.tower?0.8:1),takeoff:EF.tko(l.atc)*rwFog*rwSnow*(l.tower?0.8:1),runways:1+l.runway2,patience:patience()};
 }
 /* ---------- route demand: how many people want to fly each route, and how full a flight will be ---------- */
 const TIERBASE=[70,120,170,260,330],TIER_FARE=[2.7,4.5,5.9,8.5,11.5],ROUTE_FEE=[100,600,2500,10000,30000],RFARE=[0.8,1,1.25];
