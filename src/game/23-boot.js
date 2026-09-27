@@ -26,6 +26,6 @@ function start(data){
   else if(!s)startTour();
   setTimeout(()=>{cloudInit().catch(()=>{})},0);
   if(s&&!s.nv3&&!fresh)toast('New: Lowmere opens a rival airport once you are a City Airport. Your planes need crews (Gates › Fleet), and the Office has Records and weekly challenges.',null,'nv3','goal',16);G.nv3=1;
-  if(newsDue())setTimeout(()=>openNews(true,true),400);
+  R.newsBoot=newsDue()?'due':'none';if(R.newsBoot==='due')setTimeout(()=>{openNews(true,true);R.newsBoot='shown'},400); // the checks wait on R.newsBoot
   requestAnimationFrame(frame);
 }

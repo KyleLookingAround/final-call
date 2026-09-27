@@ -59,7 +59,7 @@ When several branches were built side by side (the `feature` playbook's "Splitti
 
 ## Done
 
-Green checks, no conflicts, and every review thread answered. The owner merges with Squash and merge; confirm the Pages run afterwards.
+Green checks, no conflicts, and every review thread answered. Then merge it yourself with Squash and merge: sessions have the owner's standing permission, and waiting costs hours when they're away. Confirm the Pages run afterwards. Only a PR that needs the owner's judgement waits for them: a balance change beyond the baselines' tolerance, or a spec question the brief doesn't settle. Say so in the PR and carry on with other work.
 
 ## After merging: look back at the session
 

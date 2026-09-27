@@ -24,4 +24,10 @@ export default async function({open,ok,saveText}){
   ok('departures: families and passengers who need help use their lane',(a.famLane||0)>100&&!a.famOther&&!b.famOther,`${a.famLane} through their lane, ${a.famOther||0} through another`);
   ok('departures: nobody reaches the market place without passing a lane',!r.sneak&&!errs.length,`${r.sneak} seen${errs.length?' '+errs[0]:''}`);
   await ctx.close();
+  // every open search table has a searcher on wages: one per open lane, and one for the fast track
+  {const {ctx,page,errs}=await open(undefined,saveText('v28-L9.json'),false,{still:true});
+    const w=await page.evaluate(()=>{const S=__sim,D=S.derived(),n=S.tablesOpen(D),with_=S.wageBill(),k=S.WAGE.srch;S.WAGE.srch=0;const without=S.wageBill();S.WAGE.srch=k;
+      return {n,lanes:D.lanes,ft:!!D.ft,share:+((with_-without)/Math.max(1e-9,with_)).toFixed(3)}});
+    ok('departures: each open search table has a searcher on wages',w.n===Math.min(8,w.lanes+(w.ft?1:0))&&w.share>0.02&&!errs.length,JSON.stringify(w)+(errs.length?' '+errs[0]:''));
+    await ctx.close()}
 }

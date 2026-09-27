@@ -1,8 +1,14 @@
 #!/bin/bash
-# Runs when a web session starts: installs the check tools so `npm run check` and `npm run bot` work straight away.
+# Runs when a session starts: sets the commit author, then (in web sessions) installs the check tools so `npm run check`
+# and `npm run bot` work straight away.
 set -euo pipefail
-if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then exit 0; fi
 cd "${CLAUDE_PROJECT_DIR:-.}"
+
+# every commit in this repo is the owner's, whichever machine or session makes it
+git config user.name KyleLookingAround
+git config user.email KyleMck10@hotmail.com
+
+if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then exit 0; fi
 
 npm install --no-audit --no-fund
 

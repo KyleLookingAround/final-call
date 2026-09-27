@@ -44,11 +44,13 @@ UPG.online.fx=(l,m)=>m?`<b>${l*12}%</b> check in online`:`<b>${l*12}%</b> → <b
 
 /* ---------- staff: bag drop counters are staffed and rostered like desks ---------- */
 WAGE.drops=2.5;OWN.drops=()=>G.lv.bagdrop;
+WAGE.srch=2; // a searcher at each open search table, one for each open lane and the fast track
+const tablesOpen=D=>Math.min(8,D.lanes+(D.ft?1:0));
 function dropsOpen(){if(!G.lv.bagdrop)return 0;const n=staffed('drops');return R.fx.strike>G.clock?Math.max(1,Math.ceil(n/2)):n}
 const islOpen=(k,D)=>(2*k<D.desks)+(2*k+1<D.desks); // how many of island k's desks are open
 function bestIsland(D){let b=0,bw=1e9;for(let k=0;k<4;k++){const o=islOpen(k,D);if(!o)continue;const w=(CIN[k]+1)/o;if(w<bw){bw=w;b=k}}return b}
 TERM_MINUTE.push(()=>{
-  const n=dropsOpen();if(n)spend(n*WAGE.drops*(G.wageMul||1)*payMul()*(R.reg?R.reg.wageMul:1)/60,'wages');
+  const n=dropsOpen()*WAGE.drops+tablesOpen(derived())*WAGE.srch;if(n)spend(n*(G.wageMul||1)*payMul()*(R.reg?R.reg.wageMul:1)/60,'wages');
   if(G.lv.roster&&G.auto&&R.lastMin%2===0){R.autoN.desks=clamp(Math.ceil((CIN[0]+CIN[1]+CIN[2]+CIN[3])/6),1,OWN.desks());if(G.lv.bagdrop)R.autoN.drops=clamp(Math.ceil(CIN[CI_B]/6),1,OWN.drops())}
   // families and those who need help get as many lanes as their share of the queue, at least one when two lanes are open
   const d=DEP(),D=derived();let f=0;for(const p of R.secQ)if(p.famL)f++;
@@ -139,7 +141,7 @@ function updateSecurity(dt,D){
   if(D.ft){const L=R.ftL;if(R.ftQ.length)take(L,()=>R.ftQ.shift(),'divest',divestT(D,0.6));if(L.p)serve(L,FT_X-5,642,dt,p=>afterDivest(p,8),FT_X-5,654)}
   else if(R.ftQ.length){while(R.ftQ.length){const p=R.ftQ.shift();p.state='secQ';p.famL=p.type==='fam'||p.type==='prm';R.secQ.push(p)}}
   // search tables: one for each open lane; a bag takes 2 minutes to open and search, unless the flight is boarding
-  const nT=Math.min(8,D.lanes+(D.ft?1:0));
+  const nT=tablesOpen(D);
   if(d.sq.some(hurry))d.sq=d.sq.filter(p=>{if(!hurry(p))return true;p.state='secOut';p.tx=(p.sl<8?laneX(p.sl):FT_X)-5;p.ty=603;return false});
   for(let i=0;i<8;i++){
     const T=R.lanes[8+i]||(R.lanes[8+i]={p:null,t:0}),s=SRCH(i);
@@ -161,7 +163,7 @@ TERM_PANEL.dep=[()=>{
   if(G.lv.kiosks)h+=row('kiosk','Kiosks',`${G.lv.kiosks} printing boarding passes${G.lv.bagdrop?'. Passengers with bags go on to bag drop.':''}`);
   if(G.lv.bagdrop)h+=row('bag','Bag drop',`${dropsOpen()} of ${G.lv.bagdrop} counters open, for kiosk and online passengers with bags`);
   h+=`<div class="sec">The security hall</div>`+row('lane','Lanes',`${D.lanes} open${D.lanes>=2?`, ${d.fam||1} for families and those who need help`:''}${D.ft?', and the fast track lane':''}`);
-  h+=row('scan','Searches',`1 bag in ${ctOn()?30:12} opened at a search table, 2 min each${ctOn()?'. CT scanners let liquids stay in bags.':''}`);
+  h+=row('scan','Searches',`1 bag in ${ctOn()?30:12} opened at a search table, 2 min each, with a searcher (${money(WAGE.srch*(G.wageMul||1))} an hour) at each of ${tablesOpen(D)} tables${ctOn()?'. CT scanners let liquids stay in bags.':''}`);
   return h}];
 TERM_PANEL.staff=[()=>{
   if(!G.lv.bagdrop)return '';const auto=G.lv.roster&&G.auto,own=OWN.drops(),n=staffed('drops');
@@ -191,10 +193,10 @@ TERM_DRAW.push(D=>{
   if(D.ft){lane(FT_X,true,true,false,'#F5D08A');lbl('FAST TRACK',FT_X,660)}
   // trays: on the divest table, riding the belt with their owner, and at the repack bench; bags opened at the search tables
   ctx.fillStyle='#8C97A1';for(let i=0;i<9;i++){const L=i<8?R.lanes[i]:R.ftL;if(L&&L.p&&L.p.state==='divest'){const x=i<8?laneX(i):FT_X;ctx.fillRect(x+2,638,5,4)}}
-  const nT=Math.min(8,D.lanes+(D.ft?1:0));
+  const nT=tablesOpen(D);
   for(let i=0;i<nT;i++){const s=SRCH(i),T=R.lanes[8+i],busy=T&&T.p&&T.p.state==='srch'&&Math.abs(T.p.x-(s.x-11))<1;ctx.fillStyle='#39414A';ctx.fillRect(s.x-6,s.y-4,12,8);
     ctx.fillStyle='#FFC72C';ctx.fillRect(s.x+8,s.y-2,4,4);if(busy){ctx.fillStyle='#D9A066';ctx.fillRect(s.x-5,s.y-3,5,6);ctx.fillStyle='#ECE8DF';ctx.fillRect(s.x+1,s.y-2,3,4)}}
   if(nT)lbl('SEARCH',517,607);
   ctx.fillStyle='#8C97A1';for(const p of R.pax)if(p.state==='scan'||p.state==='repack'){const x=p.tx+7;ctx.fillRect(x,p.state==='scan'?p.y-2:604,5,4)}
 });
-SIMX.depLog=DEP_LOG;Object.assign(SIMX,{qSlot,secSlot,famSlot,ftSlot,srchSlot,deskX,kioskX,dropX,laneX,IX,dropsOpen,searchRate,DEP});
+SIMX.depLog=DEP_LOG;Object.assign(SIMX,{tablesOpen,WAGE,qSlot,secSlot,famSlot,ftSlot,srchSlot,deskX,kioskX,dropX,laneX,IX,dropsOpen,searchRate,DEP});

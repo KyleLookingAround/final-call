@@ -16,7 +16,7 @@ Work through these steps in order. Small fixes (a label, a nit, an obvious bug) 
 
 - Copy `docs/specs/TEMPLATE.md` to `docs/specs/<short-name>.md` and fill it in. Keep it to a page.
 - Check it against the owner's preferences in the project notes: no scenario choice, locked things hidden, impacts on the map/board/gates, concise UK English, phones down to 320 px, managers for players who'd rather not.
-- Stop and get the owner's approval of the spec before writing code. Mark it `Approved` when they agree.
+- Get the owner's approval of the spec before writing code, and mark it `Approved` when they agree. A brief that approves a spec in advance counts: mark it `Approved`, say so in the spec, and build.
 
 ## 3. Build
 
@@ -45,12 +45,22 @@ Work through these steps in order. Small fixes (a label, a nit, an obvious bug) 
 
 - Commit with a short imperative subject in plain words; add a body when the reason isn't obvious. No attribution lines; the project notes list what messages must leave out.
 - `git push -u origin feature/<short-name>`, then open a PR with a plain title, filling in `.github/pull_request_template.md`. Check the description afterwards and remove anything added that the template doesn't have.
-- Follow the `steward` playbook until the PR is green and merged. The owner merges with Squash and merge; `main` publishes to GitHub Pages.
+- Follow the `steward` playbook until the PR is green, then merge it yourself with Squash and merge; `main` publishes to GitHub Pages.
 
 ## 7. Learn
 
 - If a bug got through to players, add the check that would have caught it, in the same PR as the fix.
 - After the merge, look back at the session that built it (the `steward` playbook's last step) and log it in `docs/LESSONS.md`.
+
+## Working while the owner is away
+
+Much of the work runs overnight. A question nobody answers costs hours, so:
+
+- Don't stop on a question the brief or the project notes already answer. Read them again first.
+- If something is truly ambiguous, take the safer option (the one easier to undo, or that changes the game less), say so in the PR, and carry on.
+- Stop and ask only for something irreversible or outside the brief.
+- Where anything in the repo conflicts with the brief, the brief wins for that session; fix the conflict in the repo in the same PR.
+- At each stopping point (a PR opened or merged, a spec written), check the session's usage (`get_session`). If the limit is reached, schedule a resume for just after it resets instead of running on overage.
 
 ## Splitting a big feature across sessions
 

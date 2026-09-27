@@ -1,6 +1,12 @@
 /* ================= WHAT'S NEW: every version's new features, shown after an update and from Settings or Help ================= */
 // Newest first. Add an entry with each release; the checks make sure the newest one matches docs/HISTORY.md.
 const UPDATES=[
+  {v:28,title:'A real terminal',points:[
+    'Passengers go through real halls: check-in islands, bag drop and a security hall with search tables; then passports, e-gates, customs and an arrivals hall where people meet them.',
+    'Bags ride a sorter and tug trains to the plane, and arriving ones share the carousels. Tight transfers can miss their flight.',
+    'The market place fills with people waiting for their gate to be called. Shops have room for so many, and later gate calls mean more shopping.',
+    'An airport hotel: rooms for late arrivals, early flyers, crews and stranded passengers (Sales › Landside).',
+    'The advisor points at a full café or hotel, and the simulation runs about twice as fast.']},
   {v:27,title:'A smarter transport manager',points:[
     'The transport manager runs your lines by what each change is worth: how often they run, fares and meeting flights.',
     'It adds services at once to an overfull line, and runs extra ones to the stadium and other venues on event days.',

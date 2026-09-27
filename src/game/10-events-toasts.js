@@ -32,7 +32,7 @@ function techFault(i,F){
   if(pol('repair')==='rush'&&G.cash>=cost){spend(cost,'costs');F.fault=Math.min(F.fault,4);toW(i,0,CABIN_TOP-24);floater(`FAULT · RUSH REPAIR ${money(cost)}`,WP.x,WP.y,'#FF9F43',true)}
   else{toW(i,0,CABIN_TOP-24);floater(`FAULT · ${mins} MIN REPAIR`,WP.x,WP.y,'#FF7A8A',true)}
 }
-function wageBill(){const D=derived();return (D.desks*WAGE.desks+D.lanes*WAGE.lanes+D.officers*WAGE.officers+dropsOpen()*WAGE.drops)*(G.wageMul||1)*payMul()*(R.reg?R.reg.wageMul:1)}
+function wageBill(){const D=derived();return (D.desks*WAGE.desks+D.lanes*WAGE.lanes+D.officers*WAGE.officers+dropsOpen()*WAGE.drops+tablesOpen(D)*WAGE.srch)*(G.wageMul||1)*payMul()*(R.reg?R.reg.wageMul:1)}
 function fireEvent(){
   if(G.lines&&Object.keys(G.lines).length&&rnd()<0.3&&regionEvent())return;
   const winter=seasonOf(dayOf(G.clock)).name==='Winter',p=pol('pay');
