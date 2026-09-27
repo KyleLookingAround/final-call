@@ -9,6 +9,7 @@ What's being worked on, what's next, and ideas not yet agreed. Anything here get
 
 - **Looks like a real airport** (#37, spec `docs/specs/real-airport.md`): the groundwork (drawing layers and a lighting pass, no change to play) first, then the parts two or three at a time from their briefs in `docs/briefs/`: apron markings and lighting, better planes and roofs; then weather you can see and vehicles on the apron.
 - **The terminal as a place** (#48, spec `docs/specs/terminal-place.md`, approved): two floors, windows, decor that comes with the building, local character, a roof terrace with spotters, and each layout's own floor plan. Its checks are written first (experiment [D]), then groundwork after the real airport merges, then the parts.
+- **Systems review** (#65, spec `docs/specs/systems-review.md`, proposed): how the systems connect today, ten proposals that link them so choices are interesting, and ten pure refactors ranked with their checks, in a recommended order that waits for the owner's approval.
 
 ## The owner's order of bundles
 
