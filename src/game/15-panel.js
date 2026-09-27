@@ -177,7 +177,8 @@ function renderPanel(){
       <div class="sec">Your save</div><p class="note">The game saves on this device. To move your airport to another device or browser, copy a save code and paste it there.</p>
       <div class="namefield"><button class="chip" id="copySave">Copy save code</button></div>
       <div class="namefield"><input id="saveIn" placeholder="Paste a save code" aria-label="Save code" autocomplete="off" spellcheck="false" style="text-transform:none"><button class="chip" id="loadSave">Load</button></div>
-      <button class="danger" id="reset">Reset progress</button>`;
+      <button class="danger" id="reset">Reset progress</button>
+      <div class="kofifoot"><a class="kofi" href="https://ko-fi.com/kylemck" target="_blank" rel="noopener">${svg('cup')}Buy me a Ko-fi</a></div>`;
     }
   }
   P.innerHTML=h;

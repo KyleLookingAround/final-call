@@ -108,6 +108,7 @@ How sessions work, not the game. Each one is small, measured and recorded in `do
 
 ## Done
 
+- **A Ko-fi link** (spec `docs/specs/kofi-link.md`). A quiet "Buy me a Ko-fi" button in What's new, Settings and the level-up card, opening `https://ko-fi.com/kylemck` in a new tab. Never on the airport view, the board or in the guided start. For the next release's notes.
 - **A feedback link in Help.** A "Send feedback" link, shown only on GitHub Pages, opens a new GitHub issue for the repo with the version, level, layout, game day, screen size and device type filled into the body. No tracking. For the next release's notes.
 - **Weekly health check.** The "Health check" workflow (`.github/workflows/health.yml`) runs the checks and the bot on seeds 1–3 against `main` weekly and on demand, opening or updating an issue labelled `health` when something drifts, and closing it once a later run is clean.
 - **Saves on the device only.** The game is published only on GitHub Pages, so saves across devices through the old hosting page, their Settings message and that page's hooks are gone. Settings › Your save says the game saves on this device, and save codes still move an airport between devices. The old keys are cleared on load. For the next release's notes.
