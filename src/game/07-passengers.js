@@ -42,7 +42,13 @@ function take(sv,pick,state,t){
   if(sv.p&&sv.n)return;const q=pick();if(!q)return;q.state=state;if(typeof t==='function')t=t(q);
   if(!sv.p){sv.p=q;sv.t=t}else{sv.n=q;sv.tn=t}
 }
-const walkMul=p=>(G.lv.mover&&(p.way||Math.abs(p.tx-p.x)>300)?2.5:1)*(p.xferred&&LAY.xfer||1)*roomWalk(p); // the people mover speeds long walks
+// Walking pace: one thing speeds a passenger at a time. The people mover, once bought, carries passengers on a long walk
+// or on their way through the doorways at 2.5× walking pace, hidden and drawn as its car on the track (12-drawing.js);
+// only a layout with its track (LAY.track) has one. A train or walkway link sets its own pace in walk() (41-airside.js).
+// Otherwise connecting passengers hurry in a layout built for it (LAY.xfer), and a room with walkways speeds everyone.
+const MOVER_ST=new Set(['toArr','toShop','toMkt','toGate']); // the walks the mover can carry
+const onMover=p=>G.lv.mover&&G.pierB&&LAY.track&&MOVER_ST.has(p.state)&&(p.way||Math.abs(p.tx-p.x)>300);
+const walkMul=p=>p.way&&p.way[p.wi+3]?1:onMover(p)?2.5:(p.xferred&&LAY.xfer||1)*roomWalk(p);
 // each part of the terminal moves its own passengers: PAX_STEP[state](p,dt,D) for departing ones (42-terminal.js)
 function updateLandside(dt,D){
   updateCheckin(dt,D);updateSecurity(dt,D);updateBelt(dt);
