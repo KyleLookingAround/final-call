@@ -67,7 +67,7 @@ function resetAll(state){
   applyLayout(G.layout||'classic');
   R.rwy={q:[],act:[null,null]};R.lot=new Array(540).fill(0);R.platform=[];R.train={state:'away',t:3,x:null};R.lotFull=0;
   R.arrQ=[];R.booths=[];R.egates=[];R.arrBelt=[];
-  R.pax=[];R.ciQ=[];R.secQ=[];R.ftQ=[];R.desks=[];R.kiosks=[];R.lanes=[];R.ftL={p:null,t:0};R.belt=[];R.st=[...Array(NG).keys()].map(mkStandRT);R.st.forEach((S,i)=>S.hold=i*6);R.floaters=[];R.toasts=[];R.fx={fog:0,rush:0,sick:0,strike:0,hedge:0,fuelUp:0,fuelDown:0,snow:0,storm:0,rain:0,line:{},leaves:0,roadworks:0};R.autoN={};R.tram={state:'away',t:2,x:null};R.bus={state:'away',t:1,x:null};R.tramQ=[];R.busQ=[];R.reg=null;for(const P of PLOTS)scheduleEvent(P.id);regionTick();
+  R.pax=[];R.ciQ=[];R.secQ=[];R.ftQ=[];R.desks=[];R.kiosks=[];R.lanes=[];R.ftL={p:null,t:0};R.belt=[];R.st=[...Array(NG).keys()].map(mkStandRT);R.st.forEach((S,i)=>S.hold=i*6);R.floaters=[];R.toasts=[];weather.reset();R.autoN={};R.tram={state:'away',t:2,x:null};R.bus={state:'away',t:1,x:null};R.tramQ=[];R.busQ=[];R.reg=null;for(const P of PLOTS)scheduleEvent(P.id);regionTick();
   R.nextEvent=G.clock+60;R.lastMin=Math.floor(G.clock);R.sel=G.stands.findIndex(s=>s.built);if(R.sel<0)R.sel=0;
   if(R.sim)return;
   setView(G.tab==='region'?'region':G.tab==='routes'?'world':'airport');$('#airline').textContent=G.name;$('#lvlName').textContent=lvlName(G.level);renderPlanBtn();boardSig='';renderBoard();renderHist();renderTabs();renderPanel();renderCam();renderToasts();syncSound();save();

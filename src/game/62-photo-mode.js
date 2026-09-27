@@ -1,6 +1,6 @@
 /* ================= PHOTO MODE: hide the panels, pick a drawn time and sky, and save a picture ================= */
 // docs/specs/photo-mode.md. Runtime only: R.photo is null while it's off. The drawn hour and sky are overrides that drawing
-// reads through drawnHour() (darkness() and sceneView) and drawnFx() (54-weather.js); G.clock, R.fx and the random stream
+// reads through drawnHour() (darkness() and sceneView) and drawnWx (54-weather.js); G.clock, R.fx and the random stream
 // never change, and leaving clears them.
 const PH_TIME=[['Now',null],['Dawn',6.6],['Noon',12],['Dusk',19.6],['Night',23]];
 const PH_SKY=['Now','Clear','Rain','Fog','Snow'];
@@ -8,10 +8,12 @@ const PH_SKY=['Now','Clear','Rain','Fog','Snow'];
 function drawnHour(){const p=R.photo;return p&&p.hour!=null?p.hour:(G.clock/60)%24}
 // the weather clocks as drawing sees them: R.fx, or with a sky picked, just that weather and on for good
 function drawnFx(){const p=R.photo;return p&&p.fx||R.fx}
+// weather.on and weather.until (28-region-weather.js) as drawing sees them
+const drawnWx={on:k=>{const f=R.photo&&R.photo.fx;return f?f[k]>G.clock:weather.on(k)},until:k=>{const f=R.photo&&R.photo.fx;return f?f[k]:weather.until(k)}};
 function photoFx(sky){if(sky==='Now')return null;const on=k=>sky.toLowerCase()===k?Infinity:-Infinity;return {rain:on('rain'),snow:on('snow'),fog:on('fog'),storm:-Infinity}}
-// fog banks for the drawn sky: drawFog (29-region-map.js) gates itself on R.fx.fog, so a picked fog stands in for that one call
-function drawnFog(x,y,w,h,a){const f=drawnFx();if(f===R.fx){drawFog(x,y,w,h,a);return}if(!(f.fog>G.clock))return;
-  const was=R.fx.fog;R.fx.fog=Infinity;try{drawFog(x,y,w,h,a)}finally{R.fx.fog=was}}
+// fog banks for the drawn sky: drawFog (29-region-map.js) gates itself on weather.on('fog'), so a picked fog stands in for that one call
+function drawnFog(x,y,w,h,a){if(!(R.photo&&R.photo.fx)){drawFog(x,y,w,h,a);return}if(!drawnWx.on('fog'))return;
+  const was=weather.until('fog');weather.set('fog',Infinity);try{drawFog(x,y,w,h,a)}finally{weather.set('fog',was)}}
 function photoOn(){
   if(R.photo)return;
   const p=R.photo={ti:0,si:0,hour:null,fx:null,speed:R.speed,view:null,paused:null};
@@ -80,4 +82,4 @@ $('#stage').addEventListener('pointerup',e=>{if(!R.photo||e.target!==cv||e.butto
   document.addEventListener('click',eat,true)},true);
 // Esc leaves, once any open card has had it
 document.addEventListener('keydown',e=>{if(R.photo&&e.key==='Escape'&&!document.querySelector('.help:not([hidden])')){e.preventDefault();e.stopImmediatePropagation();photoOff()}},true);
-Object.assign(SIMX,{drawnHour,drawnFx,photoRegionSky,photoOn,photoOff,photoStep,photoShot,PH_TIME,PH_SKY});
+Object.assign(SIMX,{drawnHour,drawnFx,drawnWx,photoRegionSky,photoOn,photoOff,photoStep,photoShot,PH_TIME,PH_SKY});

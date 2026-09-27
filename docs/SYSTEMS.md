@@ -23,6 +23,7 @@ The project notes (`CLAUDE.md`) hold what every change needs. This file holds ho
 - [The terminal](systems/terminal.md) (`42-terminal.js`, `47-hotel.js`, `05-flights.js`, `43-departures.js`)
 - [Transport manager](systems/transport-manager.md) (`32-managers.js`)
 - [Update check](systems/update-check.md) (`37-update-check.js`)
+- [Weather and events](systems/weather.md) (`28-region-weather.js`, `10-events-toasts.js`, `54-weather.js`, `41-airside.js`, `07-passengers.js`, `12-drawing.js`, `39-layouts.js`, `43-departures.js`, `47-hotel.js`, `04-geometry.js`)
 - [What's new](systems/whats-new.md) (`38-updates.js`)
 <!-- /joined:systems -->
 
@@ -207,9 +208,12 @@ The main names, by file group (the joined table below is the complete list, from
 - `transport`: The transport manager: its suggestions are buildable, pay back within a week and come one per line; Not now hides one; extensions and upgrades work (the old line runs until the new one opens, which takes a reserved number); it leaves lines you've taken over alone, reviews the rest, adds services to an overfull line within the hour and runs event extras only while crowds travel.
 - `update`: The update-check toast (docs/specs/update-toast.md, src/game/37-update-check.js): quiet when the running build matches dist/version.json, a toast when it doesn't, Update now saves then reloads, Later holds it back an hour, and none of it runs off GitHub Pages or in the headless sim.
 - `vehicles`: Vehicles working each stand's turnaround (src/game/55-vehicles.js, docs/specs/real-airport.md): vehicleWork(i) reads only the stand's own state, so it's a turnaround (docked, or easing back off the stand) exactly when the stand says so, and never at an empty stand or one whose plane is still on its way in.
+- `weather-fx`: Weather and events in one place (28-region-weather.js, docs/systems/weather.md): over a seeded day and a bit on the level 9 save, the weather and event flags in R.fx (fog, snow, rain, storm, rush, sick, strike, fuel, the lines' faults, replacement buses, roadworks and leaves) come on and go off at the same minutes as they did on main before weather.set and weather.on (tools/checks/lib/weather-fx.json, recorded from main; WEATHER_FX_RECORD=1 writes it again).
 - `weather`: Weather you can see (src/game/54-weather.js, docs/specs/real-airport.md): rain, settled snow, puddles, fog and cloud shadows draw only while R.fx says they're on (fading out after, never a new saved field), settled snow is cleared from every built stand, and the windsock is always up.
 - `windows`: Windows (docs/specs/terminal-place.md): glass on every airside wall that faces the apron, passengers who are waiting drifting to it when a wide-body goes by and never after their gate is called, and lit at night. Written before the code (tools/checks/pending.txt). Reads the names in lib/place.mjs, plus glass() → [[x1, y1, x2, y2]…], the glass for the layout as built; p.watch, set while a passenger watches; and glassLights, the function the windows add to LIGHTS.
 <!-- /joined:checks -->
+
+On a **draft** PR, the Checks workflow (`checks.yml`) only runs the groups `tools/touched.mjs` says the changed files touch, plus `brief` and `graph` (cheap) and `sim` (a floor); marking the PR ready for review, a non-draft PR, or a manual run all run every group instead. Only `src/game/` files, `tools/graph.mjs`, `tools/brief.mjs` and `tools/checks/*.mjs` map to a narrower set; anything else (`tools/build.mjs`, `src/shell.html`, `package*.json`, a workflow file, `tools/check.mjs`…) falls back to every group, same as a diff it fails to read.
 
 ## The bot
 
