@@ -1,0 +1,40 @@
+# Keeps PR titles and descriptions free of tool attribution, the same patterns as .githooks/commit-msg
+# (which does this for commit messages). Separate from checks.yml so editing a description only re-runs
+# this fast check, not npm run check.
+name: Description check
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const lines = [
+              ['title', pr.title || ''],
+              ...String(pr.body || '').split('\n').map((l, i) => ['description line ' + (i + 1), l]),
+            ];
+            // same patterns as .githooks/commit-msg: known attribution shapes, plus a general
+            // claude/anthropic mention as a catch-all
+            const re = /co-authored-by:.*(claude|anthropic)|claude-session:|generated (with|by) .*claude|claude\.(ai|com)\/|\b(claude|anthropic)\b/i;
+            const bad = [];
+            for (const [where, line] of lines) {
+              if (re.test(line)) bad.push(`${where}: "${line.trim()}"`);
+            }
+            if (bad.length) {
+              core.setFailed(
+                'This PR\'s title or description mentions Claude or Anthropic, or carries a tool attribution line:\n' +
+                bad.map(b => '- ' + b).join('\n') +
+                '\n\nEdit the description to remove it (call CLAUDE.md "the project notes" and .claude/ "editor settings"). ' +
+                'No push is needed: editing the description re-runs this check.'
+              );
+            }
