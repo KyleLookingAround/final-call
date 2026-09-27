@@ -2,6 +2,14 @@
 
 After a PR merges, look back at the session that built it: what it cost, what slowed it, and what would have saved time or credits (the `steward` playbook's last step). Newest first. A lesson marked → changed something, and says where.
 
+## A Ko-fi link · 27 Sep 2026
+
+- **Numbers:** session `session_01Metkx2JhFRvAsn8KzuXG5C`, estimate $6. Started 11:45; the full check suite (157 checks) passed first time, no page errors. Cost read 0 through the build (not yet reported at that point, not free). `PLAY` is unaffected: nothing in `update()` changed, so no bot run was needed to prove it; the Balance workflow confirms it on the PR.
+- **Went well:** the brief's "read first" list (the project notes, `node tools/graph.mjs` on the two files, the two specs) was enough; no other file needed reading before writing code. `ICON.cup` already existed, so the cup didn't need drawing. `tools/checks/kofi.mjs` (a new file) picked up its group name automatically, as the project notes describe.
+- **Lessons:**
+  - The level-up card's spec called it a card with a fixed foot (Masterplan/Play); the brief wanted the Ko-fi line "under the links to what's unlocked and never above them," which meant inside the scrolling body, not the fixed footer. Reading both before writing the line avoided putting it in the wrong place.
+  - Screenshots needed the guided-start coach mark and spotlight hidden explicitly (`#coach`, `#spot`), not just `G.tour={done:1}`, to see the panels cleanly; the existing `levelup` check already did this for the level-up card, but not for Settings or What's new, which cost a re-shoot to notice.
+
 ## #39 Saves on the device only · 27 Sep 2026
 
 - **Numbers:** done by the terminal's finishing session, at the owner's request, between features. PR opened 11:25, merged 11:32. One push after it opened (a docs wording fix); CI green first time. Bot STATE identical to main on seeds 1–3.
