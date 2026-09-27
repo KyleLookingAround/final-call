@@ -22,6 +22,7 @@ const shell=readShell().replaceAll('%SITE%',site)
 const parse=(code,filename,where=l=>`${filename}:${l}`)=>{try{new Script(code,{filename})}catch(e){
   const l=+((e.stack||'').split('\n')[0].match(/:(\d+)$/)||[])[1];fail(`${e.message} at ${l?where(l):filename}`)}};
 if(!shell.includes('/*GAME*/'))fail('src/shell.html has lost its /*GAME*/ marker');
+if(!shell.includes('%BUILD_ID%'))fail('src/shell.html has lost its %BUILD_ID% marker');
 for(const p of parts){
   if(!p.text.endsWith('\n'))fail(p.file+' must end with a newline');
   if(/<\/script/i.test(p.text))fail(p.file+' must not contain a closing script tag');
@@ -40,12 +41,19 @@ const dup=[...new Set(names.filter(([n],i)=>names.findIndex(([o])=>o===n)!==i).m
 if(dup.length)fail('duplicate top-level functions: '+dup.map(n=>`${n} in ${names.filter(([o])=>o===n).map(([,f])=>f).join(' and ')}`).join('; '));
 
 // what the checks and the bot can reach inside the game; add new functions here when a test needs them
-const SIM='window.__sim={get G(){return G},set G(v){G=v},R,update,buyUpgrade,buyStand,buyPier,buyAircraft,buy,capOf,upCost,upLocked,UPG,AIRCRAFT,AC_ORDER,LEVELS,STAND,PIER,METHODS,SHOPS,canBuild,isBuilding,buildSlots,sellValue,serviceCost,dailyPax,levelChecks,upkeepRate,wageBill,loanCap,derived,loadFactor,advise,resetAll,DEFAULT,shopUpCost,standOpen,save,advise,checkGoals,standBuyable,upBuyable,builtCount,shopValue,seasonOf,dayOf,fitsGate,TRIP,regionTick,orderLine,lineQuote,closeLine,setTab,draftTap,startDraft,renderPanel,netGeom,buildDev,MODES,DEV,PLOTS,PLACES,NODES,EDGES,modeLocked,serves,lineCode,linesAt,SUGGEST,update,STN_UP,setView,regionPanel,updateEvents,pol,POLICIES,news,scheduleEvent,has,research,TECH,techState,buyPoint,curGoal,GOALS,checkLevel,openPlan,closePlan,renderPlan,CITY,CITIES,routeLF,cityMarket,cityWill,pickRoute,openRoute,rsOf,promoteRoute,ROUTE_FEE,TIERBASE,worldTap,setView,consultCost,computeTransitRecs,evalRegion,managersTick,transportRecs,routeRecs,lineTweaks,rivShare,rivKeep,rivalDay,buyRival,rivMix,rivalPanel,routesPanel,dayTick,routeCard,crewState,crewTarget,hireCrew,nightChecks,farDelay,checkStamps,chalDay,checkChal,recordsPanel,tourStep,startTour,tourNext,rivBuyCost,rnd,seedRandom,SIDX,STAND_ORDER,SHOP_X,shopOpen,LAYOUTS,applyLayout,switchLayout,rebuildLayout,layoutTick,layoutPanel,STAND_KIND,STAND_X,get LAY(){return LAY},get W(){return W},UPDATES,openNews,layoutFaults,XF,standBox,get ROOMS(){return ROOMS},busMul,buyLounges,LOUNGES,finishBuild,recCands,recKey,applyRec,REC_PAY,upgradeStops,upTargets,nextNum,lineFreq,lineDown,evExtra,mgrStep,mgrHour,UPGRADE,airWorth,terminalFaults,TERM_ROOMS,hallId};Object.assign(window.__sim,SIMX);';
+const SIM='window.__sim={get G(){return G},set G(v){G=v},R,update,buyUpgrade,buyStand,buyPier,buyAircraft,buy,capOf,upCost,upLocked,UPG,AIRCRAFT,AC_ORDER,LEVELS,STAND,PIER,METHODS,SHOPS,canBuild,isBuilding,buildSlots,sellValue,serviceCost,dailyPax,levelChecks,upkeepRate,wageBill,loanCap,derived,loadFactor,advise,resetAll,DEFAULT,shopUpCost,standOpen,save,advise,checkGoals,standBuyable,upBuyable,builtCount,shopValue,seasonOf,dayOf,fitsGate,TRIP,regionTick,orderLine,lineQuote,closeLine,setTab,draftTap,startDraft,renderPanel,netGeom,buildDev,MODES,DEV,PLOTS,PLACES,NODES,EDGES,modeLocked,serves,lineCode,linesAt,SUGGEST,update,STN_UP,setView,regionPanel,updateEvents,pol,POLICIES,news,scheduleEvent,has,research,TECH,techState,buyPoint,curGoal,GOALS,checkLevel,openPlan,closePlan,renderPlan,CITY,CITIES,routeLF,cityMarket,cityWill,pickRoute,openRoute,rsOf,promoteRoute,ROUTE_FEE,TIERBASE,worldTap,setView,consultCost,computeTransitRecs,evalRegion,managersTick,transportRecs,routeRecs,lineTweaks,rivShare,rivKeep,rivalDay,buyRival,rivMix,rivalPanel,routesPanel,dayTick,routeCard,crewState,crewTarget,hireCrew,nightChecks,farDelay,checkStamps,chalDay,checkChal,recordsPanel,tourStep,startTour,tourNext,rivBuyCost,rnd,seedRandom,SIDX,STAND_ORDER,SHOP_X,shopOpen,LAYOUTS,applyLayout,switchLayout,rebuildLayout,layoutTick,layoutPanel,STAND_KIND,STAND_X,get LAY(){return LAY},get W(){return W},UPDATES,openNews,layoutFaults,XF,standBox,get ROOMS(){return ROOMS},busMul,buyLounges,LOUNGES,finishBuild,recCands,recKey,applyRec,REC_PAY,upgradeStops,upTargets,nextNum,lineFreq,lineDown,evExtra,mgrStep,mgrHour,UPGRADE,airWorth,terminalFaults,TERM_ROOMS,hallId,BUILD_ID,updCheckNow,updTryShow,updApply,updChecking,feedbackRepo};Object.assign(window.__sim,SIMX);';
+
+// the build id: a short hash of the built page, stamped into it (%BUILD_ID%, in the meta tag and in 37-update-check.js)
+// and written to dist/version.json next to index.html, so a running page can tell it's grown stale
+const built=page(shell,game);
+const buildId=createHash('sha256').update(built).digest('hex').slice(0,10);
+const withBuildId=s=>s.replaceAll('%BUILD_ID%',buildId);
 
 mkdirSync(join(root,'dist'),{recursive:true});
-writeFileSync(join(root,'dist/index.html'),page(shell,game));
+writeFileSync(join(root,'dist/index.html'),withBuildId(built));
+writeFileSync(join(root,'dist/version.json'),JSON.stringify({id:buildId})+'\n');
 for(const f of readdirSync(pub))copyFileSync(join(pub,f),join(root,'dist',f));
 mkdirSync(join(root,'build'),{recursive:true});
-writeFileSync(join(root,'build/test.html'),page(shell,game.replace('/*SIM_HOOK*/',()=>SIM)));
+writeFileSync(join(root,'build/test.html'),withBuildId(page(shell,game.replace('/*SIM_HOOK*/',()=>SIM))));
 {const {build:graph}=await import('./graph.mjs');writeFileSync(join(root,'docs/graph.json'),JSON.stringify(graph(),null,1))} // the map sessions query (tools/graph.mjs)
-console.log(`built dist/index.html (${Math.round(page(shell,game).length/1024)} KB) from ${parts.length} files, build/test.html and docs/graph.json`);
+console.log(`built dist/index.html (${Math.round(built.length/1024)} KB) from ${parts.length} files, build/test.html and docs/graph.json`);

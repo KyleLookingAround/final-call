@@ -2,7 +2,14 @@
 
 After a PR merges, look back at the session that built it: what it cost, what slowed it, and what would have saved time or credits (the `steward` playbook's last step). Newest first. A lesson marked → changed something, and says where.
 
-## Game logic ideas · 27 Sep 2026
+## Tell players when a new version is ready · 27 Sep 2026
+
+- **Numbers:** session `session_01EdqgFSmkJTE7ekGc9YfeQz`, estimate $6: cost and context read 0 early on, the usual early reading. Started from a checked brief with no questions for the owner; every check passed first time except the new `update` group, which needed two rounds of local debugging before it opened as a PR.
+- **Went well:** the graph queries in the brief (`toast`, `lvlTick`, `22-save.js`) and reading `feedbackRepo()` first meant the whole system (the Pages detection, the toast, the save-then-reload) was built from existing patterns with no new plumbing. Faking the served location with a route interception, as the `feedback` check does, let the new `update` check exercise the GitHub Pages path and a real reload without real network or real waiting.
+- **Lessons:**
+  - The first version of the check group set a "quiet period" clock to `0` to skip past the "not in the first minute" gate, on the wrong assumption that the clock read wall-clock time. It reads `performance.now()`, time since the page loaded, which is only ever a few hundred milliseconds into a short-lived check page — so `0` was already "recent" and the gate kept blocking every call. Setting it far in the past (`-1e9`) fixed it. → No change to a playbook: this is the record for the next check that rewinds a `performance.now()`-based clock — move it backwards, not to zero.
+  - A check that clicks "Update now" and reads `G.cash` straight after the reload saw it a little lower each run, because the reload's own real seconds let the game's upkeep keep ticking while `R.speed` was left running. Pausing (`R.speed=0`) before setting the test value narrowed it, but a reloaded page boots at its own default speed and starts spending again before the check can read it back, so cash still drifted by a small, real amount. → The check allows a tolerance (`< 500` on a fixture over $4M) rather than needing an exact match; an exact match on any value the simulation can still touch after a reload will be flaky.
+  - The `feedback` check's fake-Pages route matches the exact served address; a reload adds a cache-busting query string to the same address, which no longer matched and made the click hang waiting for navigation. → The route strips the query before comparing, so a check that reloads within a faked location needs the same fix if it copies this pattern.
 
 - **Numbers:** session `session_01DdCEFGD4zwqgzUBqSVLz86`, estimate $8: $3.01 and 186k of 1M context at the first merge attempt (`usage.cost_usd` was missing from `get_session` when the PR opened). Created 12:20; the three bot runs on `main` ran in the background while the code was read, and took about 12 minutes side by side. Docs only, so no Balance run.
 - **Lessons:**
