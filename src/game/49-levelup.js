@@ -39,6 +39,7 @@ function renderLvl(from,to){
   if(U.open.length)h+=sec('Opens up')+U.open.map(row).join('');
   if(U.more.length){h+=sec('Upgrades can go higher',U.more.length);const tabs=[...new Set(U.more.map(x=>x.tab))];
     for(const t of tabs)h+=`<div class="lvgrp">${LV_TAB[t]||t}</div><div class="lvchips">`+U.more.filter(x=>x.tab===t).map(x=>`<button class="lvchip chip" data-lvgo="${x.go}">${lvIc(x.ic)}${x.t}</button>`).join('')+`</div>`}
+  h+=`<div class="kofifoot"><a class="kofi" href="https://ko-fi.com/kylemck" target="_blank" rel="noopener">${svg('cup')}Buy me a Ko-fi</a></div>`;
   $('#lvlList').innerHTML=h;$('#lvlList').scrollTop=0;
   $('#lvlPlan').innerHTML=`Masterplan${pts?`<span class="lvpts"> · ${pts} ★</span>`:''}`;
 }
