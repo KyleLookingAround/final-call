@@ -254,4 +254,4 @@ function drawShopUnit(j){
   ctx.restore();
 }
 
-SIMX.isCalled=isCalled;SIMX.shopCap=shopCap;SIMX.shopUsed=shopUsed;SIMX.mktPlan=mktPlan;SIMX.callLead=callLead;SIMX.gateWalkMin=gateWalkMin;SIMX.boardEta=boardEta;
+SIMX.cafeTip=cafeTip;SIMX.hotelTip=hotelTip;SIMX.isCalled=isCalled;SIMX.shopCap=shopCap;SIMX.shopUsed=shopUsed;SIMX.mktPlan=mktPlan;SIMX.callLead=callLead;SIMX.gateWalkMin=gateWalkMin;SIMX.boardEta=boardEta;

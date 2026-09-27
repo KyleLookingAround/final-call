@@ -19,6 +19,7 @@ function advise(){
   if(!a&&ciW>7)a=up(`Check-in queue is about ${Math.round(ciW)} min.`,['desks','training','kiosks','online']);
   if(!a&&R.st.some(s=>s.F&&s.F.plane.state==='boarding'&&s.F.seated>=s.F.booked-2&&s.F.hold<s.F.checkedTotal-2))a=up('A full plane is waiting on hold bags.',['handlers','bagsys']);
   if(!a){const crowd=R.st.some((S,i)=>S.F&&S.F.plane.state==='boarding'&&R.pax.filter(p=>p.stand===i&&p.state==='gate').length>14);if(crowd)a=up('Passengers are piling up at a gate.',['scanners','walkway'])}
+  if(!a)a=cafeTip()||hotelTip(up);
   if(!a){const jam=R.st.some(S=>S.aisle.flat().filter(p=>p.phase==='stow'||p.phase==='shuffle').length>=4);if(jam)a=up('Aisles are jammed with people stowing bags.',['bins'])}
   if(!a&&SET().recs!==false&&R.trRecs&&R.trRecs.sig===recSig()){const c=R.trRecs.list.find(c=>!c.id||G.lines[c.id]);if(c&&c.pay<12&&G.cash>=c.cost)a={...recTip(c),label:'See it'}}
   if(!a&&tabOpen('routes')){let sup=0,mk=0;for(const c in (G.routes||{})){sup+=rsOf(c).s;mk+=cityMarket(c)}if(mk>0&&sup>mk*1.15&&CITIES.some(c=>!routeOpen(c[0])&&has('rt:'+c[2])))a={text:`Your planes offer ${Math.round(sup/mk*100)}% of the seats your cities want, so flights leave emptier. A new route opens a new market.`,go:['routes','[data-ropen]'],label:'Routes'}}
@@ -33,6 +34,17 @@ function advise(){
   if(!a&&(G.pts||0)>0&&TECH.some(T=>techState(T)==='ready'))a={text:`You have ${G.pts} plan point${G.pts>1?'s':''} to spend in the Masterplan.`,go:['plan'],label:'Masterplan'};
   if(!a&&G.cash<0)a={text:'You’re in the red. Close counters you don’t need, or borrow from the bank.',go:['office','#loanRange'],label:'Bank'};
   return a;
+}
+// the fullest café, coffee cart, bar or dining room, if it turned more than 7 away in the last hour
+function cafeTip(){
+  if(!R.awayH)return null;let j=-1,n=7;
+  G.shops.forEach((s,k)=>{if(s&&['coffee','cafe','bar','dining'].includes(SHOPS[s.type].id)&&(R.awayH[k]||0)>n){n=R.awayH[k];j=k}});
+  return j<0?null:{text:`The ${SHOPS[G.shops[j].type].name.toLowerCase()} turned away ${n} passengers in the last hour. Upgrading it adds room.`,go:['sales',`[data-shopup="${j}"]`],label:'Shops'};
+}
+// a hotel that turned 10 or more guests away last night: more rooms, or dearer ones
+function hotelTip(up){
+  const L=G.lv.hotel&&G.hotelBook&&G.hotelBook.last;if(!L||L.away<10)return null;const t=`The hotel was full last night and turned away ${L.away} guests.`;
+  return up&&up(t,['hotel'])||{text:t+' Dearer rooms would earn more from each.',go:['sales','#hotel'],label:'Hotel'};
 }
 function renderTip(){
   if(SET().recs!==false&&tabOpen('region')&&!R.trJob&&(!R.trRecs||G.clock-R.trRecs.at>180||R.trRecs.sig!==recSig())&&performance.now()-(R.trRecT||0)>20000){R.trRecT=performance.now();recStart()}
