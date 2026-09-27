@@ -43,8 +43,6 @@ How sessions work, not the game. Each one is small, measured and recorded in `do
 
 ## Next
 
-- **Weekly health check.** A scheduled run of the checks and the bot on `main`, opening an issue when something drifts.
-
 ## Ideas (not agreed)
 
 - **Let the transport manager build.** An opt-in chip that lets it buy its top suggestion within a budget. Left out of version 27, where it only suggests.
@@ -59,6 +57,7 @@ How sessions work, not the game. Each one is small, measured and recorded in `do
 ## Done
 
 - **A feedback link in Help.** A "Send feedback" link, shown only on GitHub Pages, opens a new GitHub issue for the repo with the version, level, layout, game day, screen size and device type filled into the body. No tracking. For the next release's notes.
+- **Weekly health check.** The "Health check" workflow (`.github/workflows/health.yml`) runs the checks and the bot on seeds 1–3 against `main` weekly and on demand, opening or updating an issue labelled `health` when something drifts, and closing it once a later run is clean.
 - **Saves on the device only.** The game is published only on GitHub Pages, so saves across devices through the old hosting page, their Settings message and that page's hooks are gone. Settings › Your save says the game saves on this device, and save codes still move an airport between devices. The old keys are cleared on load. For the next release's notes.
 - **Version 28: a real terminal** (#17). Halls in the order real airports use them: check-in islands, bag drop and a security hall with search tables; immigration with e-gates, a domestic channel, customs and an arrivals hall with meeters; a baggage hall with a sorter, tug trains and shared carousels; a market place with shops people walk into, gate calls and gate lounges; and an airport hotel. Built in five parts side by side (#18, #19, #21, #22, #23, #24) and brought together in one.
 - **Version 27: a smarter transport manager** (#15). Lines run by value (services, fares, meeting flights), quick action on overfull lines, extra services on event days, and suggestions to upgrade, extend or close lines.
