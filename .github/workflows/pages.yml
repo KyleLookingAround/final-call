@@ -3,6 +3,13 @@ name: Publish to GitHub Pages
 on:
   push:
     branches: [main]
+    # only what goes into the page: a docs-only merge publishes nothing new
+    paths:
+      - 'src/**'
+      - 'tools/build.mjs'
+      - 'tools/sources.mjs'
+      - 'package.json'
+      - '.github/workflows/pages.yml'
   workflow_dispatch:
 
 permissions:
