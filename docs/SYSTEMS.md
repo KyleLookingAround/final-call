@@ -81,7 +81,7 @@ When the link is shared, chat apps and social sites show `src/public/preview.jpg
   - **Night** is 23:00–05:00: the hum drops to a third and only final calls are announced, unspoken.
   - **Settings:** `sndAnn` 'chime' plays the chime without words or voice; `sndFx` silences the tills (`kaching`) and ticks; `G.sound` silences everything, though the words still show.
 
-- **Levels and Masterplan** (`02-masterplan.js`, `09-construction-levels-days.js`, `18-masterplan-ui.js`). Level-ups and some goals give plan points. Consultants sell points from level 4. `GOALS` is a sequential list, and `curGoal()` returns the first goal that is unfinished and available.
+- **Levels and Masterplan** (`02-masterplan.js`, `09-construction-levels-days.js`, `18-masterplan-ui.js`). Level-ups and some goals give plan points. Consultants sell points from level 4. `GOALS` is a sequential list, and `curGoal()` returns the first goal that is unfinished and available. `recommendedTech(branch)` marks the lowest-tier plan ready to approve in each category as the one to pick next; it's display only, worded like the level-up card's "what this unlocks" line (`planUnlockLine`), and changes no cost, effect or unlock.
 - **Routes** (`31-routes.js`; `pickRoute`, `cityMarket` and `routeLF` are in `03-state.js`).
   - Each city has a market in seats per day (`cityMarket`, which includes Lowmere's cut through `rivKeep`).
   - `routeLF` gives how full a flight will be.
