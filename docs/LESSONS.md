@@ -19,6 +19,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 - [The terminal as a place: checks first · 27 Sep 2026](lessons/90-terminal-place-checks.md)
 - [Polish: overlay cards that match · 27 Sep 2026](lessons/87-overlay-cards.md)
 - [Polish: phone chrome and touch targets · 27 Sep 2026](lessons/84-phone-chrome.md)
+- [Polish: Reports and the region at night · 27 Sep 2026](lessons/80-reports-region-night.md)
 - [Version 31: the real airport brought together · 27 Sep 2026](lessons/67-real-airport-together.md)
 - [Systems review · 27 Sep 2026](lessons/66-systems-review.md)
 - [Tell players when a new version is ready · 27 Sep 2026](lessons/64-update-toast.md)

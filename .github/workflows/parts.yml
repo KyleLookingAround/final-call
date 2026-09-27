@@ -15,12 +15,10 @@ permissions:
   pull-requests: write
   issues: write
 
-concurrency:
-  group: parts-together
-  cancel-in-progress: false
-
 jobs:
   plan:
+    # PRs that aren't parts skip without starting a runner
+    if: github.event_name != 'pull_request' || contains(join(github.event.pull_request.labels.*.name, ','), 'part:')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
@@ -55,6 +53,10 @@ jobs:
   together:
     needs: plan
     if: needs.plan.outputs.features != '[]'
+    # on the job, so skipped runs from PRs that aren't parts never queue here
+    concurrency:
+      group: parts-together
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     timeout-minutes: 25
     strategy:

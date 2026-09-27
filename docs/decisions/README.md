@@ -20,6 +20,7 @@ The list is joined from the files here by `node tools/join.mjs` (`npm run build`
 | [ADR-2026-09-26-source-in-numbered-files](ADR-2026-09-26-source-in-numbered-files.md) | The source is numbered files joined into one script |
 | [ADR-2026-09-26-stand-frames-and-rooms](ADR-2026-09-26-stand-frames-and-rooms.md) | Stands have their own frames, and airside is rooms joined by doorways |
 | [ADR-2026-09-26-terminal-halls-and-parts](ADR-2026-09-26-terminal-halls-and-parts.md) | The terminal is halls, and its parts plug in |
+| [ADR-2026-09-27-ci-minutes](ADR-2026-09-27-ci-minutes.md) | A public repo, and CI that cancels superseded runs |
 | [ADR-2026-09-27-fewer-clashes](ADR-2026-09-27-fewer-clashes.md) | One file per entry, lists joined from them, and PRs kept up to date with main (an experiment) |
 | [ADR-2026-09-27-knowledge-graph](ADR-2026-09-27-knowledge-graph.md) | A map of the code and docs, generated from the source (an experiment) |
 | [ADR-2026-09-27-reviewer-step](ADR-2026-09-27-reviewer-step.md) | A fresh review before each PR opens (an experiment) |

@@ -172,6 +172,7 @@ The main names, by file group (the joined table below is the complete list, from
 - `news`: What's new opens once for an older save and not again, never for a new game, and from Settings with every version. It waits for the page's state (R.newsBoot), not set times.
 - `perf`: How long a level 9 airport, and a fully built sixteen-stand Midfield, take to simulate, against a calibration run so machines compare (fails over its budget), and how close a CPU-throttled phone gets to full speed at 8x with each (reported only).
 - `plans`: "The terminal as a place" (docs/specs/terminal-place.md): each layout's own terminal table, floors on rooms and doorways, the floor chip, each layout's floor plan, and the scene checks the bundle adds (nothing drawn inside a hall under the roof, one floor at a time, and how fast the terminal draws zoomed in). Written before the code: tools/checks/pending.txt lists the checks still waiting for it. The names they read are in lib/place.mjs, plus hallLabel(id) → [x, y], where a hall's name is drawn (tapping it goes to that hall's floor).
+- `reports`: Reports and the region at night (docs/briefs/polish-reports.md, #76): Office › Reports folds routes with no flights behind a link and shows near-zero profit in whole dollars; Region › Transport names the busiest lines and says when a quicker line takes a line's riders; and the region map darkens at night while its towns' windows shine.
 - `roofs`: Roofs over the terminal and its piers (src/game/53-roofs.js, docs/specs/real-airport.md): a floor the player steps up to with the Roof button, never drawn over the halls on their own at any zoom, never over a room not built yet, and taps still reach the shops under them and the stands.
 - `rules`: The game's rules: the same seed plays the same game; cheaper fares fill more seats and keep more travellers from Lowmere; costs rise with level; planes lose value with wear; levels ask for more each time; every layout is sound; plan and goal ids are sound; the newest What's new version matches docs/HISTORY.md; the sim hook reads live values; and loading a save twice changes nothing.
 - `saves`: Every save in tools/saves loads, plays two game days and opens every tab.
@@ -204,6 +205,7 @@ When the link is shared, chat apps and social sites show `src/public/preview.jpg
 
 - Panels are HTML strings built by `renderPanel()`. Clicks are handled in one delegated listener through `data-*` attributes (also `recsClick`, `routesClick` and the region click).
 - Sub-tabs use `segs()`. The Office has Plan, Money, Reports, Records, Policies and Settings.
+- Office › Reports' route table shows profit below $100 in whole dollars, and folds routes with no flights in the last 24 hours behind a Show/Hide link (`R.idleRoutes`, runtime only).
 - Tab ids are `stands` (Gates), `routes`, `terminal`, `ground` (Airfield), `sales`, `region` and `office`.
 
 ## Views and phone layout
