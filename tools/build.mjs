@@ -40,9 +40,31 @@ for(const p of parts)for(const m of p.text.matchAll(/^function ([A-Za-z0-9_$]+)/
 const dup=[...new Set(names.filter(([n],i)=>names.findIndex(([o])=>o===n)!==i).map(([n])=>n))];
 if(dup.length)fail('duplicate top-level functions: '+dup.map(n=>`${n} in ${names.filter(([o])=>o===n).map(([,f])=>f).join(' and ')}`).join('; '));
 
+// a top-level let must reach the checks through a getter (get X(){return X}): a plain entry is copied once when the page
+// loads and never changes after
+// the entries of a list, split at its top-level commas (strings and brackets kept whole)
+const entries=src=>{const out=[];let d=0,q=null,cur='';for(let i=0;i<src.length;i++){const c=src[i];
+  if(q){cur+=c;if(c==='\\'){cur+=src[++i];continue}if(c===q)q=null;continue}
+  if(c==='"'||c==="'"||c==='`'){q=c;cur+=c;continue}
+  if('([{'.includes(c))d++;else if(')]}'.includes(c))d--;
+  if(c===','&&!d){out.push(cur.trim());cur=''}else cur+=c}
+  if(cur.trim())out.push(cur.trim());return out};
+const block=(text,at)=>{let d=0;for(let i=at;i<text.length;i++){if(text[i]==='{')d++;else if(text[i]==='}'&&!--d)return text.slice(at+1,i)}return ''};
+const SIMX_ASSIGN=/Object\.assign\(\s*SIMX\s*,\s*\{/g;
+const lets=new Set(),simxBad=[];
+// every name a let declares at the start of a line or after a semicolon, up to the end of its statement (a let inside a
+// function counts too, which only matters if something exposes a name it shares)
+for(const p of parts)for(const m of p.text.matchAll(/(?:^|;[ \t]*)let ([^\n]+)/gm)){let st='',d=0;for(const c of m[1]){if('([{'.includes(c))d++;else if(')]}'.includes(c))d--;if(c===';'&&!d)break;st+=c}
+  for(const e of entries(st)){const n=(e.match(/^([A-Za-z_$][\w$]*)/)||[])[1];if(n)lets.add(n)}}
+const plain=e=>(e.match(/^([A-Za-z_$][\w$]*)$/)||e.match(/^[A-Za-z_$][\w$]*\s*:\s*([A-Za-z_$][\w$]*)$/)||[])[1];
+for(const p of parts){
+  for(const m of p.text.matchAll(SIMX_ASSIGN))for(const e of entries(block(p.text,m.index+m[0].length-1))){const n=plain(e);if(n&&lets.has(n))simxBad.push(`${n} (${p.file})`)}
+  for(const m of p.text.matchAll(/\bSIMX\.[A-Za-z_$][\w$]*\s*=\s*([A-Za-z_$][\w$]*)\s*[;,\n]/g))if(lets.has(m[1]))simxBad.push(`${m[1]} (${p.file})`);
+}
+
 // what the checks and the bot reach inside the game (window.__sim, in build/test.html only): every top-level name the tools
-// use as S.<name> or __sim.<name> (tools/, tools/checks/ and build/*.mjs), found here rather than kept in a list. A top-level let gets a getter and a setter, so it
-// stays live; the terminal's parts can also add to SIMX in their own files.
+// use as S.<name> or __sim.<name> (tools/, tools/checks/ and its lib/, and build/*.mjs), found here rather than kept in a
+// list. A let gets a getter (and a top-level one a setter), so it stays live; the parts can also add to SIMX in their files.
 const topLevel=new Map(); // name -> 'let' or 'const'/'function'/'class'
 for(const p of parts)for(const line of p.text.split('\n')){
   const m=line.match(/^(?:async\s+)?(function\*?|const|let|class)\s+([A-Za-z_$][\w$]*)/);if(!m)continue;
@@ -54,10 +76,16 @@ for(const p of parts)for(const line of p.text.split('\n')){
 }
 // the tools, their check groups, and any throwaway scripts in build/ (git-ignored) a session writes to look at something
 const scripts=d=>existsSync(join(root,d))?readdirSync(join(root,d)).filter(f=>/\.m?js$/.test(f)).map(f=>d+'/'+f):[];
-const toolFiles=[...scripts('tools'),...scripts('tools/checks'),...scripts('build')];
+const toolFiles=[...scripts('tools'),...scripts('tools/checks'),...scripts('tools/checks/lib'),...scripts('build')];
 const used=new Set();for(const f of toolFiles)for(const m of readFileSync(join(root,f),'utf8').matchAll(/\b(?:S|__sim)\.([A-Za-z_$][\w$]*)/g))used.add(m[1]);
 const simNames=[...used].filter(n=>topLevel.has(n)).sort();
-const SIM='window.__sim={'+simNames.map(n=>topLevel.get(n)==='let'?`get ${n}(){return ${n}},set ${n}(v){${n}=v}`:n).join(',')+'};Object.assign(window.__sim,SIMX);';
+const live=n=>topLevel.get(n)==='let'||lets.has(n);
+const SIM='window.__sim={'+simNames.map(n=>live(n)?`get ${n}(){return ${n}}`+(topLevel.get(n)==='let'?`,set ${n}(v){${n}=v}`:''):n).join(',')+'};Object.defineProperties(window.__sim,Object.getOwnPropertyDescriptors(SIMX));function simAssign(t,...o){for(const s of o)Object.defineProperties(t,Object.getOwnPropertyDescriptors(s));return t}';
+for(const e of entries(block(SIM,SIM.indexOf('{'))))if(lets.has(plain(e)))simxBad.push(`${e} (the SIM list in tools/build.mjs)`);
+if(simxBad.length)fail('the checks would read a copy of '+simxBad.join(', ')+': expose a top-level let with a getter, get X(){return X}');
+// getters stay getters all the way: the parts add to SIMX with Object.assign(SIMX,{…}), which would read a getter once and
+// store its value, so in the test page those calls keep each property as it was written (simAssign, declared in the hook)
+const simGame=game.replace(SIMX_ASSIGN,'simAssign(SIMX,{').replace('/*SIM_HOOK*/',()=>SIM);
 
 // the build id: a short hash of the built page, stamped into it (%BUILD_ID%, in the meta tag and in 37-update-check.js)
 // and written to dist/version.json next to index.html, so a running page can tell it's grown stale
@@ -70,7 +98,7 @@ writeFileSync(join(root,'dist/index.html'),withBuildId(built));
 writeFileSync(join(root,'dist/version.json'),JSON.stringify({id:buildId})+'\n');
 for(const f of readdirSync(pub))copyFileSync(join(pub,f),join(root,'dist',f));
 mkdirSync(join(root,'build'),{recursive:true});
-writeFileSync(join(root,'build/test.html'),withBuildId(page(shell,game.replace('/*SIM_HOOK*/',()=>SIM))));
+writeFileSync(join(root,'build/test.html'),withBuildId(page(shell,simGame)));
 {const {build:graph}=await import('./graph.mjs');writeFileSync(join(root,'docs/graph.json'),JSON.stringify(graph(),null,1))} // the map sessions query (tools/graph.mjs)
 // the lists joined from one file per entry (tools/join.mjs): lessons, roadmap, decisions, systems, checks and files
 {const {joinedFiles,rejoin}=await import('./join.mjs');for(const f of joinedFiles()){let s;try{s=rejoin(f)}catch(e){fail(e.message)}if(s!==readFileSync(join(root,f),'utf8'))writeFileSync(join(root,f),s)}}

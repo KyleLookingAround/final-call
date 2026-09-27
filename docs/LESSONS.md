@@ -10,6 +10,8 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 <!-- joined:lessons from docs/lessons/ by tools/join.mjs: don't edit between these lines -->
 - [Polish audit · 27 Sep 2026](lessons/main-polish-audit.md)
 - [Version 32: ready for what's next · 27 Sep 2026](lessons/main-release-32.md)
+- [The terminal as a place: checks first · 27 Sep 2026](lessons/90-terminal-place-checks.md)
+- [Polish: overlay cards that match · 27 Sep 2026](lessons/87-overlay-cards.md)
 - [Polish: phone chrome and touch targets · 27 Sep 2026](lessons/84-phone-chrome.md)
 - [Version 31: the real airport brought together · 27 Sep 2026](lessons/67-real-airport-together.md)
 - [Systems review · 27 Sep 2026](lessons/66-systems-review.md)

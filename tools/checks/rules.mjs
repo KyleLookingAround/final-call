@@ -1,7 +1,7 @@
 // The game's rules: the same seed plays the same game; cheaper fares fill more seats and keep more travellers from
 // Lowmere; costs rise with level; planes lose value with wear; levels ask for more each time; every layout is sound;
-// plan and goal ids are sound; the newest What's new version matches docs/HISTORY.md; and loading a save twice
-// changes nothing.
+// plan and goal ids are sound; the newest What's new version matches docs/HISTORY.md; the sim hook reads live
+// values; and loading a save twice changes nothing.
 
 export default async function({open,ok,saveText,newest,out,HIST_TOP}){
   const run=async seed=>{const {ctx,page}=await open(undefined,null,false,{seed,still:true});
@@ -60,6 +60,9 @@ export default async function({open,ok,saveText,newest,out,HIST_TOP}){
       const built=S.G.lounges;S.G.lounges=false;S.G.cash=cash;S.switchLayout('classic');
       t('rules: mobile lounges keep remote boarding quick in rain, and are built as a project',bus<lounge&&bought&&built,`in rain: buses ${bus}, lounges ${lounge}`)}
     {const v=S.UPDATES.map(u=>u.v);t('rules: What\'s new versions run newest first and match the history',v.every((x,i)=>i===0||x<v[i-1])&&v[0]===HIST_TOP,`newest ${v[0]}, history ${HIST_TOP}`)}
+    {// the sim hook reads live values: a let the game reassigns is exposed through a getter, not copied once at load
+      const a=S.AF_Y,top=S.LAYOUTS.mid.top;S.applyLayout('mid');const mid=S.AF_Y;const fl=S.R.floor;S.R.floor='roof';S.draw();const roof=S.ROOF,rooms=S.ROOMS;S.R.floor=fl;S.applyLayout(S.G.layout);
+      t('rules: the sim hook reads live values (AF_Y after a layout change, ROOF after a frame on the roof)',mid===top&&a!==mid&&roof!=null&&rooms!=null,`AF_Y ${a} → ${mid} (Midfield's top ${top}), ROOF ${roof?'set':'null'}`)}
     {const s1=JSON.stringify(S.G);S.resetAll(JSON.parse(s1));const g2=S.G,g1=JSON.parse(s1);
       bad=Object.keys(g1).filter(k=>k!=='savedAt'&&JSON.stringify(g1[k])!==JSON.stringify(g2[k])); // savedAt is when it was last saved
       t('rules: loading a save twice changes nothing',!bad.length,few(bad))}
