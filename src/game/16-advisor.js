@@ -48,7 +48,8 @@ function hotelTip(up){
 }
 function renderTip(){
   if(SET().recs!==false&&tabOpen('region')&&!R.trJob&&(!R.trRecs||G.clock-R.trRecs.at>180||R.trRecs.sig!==recSig())&&performance.now()-(R.trRecT||0)>20000){R.trRecT=performance.now();recStart()}
-  const a=SET().tips===false?null:advise(),el=$('#tip'),sig=a?a.text+(a.k||a.label)+(a.c||''):'';
+  // the tip is about the airport, so clear it over the region and world maps
+  const a=R.view==='airport'&&SET().tips!==false?advise():null,el=$('#tip'),sig=a?a.text+(a.k||a.label)+(a.c||''):'';
   if(sig===R.tipSig){const b=el.querySelector('[data-cost]');if(b)b.disabled=G.cash<+b.dataset.cost;return}
   R.tipSig=sig;el.hidden=!a;if(!a)return;
   el.innerHTML=`<span class="lab">Tip</span><span class="tt">${a.text}</span>${a.k?`<button class="buy" data-tipbuy="${a.k}" data-cost="${a.c}" ${G.cash<a.c?'disabled':''}>${money(a.c)}</button>`:`<button class="buy ghost" data-tipgo="1">${a.label}</button>`}<button class="snooze" aria-label="Hide tips for a while">×</button>`;
