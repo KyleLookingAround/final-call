@@ -16,7 +16,7 @@ Now and then someone famous flies from your airport. The day before, the board a
 
 ## How it works
 
-- **When:** from level 3 (Regional Airport, `G.level>=2`). At each day change, if no visit is booked and the day has come round, a visit is booked for the next day: at levels 3–4 the next one comes 6–9 days later, at 5–6 after 4–7, from 7 after 3–5 (all through `rnd()`). The hour is between 08:00 and 19:00.
+- **When:** from level 3 (Regional Airport, `G.level>=2`). At each day change, if no visit is booked and the day has come round, a visit is booked for the next day: at levels 3–4 the next one comes 6–9 days later, at 5–6 after 4–7, from 7 after 3–5 (all through `rnd()`). The hour is between 08:00 and 18:45.
 - **Who:** an invented first name and surname (or a royal's title and an invented realm) and a kind: footballer, pop star, film actor or royal. The lists are made up, and checked not to pair into well-known names.
 - **The flight:** from the visit's hour, the earliest passenger flight at a stand leaving in the next 40–300 minutes, preferring one whose passengers are still arriving, carries them; one of its passengers (business class if there is one) is the celebrity. If none turns up by the end of the day, they go by car and the visit quietly lapses.
 - **The busy hour:** the best café-type unit open (café, coffee cart, bar or restaurant, else any shop) takes 60% more on everything it earns for an hour after the flight is picked, paid through `earn(…,'shops',…,at)` with the flight's stand as the place.

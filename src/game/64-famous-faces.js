@@ -57,10 +57,12 @@ function famousCafe(){
 }
 function famousMinute(){
   const S=G.famous,v=S&&S.v;let f=R.famous;
-  if(v&&v.st===1&&!f)v.st=0; // after a load: their flight is looked for again
+  if(f&&(f.R!==R.st||!v||v.st!==1)){R.famous=f=null} // a new game or a load since
+  if(v&&v.st===1&&!f)v.st=0; // after a load: their flight is looked for again, the same one if it's still here
   if(v&&v.st===0&&G.clock>=v.t){
-    if(dayOf(G.clock)>v.d)v.st=2; // no flight turned up: they went by car
-    else{const F=famousFlight();if(F){const p=famousPax(F);f=R.famous={F,i:F.i,p,shop:-1,e0:0,end:0,...famousCrowd(),out:null};v.st=1;v.flt=F.code+F.no;v.at=F.i}}
+    const same=v.flt&&R.st.find(S=>S.F&&S.F.code+S.F.no===v.flt);
+    if(!same&&dayOf(G.clock)>v.d)v.st=2; // no flight turned up: they went by car
+    else{const F=same?same.F:famousFlight();if(F){const p=famousPax(F);f=R.famous={F,R:R.st,p,shop:-1,e0:0,end:0,...famousCrowd(),out:null};v.st=1;v.flt=F.code+F.no;v.at=F.i}}
   }
   if(f&&v&&v.st===1){
     const F=f.F,p=f.p,air=p&&p.state!=='new'&&!LAND_ST.has(p.state)&&!['train','tram','bus'].includes(p.state);
@@ -70,11 +72,11 @@ function famousMinute(){
     if(f.shop<0){const j=p&&(p.state==='toShop'||p.state==='shop')?p.shop:(F.plane.state==='boarding'&&isCalled(F)||p&&(p.state==='toGate'||p.state==='gate'))?famousCafe():-1;
       if(famousShop(j)){f.shop=j;f.e0=G.shops[j].earned||0;f.end=G.clock+60}}
     if(f.shop>=0&&G.clock<f.end&&famousShop(f.shop)){const s=G.shops[f.shop],d=(s.earned||0)-f.e0;
-      if(d>0){const b=0.6*d;s.earned+=b;v.paid=(v.paid||0)+b;shopPt(f.shop,50,40);earn(b,'shops',WP.x,WP.y,'#FFC72C',null,f.i)}f.e0=s.earned||0}
+      if(d>0){const b=0.6*d;s.earned+=b;v.paid=(v.paid||0)+b;shopPt(f.shop,50,40);earn(b,'shops',WP.x,WP.y,'#FFC72C',null,F.i)}f.e0=s.earned||0}
     // their flight leaves: the rating moves with its punctuality
-    if(R.st[f.i].F!==F){
+    if(R.st[F.i].F!==F){
       const h=G.history.find(x=>x.tag===F.code+F.no&&x.std===F.std),s=famousName(v),S0=s[0].toUpperCase()+s.slice(1);
-      if(h){const late=h.late>0;repAdj(late?-1:1,'famous',f.i);news(late?`${S0} left ${h.late} min late on ${h.tag}, and the papers noticed.`:`${S0} left on time on ${h.tag}.`)}
+      v.at=F.i;if(h){const late=h.late>0;repAdj(late?-1:1,'famous',F.i);news(late?`${S0} left ${h.late} min late on ${h.tag}, and the papers noticed.`:`${S0} left on time on ${h.tag}.`)}
       v.st=2;f.ph=[];f.fan=[];f.shop=-1;R.famous=null;f=null;
     }
   }
