@@ -11,15 +11,15 @@
   4. **Generated indexes, not hand-kept ones.** `docs/decisions/README.md` built from the folder. Anything still registered in a central list in `tools/build.mjs` (`__sim`) or `tools/check.mjs` (groups) moves to per-file registration, as `SIMX` and `tools/checks/` already do.
   5. **Split the project notes' details by topic** so a change to one system edits that system's notes, not the shared file. Keep a short core in the project notes; details go to the playbooks and `docs/SYSTEMS.md` sections (split into per-system files if that file is still a hotspot). The rule "keep the notes true in the same PR" stays, pointing at the per-topic file.
   6. **Automatic catch-up.** A workflow (`.github/workflows/catch-up.yml`) that, when `main` moves, merges `main` into each open PR from this repo and pushes if it merges cleanly, and comments once if it doesn't. It never rebases or force-pushes.
-  7. **A regular tidy of the lessons.** A weekly Routine (`create_trigger`, a fresh session each time, Mondays early UK time) that reads every lesson file and opens one PR which:
+  7. **A tidy of the lessons every 8 new ones.** No schedule: it runs once 8 lessons have been added since the last tidy. `docs/lessons/.last-tidy` holds the lesson files the last tidy saw, and the join script prints how many are new. The `steward` playbook's look-back step checks that count after adding a lesson; at 8 or more, that session fires the tidy Routine (`fire_trigger`) and says so in its PR. The Routine (`create_trigger` with no schedule, a fresh session each time) reads every lesson file and opens one PR which:
      - merges lessons that say the same thing into one, keeping each source's PR number;
      - groups related lessons under a theme (merge-chasing, checks, cost, tools, saves…), with a theme field at the top of each file so the index can group them;
      - deletes lessons that are out of date (the tool, file or rule they describe is gone) or already written into a playbook, the project notes or a check, naming where in the PR;
      - turns a lesson seen three or more times without a → into a proposed playbook or check change in the same PR, or a `needs-owner` issue if it's a rule change the owner should decide;
-     - changes nothing in the game, and squash-merges itself once checks are green.
+     - updates `docs/lessons/.last-tidy`, changes nothing in the game, and squash-merges itself once checks are green.
      Write its brief as `docs/briefs/lessons-tidy.md` from the template and give the Routine that brief as its prompt. Record the Routine's id in the `coordinator` playbook.
 - Files it may touch: `docs/LESSONS.md`, `docs/lessons/`, `docs/ROADMAP.md`, `docs/HISTORY.md` and any new `*.d/` folders, `docs/decisions/README.md`, `docs/SYSTEMS.md` (and a split of it), the project notes, `.claude/skills/` (`feature`, `steward`, `release`, `coordinator`), `tools/` (a new join script, `build.mjs`, `check.mjs`, `graph.mjs` so it follows the moved files), `src/game/38-updates.js` and the `UPDATES` fragments only, `.github/workflows/catch-up.yml`, a decision record, and this brief. No other game code.
-- Each change gets a line under "The runbook" in `docs/ROADMAP.md` and its measurement in the lessons. It stays only if it clearly helps. Measure: extra merges from `main` per PR (the worst so far is eight; the target is zero or one however many sessions run), and for the tidy, the number of lesson files before and after each run.
+- Each change gets a line under "The runbook" in `docs/ROADMAP.md` and its measurement in the lessons. It stays only if it clearly helps. Measure: extra merges from `main` per PR (the worst so far is eight; the target is zero or one however many sessions run), and for the tidy, the number of lesson files before and after each run and how often it fires.
 
 ## Read first
 
@@ -41,7 +41,7 @@ The session, with Squash and merge once checks are green, then confirms the Page
 
 ## What's left for others
 
-- Don't start the weekly tidy's first run by hand. Let the Routine fire.
+- Don't start the tidy by hand. It fires at the 8th new lesson; the moved entries count as already seen.
 - Don't add a limit on sessions. The owner's order of work continues as in `docs/ROADMAP.md`.
 - A merge queue is for later, if the owner moves the repo into an organisation.
 
