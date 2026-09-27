@@ -28,7 +28,11 @@ From the idea board. Each bundle gets an issue and a spec before work starts.
 How sessions work, not the game. Each one is small, measured and recorded in `docs/LESSONS.md`; it stays only if it clearly helps.
 
 - **Knowledge graph** (#31, `docs/decisions/ADR-2026-09-27-knowledge-graph.md`): `node tools/graph.mjs <name>` answers "what touches X?", and the `graph` check keeps doc links true. Measure on "Looks like a real airport": context and cost per session against the terminal's parts.
-- **Next, before "Looks like a real airport" is split into parts:** a brief template with a checker, a "needs the owner" issue queue, a cost budget per brief, and a workflow that tests parts together.
+- **[A] Briefs, the owner's queue, cost budgets and parts together** (#35, `docs/decisions/ADR-2026-09-27-session-briefs.md`). Measure on "Looks like a real airport", then keep or remove each:
+  - **Brief template** (`docs/briefs/TEMPLATE.md`, `node tools/brief.mjs`, the `brief` check): every session and part starts from a checked brief. Measure: questions a session asks that its brief should have answered (the terminal's finishing session asked two).
+  - **Needs-owner queue**: an issue labelled `needs-owner` with a default taken after 12 hours; the session carries on meanwhile. Measure: hours idle waiting on answers (six overnight last time).
+  - **Cost budget per brief**: `usage.cost_usd` against the brief's estimate at each stopping point; past twice it, a reason and a trim. Measure: sessions over twice their estimate, and cost per PR (the four-PR session cost $16.60 and used 417k of context).
+  - **Parts together** (`.github/workflows/parts.yml`): `main` plus every open `part:<feature>` PR, checked together on each push, hourly and on demand, with one comment per part. Measure: how soon a combination problem shows (the terminal's showed only when brought together), and the time from the last part's merge to green. Balance tables can follow.
 - **During "Looks like a real airport":** cheaper effort for routine work and one or two parts.
 - **After it merges:** faster CI (cached Chromium, and only the touched check groups on drafts).
 - **For "The terminal as a place":** write the checks first.

@@ -61,9 +61,11 @@ Much of the work runs overnight. A question nobody answers costs hours, so:
 - Don't stop on a question the brief or the project notes already answer. Read them again first.
 - If something is truly ambiguous, take the safer option (the one easier to undo, or that changes the game less), say so in the PR, and carry on.
 - Stop and ask only for something irreversible or outside the brief.
+- **The needs-owner queue.** When the owner truly has to decide, don't wait in the conversation. Open an issue labelled `needs-owner` with the question, the options, and the one you'll take by default. Carry on with other work, look at the issue at each stopping point, and take the default after 12 hours with no answer; say so on the issue and in the PR, and close the issue.
 - Where anything in the repo conflicts with the brief, the brief wins for that session; fix the conflict in the repo in the same PR.
-- At each stopping point (a PR opened or merged, a spec written), check the session's usage (`get_session`). If the limit is reached, schedule a resume for just after it resets instead of running on overage. Its `usage.cost_usd` and `context_usage` can read 0 early in a session and fill in later; read them at the end of a piece of work, not the start.
-- **One PR-sized item per session.** When an item merges, the session that merged it writes the next item's brief and starts a fresh session for it (`create_session`), rather than carrying on with its own history. Keep two items in one session only when they share code and the second can be built while the first's CI runs (Sound and the level-up card did).
+- At each stopping point (a PR opened or merged, a spec written), check the session's usage (`get_session`). If `rate_limit_info` says "rejected" or `isUsingOverage`, schedule a `send_later` for a minute after `resetsAt` and end the turn instead of running on overage.
+- **The cost budget.** Compare `usage.cost_usd` with the brief's estimate at each stopping point. It can read 0 early in a session and fill in later: a 0 means not yet known, not free. Past twice the estimate, say why in the PR and in `docs/LESSONS.md`, and trim or split what's left.
+- **One PR-sized item per session.** When an item merges, the session that merged it writes the next item's brief from `docs/briefs/TEMPLATE.md`, saves it as `docs/briefs/<short-name>.md`, runs `node tools/brief.mjs` on it, and starts a fresh session for it (`create_session`) with the brief as its first message, rather than carrying on with its own history. The brief is committed in the new session's PR, and the `brief` check keeps it complete. Keep two items in one session only when they share code and the second can be built while the first's CI runs (Sound and the level-up card did).
 - In a long-lived checkout, run `git status` before committing and stage paths by name: switching branches carries untracked and newly ignored files across.
 
 ## Splitting a big feature across sessions
@@ -72,7 +74,8 @@ Worth it only when the feature has parts that can live in different files. The t
 
 1. **Groundwork first, merged.** One PR lays the shared structure the parts plug into: tables and hooks, a file per part, a check group per part. It leaves `PLAY` identical on seeds 1–3. Merge it, then start every part from `main`. Parts started from the unmerged branch look conflicted everywhere once it's squash-merged (the `steward` playbook has the fix).
 2. **Two or three at a time.** Every session draws on the same five-hour usage limit. Five parts plus the coordinator used it up within the hour, and the rest ran as overage. Start a batch just after the limit resets.
-3. **Each part's brief says:**
+3. **Each part's brief** is written from `docs/briefs/TEMPLATE.md` and says:
+   - its label, `part:<feature>`, which the Parts workflow (`.github/workflows/parts.yml`) uses to merge it with `main` and the other open parts and run `npm run check`, keeping one comment on each part's PR. Read that comment before merging a part: it shows combination problems (conflicts, the parts' checks failing together) while they're still cheap;
    - its files, the shared hooks it may add, and that its notes stay in its own bullet;
    - the functions and files to read first, so it doesn't explore the whole game;
    - its share of any shared budget. Measure the `perf` headroom on `main` and divide it between the parts, or they each spend all of it;
