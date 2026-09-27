@@ -41,6 +41,7 @@ Make the change, rebuild, and run the same three seeds into `build/after-$s.log`
 
 - `build/saves/L<n>.json` are the bot's airports at each level; seed one through `localStorage['final-call-save-v2']` to look at a stage.
 - Bot options (JSON after the hours) change its strategy; they are read as `opts.*` in `tools/bot.js`. For example `'{"noBuyLow":true}'` never buys Lowmere, and `'{"layouts":true}'` rebuilds into better layouts (`layoutPath` picks which).
+- `--rate-day` turns on the rating that reflects the last day (`R.rateDay`, `docs/systems/effects.md`), and `--rate-day='{"scale":6}'` tries its constants. Its runs aren't in the baselines, don't write `build/saves/`, and add `-rateday` to the bot's file names; the snapshots gain `rdT` (the rating's target) and `rdS` (the day's net score per departure).
 - The Balance workflow runs the three seeds on PRs that touch `src/game/` or the bot, once keeping Classic and once rebuilding: when the PR opens or leaves draft, when the `balance` label is added, and on demand. Its tables are in the run's summary; `off` levels show as warnings. The baselines are for keeping Classic; rebuilding should reach level 9 about 5–10% sooner, so its level 9 row reads `near`.
 
 ## Baselines (bot, 1150 game hours)

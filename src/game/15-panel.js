@@ -262,12 +262,18 @@ function affordableIn(tab){
 }
 function stars(r){const n=clamp(Math.round(r/20),0,5);return `<span class="stars">${'★'.repeat(n)}<span class="off">${'★'.repeat(5-n)}</span></span> <small style="font-size:11px;color:var(--muted)">${Math.round(r)}</small>`}
 let lastRepShown=-1;
+// with a rating that reflects the last day (R.rateDay, 04-effects.js): an arrow for where it's heading, and the last
+// three hours' biggest cause that way as the chip's title
+function repChipDay(){const t=rateDayTarget(),dir=t>G.rep+1?1:t<G.rep-1?-1:0,rr=repRecent();let why='';
+  for(const k in rr)if(dir&&rr[k]*dir>0&&(!why||rr[k]*dir>rr[why]*dir))why=k;
+  const key=Math.round(G.rep)+'/'+dir+'/'+why;if(key===lastRepShown)return;lastRepShown=key;const el=$('#sRep');
+  el.innerHTML=stars(G.rep)+(dir?`<small style="font-size:11px;color:var(--${dir>0?'good':'bad'})">${dir>0?'▲':'▼'}</small>`:'');el.title=why?REPLBL[why]||'':''}
 function refreshUI(){
   if(G.tab==='routes'||G.tab==='office'&&(R.oSub==='reports')){const now=performance.now();if(now-(R.panelT||0)>4000&&now-(R.panelPtr||0)>1500&&!(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('#panel input'))){R.panelT=now;const pn=$('#panel'),sc=pn.scrollTop;renderPanel();pn.scrollTop=sc}}
   if(G.tab==='region'&&R.reg&&R.reg.at!==R.regShown&&!R.draft){const now=performance.now();if(now-(R.panelT||0)>4000&&now-(R.panelPtr||0)>1500){R.regShown=R.reg.at;R.panelT=now;const pn=$('#panel'),sc=pn.scrollTop;renderPanel();pn.scrollTop=sc}}
   if(document.body.classList.contains('fs')){$('#fsOn').textContent=(G.flights?Math.round(G.ontime/G.flights*100)+'% on time':'');$('#fsDot').hidden=SET().badges===false||!TABS.some(([id])=>affordableIn(id))}
   {const vb=$('#viewb'),o=tabOpen('region');if(vb.hidden===o)vb.hidden=!o;const wb=$('#worldb'),ow=tabOpen('routes');if(wb.hidden===ow)wb.hidden=!ow;const tb=$('.bmode [data-bm="trn"]'),hasTrn=trnIds().length>0;if(tb.hidden===hasTrn)tb.hidden=!hasTrn;if(R.bm==='trn'){const sig='trn'+trnIds().join(',');if(sig!==boardSig)renderBoard()}}
-  if(Math.round(G.rep)!==lastRepShown){lastRepShown=Math.round(G.rep);$('#sRep').innerHTML=stars(G.rep)}
+  if(R.rateDay)repChipDay();else if(Math.round(G.rep)!==lastRepShown){lastRepShown=Math.round(G.rep);$('#sRep').innerHTML=stars(G.rep)}
   $('#sOn').textContent=G.flights?Math.round(G.ontime/G.flights*100)+'%':'–';
   {const hb=G.hours.length>1?G.hours[G.hours.length-2]:G.hours[G.hours.length-1],nt=hb?hb.rev-hb.cost:0,el=$('#sFlown');el.textContent=hb?money(nt):'–';el.style.color=nt<0?'var(--bad)':''}
   $$('[data-live^="staff-"]').forEach(el=>{el.textContent=staffed(el.dataset.live.slice(6))});
