@@ -1,6 +1,6 @@
 # Level-up screen
 
-Issue: #29 · Status: Approved (the owner's addition before bundle 2, approved in advance in the brief of 27 Sep 2026)
+Issue: #29 · PRs: #30 · Status: Built. Approved (the owner's addition before bundle 2, approved in advance in the brief of 27 Sep 2026)
 
 ## What the player gets
 

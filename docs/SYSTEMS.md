@@ -15,6 +15,7 @@ The project notes (`CLAUDE.md`) hold what every change needs. This holds how eac
 - `shots`: phone, tablet and desktop screenshots of the airport, world and region in `build/shots/`. CI keeps them as the "screenshots" artifact on every PR;
 - `share`: the link-preview tags are filled in, and the preview image (1200×630, under 300 KB) and home-screen icon are published;
 - `layouts`: every layout plays two hours fully built without errors, the Layout tab fits a 320 px phone, and each layout's screenshot goes in `build/shots/`;
+- `graph`: every link in the docs resolves and every system below names its files (`tools/graph.mjs`, which also answers `node tools/graph.mjs <name>`); a system file changed without its section is a warning;
 - `news`: What's new opens once for an older save and not again, never for a new game, and from Settings with every version. It waits for the page's state (`R.newsBoot`), not set times;
 - each file in `tools/checks/` is a group named after it (`terminal`: every layout's desks, lanes, passport desks, carousels and queues sit in their halls, and departing and arriving passengers each go through their own halls; `departures`, `arrivals`, `baggage`, `market` and `hotel`: each part of the terminal; `levelup`: the level-up card opens once, pauses and puts the speed back, lists only what's new, links to the right tabs, shares one card between levels reached together, stays closed with the setting off, in the guided start and headless, and fits phones to desktops; `sound`: announcements, spoken calls, each sound setting, the quiet night, nothing in the headless sim and the board's line at 320 px, with a stub audio context and speech synthesis). It exports a function that gets the helpers (`open`, `ok`, `saveText`…);
 - `perf`: how long a level 9 airport, and a fully built sixteen-stand Midfield, take to simulate, against a calibration run so machines compare (fails over its budget), and how close a CPU-throttled phone gets to full speed at 8× with each (reported only).
@@ -65,13 +66,13 @@ When the link is shared, chat apps and social sites show `src/public/preview.jpg
   - **Night** is 23:00–05:00: the hum drops to a third and only final calls are announced, unspoken.
   - **Settings:** `sndAnn` 'chime' plays the chime without words or voice; `sndFx` silences the tills (`kaching`) and ticks; `G.sound` silences everything, though the words still show.
 
-- **Levels and Masterplan.** Level-ups and some goals give plan points. Consultants sell points from level 4. `GOALS` is a sequential list, and `curGoal()` returns the first goal that is unfinished and available.
-- **Routes.**
+- **Levels and Masterplan** (`02-masterplan.js`, `09-construction-levels-days.js`, `18-masterplan-ui.js`). Level-ups and some goals give plan points. Consultants sell points from level 4. `GOALS` is a sequential list, and `curGoal()` returns the first goal that is unfinished and available.
+- **Routes** (`31-routes.js`; `pickRoute`, `cityMarket` and `routeLF` are in `03-state.js`).
   - Each city has a market in seats per day (`cityMarket`, which includes Lowmere's cut through `rivKeep`).
   - `routeLF` gives how full a flight will be.
   - The dispatcher `pickRoute` sends each plane where it earns most per hour.
   - Fares are −20%, standard or +25% per route.
-- **Region.** Bus, tram, rail, metro and high-speed lines, development sites, events, and weather.
+- **Region** (`24-region-places.js` to `30-region-ui.js`). Bus, tram, rail, metro and high-speed lines, development sites, events, and weather.
 - **Transport manager** (`32-managers.js`, on with `autoLines`, for lines without `L.man`).
   - **What a change is worth:** `evalRegion` runs the region model with a change and without it, at 09:00 and 17:30. `recValue` adds transport profit, the airport's extra demand (valued by `airWorth`, the median recent hour) and cheaper wages.
   - **Reviews:** `managersTick` queues a review of each line every 6 hours. `mgrStep` then makes one measurement a game minute:
@@ -87,15 +88,15 @@ When the link is shared, chat apps and social sites show `src/public/preview.jpg
     - they show quickest payback first, at most one per line and within a week (`REC_PAY`);
     - `applyRec` carries one out, and Not now hides one for a day (`R.recHide`).
   - **Upgrades** are line builds with `up` (and `from`, the old code): the old line runs until the build finishes, then takes the new kind, number (reserved by `nextNum`) and colour.
-- **Lowmere.**
+- **Lowmere** (`33-lowmere.js`).
   - Lowmere opens 3 days after you reach City Airport. Your share of a shared route comes from `rivShare`: flights a day, fare, rating, on-time rate, plus promotions, slot agreements and high-speed rail.
   - It grows daily, runs 3-day fare sales and withdraws from routes you dominate.
   - You can buy it at World Gateway (`rivBuyCost`), after which it pays a daily dividend.
-- **Airline operations.**
+- **Airline operations** (`34-airline-operations.js`).
   - A departure of your own plane waits for a rested crew (`crewReady`; a duty of about 10 h, then 12 h of rest), and shows CREW DELAY while it waits.
   - `farDelay` can bring a plane back late.
   - The Maintenance policy (on by default) services worn planes at 03:00.
-- **Records, stamps and challenges.**
+- **Records, stamps and challenges** (`35-records.js`).
   - Personal bests (`G.rec`) show a RECORD floater when broken.
   - There are 24 stamps; only earned ones are shown.
   - Each game week has 3 challenges, sized from last week. Each pays about 12% of a day's profit, and finishing all three gives a plan point while plans remain.
@@ -160,6 +161,6 @@ When the link is shared, chat apps and social sites show `src/public/preview.jpg
     - `hotelStranded`: from level 4, a departure held an hour late at night by fog or a storm owes its passengers rooms; yours are cheap, the rest go to dear city hotels and cost rating.
     - Rooms are cheap, standard or premium (`G.hotelPrice`); the duty manager (`SET().autoDuty`) re-prices each noon from last night. The card is in Sales › Landside; `drawHotel` lights a window per guest.
   - **Advisor.** `advise` (`16-advisor.js`) points at the fullest café (a café, coffee cart, bar or dining room that turned away more than 7 in the last hour, from `R.awayH`) and at a hotel that turned away 10 or more guests last night.
-- **What's new.** `UPDATES` holds every version's headline and points. The card opens after loading when `G.seen` is older than the newest version (not for new games or during the guided start) and from Settings or Help. Each release adds an entry; the `rules` check matches it against `docs/HISTORY.md`.
-- **Guided start.** A 6-step tour (`TOUR`) runs on new games only and can be skipped or replayed from Help. It turns itself off on any save with progress.
-- **Saves across devices.** These only work on claude.ai, through `window.claude.use('db')`. On GitHub Pages `window.claude` is undefined, so the game saves on the device only. Keep that fallback working.
+- **What's new** (`38-updates.js`). `UPDATES` holds every version's headline and points. The card opens after loading when `G.seen` is older than the newest version (not for new games or during the guided start) and from Settings or Help. Each release adds an entry; the `rules` check matches it against `docs/HISTORY.md`.
+- **Guided start** (`36-guided-start.js`). A 6-step tour (`TOUR`) runs on new games only and can be skipped or replayed from Help. It turns itself off on any save with progress.
+- **Saves across devices** (`37-cloud-saves.js`). These only work on claude.ai, through `window.claude.use('db')`. On GitHub Pages `window.claude` is undefined, so the game saves on the device only. Keep that fallback working.

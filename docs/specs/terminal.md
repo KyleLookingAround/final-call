@@ -1,6 +1,6 @@
 # A terminal that works like a real one
 
-Issue: #17 · Status: Approved
+Issue: #17 · Status: Built · PRs: #18, #19, #21, #22, #23, #24, #26
 
 ## What the player gets
 

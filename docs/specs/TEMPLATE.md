@@ -1,6 +1,6 @@
 # <Feature name>
 
-Issue: #<number> · Status: Proposed | Approved | Built
+Issue: #<number> · Status: Proposed | Approved | Built · PRs: #<number>, … (added as they open)
 
 Copy this file to `docs/specs/<short-name>.md`. Keep it to a page. The owner approves it before building starts.
 
