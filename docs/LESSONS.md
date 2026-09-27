@@ -2,6 +2,12 @@
 
 After a PR merges, look back at the session that built it: what it cost, what slowed it, and what would have saved time or credits (the `steward` playbook's last step). Newest first. A lesson marked → changed something, and says where.
 
+## A feedback link in Help · 27 Sep 2026
+
+- **Numbers:** session `session_01RcMyepPjoZed4Nu662QwAW`, estimate $6. Started from a checked brief with no questions for the owner; every check passed first time, including the new `feedback` group.
+- **Went well:** the graph queries in the brief (`openHelp`, `17-help-keys-speed.js`, `38-updates.js`) named the file, its functions and where the version lives, so no wider search was needed. Faking the served location with a route interception (rather than trying to override `window.location`) let the check exercise the GitHub Pages path without real network.
+- **Lesson:** `npm run preview` regenerates the link-preview image from a live save's current camera state, so it changes on every run even without a visual change; a PR that didn't touch drawing had nothing to gain from committing a new one. → No change: only commit the regenerated image after a PR that actually changes how the game looks, and check the diff isn't just run-to-run noise first.
+
 ## Real airport groundwork, spec and parts' briefs · 27 Sep 2026
 
 - **Numbers:** session `session_01FzgcmHBgyerAkkyLvdb5kW`, estimate $20: $1.55 and 149k of 1M context when the PR opened. Started 07:35; the session was resumed several times, so the wall-clock time says little. No questions for the owner.
