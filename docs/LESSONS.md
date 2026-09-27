@@ -2,6 +2,17 @@
 
 After a PR merges, look back at the session that built it: what it cost, what slowed it, and what would have saved time or credits (the `steward` playbook's last step). Newest first. A lesson marked → changed something, and says where.
 
+## Systems refactor 3: one effects ledger · 27 Sep 2026
+
+- **Numbers:** session `session_01BVVbyCbysZqXQHNzgErWpQ`, estimate $10: $3.69 and 183k of 1M context at the CI check-in, well under. Started 17:21 UTC, PR (#85) opened 17:37; checks and Balance green on the first push; one `main` merge-in (clean) before merging.
+- **Went well:** `node tools/graph.mjs repAdj`/`earn`/`REPWHY` listed every file to read, so nothing else was opened end to end. A 2-day headless fingerprint of `G` on two saves against a worktree of `main` gave a no-game-change answer in a minute, well before the bot; the bot then showed `PLAY` identical on seeds 1–3 both ways, run locally against `main` since the Balance workflow prints `PLAY` but doesn't compare it with `main`.
+- **Lessons:**
+  - A fingerprint script that loads a page and waits before setting `R.sim` isn't repeatable: the frame loop runs in real time meanwhile. Stubbing `requestAnimationFrame` (as `open(…,{still:true})` in `tools/check.mjs` does) made it repeat exactly.
+  - Switching layout while passengers are in the terminal crashes the next step (`faceW` on a stand that's gone); a check that wants several layouts needs a fresh page for each, switched before play.
+  - A file numbered before `42-terminal.js` can't add to `SIMX` at load time, and `tools/build.mjs`'s list belonged to another open PR, so the check reads the cause tables through `__sim.R.effects`. → Refactor 4 or whichever PR next edits `build.mjs` could move `SIMX` into an early file (`03-state.js`), so any file can register what the checks need.
+  - The Balance workflow's `PLAY` lines have to be compared with `main` by hand, which here meant twelve local bot runs. → Worth having `balance.yml` also build `main` and print whether `PLAY` matches (the faster-CI [B] session owns `.github/workflows/`).
+  - `create_pull_request` added the session-link footer again, and the Description check failed until it was stripped; a third session hitting it confirms the read-back step.
+
 ## Polish: phone chrome and touch targets · 27 Sep 2026
 
 - **Numbers:** session `session_01BNMAt5vgY9kVSc98GujRBt`, estimate $8: $5.97 and 285k of 1M context by the merge, under the estimate. Started 17:20 UTC, PR opened 17:37 (17 minutes: reading the four issues and the audit's fix-batch table, writing the CSS, screenshotting five sizes by hand since none of the built-in `npm run check -- shots` sizes matched the brief's list, and a fresh review). Checks green the same minute; merged shortly after, one `main` merge-in (the polish audit doc PR, #77, landing under it).
