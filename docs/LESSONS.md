@@ -2,6 +2,15 @@
 
 After a PR merges, look back at the session that built it: what it cost, what slowed it, and what would have saved time or credits (the `steward` playbook's last step). Newest first. A lesson marked → changed something, and says where.
 
+## Polish audit · 27 Sep 2026
+
+- **Numbers:** session `session_017bfAy4YrGKprBcimixNCgp`, estimate $6: $8.74 and 196k of 1M context by the time the PR opened, a little over the estimate but not past twice it. Started 16:49 UTC. Docs only, no code, no bot run.
+- **Went well:** three background review agents (desktop tab-by-tab across all four levels; phone/tablet layout and touch targets; overlays, day/night and motion) ran in parallel, each writing its own screenshots, looking at them, and handing back a findings table rather than raw images. That kept the main session's own context to reading three short reports instead of the 170-odd screenshots the three of them actually took between them, which is what the brief's "read the images once" warning was really asking for.
+- **Lessons:**
+  - Splitting the sweep by device/concern (not by level) meant each agent needed its own primer on the game's tab/view/subtab switching (`setTab`, `setView`, `R.oSub`, `openPlan`, `openHelp`…), since none of that is written down in one place for a fresh session to find. → Worth a short "driving the game headlessly" note in `docs/SYSTEMS.md`'s UI section next time this is needed, so a future audit's agent briefs are shorter.
+  - Two of the five "known issues" named in the brief (the rating pinned near 100, the board's one-city network) turned out to already be exactly what systems-review proposal 1 and a liked idea board entry are about to fix properly. Listing them in the polish table anyway (as the brief asked) but flagging in the row itself that a fix batch should coordinate with that work, rather than writing a smaller patch that would be redone, avoided the punch list quietly duplicating a bundle already on the roadmap.
+  - The GitHub MCP tools available in this session have no dedicated label-creation call, but `issue_write`'s `create` with an unknown label name created it in passing on the first issue opened — worth knowing that works before a session spends time looking for a `create_label` tool that isn't there.
+
 ## Tell players when a new version is ready · 27 Sep 2026
 
 - **Numbers:** session `session_01EdqgFSmkJTE7ekGc9YfeQz`, estimate $6: $13.55 and 441k of 1M context by the merge, over twice the estimate. Started 13:22, PR opened 13:47 (the feature itself: spec, code and checks, all green first time bar the `update` group's own local debugging); merged 15:44, so about two hours end to end. Started from a checked brief with no questions for the owner.
