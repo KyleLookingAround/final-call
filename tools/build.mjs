@@ -47,4 +47,5 @@ writeFileSync(join(root,'dist/index.html'),page(shell,game));
 for(const f of readdirSync(pub))copyFileSync(join(pub,f),join(root,'dist',f));
 mkdirSync(join(root,'build'),{recursive:true});
 writeFileSync(join(root,'build/test.html'),page(shell,game.replace('/*SIM_HOOK*/',()=>SIM)));
-console.log(`built dist/index.html (${Math.round(page(shell,game).length/1024)} KB) from ${parts.length} files, and build/test.html`);
+{const {build:graph}=await import('./graph.mjs');writeFileSync(join(root,'docs/graph.json'),JSON.stringify(graph(),null,1))} // the map sessions query (tools/graph.mjs)
+console.log(`built dist/index.html (${Math.round(page(shell,game).length/1024)} KB) from ${parts.length} files, build/test.html and docs/graph.json`);

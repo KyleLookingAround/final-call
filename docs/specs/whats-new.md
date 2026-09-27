@@ -1,6 +1,6 @@
 # What's new
 
-Issue: #8 · Status: Built
+Issue: #8 · Status: Built · PRs: #9
 
 Part of the same release as airport layouts (version 22).
 
