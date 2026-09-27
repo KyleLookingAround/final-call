@@ -20,6 +20,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 - [Passengers who suddenly sped down the piers (#82) · 27 Sep 2026](lessons/89-pax-movement.md)
 - [Polish: overlay cards that match · 27 Sep 2026](lessons/87-overlay-cards.md)
 - [Polish: phone chrome and touch targets · 27 Sep 2026](lessons/84-phone-chrome.md)
+- [Systems refactor 2: routes and demand in one file · 27 Sep 2026](lessons/81-refactor-routes.md)
 - [Polish: Reports and the region at night · 27 Sep 2026](lessons/80-reports-region-night.md)
 - [Version 31: the real airport brought together · 27 Sep 2026](lessons/67-real-airport-together.md)
 - [Systems review · 27 Sep 2026](lessons/66-systems-review.md)

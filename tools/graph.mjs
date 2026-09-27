@@ -2,7 +2,8 @@
 //   node tools/graph.mjs <name>     everything related to a system, file, function, hook, saved field or check group
 //   node tools/graph.mjs --write    writes docs/graph.json (git-ignored; npm run build does this too)
 //   node tools/graph.mjs --check    fails on broken doc links and docs/systems/ files that name no game files; warns when a
-//                                   system's file changed on this branch but its notes didn't
+//                                   system's file changed on this branch but its notes didn't, and when a system's notes
+//                                   name three or more functions that live in one file outside its own
 // What it reads: src/game/*.js (top-level functions and names, the hooks each file registers, saved fields),
 // tools/checks/*.mjs (each group and what it calls through window.__sim), and the docs' own link lines: docs/systems/
 // (one file per system, and the game files it names), docs/decisions/, docs/specs/ (issue and PRs), and docs/lessons/
@@ -58,7 +59,9 @@ function refsIn(s){
 function systems(){
   const out={};
   for(const f of ls('docs/systems').filter(f=>f.endsWith('.md'))){const s=rd('docs/systems/'+f),k=(s.match(/^# (.+)/m)||[])[1]||f;
-    out[k]={doc:'docs/systems/'+f,files:refsIn(s).filter(x=>x.startsWith('src/game/')),refs:refsIn(s)}}
+    const par=(s.match(/^\*\*.+?\*\*\s*\(([^)]*)\)/m)||[])[1]||'',aside=refsIn(par.split(';').slice(1).join(';')),files=refsIn(s).filter(x=>x.startsWith('src/game/'));
+    // the functions its text names, and its own files: all it names but those its first line only mentions after a ";" ("… stay in 03-state.js")
+    out[k]={doc:'docs/systems/'+f,files,refs:refsIn(s),names:uniq(all(s,/`(\w+)(?:\([^`]*\))?`/g)),own:files.filter(x=>!aside.includes(x)||refsIn(par.split(';')[0]).includes(x))}}
   return out;
 }
 // everything related to a name, in a short list
@@ -96,6 +99,10 @@ export function check(g){
   for(const l of g.lessons)for(const f of l.to)if(!exists(f))errs.push(`${l.file} points at ${f}, which doesn't exist`);
   let changed=[];try{const base=execSync('git merge-base HEAD origin/main',{cwd:root,stdio:['ignore','pipe','ignore']}).toString().trim();changed=execSync(`git diff --name-only ${base}`,{cwd:root}).toString().split('\n').filter(Boolean)}catch(e){}
   if(changed.length)for(const [k,S] of Object.entries(g.systems)){const hit=S.files.filter(f=>changed.includes(f));if(hit.length&&!changed.includes(S.doc))warns.push(`${hit.join(', ')} changed but ${S.doc} ("${k}") didn't: is it still true?`)}
+  // a system's notes that name three or more functions living in one file outside its own: they belong with the system, or the file with the section
+  for(const [k,S] of Object.entries(g.systems)){const by={};
+    for(const n of S.names){const at=(g.defs[n]||[]).filter(f=>g.files[f].funcs.includes(n));if(at.length&&!at.some(f=>S.own.includes('src/game/'+f)))(by[at[0]]||(by[at[0]]=[])).push(n)}
+    for(const [f,ns] of Object.entries(by))if(ns.length>=3)warns.push(`${S.doc} ("${k}") names ${ns.join(', ')}, which live in ${f}, outside its files`)}
   return {errs,warns};
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){

@@ -25,7 +25,7 @@ The project notes (`CLAUDE.md`) hold what every change needs. This file holds ho
 
 ## Files
 
-The game is one strict IIFE, split into files in `src/game/`. The build joins them in file-name order, so they share one scope: any file can use what another declares at the top level, and order only matters for code that runs at load time (`99-start.js` runs last and starts the game). Keep a new system in its own file, numbered before `99-start.js`, and start it with a one-line `/* ===== what's in it ===== */` comment: the table below is built from those lines. Some functions sit where they were first written rather than where their name suggests (`pickRoute` is in `03-state.js`), so search `src/game/` by name.
+The game is one strict IIFE, split into files in `src/game/`. The build joins them in file-name order, so they share one scope: any file can use what another declares at the top level, and order only matters for code that runs at load time (`99-start.js` runs last and starts the game). Keep a new system in its own file, numbered before `99-start.js`, and start it with a one-line `/* ===== what's in it ===== */` comment: the table below is built from those lines. Some functions sit where they were first written rather than where their name suggests (`wageBill` is in `10-events-toasts.js`), so search `src/game/` by name.
 
 The main names, by file group (the joined table below is the complete list, from each file's first line):
 
@@ -38,7 +38,7 @@ The main names, by file group (the joined table below is the complete list, from
 | `15-panel` to `21-layout` | Side panel, advisor, help/keys/speed, Masterplan UI, phone bottom sheet, full screen, layout |
 | `22-save`, `23-boot` | Saving and migrating (`resetAll`), boot and the frame loop |
 | `24-region-places` to `30-region-ui` | The region: places and stations, helpers, the journey network, events and line building, weather, map drawing, the Region tab |
-| `31-routes` to `36-guided-start` | Routes and the world map, managers and recommendations, Lowmere, airline operations, records/stamps/challenges, guided start |
+| `31-routes` to `36-guided-start` | Routes, their demand and fares, the dispatcher (`pickRoute`) and the world map, managers and recommendations, Lowmere, airline operations, records/stamps/challenges, guided start |
 | `37-update-check` | Tells a player on the published site when a new version is ready, and reloads to it |
 | `38-updates` | What's new: the `UPDATES` list (every version, newest first) and its card |
 | `39-layouts`, `40-layout-drawing` | Airport layouts: the `LAYOUTS` table, rebuilding and switching, the Airfield › Layout tab; remote stands, buses, rooms, shop units and each layout's buildings |
@@ -161,7 +161,7 @@ The main names, by file group (the joined table below is the complete list, from
 - `departures`: Departures (docs/specs/terminal.md): check-in islands with their own queues, bag drop for kiosk and online passengers with bags, and security: the search rate, family and assistance lanes, and no way into the market place but a lane.
 - `feedback`: The feedback link in Help (docs/specs/feedback-link.md): hidden outside GitHub Pages; on GitHub Pages it opens a prefilled issue for the repo the page is served from, and the body stays well under GitHub's URL length limit.
 - `floors`: Two floors (docs/specs/terminal-place.md): departures upstairs and arrivals below, people changing floor only on the escalators and the lift (families and those who need help by lift), nobody stuck, walks about as long as before, taps going to a hall's floor, and old saves landing on the right floor. Written before the code (tools/checks/pending.txt). Reads the names in lib/place.mjs, plus a baggage hall room 'bag', hallLabel(id) → [x, y] where a hall's name is drawn, and an advisor tip {hall: id} flying the camera to that hall.
-- `graph`: The map in tools/graph.mjs: every link in the docs resolves, every system in docs/systems/ names its files, and the joined lists (tools/join.mjs) are sound; a system's file changed without its notes is a warning.
+- `graph`: The map in tools/graph.mjs: every link in the docs resolves, every system in docs/systems/ names its files, and the joined lists (tools/join.mjs) are sound; a system's file changed without its notes is a warning, and so are notes naming three or more functions that live in one file outside the system's own (a file its first line mentions only after a ";" isn't its own).
 - `hotel`: The airport hotel (docs/specs/terminal.md): it's never overbooked, crews resting there are ready sooner, stranded passengers get rooms, late arrivals walk through to the lobby, early guests come down from it, and with no hotel nothing changes.
 - `kofi`: The Ko-fi link (docs/specs/kofi-link.md): a quiet link to https://ko-fi.com/kylemck in What's new, Settings and the level-up card, nowhere else (not the airport view, the board or the goal bar), and it doesn't stop the level-up card fitting a 320 px phone.
 - `layout`: No sideways overflow and no page scroll, from 320 px phones to 2560 px screens, portrait and landscape.

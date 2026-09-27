@@ -1,5 +1,7 @@
 // The map in tools/graph.mjs: every link in the docs resolves, every system in docs/systems/ names its files, and the
-// joined lists (tools/join.mjs) are sound; a system's file changed without its notes is a warning.
+// joined lists (tools/join.mjs) are sound; a system's file changed without its notes is a warning, and so are notes
+// naming three or more functions that live in one file outside the system's own (a file its first line mentions only
+// after a ";" isn't its own).
 
 export default async function({ok}){
   const {build,check}=await import('../graph.mjs'),g=build(),{errs,warns}=check(g);
