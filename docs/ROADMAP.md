@@ -59,6 +59,7 @@ How sessions work, not the game. Each one is small, measured and recorded in the
 ## Next
 
 <!-- joined:next from docs/roadmap.d/ (Section: next) by tools/join.mjs: don't edit between these lines -->
+- **Draw the moving walkways** (from #89's look back, `docs/lessons/89-pax-movement.md`; PR #89): the moving walkways upgrade still speeds concourse walks up to 2.6× with nothing drawn for it. #89 fixed the same problem for the people mover (riders hidden, drawn on its cars, every change of pace eased) but left the walkways as pure numbers, calling drawing them a follow-up for the owner to decide. For the owner to order.
 <!-- /joined:next -->
 
 ## Ideas (not agreed)
