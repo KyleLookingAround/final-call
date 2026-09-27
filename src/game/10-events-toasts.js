@@ -5,7 +5,7 @@ function toast(text,choices,id,kind,ttl){
   id=id||('t'+(++R.toastId));
   if(R.toasts.some(t=>t.id===id))return;
   const tl=ttl??(choices?30:8);R.toasts.push({id,text,choices:choices||null,kind:kind||'',ttl:tl,max:tl});
-  if(R.toasts.length>3){const k=R.toasts.findIndex(t=>!t.choices);R.toasts.splice(k>=0?k:0,1)}
+  if(R.toasts.length>3){const k=R.toasts.findIndex(t=>!t.choices),i=k>=0?k:0,ev=R.toasts[i];if(ev.choices)ev.choices[ev.choices.length-1].fn();R.toasts.splice(i,1)}
   renderToasts();
   if(choices)alertTone();
 }

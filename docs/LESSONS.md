@@ -17,6 +17,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 - [Polish audit · 27 Sep 2026](lessons/main-polish-audit.md)
 - [Version 32: ready for what's next · 27 Sep 2026](lessons/main-release-32.md)
+- [Quiet the noise: fold repeated incidents, expire toasts, clear stale tips · 27 Sep 2026](lessons/92-polish-noise.md)
 - [The terminal as a place: checks first · 27 Sep 2026](lessons/90-terminal-place-checks.md)
 - [Passengers who suddenly sped down the piers (#82) · 27 Sep 2026](lessons/89-pax-movement.md)
 - [#88 Masterplan on a small phone · 27 Sep 2026](lessons/88-masterplan-small-phone.md)
