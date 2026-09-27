@@ -52,7 +52,7 @@ Work through these steps in order. Small fixes (a label, a nit, an obvious bug) 
 ## 7. Ship
 
 - Commit with a short imperative subject in plain words; add a body when the reason isn't obvious. No attribution lines; the project notes list what messages must leave out.
-- `git push -u origin feature/<short-name>`, then open a PR with a plain title, filling in `.github/pull_request_template.md`. Check the description afterwards and remove anything added that the template doesn't have.
+- `git push -u origin feature/<short-name>`, then open a PR with a plain title, filling in `.github/pull_request_template.md`. Open it as a draft while iterating, so Checks only runs the groups the change touches, and mark it ready for review before merging. Check the description afterwards and remove anything added that the template doesn't have.
 - Follow the `steward` playbook until the PR is green, then merge it yourself with Squash and merge; `main` publishes to GitHub Pages.
 
 ## 8. Learn

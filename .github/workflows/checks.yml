@@ -1,7 +1,12 @@
 name: Checks
 
+# On a draft PR, tools/touched.mjs turns the changed files into the check groups worth running, so most
+# rounds while iterating are quick; marking the PR ready for review (ready_for_review, below) runs every
+# group, as does a non-draft PR and any push. A draft's partial run is never the one a merge relies on: a
+# draft PR can't be merged, and going ready always re-triggers this workflow with everything.
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
 
 permissions:
@@ -13,6 +18,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # tools/touched.mjs diffs against origin/main
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -29,7 +36,15 @@ jobs:
         if: steps.pw-cache.outputs.cache-hit != 'true'
       - run: npx playwright install-deps chromium
         if: steps.pw-cache.outputs.cache-hit == 'true'
-      - run: npm run check
+      - id: touched
+        if: github.event.pull_request.draft
+        run: node tools/touched.mjs origin/main >> "$GITHUB_OUTPUT"
+      - name: Run the touched check groups
+        if: github.event.pull_request.draft && steps.touched.outputs.groups
+        run: for g in ${{ steps.touched.outputs.groups }}; do npm run check -- "$g"; done
+      - name: Run every check group
+        if: "!(github.event.pull_request.draft && steps.touched.outputs.groups)"
+        run: npm run check
       - uses: actions/upload-artifact@v4
         if: always()
         with:

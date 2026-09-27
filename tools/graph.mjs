@@ -62,28 +62,30 @@ function systems(){
   for(const k in out){out[k].files=refsIn(out[k].text).filter(f=>f.startsWith('src/game/'));out[k].refs=refsIn(out[k].text);delete out[k].text}
   return out;
 }
+// the check groups that call any of these functions or SIMX hooks; tools/touched.mjs reuses this to map a
+// changed src/game/ file to the groups worth running for it
+export function checksCalling(g,names){return Object.entries(g.checks).filter(([,c])=>c.sim.some(n=>names.includes(n))).map(([k])=>k)}
 // everything related to a name, in a short list
 export function query(g,q){
   const lo=q.toLowerCase(),out=[],add=(k,v)=>{v=[].concat(v).filter(Boolean);if(v.length)out.push(`${k}: ${uniq(v).join(', ')}`)};
   const file=Object.keys(g.files).find(f=>f===q||f.replace(/\.js$/,'')===q||f.slice(3).replace(/\.js$/,'')===lo);
   const sysName=Object.keys(g.systems).find(k=>k.toLowerCase()===lo)||Object.keys(g.systems).find(k=>k.toLowerCase().includes(lo));
   const src=f=>readFileSync(join(root,'src/game',f),'utf8'),users=n=>Object.keys(g.files).filter(f=>new RegExp('\\b'+n.replace('.','\\.')+'\\b').test(src(f)));
-  const checksCalling=names=>Object.entries(g.checks).filter(([,c])=>c.sim.some(n=>names.includes(n))).map(([k])=>k);
   const docsFor=paths=>({sys:Object.entries(g.systems).filter(([,s])=>s.files.some(f=>paths.includes(f))).map(([k])=>k),
     dec:g.decisions.filter(d=>d.refs.some(f=>paths.includes(f))).map(d=>d.file),les:g.lessons.filter(l=>l.to.some(f=>paths.includes(f))).map(l=>l.title),spec:g.specs.filter(s=>s.refs.some(f=>paths.includes(f))).map(s=>s.file)});
   const sysExact=Object.keys(g.systems).find(k=>k.toLowerCase()===lo);
   if(file&&!sysExact){const F=g.files[file],p='src/game/'+file,d=docsFor([p]);out.push(`file src/game/${file}`);add('functions',F.funcs);add('hooks',F.hooks);
-    add('saved fields',Object.entries(g.saved).filter(([,fs])=>fs.includes(file)).map(([k])=>k));add('checks',checksCalling(F.funcs.concat(F.hooks.filter(h=>h.startsWith('SIMX.')).map(h=>h.slice(5)))));
+    add('saved fields',Object.entries(g.saved).filter(([,fs])=>fs.includes(file)).map(([k])=>k));add('checks',checksCalling(g,F.funcs.concat(F.hooks.filter(h=>h.startsWith('SIMX.')).map(h=>h.slice(5)))));
     add('systems',d.sys);add('specs',d.spec);add('decisions',d.dec);add('lessons',d.les);return out}
   if(sysName){const S=g.systems[sysName],d=docsFor(S.files);out.push(`system "${sysName}" (docs/SYSTEMS.md)`);add('files',S.files.map(f=>f.slice(9)));
     add('hooks',S.files.flatMap(f=>(g.files[f.slice(9)]||{hooks:[]}).hooks).filter(h=>!h.startsWith('UPG.')));add('saved fields',Object.entries(g.saved).filter(([,fs])=>fs.some(f=>S.files.includes('src/game/'+f))).map(([k])=>k).slice(0,40));
-    add('checks',checksCalling(S.files.flatMap(f=>(g.files[f.slice(9)]||{funcs:[]}).funcs)));add('specs',d.spec);add('decisions',d.dec);add('lessons',d.les);return out}
+    add('checks',checksCalling(g,S.files.flatMap(f=>(g.files[f.slice(9)]||{funcs:[]}).funcs)));add('specs',d.spec);add('decisions',d.dec);add('lessons',d.les);return out}
   if(g.checks[q]){const c=g.checks[q];out.push(`check group ${q} (${c.file})`);add('calls',c.sim);add('defined in',c.sim.flatMap(n=>g.defs[n]||[]));return out}
   const sv=Object.keys(g.saved).filter(k=>k==='G.'+q||k===q||k==='G.set.'+q);
   if(sv.length){for(const k of sv){out.push(`saved field ${k}`);add('used in',g.saved[k])}return out}
   const hook=Object.entries(g.files).filter(([,F])=>F.hooks.some(h=>h===q||h.endsWith('.'+q)||h===q.replace(/\.push$/,''))).map(([f])=>f);
   if(g.defs[q]||hook.length){const at=(g.defs[q]||[]).concat(hook);out.push(`${g.defs[q]?'name':'hook'} ${q}`);add(g.defs[q]?'defined in':'registered by',at);add('used in',users(q).filter(f=>!at.includes(f)));
-    add('checks',checksCalling([q]));const d=docsFor(at.map(f=>'src/game/'+f));add('systems',d.sys);add('decisions',d.dec);return out}
+    add('checks',checksCalling(g,[q]));const d=docsFor(at.map(f=>'src/game/'+f));add('systems',d.sys);add('decisions',d.dec);return out}
   // anything else: names and files that contain it
   add('names like it',Object.keys(g.defs).filter(n=>n.toLowerCase().includes(lo)).slice(0,20));add('systems like it',Object.keys(g.systems).filter(k=>k.toLowerCase().includes(lo)));
   add('files like it',Object.keys(g.files).filter(f=>f.includes(lo)));return out.length?out:[`nothing found for ${q}`];
