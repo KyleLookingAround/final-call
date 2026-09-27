@@ -10,6 +10,34 @@ After a PR merges, look back at the session that built it: what it cost, what sl
   - Two defaults were not pure: `hotelBook`'s reads `G.clock` through `hotelNight()`. Calling `DEFAULT()` before the save is in `G` would have given older saves a hotel night from the previous airport's clock, and the hashes caught nothing only because the fill loop runs after `G` is set. A `FIELDS` default that reads `G` is fine in `resetAll`, but not in `DEFAULT()` called anywhere else (`migrate()` now drops it for that reason). Worth remembering when a part adds a default that reads the airport.
   - `tools/graph.mjs` parsed the literal text of `DEFAULT()` to list saved fields, so changing its shape broke the `graph` check although the file wasn't in the brief's list. A tool that reads the source by regex is part of the code it reads: grep `tools/` for a function's name before reshaping it.
   - The brief said the Balance workflow shows `PLAY` against `main`; it runs the PR head only, so "identical to `main`" still needed the six bot runs of `main` locally (about 9 minutes side by side). → Worth the Balance workflow also printing `main`'s `PLAY` (or the briefs saying to run `main` locally); left for the faster-CI session's files, not changed here.
+## Polish: overlay cards that match · 27 Sep 2026
+
+- **Numbers:** estimate $5: $6.18 by the merge, a little over. Started 17:20, PR #87 opened 17:44, merged 18:16 (56 minutes end to end). Three commits: the four fixes, a follow-up from the fresh review, and this look-back. `npm run check`: 186/186, twice (once before the review's follow-up commit, once after). No bot run: nothing in `update()` changed.
+- **Went well:** measuring the guided start's bug with a throwaway Playwright script (`build/tour-inspect.mjs`, deleted before committing) that read `#coach`, `#goal`, `.stats` and `#tabs`' real `getBoundingClientRect()` values at each of the brief's four sizes settled what was actually overlapping (the tab bar or stats row next to the goal, not the goal bar itself, as the audit's wording suggested) before writing a fix, rather than guessing from the CSS. The same approach (measure, don't guess) then verified the fix at all four sizes plus an edge case the review raised.
+- **Lessons:**
+  - The fresh review (a general-purpose helper, since no `code-review` agent type was available to the `Agent` tool in this session) caught a real gap the four-sizes check didn't: `tourStep`'s last-resort fallback and its tall-target override still measured against the spotlighted rect alone, not the widened avoid-zone the main fix added, so a short landscape viewport could still land the coach box back on the stats row or tab bar. Fixed and reverified before merge. → No change to a playbook: this is the case for reviewing the *whole* function a fix touches, not just the branch the reported bug hits, since a short viewport width wasn't one of the brief's four required sizes and so was never actually run.
+  - The review also flagged that unifying the close-button style visibly changed the level-up card's own close button (from a distinct 34×34 translucent box to the same 32×32 solid one the other cards use), as if that might be unintended. It was the intended fix for the audit row (one shared *style*, not just shared code) — confirmed by screenshot rather than assumed. A review that flags an intentional change as a maybe is still worth the two minutes to confirm.
+  - `main` had moved twice more by the time this look-back was written (a polish audit and a board-touch-targets PR before the merge, a terminal-checks PR after it), yet the PR itself never needed a `main` merge-in: none of the moved files overlapped this PR's three. Confirms scoping a brief's "may touch" list tightly (here: `src/shell.html`'s overlay classes and two specific game files, explicitly not `.chip`/`.hud`/the tab bar) is what keeps a PR out of the merge-chase on a busy day, not luck.
+
+## The terminal as a place: checks first · 27 Sep 2026
+
+- **Numbers:** estimate $10. Started 17:00, PR #90 opened 18:00. Two commits before opening and one from the review. `npm run check`: 190 passed, 35 pending. The new groups add about 20 s. Balance was dispatched by hand, since it doesn't run for `tools/` changes: green, and seed 1's `PLAY` and `STATE` match `main`.
+- **What it found on `main`:**
+  - rebuilding twice can stop the game (#78);
+  - Star's and Round's walks are 1.75× and 1.9× Classic's;
+  - Round leaves passengers at a boarding gate past departure for 90+ minutes;
+  - rebuilding into Curved front, Satellite or Midfield leaves shoppers outside any room;
+  - loading a save in a page that has already played another leaves runtime state behind.
+- **Lessons:**
+  - Step 1's plan missed that `Object.assign(SIMX,{get X(){…}})` in the parts already flattens a getter, before the hook runs. The `rules` check, written first, showed it at once. → The test page keeps each property as written (`tools/build.mjs`).
+  - The first draft of the new groups took 33 s, mostly opening pages. → Checks whose play takes seconds wait until their code exists (`TP_ALL=1` plays them now), and the rest share pages. Budget it before writing, not after.
+  - The fresh review caught a check that could never fail: toasts don't happen in the headless sim, so "the crowd is the only sign" counted nothing. It caught six more that would have misled a part, all fixed before opening. → A pre-written check that expects nothing (0 toasts, 0 stuck) needs the thing it watches to be able to happen in its setup. Say so in the check.
+- **How [D] will be measured:** each part's PR records:
+  - (a) game-code bugs a pre-written check caught before the PR opened;
+  - (b) game-code bugs found after it opened;
+  - (c) pre-written checks it had to fix, and how.
+
+  The coordinator adds them up after the last part. The baseline is the terminal's 0.6 late bugs a part. [D] stays if (b) is at most 0.3 a part and this PR costs under 15% of the bundle.
 
 ## Polish: phone chrome and touch targets · 27 Sep 2026
 
