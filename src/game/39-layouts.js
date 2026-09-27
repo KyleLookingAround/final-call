@@ -203,10 +203,28 @@ clock(MINUTE,'layoutTick',1,0,layoutTick);
 const layoutDrains=i=>G.layoutNext&&i>=LAYOUTS[G.layoutNext].stands.length;
 const AT_STAND=new Set(['gate','toGate','bridge','aisle','sitting','dAisle','dBridge']),IN_PLANE=new Set(['bridge','aisle','sitting','dAisle','dBridge']);
 function switchLayout(id){
-  const oXF=XF.map(t=>({...t})),old=STAND.slice(),from=LAY.name;
+  const oXF=XF.map(t=>({...t})),old=STAND.slice(),from=LAY.name,fromId=G.layout,was=R.pax.map(p=>p.stand);
   const rid=R.pax.map(p=>p.room!=null&&ROOMS[p.room]?ROOMS[p.room].id:null); // rooms are numbered afresh for each layout
-  G.layout=id;G.layoutNext=null;G.layoutAt=null;applyLayout(id);
+  applyLayout(id);
+  // a flight at a stand the new layout drops moves to a free built stand it keeps, with everyone aboard, on its bridge,
+  // at its gate or still to come; with no stand free, the switch waits for those stands to empty, as a rebuild does
+  const to=new Map();
+  for(let i=SIDX.length;i<R.st.length;i++){const F=R.st[i].F;if(!F)continue;
+    const t=AIRCRAFT.indexOf(F.ac),free=SIDX.filter(j=>G.stands[j].built&&!R.st[j].F&&![...to.values()].includes(j));
+    const j=[free.find(j=>fitsGate(t,j)&&!R.st[j].out),free.find(j=>fitsGate(t,j)),free[0]].find(j=>j!=null);
+    if(j==null){applyLayout(fromId);G.layoutNext=id;G.layoutAt=G.clock;
+      toast(`The ${LAYOUTS[id].name} layout opens once the stands it drops have seen off their flights.`,null,null,'goal',8);return false}
+    to.set(i,j)}
+  G.layout=id;G.layoutNext=null;G.layoutAt=null;
   R.pax.forEach((p,k)=>{p.room=rid[k]!=null?ROOM_ID[rid[k]]??ROOM_MAIN():p.room});
+  for(const [i,j] of to){const S=R.st[i],F=S.F,fl=G.fleet[F.fleetIdx],re=p=>{if(p&&p.F===F)p.stand=j};
+    R.st[i]=R.st[j];R.st[j]=S;F.i=j;F.arr.stand=j;if(fl&&fl.gate===i)fl.gate=j;
+    R.pax.forEach(re);F.manifest.forEach(re);re(F.straggler);F.arr.pax.forEach(re);
+    for(const p of R.pax)re(p.xfer); // someone connecting into it who hasn't landed yet
+    for(const T of R.st)if(T.F)T.F.arr.pax.forEach(p=>re(p.xfer));
+    for(const m of R.rwy.q)if(m.F===F)m.stand=j}
+  for(let i=SIDX.length;i<R.st.length;i++)R.st[i].out=null;
+  for(const m of R.rwy.q)if(m.stand>=SIDX.length)m.stand=SIDX.length-1; // a plane already off a dropped stand: it only marks where a floater shows
   // stands and shop units the new layout doesn't have are sold at their resale value
   let refund=0;
   G.stands.forEach((st,i)=>{if(i>=STAND_X.length&&st.built){refund+=Math.round((old[i]?old[i].cost:0)*0.4);G.stands[i]={built:false,ac:null,method:'random',rear:false,route:'mixed'}}});
@@ -214,12 +232,12 @@ function switchLayout(id){
   if(refund){G.cash+=refund;G.revBy.assets+=refund}
   // flights carry on: each plane and everyone aboard or on its bridge move with the stand; people at gates and shops,
   // and arrivals on their way out, step into the matching place in the new layout
-  const n=SIDX.length,move=(i,p,k)=>{const T=oXF[i],dx=p[k+'x']-T.ox,dy=p[k+'y']-T.oy;toW(i,dx*T.c+dy*T.s,dy*T.c-dx*T.s);p[k+'x']=WP.x;p[k+'y']=WP.y};
-  for(const p of R.pax){const i=p.stand;p.way=null;
-    if(i<n&&IN_PLANE.has(p.state)){move(i,p,'');move(i,p,'t')}
+  const n=SIDX.length,move=(o,i,p,k)=>{const T=oXF[o],dx=p[k+'x']-T.ox,dy=p[k+'y']-T.oy;toW(i,dx*T.c+dy*T.s,dy*T.c-dx*T.s);p[k+'x']=WP.x;p[k+'y']=WP.y};
+  R.pax.forEach((p,k)=>{const i=p.stand,o=was[k];p.way=null;
+    if(i<n&&o<oXF.length&&IN_PLANE.has(p.state)){move(o,i,p,'');move(o,i,p,'t')}
     else if(i<n&&(p.state==='gate'||p.state==='toGate')){if(p.spot>=0){const s=spotPos(i,p.spot);p.tx=s.x;p.ty=s.y}else if(XF[i].nose){toW(i,-80,FACE_Y-24);p.tx=WP.x;p.ty=WP.y}else{p.tx=STAND_X[i]-70;p.ty=506}p.x=p.tx;p.y=p.ty;p.room=STAND_ROOM[i]}
     else if(p.state==='toShop'||p.state==='shop'){if(p.shop<SHOP_X.length&&G.shops[p.shop]){if(ROOMS){shopPt(p.shop,58,47);p.tx=WP.x;p.ty=WP.y;p.su=58}else{p.tx=SHOP_X[p.shop]+58;p.ty=499}p.x=p.tx;p.y=p.ty;p.room=SHOP_ROOM[p.shop]}else if(p.stand<n){p.state='gate';toGate(p);p.x=p.tx;p.y=p.ty;p.way=null}}
-    else if(p.state==='toArr'){p.x=p.tx;p.y=p.ty;p.room=ROOM_MAIN()}}
+    else if(p.state==='toArr'){p.x=p.tx;p.y=p.ty;p.room=ROOM_MAIN()}});
   for(const i of SIDX){const S=R.st[i];
     if(S.F){const F=S.F;F.geo=geom(F.ac);F.P=paths(i,F.geo);S.geo=F.geo;S.P=F.P;
       for(const br of S.bridge)for(const p of br)p.s=Math.min(p.s,(p.lane?F.P.rear:F.P.bridge).len)}
@@ -227,6 +245,7 @@ function switchLayout(id){
   R.sel=Math.max(0,Math.min(R.sel,SIDX.length-1));
   toast(`The airport now has the ${LAY.name} layout${refund?`. ${money(refund)} back for what didn't fit`:''}.`,null,null,'goal',10);
   if(!R.sim){renderBoard();renderCam();renderPanel()}
+  return true;
 }
 
 // Airfield › Layout: every layout the player can rebuild into, as a small plan with what it gives and takes
