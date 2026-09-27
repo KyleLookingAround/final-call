@@ -8,6 +8,12 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 ## The lessons
 
 <!-- joined:lessons from docs/lessons/ by tools/join.mjs: don't edit between these lines -->
+### Merge-chasing
+
+- [#94 Fewer clashes between sessions · 27 Sep 2026](lessons/94-fewer-clashes.md)
+
+### Not sorted yet
+
 - [Polish audit · 27 Sep 2026](lessons/main-polish-audit.md)
 - [Version 32: ready for what's next · 27 Sep 2026](lessons/main-release-32.md)
 - [The terminal as a place: checks first · 27 Sep 2026](lessons/90-terminal-place-checks.md)
