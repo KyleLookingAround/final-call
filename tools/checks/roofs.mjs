@@ -9,7 +9,7 @@ export default async function({open,ok,saveText,newest}){
     const roofed=(x,y)=>{S.draw();const a=px(x,y),L=S.LAYER.roofs,keep=L.splice(0);S.draw();const b=px(x,y);L.push(...keep);return a!==b};
     const main=S.ROOMS[S.hallId('main')].poly,mx=(main[0][0]+main[1][0])/2,my=(main[0][1]+main[2][1])/2;
     zoom(0.01);const out={z:+R.cam.z.toFixed(2),main:roofed(mx,my)};
-    zoom(1.6);R.cam.x=mx-300;R.cam.y=my-200;S.clampCam();const inn={z:R.cam.z,main:roofed(mx,my),fade:S.roofFade(1.6)};
+    zoom(1);R.cam.x=mx-300;R.cam.y=my-200;S.clampCam();const inn={z:R.cam.z,main:roofed(mx,my),fade:S.roofFade(1)}; // 1x: the airport view's starting zoom
     // not built yet: Pier B's rooms before Pier B, the hotel before it's bought (and roofed once they are)
     zoom(0.01);const pierB=G.pierB,hotel=G.lv.hotel;G.pierB=false;G.lv.hotel=0;
     const later=S.ROOMS.filter(r=>r.ph===2||r.need),at=r=>{const P=r.poly,x=P.reduce((a,p)=>a+p[0],0)/P.length,y=P.reduce((a,p)=>a+p[1],0)/P.length;return roofed(x,y)},

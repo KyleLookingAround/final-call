@@ -2,6 +2,15 @@
 
 After a PR merges, look back at the session that built it: what it cost, what slowed it, and what would have saved time or credits (the `steward` playbook's last step). Newest first. A lesson marked → changed something, and says where.
 
+## #51 Clear roofs at the starting zoom · 27 Sep 2026
+
+- **Numbers:** session `session_01DNpd2NAxxaMbr4nBX4SbvS`, estimate $3: `usage.cost_usd` still missing from `get_session` at the first stopping point (the pattern the game logic ideas session hit already), rate limit status stayed `allowed` throughout. Created 13:18, code plus checks plus screenshots plus the preview image done by 13:26.
+- **Lessons:**
+  - The owner's answer to #51 was already sitting on the issue as a comment by the time this session read it, so no `needs-owner` issue or wait was needed — reading the issue's own comments first (not just its body) before assuming a question is still open is worth doing every time.
+  - The starting camera zoom (`R.cam.z`, default `1`) isn't saved and isn't touched anywhere on the normal boot path into the airport view, so "clear at the default zoom" only needed proving for one number, not per device; the one path that sets a different starting zoom (`resize()`'s first-run branch) only fires for a view other than `airport` and only zooms further out, which is the safe direction already. Worth a line in `docs/SYSTEMS.md` if roofs come up again, so the next session doesn't re-derive it.
+  - The `roofs` check's "gone zoomed in" case used to zoom to 1.6× just to clear the old fade's top end with margin; moving it to exactly 1× turned the same assertion into a direct test of the issue itself (roofs gone at the real starting zoom) rather than an arbitrary point further out. → No playbook change, just a reminder that a check's test points are worth re-picking against what they're actually proving, not just re-validating against a moved constant.
+  - `npm run preview`'s screenshot is taken at the airport view's default zoom, so this change altered it for real (halls and colour visible where a grey roof panel was); the earlier lesson about only committing the regenerated image after a visible change applied cleanly here.
+
 ## Game logic ideas · 27 Sep 2026
 
 - **Numbers:** session `session_01DdCEFGD4zwqgzUBqSVLz86`, estimate $8: $3.01 and 186k of 1M context at the first merge attempt (`usage.cost_usd` was missing from `get_session` when the PR opened). Created 12:20; the three bot runs on `main` ran in the background while the code was read, and took about 12 minutes side by side. Docs only, so no Balance run.

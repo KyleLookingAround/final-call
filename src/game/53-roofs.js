@@ -3,7 +3,7 @@
 // reads as buildings. Between ROOF_Z[0] and ROOF_Z[1] camera zoom the roofs fade away to show the halls and passengers.
 // Rooms not built yet (a second phase before Pier B, the hotel before it's bought) have no roof. Drawing only: the roofs
 // follow ROOMS and roomOn() and change nothing; taps go through them as before (tapAt).
-const ROOF_Z=[0.9,1.3];
+const ROOF_Z=[0.6,0.95];
 const roofFade=z=>clamp((ROOF_Z[1]-z)/(ROOF_Z[1]-ROOF_Z[0]),0,1); // 1 zoomed out, 0 zoomed in
 let ROOF=null; // the current plan: {key, rooms:[{x0,y0,x1,y1,path,edge,sky:[…],plant:[…]}]}
 // a roof's parts in the room's own frame, along its longest wall: skylight strips down the middle and plant along one side,
