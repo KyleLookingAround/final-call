@@ -41,7 +41,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--sign);outline-o
 .clock{font:500 17px/1 var(--mono);color:var(--sign);font-variant-numeric:tabular-nums;white-space:nowrap}
 .clock small{font-size:10px;color:var(--muted);letter-spacing:.1em;margin-right:6px;font-family:var(--disp);font-weight:700}
 .board{--fs:13px}
-.bcols,.brow,.hrow{display:grid;grid-template-columns:calc(var(--fs)*4.75 + 4px) calc(var(--fs)*5.7 + 5px) minmax(0,1fr) calc(var(--fs)*1.9 + 1px) calc(var(--fs)*9.5 + 9px);gap:8px;align-items:center}
+.bcols,.brow,.hrow{display:grid;grid-template-columns:calc(var(--fs)*4.75 + 4px) calc(var(--fs)*5.7 + 5px) minmax(0,1fr) calc(var(--fs)*2.6 + 4px) calc(var(--fs)*9.5 + 9px);gap:8px;align-items:center}
 .bcols{font:700 10px/1 var(--disp);letter-spacing:.14em;color:#5E6873;text-transform:uppercase;white-space:nowrap}
 .bcols span{overflow:hidden}
 .brow{font:500 var(--fs)/1 var(--mono);color:var(--sign);cursor:pointer;border-radius:3px}
@@ -173,7 +173,7 @@ table.fin tr.tot td{color:var(--sign);font-weight:600;border-bottom:0}
 
 @media (max-width:440px){
   .board{--fs:11px}
-  .bcols,.brow{gap:5px;grid-template-columns:calc(var(--fs)*4.75 + 4px) calc(var(--fs)*5.7 + 5px) calc(var(--fs)*2.85 + 2px) calc(var(--fs)*1.9 + 1px) calc(var(--fs)*9.5 + 9px)}
+  .bcols,.brow{gap:5px;grid-template-columns:calc(var(--fs)*4.75 + 4px) calc(var(--fs)*5.7 + 5px) calc(var(--fs)*2.85 + 2px) calc(var(--fs)*2.6 + 4px) calc(var(--fs)*9.5 + 9px)}
   .bcols .dl{font-size:0}.bcols .dl::before{content:"To";font-size:10px}
   .brow .city{display:none}
   .bcols{letter-spacing:.08em}
@@ -558,6 +558,30 @@ body.fs .cam{max-width:calc(100% - 172px)}
 @media (min-width:900px){body.fs .side{top:var(--topgap)}}
 .help{padding-top:calc(16px + var(--topgap))}
 @media (max-width:899px){.pcard{padding-top:calc(14px + var(--topgap))!important}.plan{padding-top:0}}
+
+/* ---- polish: chrome and touch targets (issues #69-72) ---- */
+@media (pointer:coarse){
+  .bmode button{padding:15px 8px 14px}
+  .hud button,.cam button{min-width:42px;height:42px}
+  .chip{padding:14px 10px 13px}
+  .segs .chip{padding-block:14px 13px}
+  .lever button{width:44px;height:42px}
+  .note .linkb{padding-block:9px;display:inline-block}
+}
+@media (max-height:500px) and (orientation:landscape){
+  .segs .chip{flex:1 1 auto;white-space:nowrap}
+}
+@media (max-width:340px){
+  .tabs button{font-size:8.5px}
+  .stats{grid-template-columns:1.1fr 1.4fr .8fr .8fr}
+  #sRep{font-size:13px}
+  .stars{letter-spacing:.5px}
+}
+@media (max-width:440px){
+  .goal{grid-template-columns:auto minmax(0,1fr)}
+  .goal .gt{white-space:normal;overflow:visible;text-overflow:clip}
+  .goal .gr{grid-column:1/-1;justify-self:end}
+}
 </style>
 
 <div class="topgap" id="topgap" aria-hidden="true" hidden></div>
