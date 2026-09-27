@@ -1,6 +1,6 @@
 # The terminal as a place
 
-Issue: (opened with the PR) · Status: Proposed · PRs: this spec (added as they open)
+Issue: #48 (approval and choices) · Status: Proposed · PRs: this spec (added as they open)
 
 Bundle 3 of `docs/ROADMAP.md`, plus its follow-up, each layout's own terminal floor plan (step 3 of `docs/specs/terminal.md`). From the idea board, the owner loved the two-level terminal and the viewing terrace with spotters, said yes to windows and to local character, and said no to placing decor. They also chose a richer top-down view, "both" for more to look at and more to decide, and "both" for a lively crowd and individuals. The checks come first (experiment [D]): the Checks section is the heart of this spec, and the first PR writes them before any code.
 
