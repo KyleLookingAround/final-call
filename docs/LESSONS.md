@@ -19,6 +19,8 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 - [The terminal as a place: checks first · 27 Sep 2026](lessons/90-terminal-place-checks.md)
 - [Passengers who suddenly sped down the piers (#82) · 27 Sep 2026](lessons/89-pax-movement.md)
 - [Polish: overlay cards that match · 27 Sep 2026](lessons/87-overlay-cards.md)
+- [Refactor 5: save migration as a table · 27 Sep 2026](lessons/86-save-fields.md)
+- [Systems refactor 3: one effects ledger · 27 Sep 2026](lessons/85-effects-ledger.md)
 - [Polish: phone chrome and touch targets · 27 Sep 2026](lessons/84-phone-chrome.md)
 - [Systems refactor 2: routes and demand in one file · 27 Sep 2026](lessons/81-refactor-routes.md)
 - [Polish: Reports and the region at night · 27 Sep 2026](lessons/80-reports-region-night.md)

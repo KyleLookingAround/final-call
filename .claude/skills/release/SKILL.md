@@ -15,6 +15,7 @@ description: Cut a Final Call release - claim the version, fold the What's new f
 3. **Save fixtures.** If anything added saved fields since the last version:
    - `npm run bot -- 1150 --seed 1` (3-4 minutes).
    - Copy `build/saves/L1.json`, `L3.json`, `L5.json` and `L9.json` to `tools/saves/v<version>-L<n>.json`.
+   - `npm run check -- migrate` fails for the new files and prints their hashes: add those lines to `GOLD` in `tools/checks/migrate.mjs`. Never change an existing line there; if an old save's hash changed, what it loads to changed.
    - `npm run check`: every save, old and new, must load and play. The layout, sheet and screenshot checks use the newest save.
 4. **Link preview.** If the game looks noticeably different, `npm run preview`, look at `src/public/preview.jpg`, and commit it.
 5. **Roadmap.** Add `docs/roadmap.d/<date>-release-<version>.md` with `Section: done` and a line for the version, and change the shipped items' own files from `Section: now` to `Section: done`. `npm run build` rejoins the roadmap.

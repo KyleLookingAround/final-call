@@ -61,7 +61,7 @@ Every change goes round the same loop, and each round leaves something that make
 ## Rules every change keeps
 
 - The game is one strict IIFE over the files in `src/game/`, joined in file-name order. A new system goes in its own numbered file before `99-start.js`, and its notes in its own `docs/systems/` file.
-- `G` is the saved state and `R` is runtime only. New saved state gets a default in `DEFAULT()` and handling for its absence in `resetAll`. Never rename or remove saved fields: old saves must keep loading.
+- `G` is the saved state and `R` is runtime only. New saved state gets its line in `FIELDS` (`03-state.js`), with its default, and a step in `MIGRATIONS` (`22-save.js`) only if older saves need more than the default. Never rename or remove saved fields: old saves must keep loading.
 - Anything that can change the game state uses `rnd()`, never `Math.random()` (the build rejects it on a line that doesn't end with `// cosmetic`).
 - Everything reachable from `update()` must work with `R.sim=true`: no DOM work and no saving. Keep the long headless simulation working.
 - Saves stay on the device (`localStorage['final-call-save-v2']`).

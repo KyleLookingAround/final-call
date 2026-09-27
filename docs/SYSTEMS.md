@@ -8,6 +8,7 @@ The project notes (`CLAUDE.md`) hold what every change needs. This file holds ho
 - [Airline operations](systems/airline-operations.md) (`34-airline-operations.js`)
 - [Airport layouts](systems/airport-layouts.md) (`39-layouts.js`, `12-drawing.js`)
 - [The airport scene](systems/airport-scene.md) (`50-scene.js`, `51-markings.js`, `55-vehicles.js`, `12-drawing.js`, `52-planes.js`, `53-roofs.js`, `13-camera.js`, `08-stands.js`, `04-geometry.js`, `54-weather.js`, `29-region-map.js`)
+- [Effects: the rating and money ledger](systems/effects.md) (`04-effects.js`)
 - [Guided start](systems/guided-start.md) (`36-guided-start.js`)
 - [Level-up card](systems/level-up-card.md) (`49-levelup.js`)
 - [Levels and Masterplan](systems/levels-and-masterplan.md) (`02-masterplan.js`, `09-construction-levels-days.js`, `18-masterplan-ui.js`)
@@ -15,7 +16,7 @@ The project notes (`CLAUDE.md`) hold what every change needs. This file holds ho
 - [Records, stamps and challenges](systems/records.md) (`35-records.js`)
 - [Region](systems/region.md) (`24-region-places.js`, `30-region-ui.js`)
 - [Routes](systems/routes.md) (`31-routes.js`, `03-state.js`)
-- [Saves](systems/saves.md) (`22-save.js`)
+- [Saves](systems/saves.md) (`22-save.js`, `03-state.js`)
 - [Sound](systems/sound.md) (`06-sound.js`, `48-sound.js`, `23-boot.js`)
 - [The terminal](systems/terminal.md) (`42-terminal.js`, `47-hotel.js`, `05-flights.js`, `43-departures.js`)
 - [Transport manager](systems/transport-manager.md) (`32-managers.js`)
@@ -32,7 +33,9 @@ The main names, by file group (the joined table below is the complete list, from
 | Files | What's in them |
 | --- | --- |
 | `00-random` | `rnd()`, the seeded random generator the simulation uses |
-| `01-constants` to `04-geometry` | Constants and level data, the Masterplan (`TECH`), state (`G`, `R`, `DEFAULT`), airport geometry |
+| `01-constants` to `03-state` | Constants and level data, the Masterplan (`TECH`), state (`G`, `R`, `DEFAULT`) |
+| `04-effects` | The effects ledger: `effect(kind, cause, amount, at)` behind `repAdj`, `earn` and `spend`, the rating's causes (`REPWHY`, `REPLBL`, `repRecent`) and floaters |
+| `04-geometry` | Airport geometry |
 | `05-flights` to `11-main-update` | Flights, sound, passengers, stands, construction/levels/days, events and toasts, `update()` |
 | `12-drawing` to `14-board` | Drawing the airport, the camera, the departures board |
 | `15-panel` to `21-layout` | Side panel, advisor, help/keys/speed, Masterplan UI, phone bottom sheet, full screen, layout |
@@ -63,6 +66,7 @@ The main names, by file group (the joined table below is the complete list, from
 | `01-constants.js` | constants |
 | `02-masterplan.js` | the Masterplan: a tech tree bought with planning points |
 | `03-state.js` | state |
+| `04-effects.js` | effects |
 | `04-geometry.js` | geometry |
 | `05-flights.js` | flights |
 | `06-sound.js` | sound |
@@ -121,7 +125,7 @@ The main names, by file group (the joined table below is the complete list, from
 ## State
 
 - **`G` and `R`.** `G` is the saved state (JSON in `localStorage['final-call-save-v2']`). `R` is runtime only.
-- **New and old saves.** `DEFAULT()` builds a new game. `resetAll(state)` loads and migrates any older save. When you add state, give it a default in `DEFAULT()` and handle its absence in `resetAll`. Never rename or remove saved fields, because old saves must keep loading.
+- **New and old saves.** `FIELDS` (`03-state.js`) lists every saved field with its default; `DEFAULT()` builds a new game from it, and `resetAll(state)` gives an older save's missing fields the same defaults, then runs `MIGRATIONS` (`22-save.js`), an ordered list of `{when, up, note}`. When you add state, add its line to `FIELDS` (a terminal part uses `TERM_FIELDS`, the same table), and a step at the end of `MIGRATIONS` only if older saves need more than the default. Never rename or remove saved fields, because old saves must keep loading; the `migrate` check fails if any save in `tools/saves/` loads differently.
 - **Saves stay on the device.** The only other localStorage key is `final-call-topgap`, the phone camera band. The old `final-call-cloud` and `final-call-device` keys are cleared on load.
 
 ## Time
@@ -159,6 +163,7 @@ The main names, by file group (the joined table below is the complete list, from
 - `brief`: docs/briefs/TEMPLATE.md and every session brief in docs/briefs/ have all their sections, filled in (tools/brief.mjs).
 - `decor`: Decor and local character (docs/specs/terminal-place.md): decor comes with the building, more with each level, is never placed or saved, never stands in anyone's way, and local signs take the region's place names and fit their halls. Written before the code (tools/checks/pending.txt). Reads the names in lib/place.mjs, plus decor() → [{hall, kind, x0, y0, x1, y1}…], the items for the layout as built and the level, and localNames() → [{text, place, hall, w}…], the local signs (place: a key of PLACES; w: the text's width in world units). "Never in the way" also reads where the counters are: deskX, kioskX, laneX, qSlot, secSlot, ftSlot, egSlot, and boothPos, egatePos, carX, carY and arrSlot, which the decor part adds to SIMX.
 - `departures`: Departures (docs/specs/terminal.md): check-in islands with their own queues, bag drop for kiosk and online passengers with bags, and security: the search rate, family and assistance lanes, and no way into the market place but a lane.
+- `effects`: The effects ledger (04-effects.js, docs/SYSTEMS.md): every cause the rating moves for over a day of play has a REPWHY entry (what the advisor says) and a REPLBL label (the Money tab's rating list); R.repWhy adds up to the change in G.rep; and the airport's own rating events carry the stand they happened at.
 - `feedback`: The feedback link in Help (docs/specs/feedback-link.md): hidden outside GitHub Pages; on GitHub Pages it opens a prefilled issue for the repo the page is served from, and the body stays well under GitHub's URL length limit.
 - `floors`: Two floors (docs/specs/terminal-place.md): departures upstairs and arrivals below, people changing floor only on the escalators and the lift (families and those who need help by lift), nobody stuck, walks about as long as before, taps going to a hall's floor, and old saves landing on the right floor. Written before the code (tools/checks/pending.txt). Reads the names in lib/place.mjs, plus a baggage hall room 'bag', hallLabel(id) → [x, y] where a hall's name is drawn, and an advisor tip {hall: id} flying the camera to that hall.
 - `graph`: The map in tools/graph.mjs: every link in the docs resolves, every system in docs/systems/ names its files, and the joined lists (tools/join.mjs) are sound; a system's file changed without its notes is a warning, and so are notes naming three or more functions that live in one file outside the system's own (a file its first line mentions only after a ";" isn't its own).
@@ -169,6 +174,7 @@ The main names, by file group (the joined table below is the complete list, from
 - `levelup`: The level-up card (docs/specs/level-up.md): it opens once on a level-up, pauses the game and puts the speed back; it lists only what has just unlocked; each link lands on the right tab; two levels at once make one card; the setting, the guided start and the headless sim keep it closed; and it fits phones, tablets and desktops.
 - `market`: The market place (docs/specs/terminal.md): shops hold no more than their room, passengers go to their gate only once the board calls it, late calls mean more shopping and early ones less, passengers stand only when a lounge's seats are full, families use the play area, and with a walk-through duty free everyone out of security walks through it.
 - `markings`: Apron markings and lighting (src/game/51-markings.js, docs/specs/real-airport.md): markings on built stands only, on every layout; lights only at night, and runway lights only on open runways; the dawn and dusk colour grade; and the markings leave the canvas as they found it.
+- `migrate`: Loading saves (22-save.js): every save in tools/saves loads to exactly the airport it did when its hash below was recorded, and every field of a new game has its default in FIELDS. Each save is loaded headless with the same seed; the hash is of JSON.stringify(G) with savedAt zeroed (wall-clock time) and G's own keys sorted, since the order of G's top-level keys is not game state (nothing walks them) while the order inside each field is. A new fixture fails until its line is added to GOLD: the check prints the hash to add.
 - `movement`: How passengers are seen to move (07-passengers.js walkMul, 41-airside.js walk, 12-drawing.js paxEase and drawMover): over a seeded half hour at the 1× frame step, nobody drawn walking moves faster than a walking top speed, and no one's drawn speed jumps by more than a set factor from one step to the next. The only exceptions are named, drawn changes: boarding a train, the people mover or a bus (hidden, drawn as it), appearing again (drawn where they are), and stepping onto a walkway link (drawn), where the pace doubles. Run on Classic with the people mover, and on layouts with walkway links (Round) and trains (Satellite). Speeds are in px per game minute: the top is the moving walkways upgrade's best pace (80×2.6×1.35) and a little to catch up; a walkway link doubles it, and a layout built for connections (LAY.xfer) speeds connecting passengers, drawn ringed.
 - `news`: What's new opens once for an older save and not again, never for a new game, and from Settings with every version. It waits for the page's state (R.newsBoot), not set times.
 - `perf`: How long a level 9 airport, and a fully built sixteen-stand Midfield, take to simulate, against a calibration run so machines compare (fails over its budget), and how close a CPU-throttled phone gets to full speed at 8x with each (reported only).
