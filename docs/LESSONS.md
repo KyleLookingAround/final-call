@@ -4,12 +4,32 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 ## Systems refactor 2: routes and demand in one file · 27 Sep 2026
 
-- **Numbers:** session `session_01U6zjCj6cE9cFXj96wryQte`, estimate $6: about $1.71 and 128k of 1M context by the final merge commit. Started 17:21 UTC, PR #81 opened 17:32; Checks, Balance and Description green by 17:40; one `main` merge-in (#84 and the polish audit).
+- **Numbers:** session `session_01U6zjCj6cE9cFXj96wryQte`, estimate $6: about $1.71 and 128k of 1M context by the final merge commit. Started 17:21 UTC, PR #81 opened 17:32; Checks, Balance and Description green by 17:40; two `main` merge-ins (#84 and the polish audit, then #87 and #90 while CI ran).
 - **Went well:** the move itself was a scripted line cut (the script asserted the moved lines' names matched the brief's list, in order) and needed no fixing: the build's duplicate-name check, `npm run check` and one 300-hour bot run on each side were enough before opening. Moving `const` arrow functions later in the join is a load-order risk only for calls at load time, and there were none.
 - **Lessons:**
   - The Balance workflow runs this branch's seeds both ways but never a build of `main`, so "`PLAY` identical against `main`" for a pure refactor still has to be done locally: a `git worktree` of `origin/main` with `node_modules` symlinked in, and the twelve runs (seeds 1–3, both ways, both builds) side by side took about ten minutes on four cores. All twelve fingerprints matched. → Worth a Balance job that also runs `main` for PRs labelled refactor; left for the faster-CI session's files, not this brief's.
   - The new `graph` warning had to be tuned before it was useful: warning on every function a section names from outside its files gave 34 warnings on `main`, because sections rightly mention helpers from other systems. Three or more from one outside file, where a file named only after a ";" in the heading isn't the section's own, flags Routes and leaves two others worth a look (Level-up card and `15-panel.js`; Airport layouts and `41-airside.js`, which no section claims).
   - `pkill -f <pattern>` inside the same Bash call whose own command line contains the pattern kills that shell (exit 144). Kill by PID, or use a pattern the command line doesn't contain.
+
+## The terminal as a place: checks first · 27 Sep 2026
+
+- **Numbers:** estimate $10. Started 17:00, PR #90 opened 18:00. Two commits before opening and one from the review. `npm run check`: 190 passed, 35 pending. The new groups add about 20 s. Balance was dispatched by hand, since it doesn't run for `tools/` changes: green, and seed 1's `PLAY` and `STATE` match `main`.
+- **What it found on `main`:**
+  - rebuilding twice can stop the game (#78);
+  - Star's and Round's walks are 1.75× and 1.9× Classic's;
+  - Round leaves passengers at a boarding gate past departure for 90+ minutes;
+  - rebuilding into Curved front, Satellite or Midfield leaves shoppers outside any room;
+  - loading a save in a page that has already played another leaves runtime state behind.
+- **Lessons:**
+  - Step 1's plan missed that `Object.assign(SIMX,{get X(){…}})` in the parts already flattens a getter, before the hook runs. The `rules` check, written first, showed it at once. → The test page keeps each property as written (`tools/build.mjs`).
+  - The first draft of the new groups took 33 s, mostly opening pages. → Checks whose play takes seconds wait until their code exists (`TP_ALL=1` plays them now), and the rest share pages. Budget it before writing, not after.
+  - The fresh review caught a check that could never fail: toasts don't happen in the headless sim, so "the crowd is the only sign" counted nothing. It caught six more that would have misled a part, all fixed before opening. → A pre-written check that expects nothing (0 toasts, 0 stuck) needs the thing it watches to be able to happen in its setup. Say so in the check.
+- **How [D] will be measured:** each part's PR records:
+  - (a) game-code bugs a pre-written check caught before the PR opened;
+  - (b) game-code bugs found after it opened;
+  - (c) pre-written checks it had to fix, and how.
+
+  The coordinator adds them up after the last part. The baseline is the terminal's 0.6 late bugs a part. [D] stays if (b) is at most 0.3 a part and this PR costs under 15% of the bundle.
 
 ## Polish: phone chrome and touch targets · 27 Sep 2026
 
