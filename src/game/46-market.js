@@ -255,3 +255,4 @@ function drawShopUnit(j){
 }
 
 SIMX.cafeTip=cafeTip;SIMX.hotelTip=hotelTip;SIMX.isCalled=isCalled;SIMX.shopCap=shopCap;SIMX.shopUsed=shopUsed;SIMX.mktPlan=mktPlan;SIMX.callLead=callLead;SIMX.gateWalkMin=gateWalkMin;SIMX.boardEta=boardEta;
+Object.assign(SIMX,{onMover,paxHidden,paxEase}); // for the movement check (tools/checks/movement.mjs): 07-passengers.js, 12-drawing.js
