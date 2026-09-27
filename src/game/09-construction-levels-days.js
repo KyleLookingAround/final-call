@@ -10,6 +10,7 @@ function updateBuilds(){
   for(const b of G.builds){if(G.clock>=b.done){b.fin=true;ch=true;finishBuild(b)}}
   if(ch){G.builds=G.builds.filter(b=>!b.fin);if(!R.sim)renderPanel()}
 }
+clock(MINUTE,'updateBuilds',1,0,updateBuilds);
 function freeAircraft(){return G.fleet.findIndex((f,j)=>!f.sold&&!G.stands.some(s=>s.built&&s.ac===j))}
 function finishBuild(b){
   const [kind,arg]=b.id.split(':');
@@ -46,18 +47,20 @@ function checkLevel(){
       renderTabs();renderPanel();$('#lvlName').textContent=LEVELS[n].name;renderPlanBtn()}
   }
 }
-function dayTick(){
-  const d=dayOf(G.clock);if(d===G.day)return;
-  const s=G.dstat;
+clock(MINUTE,'checkLevel',1,0,checkLevel);
+function dayTick(){const d=dayOf(G.clock);if(d!==G.day)runClock(DAY,d,G.dstat)} // the DAY hooks get the day just ended's stats
+clock(MINUTE,'dayTick',1,0,dayTick);
+clock(DAY,'dayReport',1,0,s=>{
   if(s&&s.flights>0){
     const profit=s.rev-s.cost;G.lastDay={day:G.day,...s,profit};
     (G.days||(G.days=[])).push({d:G.day,pax:s.pax,arr:s.arr,fl:s.flights,ot:s.ontime,p:Math.round(profit),rep:Math.round(G.rep),rt:Object.keys(G.routes||{}).length,rd:R.reg?Math.round(R.reg.riders||0):0,lv:G.level});if(G.days.length>40)G.days.shift();
     toast(`Day ${G.day} report: ${num(s.pax)} passengers departed and ${num(s.arr)} arrived, ${s.ontime}/${s.flights} flights on time, profit ${money(profit)}.`,null,null,profit>=0?'goal':'warn',12);
   }
   if(s&&s.flights>=3)G.otp=G.otp==null?s.ontime/s.flights:G.otp*0.6+0.4*s.ontime/s.flights;
-  recordsDay(s);
-  G.day=d;G.dstat={pax:0,arr:0,flights:0,ontime:0,rev:0,cost:0,rep0:G.rep};regionDay();rivalDay();chalDay();for(const f of TERM_DAY)f();
-  const sea=seasonOf(d),prev=seasonOf(d-1);
+});
+clock(DAY,'newDay',1,0,()=>{G.day=dayOf(G.clock);G.dstat=dayStats()});
+clock(DAY,'season',1,0,()=>{
+  const d=G.day,sea=seasonOf(d),prev=seasonOf(d-1);
   if(sea!==prev)toast(sea.name==='Winter'?'Winter: ski and winter-sun routes are busiest. Expect snow; de-icing pads keep turnarounds moving.':sea.name==='Summer'?'Summer holidays: beach cities and families fill flights. Ski routes go quiet.':`${sea.name} is here.`,null,null,'',9);
-}
+});
 

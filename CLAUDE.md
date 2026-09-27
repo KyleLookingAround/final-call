@@ -72,7 +72,7 @@ The game is one strict IIFE, split into files in `src/game/`. The build joins th
 | Files | What's in them |
 | --- | --- |
 | `00-random` | `rnd()`, the seeded random generator the simulation uses |
-| `01-constants` to `03-state` | Constants and level data, the Masterplan (`TECH`), state (`G`, `R`, `DEFAULT`) |
+| `01-constants` to `03-state` | Constants and level data, the clock tables and day stats (`02-clocks`: `MINUTE`, `HOUR`, `NIGHT`, `DAY`, `DAY_STATS`), the Masterplan (`TECH`), state (`G`, `R`, `DEFAULT`) |
 | `04-effects` | The effects ledger: `effect(kind, cause, amount, at)` behind `repAdj`, `earn` and `spend`, the rating's causes (`REPWHY`, `REPLBL`, `repRecent`) and floaters |
 | `04-geometry` | Airport geometry |
 | `05-flights` to `11-main-update` | Flights, sound, passengers, stands, construction/levels/days, events and toasts, `update()` |
@@ -108,11 +108,13 @@ Some functions sit where they were first written rather than where their name su
 
 ### Time
 
-`update(dt)` advances game minutes. The frame loop takes steps of up to 0.034 minutes, or 0.1 minutes at 4× and 8× (the bot's step size, a third of the work). These hooks run from it:
+`update(dt)` advances game minutes. The frame loop takes steps of up to 0.034 minutes, or 0.1 minutes at 4× and 8× (the bot's step size, a third of the work).
 - The frame loop, four times a second and never in `R.sim`: the board, the goal bar, `soundTick` (which watches the game without changing it) and `lvlTick` (the level-up card).
-- Every game minute: `updateBuilds`, `dayTick`, `checkLevel`, `fleetTick`, `mgrStep` and the terminal's `TERM_MINUTE` hooks.
-- `managersTick` runs every 6 hours, `crewTick` every 30 minutes, and `recordsHour` and `mgrHour` every hour. `nightChecks` runs at 03:00.
-- `dayTick` runs `recordsDay`, `regionDay`, `rivalDay`, `chalDay` and the terminal's `TERM_DAY` hooks.
+- Everything else that runs on the clock is a hook in one of the clock tables (`02-clocks.js`): `MINUTE` each game minute, `HOUR` on the hour and half hour, `NIGHT` at 03:00 and `DAY` when the day changes. Each is an ordered list of `{id, every, at, fn}`; the order is listed once in `CLOCK_ORDER`, and a system registers its hooks from its own file with `clock(T, id, every, at, fn)`. `node tools/graph.mjs MINUTE` lists them. Today:
+  - `MINUTE`: `autoStaff` (every 2 minutes), `updateBuilds`, `layoutTick`, `dayTick`, `checkLevel`, `fleetTick`, `managersTick` (every 6 hours), `mgrStep` and the terminal's `TERM_MINUTE` hooks.
+  - `HOUR`: `mgrHour`, `crewTick` (every 30 minutes), `recordsHour`, `NIGHT` (`nightChecks`) and advertising's cost to the rating.
+  - `DAY`: the day report, `recordsDay`, the new day, `regionDay`, `rivalDay`, `chalDay`, the terminal's `TERM_DAY` hooks and the season's toast.
+- A day's stats are `G.dstat`, whose fields are listed in `DAY_STATS` (`dayStat(key, label)` from the system's own file); count with `dayAdd(key, n)`, read with `dayVal(stats, key)`. The `clocks` and `daystats` checks pin the order, cadence and fields to recordings.
 
 ### Headless sim
 

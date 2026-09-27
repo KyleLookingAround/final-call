@@ -199,6 +199,7 @@ function layoutTick(){
   const n=LAYOUTS[G.layoutNext].stands.length;if(R.st.some((S,i)=>i>=n&&(S.F||S.out)))return;
   switchLayout(G.layoutNext);
 }
+clock(MINUTE,'layoutTick',1,0,layoutTick);
 const layoutDrains=i=>G.layoutNext&&i>=LAYOUTS[G.layoutNext].stands.length;
 const AT_STAND=new Set(['gate','toGate','bridge','aisle','sitting','dAisle','dBridge']),IN_PLANE=new Set(['bridge','aisle','sitting','dAisle','dBridge']);
 function switchLayout(id){

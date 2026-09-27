@@ -143,4 +143,5 @@ function regionDay(){
     for(const n of NODE_IDS)if(NODES[n].pl===pid)tgt+=(G.tod[n]||0)*(pid==='city'?14:8);
     const cur=placePop(pid);G.pop[pid]=Math.round((cur+(tgt-cur)*0.2)*10)/10}
 }
+clock(DAY,'regionDay',1,0,regionDay);
 
