@@ -1,6 +1,6 @@
 # Late runners, and a passenger's story
 
-Issue: from the owner's idea board (`docs/ideas/board-2026-09.md`, first in their order) · Status: Approved (the owner rated it Love it and the brief `docs/briefs/late-runners.md` approves this spec in advance) · PRs: see `docs/systems/late-runners.md`
+Issue: #99, from the owner's idea board (`docs/ideas/board-2026-09.md`, first in their order) · Status: Approved (the owner rated it Love it and the brief `docs/briefs/late-runners.md` approves this spec in advance) · PRs: see `docs/systems/late-runners.md`
 
 ## What the player gets
 

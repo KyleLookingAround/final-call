@@ -1,13 +1,15 @@
 /* ================= board ================= */
 const FL_CH='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';const FLAPS=new Set();
 function mkFlaps(el,n){el.innerHTML='';el._cells=[];for(let i=0;i<n;i++){const s=document.createElement('span');s.className='fl';s.textContent=' ';el.appendChild(s);el._cells.push({el:s,target:' ',left:0})}el._val=null}
-function setFlaps(el,text){text=String(text).toUpperCase().padEnd(el._cells.length).slice(0,el._cells.length);if(el._val===text)return;el._val=text;el._cells.forEach((c,i)=>{const ch=text[i];if(c.target!==ch){c.target=ch;c.left=REDUCED?0:3+(i%5);if(!c.left)c.el.textContent=ch===' '?' ':ch}});FLAPS.add(el)}
+const flapPage=(t,n)=>{if(t.length<=n||!t.includes(' '))return t;const w=t.split(' ');return w[Math.floor(Date.now()/2400)%w.length]}; // a status too long for its flaps shows a word at a time
+function setFlaps(el,text){text=flapPage(String(text).toUpperCase(),el._cells.length).padEnd(el._cells.length).slice(0,el._cells.length);if(el._val===text)return;el._val=text;el._cells.forEach((c,i)=>{const ch=text[i];if(c.target!==ch){c.target=ch;c.left=REDUCED?0:3+(i%5);if(!c.left)c.el.textContent=ch===' '?' ':ch}});FLAPS.add(el)}
 setInterval(()=>{for(const el of FLAPS){let busy=false;for(const c of el._cells){if(c.left>0){c.left--;c.el.textContent=c.left?FL_CH[Math.floor(Math.random()*FL_CH.length)]:(c.target===' '?' ':c.target);busy=true}}if(!busy)FLAPS.delete(el)}},55); // cosmetic
+const BOARD_STATUS=[]; // (F) → a status that outranks DELAYED while boarding, or null (GATE CLOSING: 61-late-runners.js)
 function statusText(F){
   const pl=F.plane;
   if(F.freighter){if(pl.state==='boarding')return F.fault>0?'TECH DELAY':F.crewWait&&!F.crew?'CREW DELAY':G.clock>F.std?'DELAYED':'LOADING';return pl.state==='closing'?'CLOSED':'CARGO'}
   if(pl.state==='wait'||pl.state==='approach'||pl.state==='inbound'||pl.state==='deplaning'||pl.state==='turnaround')return gateCallText(F);
-  if(pl.state==='boarding'){if(!isCalled(F))return gateCallText(F);if(F.fault>0)return 'TECH DELAY';if(F.crewWait&&!F.crew)return 'CREW DELAY';if(G.clock>F.std)return 'DELAYED';if(F.seated>=F.booked&&F.hold<F.checkedTotal)return 'BAGGAGE';if(G.clock>=F.std-10)return 'FINAL CALL';return 'BOARDING'}
+  if(pl.state==='boarding'){if(!isCalled(F))return gateCallText(F);if(F.fault>0)return 'TECH DELAY';if(F.crewWait&&!F.crew)return 'CREW DELAY';for(const f of BOARD_STATUS){const s=f(F);if(s)return s}if(G.clock>F.std)return 'DELAYED';if(F.seated>=F.booked&&F.hold<F.checkedTotal)return 'BAGGAGE';if(G.clock>=F.std-10)return 'FINAL CALL';return 'BOARDING'}
   return 'CLOSED';
 }
 let boardSig='';
