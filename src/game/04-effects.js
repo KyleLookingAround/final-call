@@ -20,7 +20,7 @@ function repAdj(d,why,at){effect('rep',why,d,at)}
 // G.rep, and each hour the rating eases towards base + span × (the day's net score per departure ÷ scale), in its
 // 5–100 clamp. Every departure settles as punctual or late, so those two causes count the departures; until minFl
 // have gone in the last day, the target leans towards the rating as it is.
-const RATE_DAY={base:60,span:40,scale:4,ease:0.15,minFl:6};
+const RATE_DAY={base:68,span:32,scale:7,ease:0.15,minFl:6};
 R.rateDay=window.__rateDay?Object.assign({},RATE_DAY,typeof window.__rateDay==='object'?window.__rateDay:{}):null;
 function rdBucket(){const h=Math.floor(G.clock/60),B=R.rdB||(R.rdB=[]),k=h%24;let b=B[k];if(!b||b.h!==h)b=B[k]={h,s:0,n:0};return b}
 function rateDayTarget(){const C=R.rateDay,h=Math.floor(G.clock/60);let s=0,n=0;for(const b of R.rdB||[])if(b&&b.h>h-24&&b.h<=h){s+=b.s;n+=b.n}
