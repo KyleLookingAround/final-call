@@ -15,7 +15,7 @@ Players start sharing the game on 28 Sep. Photo mode lets them hide the panels, 
 - A small bar at the foot of the screen, clear of the phone's home bar: **Time** (Now, Dawn, Noon, Dusk, Night), **Sky** (Now, Clear, Rain, Fog, Snow), **Pause**, a round **shutter**, and **Done**. Each of Time and Sky is one button that steps to the next choice, so the bar fits a 320 px phone in one row.
 - Drag and pinch still frame the view. A tap on the map, **Done** or Esc leaves and brings every panel back as it was.
 - The shutter flashes the screen and saves a PNG of the map at the screen's full resolution, with a small "FINAL CALL" mark in the bottom-right corner: a download on desktop, the share sheet on phones where sharing files works (a download where it doesn't).
-- In the airport view Time sets the lighting pass (grade, darkness, the lights) and Sky sets the rain, puddles, snow, fog and windsock. In the Region Time sets the night over the land and its lit windows, and Sky lays rain, snow or fog over the map. On the world map the bar offers only Pause, the shutter and Done.
+- In the airport view Time sets the lighting pass (grade, darkness, the lights) and Sky sets the rain, puddles, snow, fog and windsock. In the Region Time sets the night over the land and its lit windows, and Sky lays rain, snow or fog over the map (the region's moving weather cells stay, as part of the map). On the world map the bar offers only Pause, the shutter and Done.
 
 ## How it works
 
