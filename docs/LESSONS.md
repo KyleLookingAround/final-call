@@ -17,6 +17,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 - [Polish audit · 27 Sep 2026](lessons/main-polish-audit.md)
 - [Version 32: ready for what's next · 27 Sep 2026](lessons/main-release-32.md)
 - [The terminal as a place: checks first · 27 Sep 2026](lessons/90-terminal-place-checks.md)
+- [Passengers who suddenly sped down the piers (#82) · 27 Sep 2026](lessons/89-pax-movement.md)
 - [Polish: overlay cards that match · 27 Sep 2026](lessons/87-overlay-cards.md)
 - [Polish: phone chrome and touch targets · 27 Sep 2026](lessons/84-phone-chrome.md)
 - [Polish: Reports and the region at night · 27 Sep 2026](lessons/80-reports-region-night.md)

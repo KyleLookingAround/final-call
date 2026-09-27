@@ -63,8 +63,7 @@ function drawTerminal(D){
     ctx.fillStyle=G.stands[i].built?'#252C33':'#1F242A';
     for(let j=0;j<80;j++){const s=spotPos(i,j);ctx.fillRect(s.x-3,s.y-3,6,6)}
   }
-  if(G.lv.mover&&G.pierB&&LAY.track){const P=LAY.trackP||(LAY.trackP=mkPath(LAY.track)),t=(performance.now()/1000*0.12)%2,q=ptAt(P,(t<1?t:2-t)*P.len);
-    ctx.strokeStyle='#2A3037';ctx.lineWidth=3;ctx.beginPath();LAY.track.forEach(([x,y],k)=>k?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();ctx.fillStyle='#5CC8FF';rrect(q[0]-12,q[1]-5,24,10,3);ctx.fill()}
+  if(G.lv.mover&&G.pierB&&LAY.track){ctx.strokeStyle='#2A3037';ctx.lineWidth=3;ctx.beginPath();LAY.track.forEach(([x,y],k)=>k?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke()} // its cars: drawPax
   // bags on the belt behind the check-in desks (check-in and security draw themselves: 43-departures.js)
   ctx.fillStyle='#D9A066';for(const b of R.belt)ctx.fillRect(b.x-2,684.5,4,4);
   ctx.fillStyle='#FFC72C';for(const i of SIDX)if(G.stands[i].built){const F=R.st[i].F;
@@ -77,28 +76,58 @@ function paxColor(p){
   return GROUPC[groupOf(p)];
 }
 const BUGGY_ST=new Set(['walkIn','toShop','toGate','gate','toArr','exitW','toReclaim','queue','secQ','ftQ']);
+// riding something drawn in their place: a train (drawLinks), the people mover (its cars, below) or a bus to a remote stand
+const paxHidden=p=>p.riding||onMover(p)||(p.state==='bridge'||p.state==='dBridge')&&STAND_KIND[p.stand]==='remote';
+// Where a passenger is drawn (p.ex, p.ey) follows where they are, its speed changing by at most EASE_K each 1× frame step
+// (EASE_STEP game minutes; twice as quick on a walkway link, which they're seen stepping onto), so a change of pace takes
+// a fraction of a second rather than one frame. It never runs ahead,
+// and snaps to them when they appear, after time out of sight, or when they jump further than EASE_SNAP. Drawing only:
+// the game moves p.x and p.y as before, and a drawn passenger is never more than a step or two behind.
+const EASE_K=1.45,EASE_STEP=0.034,EASE_V0=40,EASE_SNAP=80;
+function paxEase(p){
+  const dt=G.clock-p.et;p.et=G.clock;
+  if(!(dt>=0&&dt<=0.5)||Math.hypot(p.x-p.ex,p.y-p.ey)>EASE_SNAP){p.ex=p.esx=p.x;p.ey=p.esy=p.y;p.ev=0;p.snap=true;return}
+  p.snap=false;if(!dt)return;
+  const dx=p.x-p.ex,dy=p.y-p.ey,d=Math.hypot(dx,dy),vs=Math.hypot(p.x-p.esx,p.y-p.esy)/dt;p.esx=p.x;p.esy=p.y;
+  if(d<1e-3){p.ex=p.x;p.ey=p.y;p.ev=0;return}
+  const k=Math.pow(p.way&&p.way[p.wi+3]===2?EASE_K*EASE_K:EASE_K,dt/EASE_STEP),v=clamp(vs+Math.min(d/0.5,0.12*vs+8),p.ev/k,Math.max(p.ev,EASE_V0)*k),s=Math.min(v*dt,d); // catching up a little faster than they walk
+  p.ex+=dx/d*s;p.ey+=dy/d*s;p.ev=s/dt;
+}
+const unEase=p=>{p.et=NaN}; // out of sight: snap back on reappearing
+// the people mover's cars: one on the track beside each group of riders, or one shuttling when nobody rides
+const MV_AT=[];
+function trackNear(P,x,y){let bx=0,by=0,bd=Infinity,vert=false;for(const g of P.segs){const [x1,y1]=g.a,[x2,y2]=g.b,ux=x2-x1,uy=y2-y1,t=clamp(((x-x1)*ux+(y-y1)*uy)/(g.len*g.len||1),0,1),qx=x1+ux*t,qy=y1+uy*t,d=Math.hypot(qx-x,qy-y);
+  if(d<bd){bd=d;bx=qx;by=qy;vert=Math.abs(uy)>Math.abs(ux)}}return [bx,by,vert]}
+function drawMover(){
+  if(!(G.lv.mover&&G.pierB&&LAY.track)){MV_AT.length=0;return}
+  const P=LAY.trackP||(LAY.trackP=mkPath(LAY.track)),car=(x,y,vert)=>{ctx.fillStyle='#5CC8FF';vert?rrect(x-5,y-12,10,24,3):rrect(x-12,y-5,24,10,3);ctx.fill()};
+  if(!MV_AT.length){const t=(performance.now()/1000*0.12)%2,q=ptAt(P,(t<1?t:2-t)*P.len),s=(t<1?t:2-t)*P.len;car(q[0],q[1],s>P.segs[0].len);return} // cosmetic
+  const done=new Set();for(let k=0;k<MV_AT.length;k+=2){const [x,y,vert]=trackNear(P,MV_AT[k],MV_AT[k+1]),key=Math.round(x/90)+','+Math.round(y/90);if(done.has(key))continue;done.add(key);car(x,y,vert)}
+  MV_AT.length=0;
+}
 function drawPax(vx0,vx1){
   for(const p of R.pax){
-    if(p.x<vx0-10||p.x>vx1+10)continue;
-    if(p.riding)continue; // on a train, drawn as the train
-    if((p.state==='bridge'||p.state==='dBridge')&&STAND_KIND[p.stand]==='remote')continue; // riding a bus, drawn as the bus
+    if(p.x<vx0-10||p.x>vx1+10){unEase(p);continue}
+    if(paxHidden(p)){if(!p.riding&&onMover(p))MV_AT.push(p.x,p.y);unEase(p);continue} // on the mover: drawn as its car
+    paxEase(p);const x=p.ex,y=p.ey;
     const inCabin=p.state==='aisle'||p.state==='sitting'||p.state==='dAisle',r=inCabin?clamp(p.F.geo.pitch*0.42,2.7,3.8):3;
     if(p.inbound){
-      ctx.fillStyle='#14171B';ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.fill();ctx.strokeStyle=p.xfer?'#6BE39A':p.stand===R.sel?'#ECE8DF':'#9FC2E0';ctx.lineWidth=1.5;ctx.stroke();
-      if(p.state==='dAisle'&&p.phase==='grab'){ctx.fillStyle='#D9A066';ctx.fillRect(p.x+r,p.y-r-2,4,4)}
-      if(p.state==='exitW'&&p.checked){ctx.fillStyle='#D9A066';ctx.fillRect(p.x+r-1,p.y-1,4,4)}
+      ctx.fillStyle='#14171B';ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();ctx.strokeStyle=p.xfer?'#6BE39A':p.stand===R.sel?'#ECE8DF':'#9FC2E0';ctx.lineWidth=1.5;ctx.stroke();
+      if(p.state==='dAisle'&&p.phase==='grab'){ctx.fillStyle='#D9A066';ctx.fillRect(x+r,y-r-2,4,4)}
+      if(p.state==='exitW'&&p.checked){ctx.fillStyle='#D9A066';ctx.fillRect(x+r-1,y-1,4,4)}
       continue;
     }
     const rr=p.kid?r*0.68:r;
-    if(!inCabin&&p.type==='prm'&&BUGGY_ST.has(p.state)){if(G.lv.assist){ctx.fillStyle='#CDD4DA';rrect(p.x-5.5,p.y-2.2,11,6,1.6);ctx.fill();ctx.fillStyle='#14171B';ctx.fillRect(p.x-4,p.y+3.2,2,1.2);ctx.fillRect(p.x+2,p.y+3.2,2,1.2)}else{ctx.strokeStyle='#909AA4';ctx.lineWidth=0.9;ctx.beginPath();ctx.moveTo(p.x+r+0.5,p.y+r);ctx.lineTo(p.x+r+0.5,p.y-r*0.4);ctx.lineTo(p.x+r+3,p.y-r*0.4);ctx.lineTo(p.x+r+3,p.y+r);ctx.stroke()}}
-    ctx.fillStyle=paxColor(p);ctx.beginPath();ctx.arc(p.x,p.y,rr,0,Math.PI*2);ctx.fill();
+    if(!inCabin&&p.type==='prm'&&BUGGY_ST.has(p.state)){if(G.lv.assist){ctx.fillStyle='#CDD4DA';rrect(x-5.5,y-2.2,11,6,1.6);ctx.fill();ctx.fillStyle='#14171B';ctx.fillRect(x-4,y+3.2,2,1.2);ctx.fillRect(x+2,y+3.2,2,1.2)}else{ctx.strokeStyle='#909AA4';ctx.lineWidth=0.9;ctx.beginPath();ctx.moveTo(x+r+0.5,y+r);ctx.lineTo(x+r+0.5,y-r*0.4);ctx.lineTo(x+r+3,y-r*0.4);ctx.lineTo(x+r+3,y+r);ctx.stroke()}}
+    ctx.fillStyle=paxColor(p);ctx.beginPath();ctx.arc(x,y,rr,0,Math.PI*2);ctx.fill();
     ctx.strokeStyle=p.xferred&&!inCabin?'#6BE39A':p.stand===R.sel&&!inCabin?'#ECE8DF':p.type==='grp'&&!inCabin?'#FF7AB6':'#14171B';ctx.lineWidth=(p.xferred||p.stand===R.sel||p.type==='grp')&&!inCabin?1.1:1;ctx.stroke();
-    if(p.type==='work'&&!inCabin&&!p.kid){ctx.fillStyle='#0E1114';ctx.fillRect(p.x+r-0.4,p.y+0.2,2.8,2.3)}
+    if(p.type==='work'&&!inCabin&&!p.kid){ctx.fillStyle='#0E1114';ctx.fillRect(x+r-0.4,y+0.2,2.8,2.3)}
     if(p.state==='aisle'){
-      if(p.phase==='stow'){ctx.fillStyle='#D9A066';ctx.fillRect(p.x+r,p.y-r-2,4,4)}
-      else if(p.phase==='shuffle'){ctx.strokeStyle='#FF7A8A';ctx.lineWidth=1.3;ctx.beginPath();ctx.arc(p.x,p.y,r+2.2,0,Math.PI*2);ctx.stroke()}
+      if(p.phase==='stow'){ctx.fillStyle='#D9A066';ctx.fillRect(x+r,y-r-2,4,4)}
+      else if(p.phase==='shuffle'){ctx.strokeStyle='#FF7A8A';ctx.lineWidth=1.3;ctx.beginPath();ctx.arc(x,y,r+2.2,0,Math.PI*2);ctx.stroke()}
     }
   }
+  drawMover();
 }
 function statusCol(s){if(s==='DEPLANING'||s==='LANDED'||s==='AT GATE')return '#5CC8FF';if(s==='ARRIVED')return '#6BE39A';if(s==='EXPECTED'||s==='COMPLETE')return '#909AA4';return s==='CARGO'||s==='LOADING'?'#D9A066':s==='BOARDING'||s==='GO TO GATE'?'#6BE39A':s==='FINAL CALL'||s==='BAGGAGE'?'#FFC72C':s==='DELAYED'||s==='TECH DELAY'||s==='CREW DELAY'?'#FF7A8A':s==='CLOSED'?'#5CC8FF':'#909AA4'}
 function gateBadge(i){
