@@ -174,7 +174,7 @@ function renderPanel(){
     h+=settingsHTML()+`<div class="sec">Airline</div><div class="namefield"><input id="nameIn" maxlength="16" value="${G.name.replace(/"/g,'')}" aria-label="Airline name"></div>
       <div class="swatches">${LIVERIES.map(([n,c],k)=>`<button class="swatch${G.livery===k?' on':''}" style="background:${c}" data-liv="${k}" aria-label="${n} livery"></button>`).join('')}</div>
       <p class="note">Day ${G.day}. ${G.flights.toLocaleString('en-GB')} flights, ${G.flown.toLocaleString('en-GB')} passengers (${(G.xfers||0).toLocaleString('en-GB')} connecting), ${(G.moves||0).toLocaleString('en-GB')} runway movements, best on-time run ${G.bestStreak}.</p>
-      <div class="sec">Your save</div><p class="note">${cloudNote()}</p><p class="note">To move your airport to another copy of the game, such as the downloaded file, copy a save code and paste it there.</p>
+      <div class="sec">Your save</div><p class="note">The game saves on this device. To move your airport to another device or browser, copy a save code and paste it there.</p>
       <div class="namefield"><button class="chip" id="copySave">Copy save code</button></div>
       <div class="namefield"><input id="saveIn" placeholder="Paste a save code" aria-label="Save code" autocomplete="off" spellcheck="false" style="text-transform:none"><button class="chip" id="loadSave">Load</button></div>
       <button class="danger" id="reset">Reset progress</button>`;

@@ -2,7 +2,8 @@
 function save(){if(R.sim)return;G.savedAt=Date.now();try{localStorage.setItem(KEY,JSON.stringify(G))}catch(e){}}
 setInterval(save,5000);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});
-try{window.claude?.hot?.snapshot?.(()=>({save:JSON.parse(JSON.stringify({...G,savedAt:Date.now()}))}))}catch(e){}
+// saves across devices were removed: tidy away their old keys once
+try{localStorage.removeItem('final-call-cloud');localStorage.removeItem('final-call-device')}catch(e){}
 function migrate(o){
   const s=DEFAULT();
   ['cash','rep','flown','flights','ontime','earned','name','clock','flightNo','sound'].forEach(k=>{if(o[k]!=null)s[k]=o[k]});

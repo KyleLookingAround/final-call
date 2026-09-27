@@ -76,7 +76,7 @@ The game is one strict IIFE, split into files in `src/game/`. The build joins th
 | `15-panel` to `21-layout` | Side panel, advisor, help/keys/speed, Masterplan UI, phone bottom sheet, full screen, layout |
 | `22-save`, `23-boot` | Saving and migrating (`resetAll`), boot and the frame loop |
 | `24-region-places` to `30-region-ui` | The region: places and stations, helpers, the journey network, events and line building, weather, map drawing, the Region tab |
-| `31-routes` to `37-cloud-saves` | Routes and the world map, managers and recommendations, Lowmere, airline operations, records/stamps/challenges, guided start, saves across devices |
+| `31-routes` to `36-guided-start` | Routes and the world map, managers and recommendations, Lowmere, airline operations, records/stamps/challenges, guided start |
 | `38-updates` | What's new: the `UPDATES` list (every version, newest first) and its card |
 | `39-layouts`, `40-layout-drawing` | Airport layouts: the `LAYOUTS` table, rebuilding and switching, the Airfield › Layout tab; remote stands, buses, rooms, shop units and each layout's buildings |
 | `41-airside` | Stand frames (`XF`, `toW`, `toL`), airside rooms and doorways (`route`, `walk`), and `layoutFaults`, the fit check for 2D layouts |
@@ -94,9 +94,7 @@ Some functions sit where they were first written rather than where their name su
 
 - **`G` and `R`.** `G` is the saved state (JSON in `localStorage['final-call-save-v2']`). `R` is runtime only.
 - **New and old saves.** `DEFAULT()` builds a new game. `resetAll(state)` loads and migrates any older save. When you add state, give it a default in `DEFAULT()` and handle its absence in `resetAll`. Never rename or remove saved fields, because old saves must keep loading.
-- **Other localStorage keys:**
-  - `final-call-topgap`: the phone camera band;
-  - `final-call-cloud` and `final-call-device`: bookkeeping for saves across devices.
+- **Saves stay on the device.** The only other localStorage key is `final-call-topgap`, the phone camera band. The old `final-call-cloud` and `final-call-device` keys are cleared on load.
 
 ### Time
 
@@ -112,12 +110,12 @@ Some functions sit where they were first written rather than where their name su
   - no DOM work and no saving;
   - toasts resolve to their last choice.
 - Everything reachable from `update()` must work that way.
-- **Randomness.** Anything that can change the game state uses `rnd()`, never `Math.random()`, so a seed repeats a run exactly. Only sound, the board's flaps, weather drawing and the device id use `Math.random()`, and the build rejects it on any line that doesn't end with `// cosmetic`.
+- **Randomness.** Anything that can change the game state uses `rnd()`, never `Math.random()`, so a seed repeats a run exactly. Only sound, the board's flaps, and weather drawing use `Math.random()`, and the build rejects it on any line that doesn't end with `// cosmetic`.
 - Tests reach functions through `window.__sim`. Its list is in `tools/build.mjs`; add to it when a test needs something new. The terminal's parts add theirs to `SIMX` in their own files instead.
 
 ## Systems in brief
 
-How each system works is in `docs/SYSTEMS.md`: levels and the Masterplan, routes, the region, the transport manager, Lowmere, airline operations, records, airport layouts, the terminal (its halls, departures, arrivals, baggage, the market place and the hotel), What's new, the guided start and saves across devices, plus the UI, views and phone layout, gating and settings. The terminal's parts plug into shared tables (`PAX_STEP`, `TERM_MINUTE`, `TERM_DRAW`…) rather than editing shared loops; read its section there before changing it.
+How each system works is in `docs/SYSTEMS.md`: levels and the Masterplan, routes, the region, the transport manager, Lowmere, airline operations, records, airport layouts, the terminal (its halls, departures, arrivals, baggage, the market place and the hotel), What's new and the guided start, plus the UI, views and phone layout, gating and settings. The terminal's parts plug into shared tables (`PAX_STEP`, `TERM_MINUTE`, `TERM_DRAW`…) rather than editing shared loops; read its section there before changing it.
 
 ## Owner's preferences
 
