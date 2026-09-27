@@ -2,6 +2,64 @@
 
 After a PR merges, look back at the session that built it: what it cost, what slowed it, and what would have saved time or credits (the `steward` playbook's last step). Newest first. A lesson marked → changed something, and says where.
 
+## Polish: overlay cards that match · 27 Sep 2026
+
+- **Numbers:** estimate $5: $6.18 by the merge, a little over. Started 17:20, PR #87 opened 17:44, merged 18:16 (56 minutes end to end). Three commits: the four fixes, a follow-up from the fresh review, and this look-back. `npm run check`: 186/186, twice (once before the review's follow-up commit, once after). No bot run: nothing in `update()` changed.
+- **Went well:** measuring the guided start's bug with a throwaway Playwright script (`build/tour-inspect.mjs`, deleted before committing) that read `#coach`, `#goal`, `.stats` and `#tabs`' real `getBoundingClientRect()` values at each of the brief's four sizes settled what was actually overlapping (the tab bar or stats row next to the goal, not the goal bar itself, as the audit's wording suggested) before writing a fix, rather than guessing from the CSS. The same approach (measure, don't guess) then verified the fix at all four sizes plus an edge case the review raised.
+- **Lessons:**
+  - The fresh review (a general-purpose helper, since no `code-review` agent type was available to the `Agent` tool in this session) caught a real gap the four-sizes check didn't: `tourStep`'s last-resort fallback and its tall-target override still measured against the spotlighted rect alone, not the widened avoid-zone the main fix added, so a short landscape viewport could still land the coach box back on the stats row or tab bar. Fixed and reverified before merge. → No change to a playbook: this is the case for reviewing the *whole* function a fix touches, not just the branch the reported bug hits, since a short viewport width wasn't one of the brief's four required sizes and so was never actually run.
+  - The review also flagged that unifying the close-button style visibly changed the level-up card's own close button (from a distinct 34×34 translucent box to the same 32×32 solid one the other cards use), as if that might be unintended. It was the intended fix for the audit row (one shared *style*, not just shared code) — confirmed by screenshot rather than assumed. A review that flags an intentional change as a maybe is still worth the two minutes to confirm.
+  - `main` had moved twice more by the time this look-back was written (a polish audit and a board-touch-targets PR before the merge, a terminal-checks PR after it), yet the PR itself never needed a `main` merge-in: none of the moved files overlapped this PR's three. Confirms scoping a brief's "may touch" list tightly (here: `src/shell.html`'s overlay classes and two specific game files, explicitly not `.chip`/`.hud`/the tab bar) is what keeps a PR out of the merge-chase on a busy day, not luck.
+
+## The terminal as a place: checks first · 27 Sep 2026
+
+- **Numbers:** estimate $10. Started 17:00, PR #90 opened 18:00. Two commits before opening and one from the review. `npm run check`: 190 passed, 35 pending. The new groups add about 20 s. Balance was dispatched by hand, since it doesn't run for `tools/` changes: green, and seed 1's `PLAY` and `STATE` match `main`.
+- **What it found on `main`:**
+  - rebuilding twice can stop the game (#78);
+  - Star's and Round's walks are 1.75× and 1.9× Classic's;
+  - Round leaves passengers at a boarding gate past departure for 90+ minutes;
+  - rebuilding into Curved front, Satellite or Midfield leaves shoppers outside any room;
+  - loading a save in a page that has already played another leaves runtime state behind.
+- **Lessons:**
+  - Step 1's plan missed that `Object.assign(SIMX,{get X(){…}})` in the parts already flattens a getter, before the hook runs. The `rules` check, written first, showed it at once. → The test page keeps each property as written (`tools/build.mjs`).
+  - The first draft of the new groups took 33 s, mostly opening pages. → Checks whose play takes seconds wait until their code exists (`TP_ALL=1` plays them now), and the rest share pages. Budget it before writing, not after.
+  - The fresh review caught a check that could never fail: toasts don't happen in the headless sim, so "the crowd is the only sign" counted nothing. It caught six more that would have misled a part, all fixed before opening. → A pre-written check that expects nothing (0 toasts, 0 stuck) needs the thing it watches to be able to happen in its setup. Say so in the check.
+- **How [D] will be measured:** each part's PR records:
+  - (a) game-code bugs a pre-written check caught before the PR opened;
+  - (b) game-code bugs found after it opened;
+  - (c) pre-written checks it had to fix, and how.
+
+  The coordinator adds them up after the last part. The baseline is the terminal's 0.6 late bugs a part. [D] stays if (b) is at most 0.3 a part and this PR costs under 15% of the bundle.
+
+## Polish: phone chrome and touch targets · 27 Sep 2026
+
+- **Numbers:** session `session_01BNMAt5vgY9kVSc98GujRBt`, estimate $8: $5.97 and 285k of 1M context by the merge, under the estimate. Started 17:20 UTC, PR opened 17:37 (17 minutes: reading the four issues and the audit's fix-batch table, writing the CSS, screenshotting five sizes by hand since none of the built-in `npm run check -- shots` sizes matched the brief's list, and a fresh review). Checks green the same minute; merged shortly after, one `main` merge-in (the polish audit doc PR, #77, landing under it).
+- **Went well:** all four batches turned out to be pure CSS, so `npm run build`/`npm run check` and a throwaway Playwright script (`build/polish-shots.mjs`, deleted before committing) at the brief's exact five sizes were enough proof; no game code, saved fields or `rnd()` were anywhere near this diff. Forcing a long goal string through `page.evaluate` before screenshotting confirmed the wrap-to-two-lines fix without needing to play a save into that state for real.
+- **Lessons:**
+  - The fresh review (`feature` playbook step 6) caught a real miss a self-review would likely have missed: `.recrow .btns .chip`'s own padding rule (three classes) is more specific than the plain `.chip` touch-media rule (one class) this batch added, so the recommendation row's "Preview" button stayed small on touch regardless of source order. Every other touch fix in this PR relies on equal-specificity selectors placed later in the stylesheet to win the cascade; a chip variant with its own more-specific override is the one shape that trick doesn't reach, and it's easy to miss without grepping every other use of a class before assuming a single generic rule covers it.
+  - Confirms the polish-audit session's lesson, independently: `create_pull_request` still appends a "Generated by Claude Code" footer to the description on its own, and the Description check still fails on it, needing the read-back-and-strip pass with `update_pull_request` before checks go green. → No playbook change needed past what that entry already asked for; two sessions hitting the identical footer the same day is enough to call it a standing step, not a one-off.
+
+## Polish audit · 27 Sep 2026
+
+- **Numbers:** session `session_017bfAy4YrGKprBcimixNCgp`, estimate $6: $8.74 and 196k of 1M context by the time the PR opened, a little over the estimate but not past twice it. Started 16:49 UTC. Docs only, no code, no bot run.
+- **Went well:** three background review agents (desktop tab-by-tab across all four levels; phone/tablet layout and touch targets; overlays, day/night and motion) ran in parallel, each writing its own screenshots, looking at them, and handing back a findings table rather than raw images. That kept the main session's own context to reading three short reports instead of the 170-odd screenshots the three of them actually took between them, which is what the brief's "read the images once" warning was really asking for.
+- **Lessons:**
+  - Splitting the sweep by device/concern (not by level) meant each agent needed its own primer on the game's tab/view/subtab switching (`setTab`, `setView`, `R.oSub`, `openPlan`, `openHelp`…), since none of that is written down in one place for a fresh session to find. → Worth a short "driving the game headlessly" note in `docs/SYSTEMS.md`'s UI section next time this is needed, so a future audit's agent briefs are shorter.
+  - Two of the five "known issues" named in the brief (the rating pinned near 100, the board's one-city network) turned out to already be exactly what systems-review proposal 1 and a liked idea board entry are about to fix properly. Listing them in the polish table anyway (as the brief asked) but flagging in the row itself that a fix batch should coordinate with that work, rather than writing a smaller patch that would be redone, avoided the punch list quietly duplicating a bundle already on the roadmap.
+  - The GitHub MCP tools available in this session have no dedicated label-creation call, but `issue_write`'s `create` with an unknown label name created it in passing on the first issue opened — worth knowing that works before a session spends time looking for a `create_label` tool that isn't there.
+  - The PR-creation tool appended a "Generated by Claude Code" footer to the description on its own, which the Description check then failed. → No change to a playbook: `create_pull_request`'s result needs a read-back-and-strip pass (as `update_pull_request` did here) whenever this environment's own PR tool is used, since the environment's default attribution isn't something the project notes can turn off from this side.
+
+## Passengers who suddenly sped down the piers (#82) · 27 Sep 2026
+
+- **Numbers:** session `session_017MmM6KJ5fiP2s9m1RzVJZn`, estimate $10: $5.69 and 242k of 1M context at the pre-merge check-in. Started 17:23, issue and PR opened by 17:52, all CI green on the first push; one merge of `main` (a `docs/SYSTEMS.md` conflict with #90's pending-checks note).
+- **What it found:** the brief's suspect was right: `walkMul` sped any walk through doorways, or any target 300 px away, 2.5× once the mover was bought, drawn as walking (700 px/min on the L9 save), and in layouts with no mover track it stacked on their trains and walkways (1,400 px/min on Round). Logging every passenger's speed per step also found the smaller jumps no one had reported: counters calling the next person forward, the duty-free path, passport desks moving their target, and the stall at every doorway where `moveTo` drops the rest of a step.
+- **Went well:** splitting "what the game simulates" from "what is drawn" kept `PLAY` and `STATE` identical on seeds 1–3, both keeping Classic and rebuilding, while fixing every jump: riders are hidden and drawn as mover cars, and the drawn position eases after the simulated one inside `drawPax`'s existing loop. A frame-by-frame measuring script in `build/` came first, and it grew straight into the `movement` check.
+- **Lessons:**
+  - A check on drawn speed has to measure what's drawn: the first version flagged the easing's own catch-up and its starting floor (a floor of 40 against a check floor of 30 read as a 1.7× jump). Tie the check's thresholds to the easing's constants, not round numbers. → `tools/checks/movement.mjs` names them together.
+  - Replacing `p.x` with a local `x` across a drawing function by text also hit `p.xfer` and `p.xferred`; the build passed, and only reading the diff caught it. When renaming a field, use word boundaries.
+  - The first full `npm run check`, run while six bots ran alongside, timed out clicking in `news`; the group passed alone on both builds and the rerun passed. Don't run the full check beside bot runs.
+  - The notes' rebuild figures (level 9 at 953–966) were stale: `main` today rebuilds to level 9 at 975–989. Measure `main` rather than trusting the notes when a change could move the rebuild runs.
+
 ## Version 32: ready for what's next · 27 Sep 2026
 
 - **Numbers:** estimate $4: about $5.25 by the PR's first stopping point, a little over the estimate, entirely from the fixture bug below rather than the release notes themselves. Started 16:10; the docs and What's new entry were written and pushed within the first six minutes, well before the bot run.
