@@ -2,7 +2,8 @@
 //   node tools/graph.mjs <name>     everything related to a system, file, function, hook, saved field or check group
 //   node tools/graph.mjs --write    writes docs/graph.json (git-ignored; npm run build does this too)
 //   node tools/graph.mjs --check    fails on broken doc links and docs/SYSTEMS.md sections without files; warns when a
-//                                   system's file changed on this branch but its section didn't
+//                                   system's file changed on this branch but its section didn't, and when a section names
+//                                   three or more functions that live in one file outside its own
 // What it reads: src/game/*.js (top-level functions and names, the hooks each file registers, saved fields), tools/check.mjs
 // and tools/checks/*.mjs (each group and what it calls through window.__sim), and the docs' own link lines: docs/SYSTEMS.md
 // sections and their files, docs/decisions/, docs/specs/ (issue and PRs), and docs/LESSONS.md (each "→" line's targets).
@@ -26,10 +27,10 @@ export function build(){
   }
   // upgrades declared in the UPG table, and the file each belongs to
   const upg=all(src['01-constants.js'],/^\s{2}(\w+):\{tab:'/gm);files['01-constants.js'].hooks=uniq(files['01-constants.js'].hooks.concat(upg.map(k=>'UPG.'+k)));
-  // saved fields: DEFAULT()'s top-level keys, G.set's, and TERM_FIELDS'
-  const dm=src['03-state.js'].match(/const DEFAULT=\(\)=>\(\{([\s\S]*?)\}\);\n/),top=[];
+  // saved fields: FIELDS' top-level keys (DEFAULT() is built from it), G.set's, and TERM_FIELDS'
+  const dm=src['03-state.js'].match(/const FIELDS=\{([\s\S]*?)\n\};\n/),top=[];
   if(dm){let d=0,key='';for(const ch of dm[1]){if('{(['.includes(ch))d++;else if('})]'.includes(ch))d--;else if(d===0&&ch===','){key='';continue}if(d===0&&/[\w$]/.test(ch))key+=ch;else if(d===0&&ch===':'&&key){top.push(key);key='#'}}}
-  const setKeys=all((src['03-state.js'].match(/set:\{([^}]*)\}/)||['',''])[1],/(\w+):/g);
+  const setKeys=all((src['03-state.js'].match(/set:(?:\(\)=>\()?\{([^}]*)\}/)||['',''])[1],/(\w+):/g);
   const termFields=Object.values(files).flatMap(x=>x.hooks).filter(h=>h.startsWith('TERM_FIELDS.')).map(h=>h.slice(12));
   const saved={};for(const k of uniq(top.filter(k=>k!=='#'))){saved['G.'+k]=Object.keys(src).filter(f=>new RegExp('\\bG\\.'+k+'\\b').test(src[f]))}
   for(const k of setKeys)saved['G.set.'+k]=Object.keys(src).filter(f=>new RegExp(`\\bG\\.set\\.${k}\\b|SET\\(\\)\\.${k}\\b|'${k}'`).test(src[f]));
@@ -59,7 +60,10 @@ function refsIn(s){
 function systems(){
   const s=rd('docs/SYSTEMS.md'),i=s.indexOf('\n## Systems'),body=s.slice(i).split('\n').slice(2),out={};let cur=null;
   for(const line of body){if(/^## /.test(line))break;const m=line.match(/^- \*\*(.+?)\.?\*\*/);if(m){cur=m[1].replace(/\.$/,'');out[cur]={text:line,files:[]};continue}if(cur)out[cur].text+='\n'+line}
-  for(const k in out){out[k].files=refsIn(out[k].text).filter(f=>f.startsWith('src/game/'));out[k].refs=refsIn(out[k].text);delete out[k].text}
+  for(const k in out){const t=out[k].text,par=(t.split('\n')[0].match(/^- \*\*.+?\*\*\s*\(([^)]*)\)/)||[])[1]||'',aside=refsIn(par.split(';').slice(1).join(';'));
+    out[k].files=refsIn(t).filter(f=>f.startsWith('src/game/'));out[k].refs=refsIn(t);
+    // the functions its text names, and its own files: all it names but those its heading only mentions after a ";" ("… are in 03-state.js")
+    out[k].names=uniq(all(t,/`(\w+)(?:\([^`]*\))?`/g));out[k].own=out[k].files.filter(f=>!aside.includes(f)||refsIn(par.split(';')[0]).includes(f));delete out[k].text}
   return out;
 }
 // everything related to a name, in a short list
@@ -97,6 +101,10 @@ export function check(g){
   for(const l of g.lessons)for(const f of l.to)if(!exists(f))errs.push(`docs/LESSONS.md "${l.title}" points at ${f}, which doesn't exist`);
   let changed=[];try{const base=execSync('git merge-base HEAD origin/main',{cwd:root,stdio:['ignore','pipe','ignore']}).toString().trim();changed=execSync(`git diff --name-only ${base}`,{cwd:root}).toString().split('\n').filter(Boolean)}catch(e){}
   if(changed.length&&!changed.includes('docs/SYSTEMS.md'))for(const [k,S] of Object.entries(g.systems)){const hit=S.files.filter(f=>changed.includes(f));if(hit.length)warns.push(`${hit.join(', ')} changed but docs/SYSTEMS.md "${k}" didn't: is it still true?`)}
+  // a section that names three or more functions living in one file outside its own: they belong with the system, or the file with the section
+  for(const [k,S] of Object.entries(g.systems)){const by={};
+    for(const n of S.names){const at=(g.defs[n]||[]).filter(f=>g.files[f].funcs.includes(n));if(at.length&&!at.some(f=>S.own.includes('src/game/'+f)))(by[at[0]]||(by[at[0]]=[])).push(n)}
+    for(const [f,ns] of Object.entries(by))if(ns.length>=3)warns.push(`docs/SYSTEMS.md "${k}" names ${ns.join(', ')}, which live in ${f}, outside its files`)}
   return {errs,warns};
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){

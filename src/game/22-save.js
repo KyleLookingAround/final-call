@@ -5,7 +5,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});
 // saves across devices were removed: tidy away their old keys once
 try{localStorage.removeItem('final-call-cloud');localStorage.removeItem('final-call-device')}catch(e){}
 function migrate(o){
-  const s=DEFAULT();
+  const s=DEFAULT();delete s.hotelBook; // its default reads the airport it's for, so resetAll gives it one once the save is in G
   ['cash','rep','flown','flights','ontime','earned','name','clock','flightNo','sound'].forEach(k=>{if(o[k]!=null)s[k]=o[k]});
   if(o.lv)for(const k in o.lv)if(k in s.lv)s.lv[k]=Math.min(o.lv[k],UPG[k].max);
   if(o.methods)s.methods={...o.methods};
@@ -16,40 +16,54 @@ function migrate(o){
   return s;
 }
 const padTo=(a,f,n=NG)=>{a=Array.isArray(a)?a.slice(0,n):[];while(a.length<n)a.push(f(a.length));return a};
-function resetAll(state){
-  const d=DEFAULT();G=Object.assign(d,state||{});
-  for(const k in TERM_FIELDS)if(G[k]==null)G[k]=TERM_FIELDS[k](); // the terminal parts' saved fields
-  G.lv=Object.assign(DEFAULT().lv,(state&&state.lv)||{});for(const k in G.lv){if(!(k in UPG))delete G.lv[k];else G.lv[k]=clamp(+G.lv[k]||0,0,UPG[k].max)}
-  G.revBy=Object.assign(DEFAULT().revBy,(state&&state.revBy)||{});
-  G.stands=padTo(G.stands,i=>({built:false,ac:null,method:'random',rear:false,route:'mixed'}));G.stands.forEach(s=>{if(!s.route)s.route='mixed'});
-  G.shops=padTo(G.shops,()=>null,NU);G.reports=padTo(G.reports,()=>null);G.arrReports=padTo(G.arrReports,()=>null);G.gstats=padTo(G.gstats,()=>[]);
-  G.open=Object.assign({desks:null,lanes:null,officers:null},G.open||{});
-  if(!Array.isArray(G.builds))G.builds=[];
-  G.fleet=(G.fleet||[]).map(f=>Object.assign({wear:0},f,{st:f.st==='away'&&f.back>G.clock?'away':'base',readyAt:G.clock,gate:null}));if(!G.fleet.some(f=>!f.sold))G.fleet.push({type:0,st:'base',readyAt:G.clock,wear:0});
-  if(G.tab==='shops')G.tab='sales';
-  G.lines=G.lines||{};G.infra=G.infra||{};G.tod=G.tod||{};G.stn=G.stn||{};G.lineSeq=G.lineSeq||0;G.dev=G.dev||{};G.pop=G.pop||{};G.evq=Array.isArray(G.evq)?G.evq:[];
-  if(state&&!state.lines){if(G.lv.rail)G.lines.castle={mode:'rail',align:'old',freq:2,fare:1,exp:false,night:false,freight:false,cars:0};if(state.lv&&state.lv.hsr)G.lines.low={mode:'hsr',align:'main',freq:1,fare:1,exp:false,night:false,freight:false,cars:0}}
-  migrateLines();R.draft=null;R.ng=null;
-  if(state&&state.level==null){ // older save: grant the level its progress already earns, without the reward
-    let lv=0;for(let n=1;n<LEVELS.length;n++){const q=LEVELS[n].req;if(G.flown>=q.pax&&builtCount()>=q.gates)lv=n;else break}G.level=Math.min(lv,4);
-  }else if(state&&!state.pv)G.level=LV_MAP[clamp(state.level|0,0,LV_MAP.length-1)];
-  if(state&&!state.pv){ // before the Masterplan: approve every plan up to the airport's level, and anything already in use
+// Older saves, brought up to date in this order after every field has its default (FIELDS). Each step's when(state) sees
+// the save as it was stored (null for a new game); up(state) changes G. Add a step at the end for a new saved field that
+// needs more than a default.
+const always=()=>true;
+const MIGRATIONS=[
+  {when:always,note:'upgrades known and within their range; money buckets, stands, shop units, reports and open counts complete',up(state){
+    G.lv=Object.assign(FIELDS.lv(),(state&&state.lv)||{});for(const k in G.lv){if(!(k in UPG))delete G.lv[k];else G.lv[k]=clamp(+G.lv[k]||0,0,UPG[k].max)}
+    G.revBy=Object.assign(FIELDS.revBy(),(state&&state.revBy)||{});
+    G.stands=padTo(G.stands,i=>({built:false,ac:null,method:'random',rear:false,route:'mixed'}));G.stands.forEach(s=>{if(!s.route)s.route='mixed'});
+    G.shops=padTo(G.shops,()=>null,NU);G.reports=padTo(G.reports,()=>null);G.arrReports=padTo(G.arrReports,()=>null);G.gstats=padTo(G.gstats,()=>[]);
+    G.open=Object.assign({desks:null,lanes:null,officers:null},G.open||{});
+    if(!Array.isArray(G.builds))G.builds=[];}},
+  {when:always,note:'planes back at base or still away, and at least one plane',up(){
+    G.fleet=(G.fleet||[]).map(f=>Object.assign({wear:0},f,{st:f.st==='away'&&f.back>G.clock?'away':'base',readyAt:G.clock,gate:null}));if(!G.fleet.some(f=>!f.sold))G.fleet.push({type:0,st:'base',readyAt:G.clock,wear:0});}},
+  {when:()=>G.tab==='shops',note:'the Shops tab became Sales',up(){G.tab='sales'}},
+  {when:always,note:'the region fields are objects',up(){
+    G.lines=G.lines||{};G.infra=G.infra||{};G.tod=G.tod||{};G.stn=G.stn||{};G.lineSeq=G.lineSeq||0;G.dev=G.dev||{};G.pop=G.pop||{};G.evq=Array.isArray(G.evq)?G.evq:[];}},
+  {when:state=>state&&!state.lines,note:'before region lines: the rail and high-speed upgrades become lines',up(state){
+    if(G.lv.rail)G.lines.castle={mode:'rail',align:'old',freq:2,fare:1,exp:false,night:false,freight:false,cars:0};if(state.lv&&state.lv.hsr)G.lines.low={mode:'hsr',align:'main',freq:1,fare:1,exp:false,night:false,freight:false,cars:0}}},
+  {when:always,note:'lines up to date; no line being drawn',up(){migrateLines();R.draft=null;R.ng=null}},
+  {when:state=>state&&state.level==null,note:'before levels: grant the level its progress already earns, without the reward',up(){
+    let lv=0;for(let n=1;n<LEVELS.length;n++){const q=LEVELS[n].req;if(G.flown>=q.pax&&builtCount()>=q.gates)lv=n;else break}G.level=Math.min(lv,4);}},
+  {when:state=>state&&state.level!=null&&!state.pv,note:'before ten levels: the old level mapped to its new number',up(state){G.level=LV_MAP[clamp(state.level|0,0,LV_MAP.length-1)]}},
+  {when:state=>state&&!state.pv,note:'before the Masterplan: approve every plan up to the airport\'s level, and anything already in use',up(){
     G.tech={};G.pts=0;G.ptBought=0;G.gdone={};
     const own=k=>{const [a,v]=k.split(':');return a==='up'?G.lv[v]>0:a==='ac'?G.fleet.some(f=>f.type===+v):a==='meth'?!!G.methods[v]:a==='shop'?G.shops.some(x=>x&&SHOPS[x.type].id===v):a==='mode'?Object.values(G.lines).some(L=>L.mode===v):a==='dev'?Object.values(G.dev).includes(v):a==='stn'?Object.values(G.stn).some(x=>x&&x[v]):false};
     for(const T of TECH)if(T.t<=G.level||T.u.some(own))G.tech[T.id]=1;
-    G.pv=2;
-  }
-  {const hadMgr=state&&state.set&&'autoLines' in state.set;G.set=Object.assign(DEFAULT().set,G.set||{});if(state&&!hadMgr){G.set.autoLines=false;G.set.autoFares=false}}
-  G.tech=G.tech||{};G.gdone=G.gdone||{};
-  if(state&&!state.tour||G.tour&&!G.tour.done&&(G.level>=1||G.flights>30))G.tour={done:1};
-  if(state&&!state.stamps){G.stamps={};for(const S of STAMPS){try{if(S.t())G.stamps[S.id]=G.day||dayOf(G.clock)}catch(e){}}}
-  if(!Array.isArray(G.crews)||(state&&!state.crews)){G.crews=[];for(let k=0;k<crewTarget();k++)G.crews.push(mkCrew(G.clock))}G.crews.forEach(c=>{c.res=0;if(c.back==null)c.back=c.free||0});if(state&&state.set&&!('autoCrews' in state.set))G.set.autoCrews=true;if(G.set.chal==null)G.set.chal=true;
-  if(state&&!state.routes){G.routes={};for(let t=0;t<5;t++){if(!has('rt:'+t))continue;CITIES.filter(c=>c[2]===t).sort((x,y)=>y[4]-x[4]).slice(0,t===0?5:4).forEach(c=>G.routes[c[0]]={f:1})}}
-  G.routes=G.routes||{};G.rs=G.rs||{};for(const c in G.routes)if(!CITY[c])delete G.routes[c];
-  if(state&&!state.gdone){for(const g of GOALS){try{const [v,t]=g.p();if(v>=t)G.gdone[g.id]=1}catch(e){}}}
-  G.day=dayOf(G.clock);if(!G.dstat)G.dstat={pax:0,arr:0,flights:0,ontime:0,rev:0,cost:0,rep0:G.rep};
-  if(G.seen==null)G.seen=state?21:UPDATES[0].v; // new games have seen everything; airports from before What's new see this release's notes once
-  if(G.lounges==null)G.lounges=false;
+    G.pv=2;}},
+  {when:always,note:'every setting present',up(){G.set=Object.assign(FIELDS.set(),G.set||{})}},
+  {when:state=>state&&!(state.set&&'autoLines' in state.set),note:'before the transport manager: lines and fares stay in the player\'s hands',up(){G.set.autoLines=false;G.set.autoFares=false}},
+  {when:always,note:'plans and goals are objects',up(){G.tech=G.tech||{};G.gdone=G.gdone||{}}},
+  {when:state=>state&&!state.tour||G.tour&&!G.tour.done&&(G.level>=1||G.flights>30),note:'no guided start for an airport with progress',up(){G.tour={done:1}}},
+  {when:state=>state&&!state.stamps,note:'before stamps: award those already earned',up(){G.stamps={};for(const S of STAMPS){try{if(S.t())G.stamps[S.id]=G.day||dayOf(G.clock)}catch(e){}}}},
+  {when:state=>!Array.isArray(G.crews)||(state&&!state.crews),note:'before crews: hire the crews the fleet needs',up(){G.crews=[];for(let k=0;k<crewTarget();k++)G.crews.push(mkCrew(G.clock))}},
+  {when:always,note:'no crew reserved; each crew has a time back',up(){G.crews.forEach(c=>{c.res=0;if(c.back==null)c.back=c.free||0})}},
+  {when:state=>state&&state.set&&!('autoCrews' in state.set),note:'before the crew manager: it hires for airports that had settings',up(){G.set.autoCrews=true}},
+  {when:()=>G.set.chal==null,note:'challenges on',up(){G.set.chal=true}},
+  {when:state=>state&&!state.routes,note:'before routes: open the biggest cities of each tier already unlocked',up(){
+    G.routes={};for(let t=0;t<5;t++){if(!has('rt:'+t))continue;CITIES.filter(c=>c[2]===t).sort((x,y)=>y[4]-x[4]).slice(0,t===0?5:4).forEach(c=>G.routes[c[0]]={f:1})}}},
+  {when:always,note:'routes only to cities that exist',up(){G.routes=G.routes||{};G.rs=G.rs||{};for(const c in G.routes)if(!CITY[c])delete G.routes[c]}},
+  {when:state=>state&&!state.gdone,note:'before goals: mark those already met',up(){for(const g of GOALS){try{const [v,t]=g.p();if(v>=t)G.gdone[g.id]=1}catch(e){}}}},
+  {when:always,note:'the day from the clock, and its stats',up(){G.day=dayOf(G.clock);if(!G.dstat)G.dstat={pax:0,arr:0,flights:0,ontime:0,rev:0,cost:0,rep0:G.rep}}},
+  {when:()=>G.seen==null,note:'What\'s new: new games have seen everything; airports from before it see version 21\'s notes on',up(state){G.seen=state?21:UPDATES[0].v}},
+];
+function resetAll(state){
+  const s=state||{};G={};for(const k in FIELDS)G[k]=s[k];Object.assign(G,s); // the table's fields first, then anything else the save holds
+  for(const k in FIELDS)if(G[k]==null)G[k]=FIELDS[k](); // with G in place, as some defaults read the airport
+  for(const M of MIGRATIONS)if(M.when(state))M.up(state);
   applyLayout(G.layout||'classic');
   R.rwy={q:[],act:[null,null]};R.lot=new Array(540).fill(0);R.platform=[];R.train={state:'away',t:3,x:null};R.lotFull=0;
   R.arrQ=[];R.booths=[];R.egates=[];R.arrBelt=[];

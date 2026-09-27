@@ -11,8 +11,9 @@ const TERM_SECS={dep:['Check-in','Security'],arr:['Arrivals'],staff:['Concourse'
 const TERM_PANEL={}; // sub-tab → [() => html]: cards shown under a Terminal sub-tab's upgrades, or 'sales:shops' and 'sales:landside'
 const TERM_CLICK=[],TERM_MINUTE=[],TERM_DAY=[],TERM_DRAW=[]; // (data, button) → true if handled; every game minute; every day; drawing, after the halls
 const TERM_SPAWN=[],TERM_EXIT=[]; // (p) → true if it has placed a new departing passenger (a hotel guest), or sent an arriving one somewhere (the hotel)
-const TERM_FIELDS={}; // saved field → () => its default, for new games and for older saves without it
+const TERM_FIELDS=FIELDS; // saved field → () => its default, for new games and for older saves without it (03-state.js)
 const SIMX={}; // functions the checks reach through window.__sim, added by each part
+SIMX.FIELDS=FIELDS;SIMX.MIGRATIONS=MIGRATIONS; // saving (03-state.js, 22-save.js)
 const RECT=(x0,y0,x1,y1)=>[[x0,y0],[x1,y0],[x1,y1],[x0,y1]];
 const BAG_HALL=[560,SEC_Y,700,LAND_B]; // x0, y0, x1, y1
 const TERM_ROOMS=[
