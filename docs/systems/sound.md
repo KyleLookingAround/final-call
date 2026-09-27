@@ -1,0 +1,9 @@
+# Sound
+
+**Sound** (`06-sound.js` for the tones, `48-sound.js` for the rest; spec `docs/specs/sound.md`).
+- **Only from the frame loop.** `soundTick` runs four times a second from `frame()` (23-boot.js), never from `update()`, returns at once in `R.sim`, and never changes game state: what it has seen per flight is in a `WeakMap`, and everything else in `SND`, which isn't saved. Nothing sounds before the first tap, which starts `AC`.
+- **Announcements** for your own flights (not `F.partner` or `F.freighter`): a gate call when `F.called` is first set (skipped if the board already reads BOARDING), boarding and final call when `statusText` first reads BOARDING or FINAL CALL, and a gate change when a called flight's `GATES` name changes (a layout switch today). A flight first seen mid-boarding (a load) is called only for what happens next. The queue keeps the newest of each kind per flight and drops any older than 30 real seconds; one plays at a time, its words on `#bann` for 8 seconds; at 4× and 8×, one every 20 seconds.
+- **Spoken calls** use `speechSynthesis` with an en-GB voice where there is one: only final calls and gate changes, at 1× or 2×, while the page is visible, not at night, at most one every 5 real minutes.
+- **Ambience** is looped noise through filters, one chain each for the hum, the rain and each runway's jet, whose gains follow the camera (`viewShare` of the halls, `R.cam.z`) and whose jets pan by the plane's place on screen. Hidden pages suspend `AC`.
+- **Night** is 23:00–05:00: the hum drops to a third and only final calls are announced, unspoken.
+- **Settings:** `sndAnn` 'chime' plays the chime without words or voice; `sndFx` silences the tills (`kaching`) and ticks; `G.sound` silences everything, though the words still show.
