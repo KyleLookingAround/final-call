@@ -8,11 +8,19 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 - **Went well:** `.githooks/commit-msg`'s own patterns carried straight over to `actions/github-script`, and `parts.yml` was a ready template for a checkout-free job. The very first proof run needed no staging: the PR opened with a real tool footer (the bug this brief was written for), and the new check caught it and named the line unprompted.
 - **Lessons:**
   - Three PRs (#38, #39, #41) had opened with a tool footer before anyone checked for it on the PR itself, only on commits. → The Description check now catches it at `opened`, `edited`, `reopened` and `synchronize`, so editing the description re-runs it without a push.
-  - Editing a PR's title or description through the GitHub API re-ran the check once, then further edits the same way stopped triggering a run at all (confirmed against `synchronize`, which fired normally on the next push). No change made here: proving an `edited` re-run took one clean edit, not several; a session that needs more than one should push a small commit instead and rely on `synchronize`.
+  - Editing a PR's title or description through the GitHub API re-ran the check once, then further edits the same way stopped triggering a run at all. No change made here: proving an `edited` re-run took one clean edit, not several; a session that needs more should push a small commit instead and rely on `synchronize`.
+  - `main` moved twice (#40, #41) while this branch was open, both touching this file. → Fetch and merge `main` again right before opening a PR that's been sitting on a branch a while, not only right after branching.
+
+## #39 Saves on the device only · 27 Sep 2026
+
+- **Numbers:** done by the terminal's finishing session, at the owner's request, between features. PR opened 11:25, merged 11:32. One push after it opened (a docs wording fix); CI green first time. Bot STATE identical to main on seeds 1–3.
+- **Lessons:**
+  - The commit hook rejected the first message because it named the old hosting page, and the first docs wording named it too. The project notes forbid both. No change: describe it as "the old hosting page".
+  - The clean-up touched eight files and needed no spec. Doing it in the session already open cost less than briefing a fresh one would have. → For a small clean-up (under about ten files, no new rules), the session at hand does it, if no PR is in flight.
 
 ## Real airport groundwork, spec and parts' briefs · 27 Sep 2026
 
-- **Numbers:** session `session_01FzgcmHBgyerAkkyLvdb5kW`, estimate $20: $1.55 and 149k of 1M context when the PR opened. Started 07:35; the session was resumed several times, so the wall-clock time says little. No questions for the owner.
+- **Numbers:** session `session_01FzgcmHBgyerAkkyLvdb5kW`, estimate $20: $5.95 and 262k of 1M context by the merge ($1.55 and 149k when the PR opened). PR #38 opened 11:24, merged 11:30; CI green first time (Checks in 6 minutes, Balance's six runs in 3½). Started 07:35; the session was resumed several times, so the wall-clock time says little. No questions for the owner.
 - **The knowledge graph:** three queries (`12-drawing.js`, `40-layout-drawing.js`, `perf`) named every file it needed. It read four source files whole (`12-drawing.js`, `13-camera.js`, `40-layout-drawing.js` and `check.mjs`'s perf group) and grepped for the rest, against eight to ten files for each terminal part. `perf`'s answer named the simulation's functions but not that it times only `update()`: drawing had no speed check at all, which only reading the check showed.
 - **Lessons:**
   - `perf` measures the simulation, and the real airport only draws, so its headroom was the wrong budget to share. → A `scene` check now times drawing a frame against the same calibration, and the spec shares that headroom instead (`docs/specs/real-airport.md`).

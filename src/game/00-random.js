@@ -1,8 +1,8 @@
 /* ================= random ================= */
 // The simulation draws its randomness from rnd(), so a run repeats exactly from the same seed.
 // The checks and the bot set window.__seed before the page loads; players get a new seed each time.
-// Only things that never touch the game state keep Math.random: sound, the board's flaps,
-// weather drawing and the device id for saves across devices.
+// Only things that never touch the game state keep Math.random: sound, the board's flaps
+// and weather drawing.
 let rndState=(window.__seed??Math.random()*4294967296)>>>0;
 function rnd(){ // mulberry32
   rndState=(rndState+0x6D2B79F5)>>>0;let t=rndState;
