@@ -9,6 +9,7 @@ What's being worked on, what's next, and ideas not yet agreed. Now, Next, the ru
 - **Level-up screen** (#29, spec `docs/specs/level-up.md`, version 30): a card for each new level with what it unlocked.
 - **The terminal as a place** (#48, spec `docs/specs/terminal-place.md`, approved): two floors, windows, decor that comes with the building, local character, a roof terrace with spotters, and each layout's own floor plan. Its checks are written (experiment [D]) and wait in `tools/checks/pending.txt`; next the groundwork, then the parts.
 - **Polish audit** (brief `docs/briefs/polish-audit.md`): a ranked punch list of everything that looks or feels unfinished, from playing and looking rather than reading code, in `docs/ideas/polish-2026-09.md`; one issue per suggested fix batch, labelled `polish`.
+- **Late runners, and passengers' stories** (spec `docs/specs/late-runners.md`, notes `docs/systems/late-runners.md`): shoppers run for the gate at final call, the gate holds or closes and the board shows GATE CLOSING; tap a passenger for their day as a story.
 <!-- /joined:now -->
 
 ## The owner's order of bundles

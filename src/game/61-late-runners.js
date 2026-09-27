@@ -8,7 +8,7 @@
 // how they feel about it. Runners and stories are runtime only, kept off the passengers themselves (WeakMaps), so the
 // passengers keep their one shape (05-flights.js seatPax) and nothing is saved.
 const RUN_AT=12,RUN_CLOSING=5,RUN_MUL=1.8,RUN_PRM=1.2,RUN_TOP=300,RUN_MISS=-0.6; // minutes before departure; pace; rating
-const RUN_HOLD={wait:3,close:1},DAWDLE=0.15; // minutes the gate holds for runners once the rest are seated, by the Late passengers policy; shoppers who browse on past the call
+const RUN_HOLD={wait:3,close:1},DAWDLE=0.05; // minutes the gate holds for runners once the rest are seated, by the Late passengers policy; shoppers who browse on past the call
 const TALES=new WeakMap(),RUNS=new WeakMap(); // passenger → their story; flight → its runners {list, n (can miss), holdAt}
 const RUN_LOG={started:0,boarded:0,missed:0}; // what the checks read
 Object.assign(REPWHY,{runner:['passengers who ran for their gate and missed it',['walkway','mover'],' Calling gates earlier (Office › Policies) gives shoppers more time.']});REPLBL.runner='Runners who missed their flight';
@@ -59,7 +59,7 @@ function missRun(p,i){
 // When a gate is called, a few of its passengers in the shops lose track of time and browse on until final call, when
 // the shop sends them out (46-market.js, p.late): they're the runners. A look over the passengers once per call.
 function dawdle(F){
-  for(const p of R.pax)if(p.F===F&&p.state==='shop'&&!p.late&&!p.inbound&&rnd()<DAWDLE){p.late=true;p.t=p.t0=Math.max(p.t,F.std-G.clock)}
+  for(const p of R.pax)if(p.F===F&&p.state==='shop'&&!p.late&&!p.inbound&&rnd()<DAWDLE){p.late=true;p.t=Math.max(p.t,F.std-G.clock)}
 }
 // every game minute: the gates just called, then, once everyone else is seated after the departure time, hold the gate
 // and close it on the runners
@@ -142,9 +142,9 @@ function openStory(p){
   R.story={p,html:''};
   if(!storyEl){storyEl=document.createElement('div');storyEl.className='paxcard';storyEl.id='paxcard';storyEl.setAttribute('role','dialog');storyEl.setAttribute('aria-label','Passenger');
     storyEl.addEventListener('click',e=>{if(e.target.closest('[data-pcx]'))closeStory()});$('#stage').appendChild(storyEl)}
-  storyEl.hidden=false;refreshStory();
+  storyEl.hidden=false;$('#stage').classList.add('story');refreshStory();
 }
-function closeStory(){R.story=null;if(storyEl)storyEl.hidden=true}
+function closeStory(){R.story=null;if(storyEl){storyEl.hidden=true;$('#stage').classList.remove('story')}}
 function refreshStory(){
   const s=R.story;if(!s||!storyEl)return;if(R.view!=='airport'){closeStory();return}
   const p=s.p,t=tale(p),st=p.state;if((st==='bridge'||st==='aisle'||st==='sitting'||p.dead)&&!t.ev.some(e=>e[1]==='board'))t.ev.push([G.clock,'board',0,0.5]); // noticed here, for the one passenger shown

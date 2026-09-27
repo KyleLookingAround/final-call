@@ -11,6 +11,7 @@ The project notes (`CLAUDE.md`) hold what every change needs. This file holds ho
 - [Clocks and day stats](systems/clocks.md) (`02-clocks.js`, `08-stands.js`, `34-airline-operations.js`, `45-baggage.js`)
 - [Effects: the rating and money ledger](systems/effects.md) (`04-effects.js`)
 - [Guided start](systems/guided-start.md) (`36-guided-start.js`)
+- [Late runners and passengers' stories](systems/late-runners.md) (`61-late-runners.js`, `46-market.js`, `43-departures.js`, `12-drawing.js`, `14-board.js`, `13-camera.js`)
 - [Level-up card](systems/level-up-card.md) (`49-levelup.js`)
 - [Levels and Masterplan](systems/levels-and-masterplan.md) (`02-masterplan.js`, `09-construction-levels-days.js`, `18-masterplan-ui.js`)
 - [Lowmere](systems/lowmere.md) (`33-lowmere.js`)
