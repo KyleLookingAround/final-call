@@ -9,6 +9,15 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 - **Lessons:**
   - The level-up card's spec called it a card with a fixed foot (Masterplan/Play); the brief wanted the Ko-fi line "under the links to what's unlocked and never above them," which meant inside the scrolling body, not the fixed footer. Reading both before writing the line avoided putting it in the wrong place.
   - Screenshots needed the guided-start coach mark and spotlight hidden explicitly (`#coach`, `#spot`), not just `G.tour={done:1}`, to see the panels cleanly; the existing `levelup` check already did this for the level-up card, but not for Settings or What's new, which cost a re-shoot to notice.
+  - Several sessions writing look-backs to the top of `docs/LESSONS.md` at once gave a merge conflict on this PR; resolved by keeping both entries, newest first.
+
+## Coordinator playbook · 27 Sep 2026
+
+- **Numbers, this session:** session `session_01AvgXx1pvHYkeuWni23ymZz`, estimate $4: cost and context read 0 while the PR was being built, the usual early reading (`#28` and earlier lessons). One PR, no questions for the owner.
+- **Numbers, the retired coordinator:** session `session_01Y9W4q52Eb4JdVy18E9pk5o`: $176 and 642k of 1M context, over 25 hours (26 Sep 10:18 to 27 Sep 11:11).
+- **Lessons:**
+  - Nothing in the runbook said how a coordinator itself starts, sweeps, talks to an idle session, or hands off to the next one; it only said to keep it light. → A `coordinator` playbook (`.claude/skills/coordinator/SKILL.md`), pointed to from the `feature` playbook's "Keep the coordinator light" and the project notes' playbook list.
+  - `ListAgents` and `SendMessage` don't reach an idle cloud session; `create_trigger` with `persistent_session_id` and a near `run_once_at` does. → In the new playbook, so the next coordinator doesn't have to rediscover it.
 
 ## #39 Saves on the device only · 27 Sep 2026
 

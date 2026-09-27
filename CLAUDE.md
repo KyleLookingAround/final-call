@@ -36,7 +36,7 @@ Every change goes round the same loop, and each round leaves something that make
 
 To find your way around, start with `node tools/graph.mjs <system, file, function, hook, field or check>` rather than reading the docs end to end.
 
-Playbooks for each part are in `.claude/skills/`: `feature` (issue to merged PR, and splitting a big feature across several sessions), `balance` (measuring with the bot), `release` (history and save fixtures) and `steward` (getting a PR to green and merging parts). How each system works is in `docs/SYSTEMS.md`. Keep these notes and that file true: a PR that changes how something works updates them in the same PR.
+Playbooks for each part are in `.claude/skills/`: `feature` (issue to merged PR, and splitting a big feature across several sessions), `balance` (measuring with the bot), `release` (history and save fixtures), `steward` (getting a PR to green and merging parts) and `coordinator` (running the other sessions building a feature's parts). How each system works is in `docs/SYSTEMS.md`. Keep these notes and that file true: a PR that changes how something works updates them in the same PR.
 
 ## Build and test
 
