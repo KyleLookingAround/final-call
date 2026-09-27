@@ -1,0 +1,52 @@
+# Checks written before their code (docs/specs/terminal-place.md, "Checks"). One per line: a check's full name, or a group
+# and * ("floors: *") for a whole group. A pending check prints PEND while it fails; once it passes it fails the run until
+# its line comes out, so each part takes out its own lines in its PR. Only the checks-first PR and the coordinator add
+# lines, and the PR that brings the parts together leaves this file with comments only.
+
+# the groundwork: each layout's terminal table, floors on rooms, R.floor and the chip, nothing drawn under a solid roof
+plans: every layout's terminal comes from its own table
+plans: rooms and doorways have floors
+plans: the floor chip
+scene: nothing is drawn inside a hall under the roof
+# needs halls on two floors, so it may wait for the two floors part
+scene: one floor at a time
+
+# two floors in Classic
+floors: departures upstairs, arrivals below
+floors: people change floor only on escalators and lifts
+floors: families take the lift
+floors: nobody is stuck between floors
+floors: walks stay about the same
+floors: tapping a hall goes to its floor
+floors: old saves land on the right floor
+
+# windows and watchers
+windows: glass on every airside wall facing the apron
+windows: passengers watch a big jet go by
+windows: nobody watches after their gate is called
+windows: lit at night
+
+# decor and local character
+decor: nothing to place
+decor: it comes with the building
+decor: never in the way
+decor: local names from the region
+decor: signs fit their halls
+
+# the roof terrace and spotters
+terrace: hidden until it can be built
+terrace: seen at every zoom
+terrace: spotters crowd for something rare
+terrace: fewer at night and in rain
+terrace: the crowd is the only sign
+terrace: spotters stay on the roof
+terrace: small takings
+terrace: its card fits a phone
+
+# each layout's own floor plan
+plans: halls inside each main building
+plans: the way through, in order, in every layout
+plans: no layout's walk is a trap
+plans: every layout plays two hours
+plans: rebuilding moves people into the new plan
+plans: old saves load into their layout's plan
