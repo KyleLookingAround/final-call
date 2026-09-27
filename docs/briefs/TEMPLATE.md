@@ -39,4 +39,4 @@ KyleLookingAround <KyleMck10@hotmail.com> (the session-start hook sets it; check
 
 - Estimate: about $<fill: dollars> (<fill: why: its size, how many CI rounds>).
 - At each stopping point (a PR opened, CI back, a merge), read `get_session`: `usage.cost_usd` against the estimate (a 0 means not yet known, not free), and `rate_limit_info`. If status is "rejected" or `isUsingOverage` is true, schedule a `send_later` for a minute after `resetsAt` and end the turn.
-- Past twice the estimate: say why in the PR and in `docs/LESSONS.md`, and trim or split what's left.
+- Past twice the estimate: say why in the PR and in its lesson (`docs/lessons/`), and trim or split what's left.
