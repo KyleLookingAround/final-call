@@ -2,6 +2,14 @@
 
 After a PR merges, look back at the session that built it: what it cost, what slowed it, and what would have saved time or credits (the `steward` playbook's last step). Newest first. A lesson marked → changed something, and says where.
 
+## #49 The terminal as a place: the spec, checks planned first · 27 Sep 2026
+
+- **Numbers:** session `session_01Dvkimw2SjgEvPiF7DhWQKb`, estimate $8: $3.96 and 219k of 1M context at the merge ($3.24 at the first check-in; `get_session` gave no cost when the PR opened). Started 11:51, PR opened 11:57, approved by the owner through the coordinator at about 13:20 (under 1½ hours after the question opened, so no default was taken), merged about 13:35. CI green on every push (Checks about 6 minutes). Three merges of `main`, each with a LESSONS conflict from entries added at the top by both sides, the last one found only when the squash-merge was refused. → Merge `main` in straight before merging, not only when CI goes green.
+- **The knowledge graph:** three queries (`42-terminal.js`, `50-scene.js`, `perf`) were enough. It read `42-terminal.js`, `50-scene.js`, `tools/checks/scene.mjs` and the end of `check.mjs` whole, and grepped for the rest. `perf` again named the simulation's functions but not the group's budgets; those came from the check itself.
+- **Lessons:**
+  - The idea board's page shows only the questions. The owner's answers are in its database (`feedback/round2`), read with `ArtifactData`, not the Artifact read. → Say so in any brief that points at the idea board.
+  - Measuring showed the real airport's shares leave this bundle about 0.02× of drawing headroom. Budgets set before a bundle is built should add up across bundles, not start fresh. → The spec makes its groundwork win room back before any part spends it.
+  - `perf` on this machine gave Midfield 0.129×, against 0.244× in the real airport's spec. Numbers from different machines don't compare. → The spec records the machine and asks each part for the median of three runs on its branch and on `main`.
 ## #60 Idea board, September 2026 · 27 Sep 2026
 
 - **Numbers:** session `session_01JryZpLH3H7sVAKb1DwUm61`, estimate $10: about $2.70 by the time the ratings were recorded, 180k of 1M context. Board published 12:44; the owner rated all 60 ideas by 13:12 and said "done"; ratings read back and recorded the same afternoon.
