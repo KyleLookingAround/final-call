@@ -27,7 +27,12 @@ function drawWeatherCells(k){
     if(k>0.3)lblBg(c.type.toUpperCase(),c.x,c.y-c.r*0.6,c.type==='storm'?'#FFC72C':'#CDD4DA',9);
   }
 }
-function news(t){(G.news||(G.news=[])).unshift({d:dayOf(G.clock),t:hhmm(G.clock),m:t});G.news.length=Math.min(G.news.length,14)}
+const NEWS_INCIDENT=/ stopped \S+ for [\d.]+ min\.$/;
+function news(t){
+  const L=G.news||(G.news=[]),d=dayOf(G.clock),top=L[0];
+  if(top&&top.d===d&&NEWS_INCIDENT.test(t)&&NEWS_INCIDENT.test(top.base||top.m)){top.n=(top.n||1)+1;top.base=top.base||top.m;top.m=`${top.base} (+${top.n-1} more today)`;top.t=hhmm(G.clock);return}
+  L.unshift({d,t:hhmm(G.clock),m:t});L.length=Math.min(L.length,14);
+}
 function regionEvent(){
   const Ls=Object.values(G.lines||{}).filter(L=>!lineDown(L));if(!Ls.length)return false;
   const sea=seasonOf(dayOf(G.clock)).name,dur=m=>G.lv.control?m/2:m,R2=R.fx.line||(R.fx.line={});

@@ -70,7 +70,10 @@ const UPDATES=[
 ];
 function renderNews(auto){
   const seen=G.seen??0,fresh=UPDATES.filter(u=>u.v>seen);
-  $('#newsList').innerHTML=UPDATES.map((u,k)=>`<details class="upd"${(auto?u.v>seen:k===0)?' open':''}><summary><span class="uv">${u.v<=15?'Up to 15':'Version '+u.v}</span> ${u.title}${u.v>seen&&auto?' <span class="live">New</span>':''}</summary><ul>${u.points.map(p=>`<li>${p}</li>`).join('')}</ul></details>`).join('');
+  const row=(u,open)=>`<details class="upd"${open?' open':''}><summary><span class="uv">${u.v<=15?'Up to 15':'Version '+u.v}</span> ${u.title}${u.v>seen&&auto?' <span class="live">New</span>':''}</summary><ul>${u.points.map(p=>`<li>${p}</li>`).join('')}</ul></details>`;
+  // a young save (Airfield or Local Airport) hasn't reached most of what's in the older history, so fold it away
+  const cut=G.level<=1?Math.max(fresh.length,3):UPDATES.length,head=UPDATES.slice(0,cut),rest=UPDATES.slice(cut);
+  $('#newsList').innerHTML=head.map((u,k)=>row(u,auto?u.v>seen:k===0)).join('')+(rest.length?`<details class="upd"><summary>${rest.length} earlier version${rest.length>1?'s':''}</summary>${rest.map(u=>row(u,false)).join('')}</details>`:'');
   $('#newsT').textContent=auto&&fresh.length?`What's new`:`What's new · all versions`;
 }
 function openNews(on,auto){
