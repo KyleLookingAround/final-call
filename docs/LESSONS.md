@@ -2,6 +2,15 @@
 
 After a PR merges, look back at the session that built it: what it cost, what slowed it, and what would have saved time or credits (the `steward` playbook's last step). Newest first. A lesson marked → changed something, and says where.
 
+## #49 The terminal as a place: the spec, checks planned first · 27 Sep 2026
+
+- **Numbers:** session `session_01Dvkimw2SjgEvPiF7DhWQKb`, estimate $8. `get_session` gave no cost when the PR opened, so it isn't known yet. Started 11:51, PR opened 11:57. No code. One question issue for the owner (#48, six choices, each with a default).
+- **The knowledge graph:** three queries (`42-terminal.js`, `50-scene.js`, `perf`) were enough. It read `42-terminal.js`, `50-scene.js`, `tools/checks/scene.mjs` and the end of `check.mjs` whole, and grepped for the rest. `perf` again named the simulation's functions but not the group's budgets; those came from the check itself.
+- **Lessons:**
+  - The idea board's page shows only the questions. The owner's answers are in its database (`feedback/round2`), read with `ArtifactData`, not the Artifact read. → Say so in any brief that points at the idea board.
+  - Measuring showed the real airport's shares leave this bundle about 0.02× of drawing headroom. Budgets set before a bundle is built should add up across bundles, not start fresh. → The spec makes its groundwork win room back before any part spends it.
+  - `perf` on this machine gave Midfield 0.129×, against 0.244× in the real airport's spec. Numbers from different machines don't compare. → The spec records the machine and asks each part for the median of three runs on its branch and on `main`.
+
 ## #39 Saves on the device only · 27 Sep 2026
 
 - **Numbers:** done by the terminal's finishing session, at the owner's request, between features. PR opened 11:25, merged 11:32. One push after it opened (a docs wording fix); CI green first time. Bot STATE identical to main on seeds 1–3.
