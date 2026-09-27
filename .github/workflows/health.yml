@@ -44,6 +44,7 @@ jobs:
         id: check
         continue-on-error: true
         run: |
+          mkdir -p build
           set -o pipefail
           npm run check 2>&1 | tee build/health-check.log
       - name: Bot, seed 1, 1150 game hours, keeping Classic
