@@ -4,13 +4,14 @@ What's being worked on, what's next, and ideas not yet agreed. Anything here get
 
 ## Now
 
-Nothing in progress. Sound is next, from the order below.
+- **Sound** (#27, spec `docs/specs/sound.md`): flight announcements with the words on the board, occasional spoken calls, and ambience that follows the camera.
 
 ## The owner's order of bundles
 
 From the idea board. Each bundle gets an issue and a spec before work starts.
 
 1. **Sound.** Announcements for your real flights now and then: mostly a chime with the words on the board, plus an occasional spoken call. Sound that follows the camera.
+   - **Then a level-up screen** (the owner's addition, before bundle 2). A card for each new level, naming what it has just unlocked, with links straight there (Masterplan, Region, World, each new upgrade's tab). It pauses the game and restores its speed when it closes. It never shows in the guided start or headless, can be turned off in Settings › Notifications, and fits a 320 px phone.
 2. **Looks like a real airport.** Apron markings, day and night lighting, roofs that cut away, better planes, weather you can see, apron vehicles. A richer top-down view, not isometric.
 3. **The terminal as a place.** Two levels, a roof terrace with spotters, windows, local character, and decor that comes with the building (the owner doesn't want to place decor).
 4. **Passengers with a voice.** Kinds of passenger, reviews on the map, a heat map of where it hurts, tap a complaint to go to its fix, follow a passenger.
