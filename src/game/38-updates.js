@@ -1,6 +1,11 @@
 /* ================= WHAT'S NEW: every version's new features, shown after an update and from Settings or Help ================= */
 // Newest first. Add an entry with each release; the checks make sure the newest one matches docs/HISTORY.md.
 const UPDATES=[
+  {v:29,title:'The airport sounds like one',points:[
+    'The terminal calls your flights: boarding, gate calls, final calls and gate changes, each with a chime and its words along the foot of the board.',
+    'Now and then a voice reads a final call or a gate change.',
+    'The hum of the terminal, jets on the runway and rain follow the camera as you zoom and scroll. Nights go quiet.',
+    'Turn each part on or off in Office › Settings › Sound.']},
   {v:28,title:'A real terminal',points:[
     'Passengers go through real halls: check-in islands, bag drop and a security hall with search tables; then passports, e-gates, customs and an arrivals hall where people meet them.',
     'Bags ride a sorter and tug trains to the plane, and arriving ones share the carousels. Tight transfers can miss their flight.',

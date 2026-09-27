@@ -55,9 +55,10 @@ A new group, `sound` (`tools/checks/sound.mjs`), with a stub audio context and s
 ## Files
 
 - New: `src/game/48-sound.js`, `tools/checks/sound.mjs`.
-- `06-sound.js`: `tone` gains an optional pan and gain node; ticks and tills check `sndFx`.
+- `06-sound.js`: ticks and tills check `sndFx`. The ambience builds its own filtered-noise chains in `48-sound.js` (a panner per runway), so `tone` is unchanged. The boarding chime moves from `08-stands.js` into the announcer.
 - `14-board.js`: the announcement line.
 - `15-panel.js`: the Sound settings rows.
+- `23-boot.js`: `soundTick()` in the frame loop.
 - `03-state.js`: the new settings' defaults.
 
 ## Left out

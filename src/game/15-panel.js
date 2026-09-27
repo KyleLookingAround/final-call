@@ -225,7 +225,11 @@ function settingsHTML(){
   h+=row('autoFares','Route manager','Sets each route’s fare to whatever earns most: dearer where people will pay, cheaper where seats go empty.',[[true,'On'],[false,'Off']]);
   h+=row('autoDuty','Duty manager','Calls each gate in time for its walk from the market place, so passengers shop for longer without holding flights, and prices hotel rooms.',[[true,'On'],[false,'Off']]);
   {const g=gapPref();h+=`<div class="sec">Screen</div><div class="polrow"><div class="rt">Space for the camera</div><div class="rd">Leaves a band at the top of the screen so a phone’s camera or notch doesn’t cover the board. Saved on this device only.</div><div class="chips">${[['off','None'],['small','Small'],['medium','Medium'],['large','Large']].map(([v,l])=>`<button class="chip${g===v?' on':''}" data-gap="${v}">${l}</button>`).join('')}</div></div>`}
-  h+=`<div class="sec">Sound</div><div class="polrow"><div class="rd">Chimes, cash tills and the runway.</div><div class="chips"><button class="chip${G.sound?' on':''}" data-sound="1">On</button><button class="chip${G.sound?'':' on'}" data-sound="0">Off</button></div></div>`;
+  h+=`<div class="sec">Sound</div><div class="polrow"><div class="rt">Sound</div><div class="rd">Everything below, all at once.</div><div class="chips"><button class="chip${G.sound?' on':''}" data-sound="1">On</button><button class="chip${G.sound?'':' on'}" data-sound="0">Off</button></div></div>`;
+  h+=row('sndAnn','Announcements','Calls for your flights: a chime, and the words along the foot of the board.',[['on','On'],['chime','Chime only'],['off','Off']]);
+  h+=row('sndVoice','Spoken calls','Now and then a voice reads a final call or a gate change, at 1× or 2×.',[[true,'On'],[false,'Off']]);
+  h+=row('sndAmb','Ambience','The terminal’s hum, jets on the runway and rain, following the camera.',[[true,'On'],[false,'Off']]);
+  h+=row('sndFx','Effects','Cash tills, and ticks as passengers pay.',[[true,'On'],[false,'Off']]);
   return h;
 }
 function applySettings(){R.tipSig=null;renderTip();if(SET().msgs!=='all'){R.toasts=R.toasts.filter(t=>t.choices&&SET().msgs==='key'||t.kind==='warn'&&SET().msgs==='key');renderToasts()}if(SET().pops==='off')R.floaters=[];R.goalSig=null;renderTabs();renderPlanBtn();refreshUI();save()}
