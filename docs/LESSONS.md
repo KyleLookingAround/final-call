@@ -11,6 +11,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 ### Merge-chasing
 
 - [#94 Fewer clashes between sessions · 27 Sep 2026](lessons/94-fewer-clashes.md)
+- [#46 Runbook experiment [B], second half: only the touched check groups on drafts · 27 Sep 2026](lessons/79-ci-touched.md)
 
 ### Not sorted yet
 
