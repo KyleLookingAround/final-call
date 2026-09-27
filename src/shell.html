@@ -247,7 +247,8 @@ body.fs .tabs .drawclose{display:grid}
 .hk i.d{width:10px;height:10px;border-radius:50%;flex:none;box-shadow:0 0 0 1px #14171B}
 .hk i.sq{width:8px;height:8px;flex:none}
 .hk i.ring{width:10px;height:10px;border-radius:50%;flex:none;box-shadow:0 0 0 1.5px var(--bad);background:#E6E1D6}
-.hcard .close{float:right;border:0;background:var(--surface2);border-radius:4px;width:32px;height:32px;font:600 16px/1 var(--mono);color:var(--muted)}
+.close{border:0;background:var(--surface2);border-radius:4px;width:32px;height:32px;font:600 16px/1 var(--mono);color:var(--muted)}
+.hcard .close{float:right}
 @media (max-width:899px){
   .grip{display:block;height:22px;flex:none;cursor:ns-resize;touch-action:none;position:relative}
   .grip::before{content:"";position:absolute;left:50%;top:8px;width:40px;height:4px;margin-left:-20px;border-radius:2px;background:#3F4852}
@@ -441,7 +442,7 @@ table.rtab th{font:600 10px/1 var(--mono);color:var(--muted);text-align:right;pa
 .lvcard{width:min(600px,100%);max-height:100%;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.55)}
 .lvhero{position:relative;flex:none;background:radial-gradient(120% 140% at 0% 0%,rgba(255,199,44,.16),transparent 55%),var(--board);border-bottom:1px solid #22272D;padding:18px 20px 16px;overflow:hidden}
 .lvhero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:repeating-linear-gradient(90deg,var(--sign) 0 18px,transparent 18px 34px);opacity:.55}
-.lvhero .close{position:absolute;top:12px;right:12px;border:0;background:rgba(255,255,255,.06);border-radius:6px;width:34px;height:34px;font:600 16px/1 var(--mono);color:var(--muted)}
+.lvhero .close{position:absolute;top:12px;right:12px}
 .lvkick{display:flex;align-items:center;gap:8px;font:700 12px/1 var(--disp);letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
 .lvkick .tag{background:var(--sign);color:var(--signInk);padding:4px 6px 3px;border-radius:2px;letter-spacing:.12em}
 .lvkick .up{color:var(--sign)}
@@ -480,7 +481,7 @@ button.lvtile:hover{border-color:var(--sign)}
 .lvfoot button{border-radius:8px;padding:11px 16px 10px;font:600 14px/1 var(--mono);white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .lvplan{border:1.5px solid var(--sign);background:none;color:var(--sign)}
 .lvplay{border:1.5px solid var(--sign);background:var(--sign);color:var(--signInk);min-width:96px}
-@media (max-width:420px){.lvhero{padding:16px 16px 14px}.lvbody{padding:12px 16px 6px}.lvfoot{padding-inline:16px}.lvfoot button{flex:1}.lvtile b{font-size:19px}}
+@media (max-width:420px){.lvhero{padding:16px 16px 14px}.lvbody{padding:12px 16px 6px}.lvfoot{padding-inline:16px}.lvplay{flex:1}.lvtile b{font-size:19px}}
 @media (max-width:360px){.lvpts{display:none}}
 @media (max-height:520px){.lvhero{padding:12px 18px 12px}.lvhero h2{font-size:26px;margin-top:6px}.lvhero h2 small{display:inline;margin:0 8px 0 0;font-size:12px}.lvladder{margin-top:8px}.lvends{display:none}.lvtile{padding:8px 11px 7px}.lvtile b{font-size:17px}.lvbody{padding-top:10px}.lvfoot{padding-block:8px}.lvfoot button{padding-block:9px 8px}}
 @media (max-width:899px){#lvlup{padding:calc(12px + var(--topgap)) 12px 12px}}
@@ -503,7 +504,7 @@ button.lvtile:hover{border-color:var(--sign)}
 .ptag.low{top:var(--hb,42px);left:auto;right:8px;transform:none}
 .hud{max-width:calc(100% - 16px);flex-wrap:wrap;justify-content:flex-end}
 .ptag.low .pk{display:none}
-@media (pointer:coarse){.ptag .pk{display:none}}
+@media (pointer:coarse){.ptag .pk{display:none}.hkeys{display:none}}
 body.fsstack .fsbar{top:var(--hb,42px);right:auto}
 body.fsstack .toasts{top:calc(var(--hb,42px) + 36px)}
 .lcard.riv{border-left:3px solid #B58CFF}
@@ -647,17 +648,19 @@ body.fs .cam{max-width:calc(100% - 172px)}
       <div class="hk"><kbd>Tap</kbd>Manage a gate, shop or area</div>
       <div class="hk"><kbd>2× tap</kbd>Zoom in on that spot</div>
     </div>
-    <h3>Keyboard</h3>
-    <div class="hgrid">
-      <div class="hk"><kbd>Space</kbd>Pause or resume</div>
-      <div class="hk"><kbd>1</kbd>–<kbd>8</kbd>Jump to a gate</div>
-      <div class="hk"><kbd>0</kbd>See the whole airport</div>
-      <div class="hk"><kbd>R</kbd>Airport or region map</div>
-      <div class="hk"><kbd>W</kbd>World routes map</div>
-      <div class="hk"><kbd>P</kbd>Masterplan</div>
-      <div class="hk"><kbd>+</kbd><kbd>−</kbd>Zoom</div>
-      <div class="hk"><kbd>F</kbd>Full screen</div>
-      <div class="hk"><kbd>H</kbd>This guide</div>
+    <div class="hkeys">
+      <h3>Keyboard</h3>
+      <div class="hgrid">
+        <div class="hk"><kbd>Space</kbd>Pause or resume</div>
+        <div class="hk"><kbd>1</kbd>–<kbd>8</kbd>Jump to a gate</div>
+        <div class="hk"><kbd>0</kbd>See the whole airport</div>
+        <div class="hk"><kbd>R</kbd>Airport or region map</div>
+        <div class="hk"><kbd>W</kbd>World routes map</div>
+        <div class="hk"><kbd>P</kbd>Masterplan</div>
+        <div class="hk"><kbd>+</kbd><kbd>−</kbd>Zoom</div>
+        <div class="hk"><kbd>F</kbd>Full screen</div>
+        <div class="hk"><kbd>H</kbd>This guide</div>
+      </div>
     </div>
     <h3>What you’re looking at</h3>
     <div class="hgrid">

@@ -5,7 +5,7 @@ const TOUR=[
   {t:'Speed time up whenever you like.',q:'.hud [data-speed="4"]',ok:()=>R.speed>=4},
   {t:'Queues growing? Open a second check-in desk.',q:()=>G.tab==='terminal'&&$('[data-buy="desks"]')?'[data-buy="desks"]':'[data-tab="terminal"]',ok:()=>G.lv.desks>=1},
   {t:'Get a flight away on time. The board shows every departure, and punctual ones pay a bonus.',q:'.board',ok:()=>G.ontime>=1},
-  {t:'Goals lead the way from here, and tips appear under the map when something needs you.',q:'#goal',next:1,last:1},
+  {t:'Goals lead the way from here, and tips appear under the map when something needs you.',q:'#goal',av:['.stats','#tabs'],next:1,last:1},
 ];
 function tourOn(){return !R.sim&&G.tour&&!G.tour.done&&TOUR[G.tour.s]}
 function tourRect(S){
@@ -20,7 +20,10 @@ function tourStep(){
   c.hidden=false;const r=tourRect(S),vw=innerWidth,vh=innerHeight,cw=Math.min(340,vw-24);c.style.width=cw+'px';
   if(!r){sp.hidden=true;c.style.left=(vw-cw)/2+'px';c.style.top=Math.max(12,vh-c.offsetHeight-90)+'px';return}
   sp.hidden=false;const pd=6;sp.style.left=(r.left-pd)+'px';sp.style.top=(r.top-pd)+'px';sp.style.width=(r.width+pd*2)+'px';sp.style.height=(r.height+pd*2)+'px';
-  const ch=c.offsetHeight,below=r.top+r.height+pd+10,above=r.top-pd-10-ch;let top=below+ch<vh-8?below:above>8?above:Math.min(vh-ch-8,Math.max(8,r.top+r.height/2-ch/2));
+  // some steps sit beside other chrome (the stats row, the tab bar): keep clear of that too, not just the spotlighted rect
+  const avr=(S.av||[]).map(sel=>document.querySelector(sel)).filter(Boolean).map(el=>el.getBoundingClientRect());
+  const pt=Math.min(r.top,...avr.map(a=>a.top)),pb=Math.max(r.bottom,...avr.map(a=>a.bottom));
+  const ch=c.offsetHeight,below=pb+pd+10,above=pt-pd-10-ch;let top=below+ch<vh-8?below:above>8?above:Math.min(vh-ch-8,Math.max(8,r.top+r.height/2-ch/2));
   if(top<r.top+r.height&&top+ch>r.top&&r.height>vh*0.4)top=Math.max(8,vh-ch-12);
   c.style.top=top+'px';c.style.left=clamp(r.left+r.width/2-cw/2,12,vw-cw-12)+'px';
 }
