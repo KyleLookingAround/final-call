@@ -1,8 +1,16 @@
 # The terminal as a place
 
-Issue: #48 (approval and choices) · Status: Proposed · PRs: this spec (added as they open)
+Issue: #48 · Status: Approved (the owner approved it on 27 Sep 2026, with the default for each of its six choices; see below) · PRs: #49 (this spec; the rest added as they open)
 
 Bundle 3 of `docs/ROADMAP.md`, plus its follow-up, each layout's own terminal floor plan (step 3 of `docs/specs/terminal.md`). From the idea board, the owner loved the two-level terminal and the viewing terrace with spotters, said yes to windows and to local character, and said no to placing decor. They also chose a richer top-down view, "both" for more to look at and more to decide, and "both" for a lively crowd and individuals. The checks come first (experiment [D]): the Checks section is the heart of this spec, and the first PR writes them before any code.
+
+**The owner's choices (#48):**
+1. Two floors from the start, in every layout.
+2. Decor doesn't change the rating.
+3. The terrace is a Terminal upgrade from level 3, and its café earns at most 2% of a day's income.
+4. Zooming in shows departures (the upper floor) first.
+5. The drawing budget stays 0.55×, and the groundwork wins room back.
+6. One part draws the other eight layouts' floor plans, split in two only if its brief finds it too big.
 
 ## What the player gets
 
@@ -31,7 +39,7 @@ The terminal stops being one flat diagram shared by every layout. It becomes a b
 - **The view:** `R.floor` (runtime, `'up'` or `'down'`, defaulting to `'up'`) picks the floor drawn. The terminal's layers draw only the rooms and passengers on that floor. Nothing inside a hall is drawn where the roof is solid (`roofA`, the roofs part's opacity at the current zoom; the groundwork exposes it if the roofs part hasn't).
 - **Spotters** are a count, not passengers: `R.spot` goes up and down with the hour, the weather and rare arrivals, and a sample of at most 40 is drawn. They never enter the terminal's queues. The terrace café earns a little per spotter.
 - **Windows** are edges of airside rooms that face the apron, worked out from each layout's rooms. A watcher is a passenger already waiting for their gate call, within reach of the glass. They go to the glass, stay until the plane has passed, and go back, and never after their gate is called.
-- **Decor** is worked out from the layout's rooms, what's built and the level. It is drawn only, never saved or placed, and has no effect on the rating (safer default; see choices).
+- **Decor** is worked out from the layout's rooms, what's built and the level. It is drawn only, never saved or placed, and has no effect on the rating (the owner's choice).
 - **Local names** come from `PLACES` in the region, picked with a hash of the unit's index, not with `rnd()`, so they never change the game.
 - **Unlocks:** two floors, windows, decor and local names from the start. The terrace is an upgrade from level 3, `G.lv.terrace`, hidden before. Each layout's plan comes with the layout.
 - **Managers and recommendations:** nothing to manage. The advisor's tips and the board's lines fly the camera to the right floor. The duty manager ignores the terrace.
@@ -166,7 +174,7 @@ Baseline, the terminal's five parts (`docs/LESSONS.md`): three game-code bugs fo
 ## Left out
 
 - Placing, moving or buying decor (the owner said no).
-- Decor that changes the rating (a choice for the owner; off by default).
+- Decor that changes the rating (the owner chose not to).
 - More than two floors, mezzanines and cutaway views of both floors at once.
 - Staff as people; kinds of passenger and their reviews (bundle 4).
 - An isometric view.

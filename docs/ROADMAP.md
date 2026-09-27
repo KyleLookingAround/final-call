@@ -8,7 +8,7 @@ What's being worked on, what's next, and ideas not yet agreed. Anything here get
 - **Level-up screen** (#29, spec `docs/specs/level-up.md`, version 30): a card for each new level with what it unlocked.
 
 - **Looks like a real airport** (#37, spec `docs/specs/real-airport.md`): the groundwork (drawing layers and a lighting pass, no change to play) first, then the parts two or three at a time from their briefs in `docs/briefs/`: apron markings and lighting, better planes and roofs; then weather you can see and vehicles on the apron.
-- **The terminal as a place** (#48, spec `docs/specs/terminal-place.md`, Proposed, awaiting the owner): two floors, windows, decor that comes with the building, local character, a roof terrace with spotters, and each layout's own floor plan. Its checks are written first (experiment [D]), then groundwork after the real airport merges, then the parts.
+- **The terminal as a place** (#48, spec `docs/specs/terminal-place.md`, approved): two floors, windows, decor that comes with the building, local character, a roof terrace with spotters, and each layout's own floor plan. Its checks are written first (experiment [D]), then groundwork after the real airport merges, then the parts.
 
 ## The owner's order of bundles
 
