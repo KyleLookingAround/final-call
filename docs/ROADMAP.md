@@ -8,6 +8,7 @@ What's being worked on, what's next, and ideas not yet agreed. Anything here get
 - **Level-up screen** (#29, spec `docs/specs/level-up.md`, version 30): a card for each new level with what it unlocked.
 
 - **Looks like a real airport** (#37, spec `docs/specs/real-airport.md`): the groundwork (drawing layers and a lighting pass, no change to play) first, then the parts two or three at a time from their briefs in `docs/briefs/`: apron markings and lighting, better planes and roofs; then weather you can see and vehicles on the apron.
+- **The terminal as a place** (#48, spec `docs/specs/terminal-place.md`, approved): two floors, windows, decor that comes with the building, local character, a roof terrace with spotters, and each layout's own floor plan. Its checks are written first (experiment [D]), then groundwork after the real airport merges, then the parts.
 
 ## The owner's order of bundles
 
@@ -21,8 +22,8 @@ From the idea board. Each bundle gets an issue and a spec before work starts.
 5. **A 24-hour airport with stakes.** Ground crews and turnarounds, cargo and night flights, airlines that leave if treated badly: the owner wants to be able to fail.
 6. **Hub and a second airport.** Waves, running Lowmere, rivals, alliances.
 
-- **Parked:** winter, seasons and world events; music.
-- **Rejected:** placing decor; a share price; eras; a sandbox.
+- **Parked:** winter, seasons and world events. From the September board: see a layout before rebuilding; missed connections you can see; air show weekend; start again with a head start; and #57's disruption days, a mix of planes that pays, costs that grow with the airport, holding your level, and a ground crew for the whole apron.
+- **Rejected:** placing decor; a share price; eras; a sandbox. From the September board: share a look around; daily postcard; second-hand planes; traffic rights; local times; take a plan back; managers with a style; insurance; and #57's night flights that pay for their noise.
 - **Follow-up to the terminal:** each layout's own terminal floor plan (step 3 of `docs/specs/terminal.md`). Every layout shares Classic's halls today.
 
 ## The runbook (experiments)
@@ -47,6 +48,49 @@ How sessions work, not the game. Each one is small, measured and recorded in `do
 
 ## Ideas (not agreed)
 
+- **From the September idea board** (`docs/ideas/board-2026-09.md`), in the owner's order. All 60 rated: 3 loved, 38 liked, 9 parked, 10 no.
+  1. **Late runners** (loved). Passengers still shopping at final call run to the gate; the gate holds or closes and the board shows GATE CLOSING. *Owner:* build on it with a story page for any passenger you tap, in the style of RimWorld: where they have been and how they felt, told as a story.
+  2. **Famous faces** (loved). Photographers at arrivals, fans at the barrier and a busy café when someone famous flies through.
+  3. **Day in a minute** (loved). A time-lapse of yesterday at your airport, played back over the map.
+  4. **A second rival**. Later on, a new airport grows at a coast town in the region, with holiday flights and its own share line.
+  5. **Build from the map**. Tap an empty stand site, shop unit or car park on the map to buy it there.
+  6. **Building sites you can watch**. Fences, a crane and a progress ring on each site while it’s built.
+  7. **Holding points and rapid exits**. A visible queue at the runway’s holding point at peaks; a rapid-exit taxiway clears landings quicker.
+  8. **A card for each plane**. Tap a plane for its age, hours, wear, routes and best day, and name it for the board.
+  9. **Route openings**. A water-cannon salute for a new route’s first flight, and its first week against the forecast on the world map.
+  10. **Charters at short notice**. A club, a tour or a school trip asks for a charter tomorrow; its passengers arrive together.
+  11. **Big groups**. A school trip or a stag party arrives as one crowd that swamps check-in, flagged on the board a day ahead.
+  12. **A staff chart for the day**. Bars for desks, bag drop, lanes and passport desks across the day; drag one to change a shift.
+  13. **Toilets and cleaners**. Queues at busy toilets and messy halls at peaks; cleaners you roster keep them right.
+  14. **Car parks by kind**. Short stay, long stay and valet, each priced on its own, with a shuttle from the long-stay park. *Owner:* and a multi-storey car park at the airport that you can see.
+  15. **Freight by rail**. A rail spur to a cargo shed, so freighters’ loads leave by train.
+  16. **Staff on the lines**. Airport staff ride your lines at shift change, so early and late services carry them.
+  17. **Where to fly next**. Cities glow by how many travellers want to go there and aren’t being flown.
+  18. **Lowmere poaches partners**. Lowmere offers one of your partner airlines a cheaper deal, shown on its gate card: match it or let them go.
+  19. **Look at Lowmere**. Tap Lowmere on the region map to see its apron and planes today.
+  20. **See a plan before approving**. A plan shows what it changes on the map before you spend the point.
+  21. **Choose what kind of airport**. At City Airport and Major Hub, pick a leaning (business, holiday or cargo) that shifts demand and the Masterplan. Not a scenario.
+  22. **Profit per stand and route**. A chart in Office › Money of what each stand and route earned this week, so the weak ones stand out.
+  23. **Unattended bag**. Police tape closes part of a hall for twenty minutes; queues back up on the map.
+  24. **Bird strike**. A plane returns, the runway closes for an inspection, and arrivals circle in a visible stack.
+  25. **One-thumb phone play**. Speed, pause and the most-used tabs within reach of one thumb on a phone.
+  26. **While you were away, on the map**. The welcome-back card pins what happened on the map, not just the money.
+  27. **Find anything**. Type a flight, gate, city or line and the camera goes there.
+  28. **Idle camera**. Leave the game alone and the camera follows a landing, a pushback or a train.
+  29. **Sounds for each hall**. Trays at security, the belt alarm at reclaim, tills in the market place, heard over each hall.
+  30. **Why did that change?**. Tap the rating, on-time or cash figure to see what moved it today.
+  31. **Next steps after the tour**. Short optional steps unlock with each level, each pointing at where to do it.
+  32. **Tap to explain**. In help mode, tap any building or vehicle to see what it does.
+  33. **World rankings**. Past level 9, a yearly world ranking of airports to climb and defend. *Owner:* is there a way to have a real leaderboard without a database we have to maintain?
+  34. **Your airport’s story**. A timeline of firsts, each with a snapshot of the map. *Owner:* maybe linked with the stamps.
+  35. **Photo mode**. Hide the panels, pick the time of day and frame your airport for a picture.
+  36. **A rating that reflects the last day (#57, 1)**. The rating moves with how the airport did today, not a sum that sits at 100.
+  37. **Airlines that choose you (#57, 2)**. Partner airlines with names and a mood from their turnarounds, who add flights or leave.
+  38. **Levels that ask for something new (#57, 3)**. From International Airport, each level asks for one thing besides counts, named on the goal bar.
+  39. **Passengers who remember (#57, 4)**. Each city remembers how its travellers were treated, by kind; short-lived reviews on the map.
+  40. **Lowmere that fights back (#57, 8)**. Lowmere goes after routes where you run late; buying it costs more the stronger it is.
+  41. **Challenges you can reach (#57, 12)**. Weekly challenges as one easy, one fair and one stretch.
+  - **Music**, revived from parked on the board: a calm score that shifts with the time of day and how busy you are. Not placed in the order.
 - **Let the transport manager build.** An opt-in chip that lets it buy its top suggestion within a budget. Left out of version 27, where it only suggests.
 - **Fares that riders notice.** In the region model, dearer line fares pay on almost every line, so the manager picks premium nearly everywhere. Riders could weigh fares more, so cheap fares win flyers on airport lines.
 - **Timetables by time of day.** More services at the peaks than at midday or late evening.
@@ -55,7 +99,7 @@ How sessions work, not the game. Each one is small, measured and recorded in `do
 - **Speed on older phones.** A check that fails if a level 9 airport draws too slowly on a throttled phone profile.
 - **Page size budget.** A check on the size of `dist/index.html`, which grows with every feature.
 - **Accessibility.** Route and line colours that work for colour-blind players, and a larger-text option.
-- **Game logic ideas** (`docs/ideas/game-logic.md`): twelve ideas from the bot on seeds 1–3, ranked. The top three:
+- **Game logic ideas** (`docs/ideas/game-logic.md`): twelve ideas from the bot on seeds 1–3, ranked, rated on the September board (the liked ones are in the list above; the rest are parked or rejected below). The top three:
   - **A rating that reflects the last day.** The rating is full from the first day, so nothing that costs rating costs anything.
   - **Airlines that choose you.** Partner airlines with a mood from their turnarounds, who add flights or leave.
   - **Levels that ask for something new.** One ask per level from 4, so levels 7–9 aren't a wait for passengers flown.
