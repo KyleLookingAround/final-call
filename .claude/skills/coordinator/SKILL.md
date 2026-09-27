@@ -60,6 +60,6 @@ description: Run the other Final Call sessions building a feature's parts - the 
 ## 10. The lessons tidy
 
 - A Routine with no schedule tidies `docs/lessons/`: it merges lessons that say the same thing, groups them by theme, deletes those out of date or already written in, turns a lesson seen three times without a → into a change, and squash-merges its own PR. Its brief, which is also its prompt, is `docs/briefs/lessons-tidy.md`; each firing starts a fresh session.
-- Routine id: `trig_01WWjSqun7aAX15iLCb4PQdc` ("Final Call: tidy the lessons"). It was created with no connectors and no repository attached, so its session clones the repo itself; if a firing can't push or open its PR, recreate it from the claude.ai Routines page with this repo and GitHub attached, and put the new id here.
+- Routine id: `trig_01WWjSqun7aAX15iLCb4PQdc` ("Final Call: tidy the lessons"). It was created with no connectors and no repository attached, so its session clones the repo itself; if a firing can't push or open its PR, recreate it from the Routines page with this repo and GitHub attached, and put the new id here.
 - It fires when a look back leaves 8 or more lessons new since the last tidy (`node tools/join.mjs` counts them): the session that added the lesson fires it (`fire_trigger`) and says so, as the `steward` playbook's last step says. Nobody starts it by hand or on a schedule.
 - At a sweep, if a tidy PR (`feature/lessons-tidy-…`) is open, let it finish before firing again. To change what it does, edit the brief and `update_trigger` its prompt to match.

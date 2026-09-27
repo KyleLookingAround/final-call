@@ -63,15 +63,15 @@ jobs:
           for row in "${rows[@]}"; do
             pr=${row%% *} head=${row#* }
             echo "::group::#$pr $head"
-            git checkout --quiet --force -B catch-up "origin/$head"
-            git reset --quiet --hard "origin/$head"
-            git clean -fdq
+            if ! { git checkout --quiet --force -B catch-up "origin/$head" && git reset --quiet --hard "origin/$head" && git clean -fdq; }; then
+              echo "couldn't check out $head"; echo "::endgroup::"; continue
+            fi
             if git merge-base --is-ancestor "$main" HEAD; then echo "already has main"; echo "::endgroup::"; continue; fi
             if ! git merge --no-edit -m "Merge main into $head" origin/main > /tmp/merge.log 2>&1; then
               conflicted=$(git diff --name-only --diff-filter=U)
               joined=$(node -e "import('./tools/join.mjs').then(m=>console.log(m.joinedFiles().join('\n')))")
               outside=$(comm -23 <(echo "$conflicted" | sort) <(echo "$joined" | sort))
-              if [ -z "$outside" ] && node tools/join.mjs --write && ! grep -lE '^(<{7}|>{7}) ' $conflicted; then
+              if [ -n "$conflicted" ] && [ -z "$outside" ] && node tools/join.mjs --write && ! grep -lE '^(<{7}|>{7}) ' $conflicted; then
                 git add $conflicted
                 git commit --quiet --no-edit
                 echo "conflicts only inside the joined lists: rejoined"

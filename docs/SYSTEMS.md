@@ -27,6 +27,33 @@ The project notes (`CLAUDE.md`) hold what every change needs. This file holds ho
 
 The game is one strict IIFE, split into files in `src/game/`. The build joins them in file-name order, so they share one scope: any file can use what another declares at the top level, and order only matters for code that runs at load time (`99-start.js` runs last and starts the game). Keep a new system in its own file, numbered before `99-start.js`, and start it with a one-line `/* ===== what's in it ===== */` comment: the table below is built from those lines. Some functions sit where they were first written rather than where their name suggests (`pickRoute` is in `03-state.js`), so search `src/game/` by name.
 
+The main names, by file group (the joined table below is the complete list, from each file's first line):
+
+| Files | What's in them |
+| --- | --- |
+| `00-random` | `rnd()`, the seeded random generator the simulation uses |
+| `01-constants` to `04-geometry` | Constants and level data, the Masterplan (`TECH`), state (`G`, `R`, `DEFAULT`), airport geometry |
+| `05-flights` to `11-main-update` | Flights, sound, passengers, stands, construction/levels/days, events and toasts, `update()` |
+| `12-drawing` to `14-board` | Drawing the airport, the camera, the departures board |
+| `15-panel` to `21-layout` | Side panel, advisor, help/keys/speed, Masterplan UI, phone bottom sheet, full screen, layout |
+| `22-save`, `23-boot` | Saving and migrating (`resetAll`), boot and the frame loop |
+| `24-region-places` to `30-region-ui` | The region: places and stations, helpers, the journey network, events and line building, weather, map drawing, the Region tab |
+| `31-routes` to `36-guided-start` | Routes and the world map, managers and recommendations, Lowmere, airline operations, records/stamps/challenges, guided start |
+| `37-update-check` | Tells a player on the published site when a new version is ready, and reloads to it |
+| `38-updates` | What's new: the `UPDATES` list (every version, newest first) and its card |
+| `39-layouts`, `40-layout-drawing` | Airport layouts: the `LAYOUTS` table, rebuilding and switching, the Airfield › Layout tab; remote stands, buses, rooms, shop units and each layout's buildings |
+| `41-airside` | Stand frames (`XF`, `toW`, `toL`), airside rooms and doorways (`route`, `walk`), and `layoutFaults`, the fit check for 2D layouts |
+| `42-terminal` to `47-hotel` | The terminal: its halls and the tables the parts plug into, then departures (check-in, security), arrivals (immigration, reclaim, the way out), baggage, the market place (shops, the walk to the gate) and the hotel |
+| `48-sound` | Announcements for your flights, spoken calls and ambience, watched from the frame loop (`soundTick`); the tones are in `06-sound` |
+| `49-levelup` | The level-up card: what a new level has just unlocked, with links there |
+| `50-scene` | The airport view's drawing layers (`LAYER`), the frame's view `V` and the lighting pass (`LIGHTS`, `lamp`) |
+| `51-markings` | Apron, stand and runway markings, and the airfield's lights at night (`rwyMarks`, `grade`) |
+| `52-planes` | Planes on the stands and runway: engines, shadows, airline colours and their lights (`drawPlane`, `miniPlane`) |
+| `53-roofs` | Roofs over the built halls, shown when the player picks the roof floor (`R.floor`, `setFloor`, `roofNow`) |
+| `54-weather` | Rain, puddles, settled snow, fog, cloud shadows and the windsock, read from `R.fx` |
+| `55-vehicles` | Fuel and catering trucks, baggage tractors and pushback tugs at each turnaround (`vehicleWork`) |
+| `99-start` | The `/*SIM_HOOK*/` marker and the call that starts the game |
+
 `src/shell.html` holds the CSS, the HTML skeleton and a `/*GAME*/` placeholder inside the only `<script>`.
 
 <!-- joined:files from src/game/, each file's first line by tools/join.mjs: don't edit between these lines -->
@@ -109,7 +136,7 @@ The game is one strict IIFE, split into files in `src/game/`. The build joins th
 
 - `R.sim=true` means no DOM work and no saving, and toasts resolve to their last choice. Everything reachable from `update()` must work that way.
 - **Randomness.** Anything that can change the game state uses `rnd()`, never `Math.random()`, so a seed repeats a run exactly. Only sound, the board's flaps, and weather drawing use `Math.random()`, and the build rejects it on any line that doesn't end with `// cosmetic`.
-- **`window.__sim`.** Tests reach the game through it, in `build/test.html` only. `tools/build.mjs` builds it from what the tests use: every top-level name that `tools/*.mjs`, `tools/checks/*.mjs` or `tools/bot.js` reaches as `S.<name>` or `__sim.<name>` (with `S=__sim`), so there's no list to add to. A top-level `let` gets a getter and a setter, so it stays live. The terminal's parts can still add to `SIMX` in their own files.
+- **`window.__sim`.** Tests reach the game through it, in `build/test.html` only. `tools/build.mjs` builds it from what the tests use: every top-level name that `tools/*.mjs`, `tools/checks/*.mjs` or `tools/bot.js` reaches as `S.<name>` or `__sim.<name>` (with `S=__sim`), plus any throwaway script in `build/*.mjs`, so there's no list to add to. A top-level `let` gets a getter and a setter, so it stays live. The terminal's parts can still add to `SIMX` in their own files.
 
 ## Build
 
