@@ -56,7 +56,7 @@ When several branches were built side by side (the `feature` playbook's "Splitti
 
 - `npm run build` and `npm run check` pass locally.
 - The commit message is a plain imperative subject with no attribution lines; the commit hook enforces this.
-- The PR title and description are plain and follow the template.
+- The PR title and description are plain and follow the template. The Description check (`.github/workflows/description.yml`) enforces this; the tools may add a footer when a PR opens, so read the description back once it's up.
 
 ## Done
 
