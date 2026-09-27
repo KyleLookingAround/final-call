@@ -2,10 +2,11 @@
 //   node tools/touched.mjs [base]   prints "groups=<space-separated groups>" for $GITHUB_OUTPUT, or "groups="
 //                                   (nothing) when every group should run
 // Used by .github/workflows/checks.yml on a draft PR, so it only spends time on the check groups the PR's
-// changed files touch, plus `brief` and `graph` (cheap) and `sim` (a floor). A file this can't confidently
-// map to a narrower set of groups (tools/build.mjs, src/shell.html, package*.json, a workflow file, or
-// anything outside src/game/, tools/, docs/, .claude/, .github/) falls back to every group, same as a change
-// this script itself fails to read. Never exits non-zero: an unreadable diff falls back to every group too.
+// changed files touch, plus `brief` and `graph` (cheap) and `sim` (a floor). Only src/game/ files, the graph
+// and brief scripts, tools/checks/*.mjs and the SAFE list below map to a narrower set; anything else
+// (tools/build.mjs, src/shell.html, package*.json, a workflow file in .github/workflows/, tools/check.mjs…)
+// falls back to every group, same as a change this script itself fails to read. Never exits non-zero: an
+// unreadable diff falls back to every group too.
 import {execSync} from 'node:child_process';
 import {dirname,join} from 'node:path';
 import {fileURLToPath} from 'node:url';

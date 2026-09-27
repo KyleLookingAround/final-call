@@ -1,9 +1,9 @@
 name: Checks
 
 # On a draft PR, tools/touched.mjs turns the changed files into the check groups worth running, so most
-# rounds while iterating are quick; marking the PR ready for review (ready_for_review, below) runs every
-# group, as does a non-draft PR and any push. A draft's partial run is never the one a merge relies on: a
-# draft PR can't be merged, and going ready always re-triggers this workflow with everything.
+# rounds while iterating are quick; marking the PR ready for review (ready_for_review, below) re-runs this
+# workflow with every group, as does a PR that isn't a draft. A draft's partial run is never the one a merge
+# relies on: a draft PR can't be merged, and going ready always re-triggers this workflow with everything.
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
