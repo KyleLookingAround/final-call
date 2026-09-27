@@ -39,6 +39,7 @@ Check that the PR's diff now shows only its own changes, and change its base to 
 
 When several branches were built side by side (the `feature` playbook's "Splitting a big feature across sessions"):
 
+- The Parts workflow (`parts.yml`) merges `main` and every open PR labelled `part:<feature>` into a temporary branch and runs `npm run check`, on each push to a part, hourly and on demand (Actions › Parts together › Run workflow). Its comment on each part's PR says whether they're green together, which part conflicts and in which files, and how long it has been red. Fix a combination problem in the part that caused it, before merging any of them.
 - Merge them one at a time, each once it's green. Before merging the next, bring it up to date with `main` and run `npm run check` again.
 - If the parts started from a groundwork branch that was then squash-merged, GitHub shows conflicts across the whole groundwork, because it can't tell the squashed commit is the same work. Check that it is (`git diff <groundwork tip> <squashed commit>` prints nothing), then tell git so without rewriting the part's history:
 
@@ -59,13 +60,13 @@ When several branches were built side by side (the `feature` playbook's "Splitti
 
 ## Done
 
-Green checks, no conflicts, and every review thread answered. Then merge it yourself with Squash and merge: sessions have the owner's standing permission, and waiting costs hours when they're away. Confirm the Pages run afterwards. Only a PR that needs the owner's judgement waits for them: a balance change beyond the baselines' tolerance, or a spec question the brief doesn't settle. Say so in the PR and carry on with other work.
+Green checks, no conflicts, and every review thread answered. Then merge it yourself with Squash and merge: sessions have the owner's standing permission, and waiting costs hours when they're away. Confirm the Pages run afterwards. Only a PR that needs the owner's judgement waits for them: a balance change beyond the baselines' tolerance, or a spec question the brief doesn't settle. Say so in the PR, open a `needs-owner` issue with the default you'll take after 12 hours (the `feature` playbook), and carry on with other work.
 
 ## After merging: look back at the session
 
 Every merged PR gets a short look back at the session that built it, so the next one costs less. Keep it to a few minutes.
 
-1. **Numbers.** From the session's record (`get_session`): what it cost, how much of its context it used, and when it started. From the PR: when it opened and merged, how many pushes came after it opened, and any red CI runs.
+1. **Numbers.** From the session's record (`get_session`): what it cost against its brief's estimate, how much of its context it used, and when it started. Any hours spent waiting on the owner (a `needs-owner` issue's open time, or a question in the conversation). From the PR: when it opened and merged, how many pushes came after it opened, and any red CI runs.
 2. **Friction.** What slowed it or needed someone else. Look at what it got stuck on, what the PR says it left undone or saw fail once, and what the merge needed: conflicts, scope fixes, a rebalance.
 3. **Record it** in `docs/LESSONS.md`: one entry per PR, a line per lesson.
 4. **Act on it** when a lesson would have saved real time or credits, or it comes up a second time. Change the playbook, brief, check or tool that would have prevented it, in the same PR as the entry. Otherwise the entry is enough.

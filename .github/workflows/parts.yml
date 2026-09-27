@@ -1,0 +1,140 @@
+# Tests the parts of a split feature together, before they merge: main plus every open PR labelled part:<feature>,
+# merged into a temporary branch on the runner, then npm run check. One comment on each part's PR says how it went and is
+# updated in place. Runs on pushes to those PRs, hourly (only when main or a part has moved since the last report) and on demand.
+name: Parts together
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: parts-together
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      features: ${{ steps.plan.outputs.features }}
+    steps:
+      - id: plan
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const {owner,repo}=context.repo,ev=context.eventName,pr=context.payload.pull_request;
+            const prs=await github.paginate(github.rest.pulls.list,{owner,repo,state:'open',per_page:100});
+            const main=(await github.rest.repos.getBranch({owner,repo,branch:'main'})).data.commit.sha;
+            const byF={};
+            for(const p of prs)for(const l of p.labels){const m=l.name.match(/^part:(.+)$/);if(m)(byF[m[1]]||(byF[m[1]]=[])).push({n:p.number,sha:p.head.sha})}
+            let want=Object.keys(byF);
+            if(ev==='pull_request'){
+              if(context.payload.action==='labeled'&&!context.payload.label.name.startsWith('part:'))want=[];
+              want=want.filter(f=>byF[f].some(p=>p.n===pr.number));
+            }
+            const out=[];
+            for(const f of want){
+              const parts=byF[f].sort((a,b)=>a.n-b.n),key=[main.slice(0,7),...parts.map(p=>p.n+'@'+p.sha.slice(0,7))].join(' ');
+              if(ev==='schedule'){ // nothing moved since the last report: skip
+                const cs=await github.paginate(github.rest.issues.listComments,{owner,repo,issue_number:parts[0].n,per_page:100});
+                if(cs.some(c=>c.body.includes(`<!-- parts:${f} -->`)&&c.body.includes(`<!-- key:${key} -->`)))continue;
+              }
+              out.push({feature:f,parts});
+            }
+            core.info(JSON.stringify(out));
+            core.setOutput('features',JSON.stringify(out));
+
+  together:
+    needs: plan
+    if: needs.plan.outputs.features != '[]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.plan.outputs.features) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Merge every part into a temporary branch
+        id: merge
+        env:
+          FEATURE: ${{ matrix.feature }}
+          PARTS: ${{ toJSON(matrix.parts) }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git checkout -q -b "parts/$FEATURE"
+          echo "main=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+          : > "$RUNNER_TEMP/merged.txt"; : > "$RUNNER_TEMP/conflicts.txt"
+          for n in $(echo "$PARTS" | jq -r '.[].n'); do
+            git fetch -q origin "pull/$n/head"
+            sha=$(git rev-parse --short FETCH_HEAD)
+            if git merge -q --no-edit FETCH_HEAD; then
+              echo "#$n@$sha" >> "$RUNNER_TEMP/merged.txt"
+            else
+              echo "#$n@$sha $(git diff --name-only --diff-filter=U | tr '\n' ' ')" >> "$RUNNER_TEMP/conflicts.txt"
+              git merge --abort
+            fi
+          done
+          cat "$RUNNER_TEMP/merged.txt" "$RUNNER_TEMP/conflicts.txt"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: npm run check on main and every part
+        id: check
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          npm run check 2>&1 | tee "$RUNNER_TEMP/check.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: parts-${{ matrix.feature }}-failures
+          path: build/check
+          if-no-files-found: ignore
+      - name: Report on each part's PR
+        if: always()
+        uses: actions/github-script@v7
+        env:
+          FEATURE: ${{ matrix.feature }}
+          PARTS: ${{ toJSON(matrix.parts) }}
+          MAIN: ${{ steps.merge.outputs.main }}
+          OUTCOME: ${{ steps.check.outcome }}
+        with:
+          script: |
+            const fs=require('fs'),{owner,repo}=context.repo,T=process.env.RUNNER_TEMP,f=process.env.FEATURE,parts=JSON.parse(process.env.PARTS);
+            const lines=p=>{try{return fs.readFileSync(p,'utf8').split('\n').filter(Boolean)}catch(e){return []}};
+            const merged=lines(T+'/merged.txt'),conflicts=lines(T+'/conflicts.txt'),log=lines(T+'/check.log');
+            const fails=log.filter(l=>l.startsWith('FAIL')),total=log.filter(l=>/^\d+\/\d+ passed/.test(l)).pop()||'no result';
+            const ok=process.env.OUTCOME==='success'&&!conflicts.length,now=new Date().toISOString().slice(0,16).replace('T',' ');
+            const shas=[...merged,...conflicts].map(l=>l.split(' ')[0].replace('#','')).sort((a,b)=>parseInt(a)-parseInt(b));
+            const key=[process.env.MAIN,...shas].join(' ');
+            const marker=`<!-- parts:${f} -->`,run=`${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
+            // red since: kept from the last report while it stays red, so the look back can see how long a combination problem lasted
+            const find=async n=>(await github.paginate(github.rest.issues.listComments,{owner,repo,issue_number:n,per_page:100})).find(c=>c.body.includes(marker));
+            const prev=await find(parts[0].n),since=ok?null:((prev&&(prev.body.match(/<!-- red-since:([^>]+) -->/)||[])[1])||now);
+            const body=[marker,`### Parts together: \`${f}\`: ${ok?'green':conflicts.length?'conflict':'red'}`,'',
+              `\`main\` ${process.env.MAIN} with ${merged.map(m=>m.replace('@',' at ')).join(', ')||'no part'}, merged in PR order into a temporary branch.`,
+              ...(conflicts.length?['','**Conflicts** (left out of the run):',...conflicts.map(c=>{const [p,...fl]=c.split(' ');return `- ${p.replace('@',' at ')} with \`main\` and the parts before it: ${fl.filter(Boolean).map(x=>'`'+x+'`').join(', ')}`})]:[]),
+              '',`\`npm run check\`: ${total}${process.env.OUTCOME==='success'?'':' ('+process.env.OUTCOME+')'}`,
+              ...fails.slice(0,10).map(l=>'- '+l.replace(/^FAIL\s+/,'')),...(fails.length>10?[`- and ${fails.length-10} more`]:[]),
+              '',`Checked ${now} UTC${since?`, red since ${since} UTC`:''} · [run](${run})`,
+              `<!-- key:${key} -->`,...(since?[`<!-- red-since:${since} -->`]:[])].join('\n');
+            for(const p of parts){const c=await find(p.n);
+              if(c)await github.rest.issues.updateComment({owner,repo,comment_id:c.id,body});
+              else await github.rest.issues.createComment({owner,repo,issue_number:p.n,body})}
+            if(!ok)core.setFailed(conflicts.length?'parts conflict':'checks fail with the parts together');
