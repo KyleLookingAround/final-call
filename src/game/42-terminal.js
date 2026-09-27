@@ -49,7 +49,7 @@ function terminalFaults(){
   if(!inH('ci',DOOR.x,DOOR.y))bad.push('departing passengers don’t come in to the check-in hall');
   return bad;
 }
-// the halls' furniture that isn't a counter, desk or lane: the baggage hall, bag belts, customs channels and each hall's name
+// the halls' furniture that isn't a counter, desk or lane: the baggage hall, bag belts and each hall's name
 function drawTerminalHalls(D){
   const [bx0,by0,bx1,by1]=BAG_HALL;ctx.fillStyle='#15191D';ctx.fillRect(bx0,by0,bx1-bx0,by1-by0);
   ctx.strokeStyle='#4E5964';ctx.lineWidth=3;ctx.strokeRect(bx0,by0,bx1-bx0,by1-by0);
@@ -57,8 +57,5 @@ function drawTerminalHalls(D){
   for(const y of [630,672]){ctx.fillRect(bx1,y-2,20,4)} // belts out to the carousels
   ctx.strokeStyle='#39414A';ctx.lineWidth=5;ctx.setLineDash([4,3]);ctx.beginPath();ctx.ellipse((bx0+bx1)/2,640,44,26,0,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
   mono('BAGGAGE HALL',(bx0+bx1)/2,540,'#56606A',8.5,'center');
-  // customs: a green and a red channel
-  ctx.fillStyle='rgba(107,227,154,.18)';ctx.fillRect(900,702,64,16);ctx.fillStyle='rgba(255,122,138,.16)';ctx.fillRect(976,702,64,16);
-  mono('NOTHING TO DECLARE',932,713,'#6BE39A',6.5,'center');mono('GOODS TO DECLARE',1008,713,'#FF7A8A',6.5,'center');
   for(const r of TERM_ROOMS)if(r.name&&!r.sign&&roomOn(r)){const [x0,y0]=r.poly[0];mono(r.name,x0+8,y0+10,'#56606A',8.5)}
 }

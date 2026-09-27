@@ -107,13 +107,9 @@ function drawTerminal(D){
     ctx.strokeStyle='#2A3037';ctx.lineWidth=3;ctx.beginPath();LAY.track.forEach(([x,y],k)=>k?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();ctx.fillStyle='#5CC8FF';rrect(q[0]-12,q[1]-5,24,10,3);ctx.fill()}
   // bags on the belt behind the check-in desks (check-in and security draw themselves: 43-departures.js)
   ctx.fillStyle='#D9A066';for(const b of R.belt)ctx.fillRect(b.x-2,684.5,4,4);
-  const inWall=(x,w,y)=>{ctx.fillStyle='#191D22';ctx.fillRect(x-w,y-2,2*w,4)};
   ctx.fillStyle='#FFC72C';for(const i of SIDX)if(G.stands[i].built){const F=R.st[i].F;
     const bg=busGate(i);if(bg){ctx.fillRect(bg[0]-2.5,bg[1]+bg[2]*4-2.5,5,5)}
     else{faceW(i,-118,FACE_Y-6);ctx.fillRect(WP.x-2.5,WP.y-2.5,5,5);if(F&&F.rear){faceW(i,-150,FACE_Y-6);ctx.fillRect(WP.x-2.5,WP.y-2.5,5,5)}}}
-  // passport desks and e-gates in the wall between immigration and reclaim
-  for(let i=0;i<8;i++){const b=boothPos(i),open=i<D.officers;if(open)inWall(b.x,6,b.y);ctx.fillStyle=open?'#6A7580':i<OWN.officers()?'#3A424B':'#262C32';ctx.fillRect(b.x-9,b.y-3,5,9);if(open){ctx.fillStyle='#FFC72C';ctx.fillRect(b.x-9,b.y+7,5,5)}}
-  for(let i=0;i<8;i++){const e=egatePos(i),open=i<D.egates;if(open)inWall(e.x,4,e.y);ctx.fillStyle=open?'#5CC8FF':'#262C32';ctx.fillRect(e.x-6,e.y-4,3,9);ctx.fillRect(e.x+3,e.y-4,3,9)}
   for(const f of TERM_DRAW)f(D);
 }
 function paxColor(p){

@@ -128,7 +128,12 @@ How each system works is in `docs/SYSTEMS.md`: levels and the Masterplan, routes
     - **Security:** `enterSecurity` sends passengers through a boarding-pass gate into the hall, then `R.secQ` (`p.famL` marks families and those who need help, who have as many lanes as their share of the queue, at least one when two lanes are open). A lane divests (`divestT`), then the passenger walks through the scanner (`scan`) to repack. 1 bag in 12 is searched at a table for 2 min, 1 in 30 with CT scanners (upgrade `ctscan`, plan `t_ct`, which also makes trays 25% quicker). `clearSec` marks the passenger `cleared` and hands them to `airside`.
     - `R.dep` (`DEP()`) keeps the search queue and the family lane count, and starts afresh when a load replaces `R.lanes`. `DEP_LOG` counts what the checks read.
 
-  - **Arrivals** (`44-arrivals.js`): `updateImmigration` (passport desks and e-gates), `afterControl`, `exitTarget`, and the steps from the concourse to the way out.
+  - **Arrivals** (`44-arrivals.js`):
+    - **Immigration.** `R.arrQ` holds everyone queuing, in two queues: the passport desks' (`arrSlot`) and the e-gates' (`p.eg`, `egSlot`). E-gate passports (`p.elig`) join the e-gates' unless the desks would be quicker; e-gates take only those, and desks help with it when theirs is empty. Rostering still counts all of `R.arrQ`.
+    - **Domestic flights** (`DOMESTIC`: Edinburgh, Belfast, Jersey) walk through the domestic channel (`DOM_X`) without queuing.
+    - **Customs.** `exitTarget` sends everyone in reclaim through customs first (`toCustoms`, `p.cus`): 1 in 40 (`CUS_ODDS`) waits 1–2 min at a search table in the red channel, then `exitTarget` again asks `TERM_EXIT`, then the station, stops, taxi rank, car hire desks (then the car park) or the forecourt.
+    - **Meeters** (`R.meet`) wait at the barrier with signs for flights landed or due within 30 min and walk off with their passenger. They're drawn only, use their own generator (`meetRnd`) and don't run headless.
+    - `drawArrivals` (`TERM_DRAW`) draws the passport desks with officers, e-gates, customs, the arrivals hall and the taxi rank; `TERM_PANEL.arr` shows today's immigration and customs (`R.arrSt`, reset daily).
 
   - **Baggage** (`45-baggage.js`, Terminal › Baggage). Bags are counts per flight at each stage (`F.bg`, `A.bg`, the queues in `R.bag`); only a sample is drawn.
     - `updateBelt`: checked bags go from the belt through screening (one in 20 to the search room), the sorter (`bagsys` sets its speed) and make-up to tug trains, which take them through the tunnel to the stand, where they count as ready for the hold (`F.bagsIn`).
