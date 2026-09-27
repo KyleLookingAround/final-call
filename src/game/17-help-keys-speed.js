@@ -7,7 +7,7 @@ function openHelp(on){$('#help').hidden=!on;if(on){syncHscr();R.helpPrev=R.speed
 $('#helpb').addEventListener('click',()=>openHelp(true));
 // full screen and sound, when the narrowest top bar has no room for them
 function syncHscr(){const hid=getComputedStyle($('#snd')).display==='none';$('#hscr').hidden=!hid;if(!hid)return;
-  $('#hfs').classList.toggle('on',document.body.classList.contains('fs'));$('#hsnd').classList.toggle('on',!!G.sound)}
+  for(const [id,on] of [['#hfs',document.body.classList.contains('fs')],['#hsnd',!!G.sound]]){$(id).classList.toggle('on',on);$(id).setAttribute('aria-pressed',on)}}
 $('#hfs').addEventListener('click',()=>{$('#fsb').click();syncHscr()});
 $('#hsnd').addEventListener('click',()=>{$('#snd').click();syncHscr()});
 $('#help').addEventListener('click',e=>{if(e.target.id==='help'||e.target.closest('[data-helpclose]'))openHelp(false)});
