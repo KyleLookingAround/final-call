@@ -72,6 +72,10 @@ function itemName(key){const [k,v]=key.split(':');
   if(k==='up')return UPG[v]?UPG[v].name:v;if(k==='ac')return AIRCRAFT[+v].name;if(k==='meth')return (METHODS.find(m=>m.id===v)||{}).name||v;
   if(k==='shop')return (SHOPS.find(x=>x.id===v)||{}).name||v;if(k==='mode')return MODES[v].name+' lines';if(k==='dev')return DEV[v].name;
   if(k==='stn')return STN_UP[v].name;if(k==='rt')return ['Short-haul','Medium-haul','Sun and capital','Long-haul','Ultra long-haul'][+v]+' routes';if(k==='feat')return FEAT_NAMES[v]||v;if(k==='lay')return 'Rebuild as '+LAYOUTS[v].name+' (Airfield › Layout)';return v}
+// display only: the one plan per category that looks best to approve next, and the line saying what it unlocks,
+// worded like the level-up card. Changes no cost, effect or unlock — the bot and managers still buy by state alone.
+function recommendedTech(b){const rs=TECH.filter(T=>T.b===b&&techState(T)==='ready');return rs.length?rs.reduce((a,c)=>c.t<a.t?c:a):null}
+function planUnlockLine(T){const un=T.u.map(k=>k.startsWith('rt:')?`${itemName(k)}: ${lvlCities(+k.slice(3))}`:itemName(k)).filter(x=>x!==T.n);return T.d+(un.length?' '+un.join(' · ')+'.':'')}
 function research(id){const T=TECH_BY[id];if(!T||techState(T)!=='ready')return false;G.pts-=T.c;(G.tech||(G.tech={}))[id]=1;
   const nt=new Set(G.newTabs||[]);for(const k of T.u){const [a,v]=k.split(':');if(a==='up'&&UPG[v])nt.add(UPG[v].tab);else if(a==='ac'||a==='meth')nt.add('stands');else if(a==='rt'||a==='feat')nt.add('routes');else if(a==='shop')nt.add('sales');else if(a==='mode'||a==='dev'||a==='stn')nt.add('region')}G.newTabs=[...nt];
   if(!R.sim){toast(`Approved: ${T.n}. ${T.u.map(itemName).join(', ')}.`,null,null,'goal',6);kaching();renderTabs();renderPlanBtn()}return true}
