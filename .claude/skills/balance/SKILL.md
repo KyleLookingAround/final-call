@@ -36,9 +36,9 @@ Make the change, rebuild, and run the same three seeds into `build/after-$s.log`
 
 ## Tips
 
-- On a PR the Balance workflow runs the same seeds both ways. Run them locally while tuning; otherwise push and report the workflow's tables, so the same runs aren't made twice.
+- Run the seeds locally and report the tables in the PR: CI minutes are limited on this private repo, and local runs are free. The Balance workflow is the confirming run: add the `balance` label (or `balance:rebuild` for both ways) once, when the code is final.
 - One part of a feature built in parts reports its numbers and tunes only outside 15% of the baselines. The whole feature is rebalanced once, with every part in.
 
 - `build/saves/L<n>.json` are the bot's airports at each level; seed one through `localStorage['final-call-save-v2']` to look at a stage.
 - Bot options (JSON after the hours) change its strategy; they are read as `opts.*` in `tools/bot.js`. For example `'{"noBuyLow":true}'` never buys Lowmere, and `'{"layouts":true}'` rebuilds into better layouts (`layoutPath` picks which).
-- The Balance workflow runs the three seeds on PRs that touch `src/game/` or the bot, once keeping Classic and once rebuilding. Its tables are in the run's summary; `off` levels show as warnings. The baselines are for keeping Classic; rebuilding should reach level 9 about 5–10% sooner, so its level 9 row reads `near`.
+- The Balance workflow runs the three seeds on PRs that touch `src/game/` or the bot and carry the `balance` label (keeping Classic) or `balance:rebuild` (once keeping Classic and once rebuilding), and on demand (both ways). Its tables are in the run's summary; `off` levels show as warnings. The baselines are for keeping Classic; rebuilding should reach level 9 about 5–10% sooner, so its level 9 row reads `near`.

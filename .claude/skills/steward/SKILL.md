@@ -15,7 +15,7 @@ description: Drive a Final Call pull request to green and merged - reading CI fa
 
 ## Balance workflow (`balance.yml`)
 
-- It runs the bot on seeds 1-3 when a PR touches `src/game/` or the bot. It fails only on errors; levels outside the baselines show as warnings.
+- It runs the bot on seeds 1-3 only when a PR that touches `src/game/` or the bot carries the `balance` label (keeping Classic) or `balance:rebuild` (both ways), or on demand. CI minutes are limited on this private repo: run the seeds locally, and add the label once the code is final. It fails only on errors; levels outside the baselines show as warnings.
 - An `off` level needs a reason in the PR, or the owner's agreement and an updated `tools/baseline.json`. See the `balance` playbook.
 
 ## Review comments

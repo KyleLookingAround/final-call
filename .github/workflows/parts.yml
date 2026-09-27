@@ -1,13 +1,11 @@
 # Tests the parts of a split feature together, before they merge: main plus every open PR labelled part:<feature>,
 # merged into a temporary branch on the runner, then npm run check. One comment on each part's PR says how it went and is
-# updated in place. Runs on pushes to those PRs, hourly (only when main or a part has moved since the last report) and on demand.
+# updated in place. Runs on pushes to those PRs and on demand. PRs without a part: label skip without starting a runner.
 name: Parts together
 
 on:
   pull_request:
     types: [opened, synchronize, reopened, labeled]
-  schedule:
-    - cron: '17 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -21,6 +19,7 @@ concurrency:
 
 jobs:
   plan:
+    if: github.event_name != 'pull_request' || contains(join(github.event.pull_request.labels.*.name, ','), 'part:')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
