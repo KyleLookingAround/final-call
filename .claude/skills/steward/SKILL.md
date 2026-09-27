@@ -23,6 +23,14 @@ description: Drive a Final Call pull request to green and merged - reading CI fa
 - Small, clear asks (a rename, a nit, a missing check): fix, push, and reply briefly.
 - Bigger asks or design questions: propose an approach to the owner before changing course.
 
+## Catching up with `main`
+
+- The Catch up workflow (`.github/workflows/catch-up.yml`) runs whenever `main` moves. It merges `main` into every open PR from this repo, rejoins the joined lists, and pushes if the merge was clean or the only conflicts were inside the joined lists. It never rebases or force-pushes. When a real conflict stops it, it comments once on the PR, naming the files, and leaves the branch alone.
+- Its pushes use the repo's token, which doesn't start `pull_request` workflows, so it starts Checks itself (never Balance: add the `balance` label before merging if the game code changed since Balance last ran). The Description check runs again at your next push or description edit. If the owner adds a `CATCH_UP_TOKEN` secret, its pushes start every workflow as usual.
+- So the branch on GitHub may be ahead of yours: `git pull --no-rebase origin <branch>` before you commit more, and never force-push over it.
+- After its comment, merge by hand: `git fetch origin main && git merge origin/main`, resolve what it named, and push. A conflict inside a joined list (between `<!-- joined:… -->` and `<!-- /joined:… -->`) needs nothing by hand: `node tools/join.mjs --write` rebuilds the list and clears it.
+- Count the merges from `main` your PR needed, by you and by the workflow, for the look back.
+
 ## Stacked PRs
 
 When one PR builds on another and the lower one is squash-merged, GitHub deletes the lower branch and points this PR at `main`. Move this branch's own commits onto `main`:
@@ -67,7 +75,8 @@ Green checks, no conflicts, and every review thread answered. Then merge it your
 
 Every merged PR gets a short look back at the session that built it, so the next one costs less. Keep it to a few minutes.
 
-1. **Numbers.** From the session's record (`get_session`): what it cost against its brief's estimate, how much of its context it used, and when it started. Any hours spent waiting on the owner (a `needs-owner` issue's open time, or a question in the conversation). From the PR: when it opened and merged, how many pushes came after it opened, and any red CI runs.
+1. **Numbers.** From the session's record (`get_session`): what it cost against its brief's estimate, how much of its context it used, and when it started. Any hours spent waiting on the owner (a `needs-owner` issue's open time, or a question in the conversation). From the PR: when it opened and merged, how many pushes came after it opened, any red CI runs, and how many merges from `main` it needed (by hand, and by the Catch up workflow).
 2. **Friction.** What slowed it or needed someone else. Look at what it got stuck on, what the PR says it left undone or saw fail once, and what the merge needed: conflicts, scope fixes, a rebalance.
-3. **Record it** in `docs/LESSONS.md`: one entry per PR, a line per lesson.
-4. **Act on it** when a lesson would have saved real time or credits, or it comes up a second time. Change the playbook, brief, check or tool that would have prevented it, in the same PR as the entry. Otherwise the entry is enough.
+3. **Record it** in its own file, `docs/lessons/<pr>-<short-name>.md` (`main-<short-name>.md` for a change pushed straight to `main`), in the shape the others have: `# Title · date`, then **Numbers**, **Went well** and **Lessons**, a line per lesson. Never add it to `docs/LESSONS.md` itself: that list is joined from the folder.
+4. **Act on it** when a lesson would have saved real time or credits, or it comes up a second time. Change the playbook, brief, check or tool that would have prevented it, in the same PR as the entry, and mark the lesson with → and where. Otherwise the entry is enough.
+5. **The tidy.** Run `node tools/join.mjs`: its first line counts the lessons added since the last tidy. At 8 or more, fire the tidy Routine (`fire_trigger` with the id in the `coordinator` playbook), say so in the PR or commit that adds the lesson, and don't tidy by hand. Only one session fires it: if a tidy PR is already open (`feature/lessons-tidy-…`), leave it be.

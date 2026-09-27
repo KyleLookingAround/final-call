@@ -1,11 +1,13 @@
 // A map of the game for sessions finding their way around, built from the source every time (plain Node, no dependencies).
 //   node tools/graph.mjs <name>     everything related to a system, file, function, hook, saved field or check group
 //   node tools/graph.mjs --write    writes docs/graph.json (git-ignored; npm run build does this too)
-//   node tools/graph.mjs --check    fails on broken doc links and docs/SYSTEMS.md sections without files; warns when a
-//                                   system's file changed on this branch but its section didn't
-// What it reads: src/game/*.js (top-level functions and names, the hooks each file registers, saved fields), tools/check.mjs
-// and tools/checks/*.mjs (each group and what it calls through window.__sim), and the docs' own link lines: docs/SYSTEMS.md
-// sections and their files, docs/decisions/, docs/specs/ (issue and PRs), and docs/LESSONS.md (each "→" line's targets).
+//   node tools/graph.mjs --check    fails on broken doc links and docs/systems/ files that name no game files; warns when a
+//                                   system's file changed on this branch but its notes didn't, and when a system's notes
+//                                   name three or more functions that live in one file outside its own
+// What it reads: src/game/*.js (top-level functions and names, the hooks each file registers, saved fields),
+// tools/checks/*.mjs (each group and what it calls through window.__sim), and the docs' own link lines: docs/systems/
+// (one file per system, and the game files it names), docs/decisions/, docs/specs/ (issue and PRs), and docs/lessons/
+// (each "→" line's targets).
 import {readFileSync,readdirSync,writeFileSync,existsSync,mkdirSync} from 'node:fs';
 import {dirname,join} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -26,24 +28,22 @@ export function build(){
   }
   // upgrades declared in the UPG table, and the file each belongs to
   const upg=all(src['01-constants.js'],/^\s{2}(\w+):\{tab:'/gm);files['01-constants.js'].hooks=uniq(files['01-constants.js'].hooks.concat(upg.map(k=>'UPG.'+k)));
-  // saved fields: DEFAULT()'s top-level keys, G.set's, and TERM_FIELDS'
-  const dm=src['03-state.js'].match(/const DEFAULT=\(\)=>\(\{([\s\S]*?)\}\);\n/),top=[];
+  // saved fields: FIELDS' top-level keys (DEFAULT() is built from it), G.set's, and TERM_FIELDS'
+  const dm=src['03-state.js'].match(/const FIELDS=\{([\s\S]*?)\n\};\n/),top=[];
   if(dm){let d=0,key='';for(const ch of dm[1]){if('{(['.includes(ch))d++;else if('})]'.includes(ch))d--;else if(d===0&&ch===','){key='';continue}if(d===0&&/[\w$]/.test(ch))key+=ch;else if(d===0&&ch===':'&&key){top.push(key);key='#'}}}
-  const setKeys=all((src['03-state.js'].match(/set:\{([^}]*)\}/)||['',''])[1],/(\w+):/g);
+  const setKeys=all((src['03-state.js'].match(/set:(?:\(\)=>\()?\{([^}]*)\}/)||['',''])[1],/(\w+):/g);
   const termFields=Object.values(files).flatMap(x=>x.hooks).filter(h=>h.startsWith('TERM_FIELDS.')).map(h=>h.slice(12));
   const saved={};for(const k of uniq(top.filter(k=>k!=='#'))){saved['G.'+k]=Object.keys(src).filter(f=>new RegExp('\\bG\\.'+k+'\\b').test(src[f]))}
   for(const k of setKeys)saved['G.set.'+k]=Object.keys(src).filter(f=>new RegExp(`\\bG\\.set\\.${k}\\b|SET\\(\\)\\.${k}\\b|'${k}'`).test(src[f]));
   for(const k of termFields)saved['G.'+k]=Object.keys(src).filter(f=>new RegExp('\\bG\\.'+k+'\\b').test(src[f]));
   // check groups and what each calls through window.__sim
-  const checks={},cm=rd('tools/check.mjs'),parts=cm.split(/\nif\(!only\|\|only==='(\w+)'\)\{/);
-  for(let i=1;i<parts.length;i+=2)checks[parts[i]]={file:'tools/check.mjs',sim:uniq(all(parts[i+1],/\bS\.(\w+)/g).concat(all(parts[i+1],/__sim\.(\w+)/g)))};
+  const checks={};
   for(const f of ls('tools/checks').filter(f=>f.endsWith('.mjs'))){const s=rd('tools/checks/'+f);checks[f.slice(0,-4)]={file:'tools/checks/'+f,sim:uniq(all(s,/\bS\.(\w+)/g).concat(all(s,/__sim\.(\w+)/g)))}}
   // the docs' link lines
   const sys=systems(),decisions=ls('docs/decisions').filter(f=>f.startsWith('ADR')).map(f=>{const s=rd('docs/decisions/'+f);return {file:'docs/decisions/'+f,title:(s.match(/^# (.*)/m)||[])[1]||f,refs:refsIn(s.replace(/## Context[\s\S]*?(?=\n## )/,''))}});
   const specs=ls('docs/specs').filter(f=>f.endsWith('.md')&&f!=='TEMPLATE.md').map(f=>{const s=rd('docs/specs/'+f);return {file:'docs/specs/'+f,issue:(s.match(/Issue: #(\d+)/)||[])[1]||null,prs:uniq(all(s,/PRs?:? ([#\d, and]+)/g).flatMap(x=>all(x,/#(\d+)/g))),refs:refsIn(s)}});
-  const lessons=[];let cur=null;for(const line of rd('docs/LESSONS.md').split('\n')){const h=line.match(/^## (.*)/);if(h){cur={title:h[1],to:[]};lessons.push(cur);continue}
-    if(cur&&line.includes('→'))cur.to.push(...refsIn(line.slice(line.indexOf('→'))))}
-  lessons.forEach(l=>l.to=uniq(l.to));
+  const lessons=ls('docs/lessons').filter(f=>f.endsWith('.md')).map(f=>{const s=rd('docs/lessons/'+f);
+    return {file:'docs/lessons/'+f,title:(s.match(/^# (.*)/m)||[])[1]||f,to:uniq(s.split('\n').filter(l=>l.includes('→')).flatMap(l=>refsIn(l.slice(l.indexOf('→')))))}});
   return {files,defs,upg,saved,checks,systems:sys,decisions,specs,lessons};
 }
 // file and name references in a piece of docs: `12-drawing.js`, src/game/…, tools/…, docs/…, .claude/skills/<name>, and `feature` playbook mentions
@@ -55,11 +55,13 @@ function refsIn(s){
   for(const m of s.matchAll(/`(\d\d)-[\w-]+\.js` to `(\d\d)-[\w-]+\.js`/g)){const a=+m[1],b=+m[2];for(const f of ls('src/game'))if(+f.slice(0,2)>a&&+f.slice(0,2)<b)r.push('src/game/'+f)}
   return uniq(r);
 }
-// docs/SYSTEMS.md: each bold bullet under "## Systems" is a system; its files are the ones its text names
+// docs/systems/: each file is a system, named by its "# " line; its files are the game files its text names
 function systems(){
-  const s=rd('docs/SYSTEMS.md'),i=s.indexOf('\n## Systems'),body=s.slice(i).split('\n').slice(2),out={};let cur=null;
-  for(const line of body){if(/^## /.test(line))break;const m=line.match(/^- \*\*(.+?)\.?\*\*/);if(m){cur=m[1].replace(/\.$/,'');out[cur]={text:line,files:[]};continue}if(cur)out[cur].text+='\n'+line}
-  for(const k in out){out[k].files=refsIn(out[k].text).filter(f=>f.startsWith('src/game/'));out[k].refs=refsIn(out[k].text);delete out[k].text}
+  const out={};
+  for(const f of ls('docs/systems').filter(f=>f.endsWith('.md'))){const s=rd('docs/systems/'+f),k=(s.match(/^# (.+)/m)||[])[1]||f;
+    const par=(s.match(/^\*\*.+?\*\*\s*\(([^)]*)\)/m)||[])[1]||'',aside=refsIn(par.split(';').slice(1).join(';')),files=refsIn(s).filter(x=>x.startsWith('src/game/'));
+    // the functions its text names, and its own files: all it names but those its first line only mentions after a ";" ("… stay in 03-state.js")
+    out[k]={doc:'docs/systems/'+f,files,refs:refsIn(s),names:uniq(all(s,/`(\w+)(?:\([^`]*\))?`/g)),own:files.filter(x=>!aside.includes(x)||refsIn(par.split(';')[0]).includes(x))}}
   return out;
 }
 // everything related to a name, in a short list
@@ -75,7 +77,7 @@ export function query(g,q){
   if(file&&!sysExact){const F=g.files[file],p='src/game/'+file,d=docsFor([p]);out.push(`file src/game/${file}`);add('functions',F.funcs);add('hooks',F.hooks);
     add('saved fields',Object.entries(g.saved).filter(([,fs])=>fs.includes(file)).map(([k])=>k));add('checks',checksCalling(F.funcs.concat(F.hooks.filter(h=>h.startsWith('SIMX.')).map(h=>h.slice(5)))));
     add('systems',d.sys);add('specs',d.spec);add('decisions',d.dec);add('lessons',d.les);return out}
-  if(sysName){const S=g.systems[sysName],d=docsFor(S.files);out.push(`system "${sysName}" (docs/SYSTEMS.md)`);add('files',S.files.map(f=>f.slice(9)));
+  if(sysName){const S=g.systems[sysName],d=docsFor(S.files);out.push(`system "${sysName}" (${S.doc})`);add('files',S.files.map(f=>f.slice(9)));
     add('hooks',S.files.flatMap(f=>(g.files[f.slice(9)]||{hooks:[]}).hooks).filter(h=>!h.startsWith('UPG.')));add('saved fields',Object.entries(g.saved).filter(([,fs])=>fs.some(f=>S.files.includes('src/game/'+f))).map(([k])=>k).slice(0,40));
     add('checks',checksCalling(S.files.flatMap(f=>(g.files[f.slice(9)]||{funcs:[]}).funcs)));add('specs',d.spec);add('decisions',d.dec);add('lessons',d.les);return out}
   if(g.checks[q]){const c=g.checks[q];out.push(`check group ${q} (${c.file})`);add('calls',c.sim);add('defined in',c.sim.flatMap(n=>g.defs[n]||[]));return out}
@@ -91,12 +93,16 @@ export function query(g,q){
 // broken links, systems without files, and systems whose files changed without their section
 export function check(g){
   const errs=[],warns=[],exists=p=>existsSync(join(root,p));
-  for(const [k,S] of Object.entries(g.systems)){if(!S.files.length)errs.push(`docs/SYSTEMS.md: "${k}" names no files`);for(const f of S.refs)if(!exists(f))errs.push(`docs/SYSTEMS.md: "${k}" links to ${f}, which doesn't exist`)}
+  for(const [k,S] of Object.entries(g.systems)){if(!S.files.length)errs.push(`${S.doc}: "${k}" names no game files`);for(const f of S.refs)if(!exists(f))errs.push(`${S.doc} links to ${f}, which doesn't exist`)}
   for(const d of g.decisions)for(const f of d.refs)if(!exists(f))errs.push(`${d.file} links to ${f}, which doesn't exist`);
   for(const s of g.specs)for(const f of s.refs)if(!exists(f)&&!/\/(new|parts?)\b/.test(f))errs.push(`${s.file} links to ${f}, which doesn't exist`);
-  for(const l of g.lessons)for(const f of l.to)if(!exists(f))errs.push(`docs/LESSONS.md "${l.title}" points at ${f}, which doesn't exist`);
+  for(const l of g.lessons)for(const f of l.to)if(!exists(f))errs.push(`${l.file} points at ${f}, which doesn't exist`);
   let changed=[];try{const base=execSync('git merge-base HEAD origin/main',{cwd:root,stdio:['ignore','pipe','ignore']}).toString().trim();changed=execSync(`git diff --name-only ${base}`,{cwd:root}).toString().split('\n').filter(Boolean)}catch(e){}
-  if(changed.length&&!changed.includes('docs/SYSTEMS.md'))for(const [k,S] of Object.entries(g.systems)){const hit=S.files.filter(f=>changed.includes(f));if(hit.length)warns.push(`${hit.join(', ')} changed but docs/SYSTEMS.md "${k}" didn't: is it still true?`)}
+  if(changed.length)for(const [k,S] of Object.entries(g.systems)){const hit=S.files.filter(f=>changed.includes(f));if(hit.length&&!changed.includes(S.doc))warns.push(`${hit.join(', ')} changed but ${S.doc} ("${k}") didn't: is it still true?`)}
+  // a system's notes that name three or more functions living in one file outside its own: they belong with the system, or the file with the section
+  for(const [k,S] of Object.entries(g.systems)){const by={};
+    for(const n of S.names){const at=(g.defs[n]||[]).filter(f=>g.files[f].funcs.includes(n));if(at.length&&!at.some(f=>S.own.includes('src/game/'+f)))(by[at[0]]||(by[at[0]]=[])).push(n)}
+    for(const [f,ns] of Object.entries(by))if(ns.length>=3)warns.push(`${S.doc} ("${k}") names ${ns.join(', ')}, which live in ${f}, outside its files`)}
   return {errs,warns};
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){

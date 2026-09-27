@@ -40,4 +40,5 @@ Option 2, keeping #91's cancelling of superseded runs and Parts' skip for PRs th
 ## Consequences
 
 - The steward playbook says to add the `balance` label before merging if the game code changed after Balance last ran.
+- Catch up (`catch-up.yml`) starts Checks after it merges `main` into a PR, but never Balance: a merge from `main` would otherwise run six bot jobs on every open game PR each time `main` moves.
 - If a workflow ever becomes a required check in branch protection, a skipped trigger (a push for Description, a draft for Checks) can leave it missing on the head commit: set its triggers again then.

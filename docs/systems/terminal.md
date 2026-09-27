@@ -1,0 +1,51 @@
+# The terminal
+
+**The terminal** (`42-terminal.js` to `47-hotel.js`, spec `docs/specs/terminal.md`). Its halls are rooms like the airside ones, the same in every layout for now (`TERM_ROOMS`, `TERM_DOORS`, merged into each layout's rooms by `applyLayout`), in the order real airports use them.
+- **Departing passengers** go from the forecourt (`out`) through the check-in hall (`ci`) and the security hall (`sec`) to the airside market place (`mkt`) and the concourse (`main`).
+- **Arriving passengers** leave the concourse by their own door into the immigration hall (`imm`), then go through reclaim (`rec`), customs (`cus`) and the arrivals hall (`arh`) and out. The hotel's lobby (`hot`) and walkway (`wlk`) exist once there's a hotel (`need`).
+- **Security lanes and passport desks** stand in the wall between a landside hall and an airside one (`SEC_LINE`) and are the only way through. The baggage hall (`BAG_HALL`) between the two sides is for bags only. Everything outside (road, stops, station, car park) sits `LAND_DY` lower than before the halls.
+- **One shape for every passenger.** `seatPax` (`05-flights.js`) makes every passenger with every field they may ever get, set to `undefined`, so they all share one object shape and the loops over `R.pax` stay fast (a mix of shapes made the simulation twice as slow). A part that gives passengers a new field adds it there; never `delete` a passenger's field.
+- **Each part plugs in** rather than editing shared loops:
+  - `PAX_STEP[state]` and `ARR_STEP[state]` move departing and arriving passengers each update;
+  - `TERM_SUBS` and `TERM_SECS` set the Terminal tab's sub-tabs and their upgrade sections, and `TERM_PANEL[sub]` adds cards (also `'sales:shops'` and `'sales:landside'`);
+  - `TERM_SPAWN` can place a new departing passenger (a hotel guest), and `TERM_EXIT` can send an arriving one somewhere other than out;
+  - `TERM_CLICK`, `TERM_MINUTE`, `TERM_DAY` and `TERM_DRAW` handle clicks, every game minute, every day and drawing;
+  - `TERM_FIELDS` gives saved fields their defaults for new games and older saves (it is `FIELDS`, the one table of saved fields; see Saves);
+  - `SIMX` exposes functions to the checks, and a part's checks go in `tools/checks/<part>.mjs`;
+  - new upgrades go in the part's file with `Object.assign(UPG,{...})`.
+- `terminalFaults` (part of `layoutFaults`) checks that every desk, kiosk, lane, passport desk, e-gate, carousel and queue sits in its hall.
+- **Departures** (`43-departures.js`, checks in `tools/checks/departures.mjs`): its places (`deskX`, `laneX`, the queues' `qSlot`, `secSlot`…) live there too.
+  - **Check-in:** four islands (`IX`) of two desks back to back, each with its own queue. `R.ciQ` holds every check-in queue in joining order, with `p.isl` naming it: an island, the kiosks (`CI_K`) or bag drop (`CI_B`). `enterLandside` joins the quickest; a party stays together.
+  - **Bag drop** (upgrade `bagdrop`, in the Self-service plan): counters that take 40% of a check-in, staffed and rostered like desks (`OWN.drops`, `WAGE.drops`, `dropsOpen`). Kiosk passengers with bags go on to it, and online check-in then covers passengers with bags, who go straight there. `finishCheckin(p,x)` puts each bag on `R.belt` at its desk or counter.
+  - **Security:** `enterSecurity` sends passengers through a boarding-pass gate into the hall, then `R.secQ` (`p.famL` marks families and those who need help, who have as many lanes as their share of the queue, at least one when two lanes are open). A lane divests (`divestT`), then the passenger walks through the scanner (`scan`) to repack. 1 bag in 12 is searched at a table for 2 min, 1 in 30 with CT scanners (upgrade `ctscan`, plan `t_ct`, which also makes trays 25% quicker). `clearSec` marks the passenger `cleared` and hands them to `airside`. Each open search table (`tablesOpen`: one per open lane and the fast track) has a searcher on `WAGE.srch`, paid with bag drop each minute and counted in `wageBill`.
+  - `R.dep` (`DEP()`) keeps the search queue and the family lane count, and starts afresh when a load replaces `R.lanes`. `DEP_LOG` counts what the checks read.
+
+- **Arrivals** (`44-arrivals.js`):
+  - **Immigration.** `R.arrQ` holds everyone queuing, in two queues: the passport desks' (`arrSlot`) and the e-gates' (`p.eg`, `egSlot`). E-gate passports (`p.elig`) join the e-gates' unless the desks would be quicker; e-gates take only those, and desks help with it when theirs is empty. Rostering still counts all of `R.arrQ`.
+  - **Domestic flights** (`DOMESTIC`: Edinburgh, Belfast, Jersey) walk through the domestic channel (`DOM_X`) without queuing.
+  - **Customs.** `exitTarget` sends everyone in reclaim through customs first (`toCustoms`, `p.cus`): 1 in 40 (`CUS_ODDS`) waits 1–2 min at a search table in the red channel, then `exitTarget` again asks `TERM_EXIT`, then the station, stops, taxi rank, car hire desks (then the car park) or the forecourt.
+  - **Meeters** (`R.meet`) wait at the barrier with signs for flights landed or due within 30 min and walk off with their passenger. They're drawn only, use their own generator (`meetRnd`) and don't run headless.
+  - `drawArrivals` (`TERM_DRAW`) draws the passport desks with officers, e-gates, customs, the arrivals hall and the taxi rank; `TERM_PANEL.arr` shows today's immigration and customs (`R.arrSt`, reset daily).
+
+- **Baggage** (`45-baggage.js`, Terminal › Baggage). Bags are counts per flight at each stage (`F.bg`, `A.bg`, the queues in `R.bag`); only a sample is drawn.
+  - `updateBelt`: checked bags go from the belt through screening (one in 20 to the search room), the sorter (`bagsys` sets its speed) and make-up to tug trains, which take them through the tunnel to the stand, where they count as ready for the hold (`F.bagsIn`).
+  - Make-up positions go to flights earliest departure first. Other flights' bags wait in the early bag store, or circle the sorter and take its capacity; when that's full, the sorter backs up.
+  - A flight that's ready to go after its departure time waits five minutes (`BAG_GRACE`) for bags on their way, then leaves behind those that haven't reached a tug (`leaveBags`): `F.checkedTotal` drops, and each costs a courier and some rating (`bags`), counted in `G.bagMiss` and the day's report.
+  - Transfer bags (`A.xb`, set in `newFlight`) come off first and go through screening and the sorter to their next flight, so tight connections can miss.
+  - `updateReclaimBelt`: arriving bags go by tug to the hall and onto the flight's carousel (`A.car`, from `carOf`, which `carX`/`carY` follow), up to 45 bags a carousel. The board shows ON BELT n, or BAGS LATE while another flight's bags fill the carousel.
+
+- **Market place** (`46-market.js`): passengers' time airside, from security (or a connecting flight) to the gate.
+  - **Gate calls:** a flight's gate is called (`F.called`, `isCalled`) a set time before boarding starts (`boardEta`); the plane boards no one until then. The Gate calls policy (`G.pol.gates`: 60, 45 or 30 min before departure, taken as 45 min after boarding starts) calls 15 min before boarding, as it starts or 15 min after. The duty manager (`G.set.autoDuty`, on by default) calls as boarding starts, and far gates early enough for their walk (`gateWalk`, once per layout). The board hides the gate and shows `GATE hh:mm` until the call (`gateCallText`).
+  - **Waiting:** `airside` and `nextAct` choose what next: the gate once it's called (anyone through security after the call may still stop at one shop), otherwise a shop (`pickShop`: the first choice as before; later ones likelier the longer until the gate is called, `callAt`, so late calls mean more shopping), or a place in the market place (`goAct`): the play area for children and their parents, the food court for groups, the charging bar for business travellers, window seats, other seats or the toilets, standing when they're full. `mktPlan` places the furniture from the hall's corners, clear of the walk from security.
+  - **Shops:** each has room for `shopCap` people (by kind and level) in rows of spots (`inPt`); a full shop sends people elsewhere (`R.away`). Browsing shops: look, then queue at a till; sit-down places: order, then sit. `occ()` gathers who is where once a step.
+  - **Gate lounges:** passengers take a seat (the stand's 80 spots) or stand, and sit when one frees; 15 or more standing at a gate costs a little rating (`lounge`).
+  - **Walk-through duty free:** a Masterplan plan (`c_walk`) unlocks the upgrade `wtdf`; once built, everyone out of security walks its aisles (state `df`), and about 1 in 3 buy (`G.dfEarned`).
+  - Sales › Shops shows how full each shop is; `drawMarket` and `drawShopUnit` draw the hall's furniture and each shop's inside.
+
+- **Hotel** (`47-hotel.js`): 40 rooms per level of the Airport hotel upgrade (`hotelRooms`). Each guest holds a room until check-out (`G.hotelStays`, `[kind, until]`); `hotelBook` never takes more than the rooms and keeps some back for crews. `G.hotelBook` is tonight's book (noon to noon): guests by kind, takings, turned away, and last night's.
+  - Arriving guests (late arrivals, long connections, conference delegates) are chosen in `TERM_EXIT` and walk through the walkway to the lobby, where `hotelStay(p)` takes their money.
+  - Early flyers book at noon from how many came down that morning, and `TERM_SPAWN` starts them in the lobby.
+  - Crews finishing a duty rest there for 9 h instead of 12 (`crewRest`, from `crewAway`).
+  - `hotelStranded`: from level 4, a departure held an hour late at night by fog or a storm owes its passengers rooms; yours are cheap, the rest go to dear city hotels and cost rating.
+  - Rooms are cheap, standard or premium (`G.hotelPrice`); the duty manager (`SET().autoDuty`) re-prices each noon from last night. The card is in Sales › Landside; `drawHotel` lights a window per guest.
+- **Advisor.** `advise` (`16-advisor.js`) points at the fullest café (a café, coffee cart, bar or dining room that turned away more than 7 in the last hour, from `R.awayH`) and at a hotel that turned away 10 or more guests last night.
