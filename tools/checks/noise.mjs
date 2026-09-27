@@ -26,10 +26,19 @@ export default async function({open,ok,saveText,newest}){
     S.news('A wire fault stopped M1 for 30 min.');
     S.news('A signal failure stopped T1 for 22.5 min.');
     S.news('Full time: Harbourgate FC 2–1 Rivals.');
-    return {count:G.news.length,rows:G.news.map(n=>n.m)};
+    const mixed={count:G.news.length,rows:G.news.map(n=>n.m)};
+    G.news=[];
+    S.news('A signal failure stopped R2 for 30 min.');
+    S.news('A signal failure stopped R2 for 20 min.');
+    const sameLine={count:G.news.length,rows:G.news.map(n=>n.m)};
+    return {mixed,sameLine};
   });
-  ok('noise: repeated region incidents fold into one Reports line',
-    news.count===2&&/\(\+2 more today\)$/.test(news.rows[1]||''),JSON.stringify(news));
+  ok('noise: repeated region incidents on different lines fold into one Reports line naming every line hit',
+    news.mixed.count===2&&news.mixed.rows[1]==='Signal and wire faults have stopped R2, M1 and T1 today.',
+    JSON.stringify(news.mixed));
+  ok('noise: the same line failing twice folds into one line too',
+    news.sameLine.count===1&&news.sameLine.rows[0]==='Signal failures have stopped R2 today.',
+    JSON.stringify(news.sameLine));
 
   const whatsNew=await page.evaluate(()=>{
     const S=__sim,G=S.G;
