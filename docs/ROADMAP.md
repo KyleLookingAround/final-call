@@ -7,7 +7,7 @@ What's being worked on, what's next, and ideas not yet agreed. Anything here get
 - **Sound** (#27, spec `docs/specs/sound.md`, version 29): flight announcements with the words on the board, occasional spoken calls, and ambience that follows the camera.
 - **Level-up screen** (#29, spec `docs/specs/level-up.md`, version 30): a card for each new level with what it unlocked.
 
-- **The terminal as a place** (#48, spec `docs/specs/terminal-place.md`, approved): two floors, windows, decor that comes with the building, local character, a roof terrace with spotters, and each layout's own floor plan. Its checks are written first (experiment [D]), then groundwork after the real airport merges, then the parts.
+- **The terminal as a place** (#48, spec `docs/specs/terminal-place.md`, approved): two floors, windows, decor that comes with the building, local character, a roof terrace with spotters, and each layout's own floor plan. Its checks are written (experiment [D]) and wait in `tools/checks/pending.txt`; next the groundwork, then the parts.
 - **Polish audit** (brief `docs/briefs/polish-audit.md`): a ranked punch list of everything that looks or feels unfinished, from playing and looking rather than reading code, in `docs/ideas/polish-2026-09.md`; one issue per suggested fix batch, labelled `polish`.
 
 ## The owner's order of bundles
@@ -43,7 +43,7 @@ How sessions work, not the game. Each one is small, measured and recorded in `do
 - **During "Looks like a real airport":** cheaper effort for routine work and one or two parts.
 - **[B] Faster CI, first half: cached Chromium** (`docs/briefs/ci-cache.md`, done). `checks.yml`, `balance.yml`, `parts.yml` and `health.yml` cache `~/.cache/ms-playwright`, keyed on the pinned version, and skip the download on a hit. Measured in `docs/LESSONS.md`: a small saving on `checks.yml`, none worth noting on `balance.yml` (system library installation dominates the setup time either way). Muddies experiment [A]'s time-to-green from the commit it names.
 - **After it merges:** [B]'s second half (only the touched check groups on drafts).
-- **For "The terminal as a place":** write the checks first.
+- **For "The terminal as a place":** write the checks first (done: the checks-first PR adds `plans`, `floors`, `windows`, `decor` and `terrace`, waiting in `tools/checks/pending.txt`). Measure [D] per part: game-code bugs a pre-written check caught before its PR opened, bugs found after it opened, and pre-written checks it had to fix (the spec's "Measuring [D]").
 
 ## Next
 
