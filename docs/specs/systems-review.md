@@ -1,6 +1,6 @@
 # Systems review: how the systems connect, and how to make choices interesting
 
-Issue: #65 · Status: Proposed · PRs: (added as they open)
+Issue: #65 · Status: Proposed · PRs: #66
 
 A plan, not a change to the game. The owner asked for the game's systems to work smoothly together and interact in meaningful ways, so that choices are interesting, and is open to refactoring the code and reworking systems to get there. Written 27 Sep 2026 from `main` at version 30 (after #49 and #53; brief: `docs/briefs/systems-review.md`). Three parts: how the systems connect today, design proposals that link them, and the refactors that make those possible, then a recommended order. Nothing here is built until the owner approves it on the issue.
 
