@@ -68,7 +68,7 @@ function dropPos(F){const f=F.bg,B=bagRT();f.pos=false;B.pos=B.pos.filter(x=>x!=
 function leaveBags(F,n){const f=bgOf(F),B=bagRT();f.cut=true;f.miss+=n;F.checkedTotal-=n;
   B.loop-=f.loop;B.ebs-=f.ebs;f.loop=f.ebs=f.mk=0;
   B.scr=B.scr.filter(g=>g[0]!==F);B.sort=B.sort.filter(g=>g[0]!==F);B.srch=B.srch.filter(s=>s.F!==F);
-  spend(n*F.fare*2,'costs');repAdj(-0.25*n,'bags');G.bagMiss=(G.bagMiss||0)+n;if(G.dstat)G.dstat.bagMiss=(G.dstat.bagMiss||0)+n;
+  spend(n*F.fare*2,'costs',F.i);repAdj(-0.25*n,'bags',F.i);G.bagMiss=(G.bagMiss||0)+n;if(G.dstat)G.dstat.bagMiss=(G.dstat.bagMiss||0)+n;
   toW(F.i,0,CABIN_TOP-24);floater(`${n} BAG${n>1?'S':''} LEFT BEHIND`,WP.x,WP.y,'#FF7A8A',true)}
 // every update: bags off each plane onto a cart, tugs to the hall, and the hall onto the flight's carousel
 function updateReclaimBelt(dt){

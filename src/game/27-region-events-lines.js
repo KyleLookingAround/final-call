@@ -25,7 +25,7 @@ function updateEvents(dt){
       else if(e.type==='cruise')head=`${e.name} has sailed.`;else if(e.type==='concert')head=`${e.name} played to ${num(e.att)}.`;else if(e.type==='conference')head=`${e.name} has wrapped up.`;else head=`The premiere of ${e.name} is over.`;
       const pct=Math.round(f*100);
       let tail=pid==='air'?'Everyone walked straight from the terminal.':f>=0.75?`${pct}% got there and back easily.`:f>=0.5?`Only ${pct}% got there and back easily; the rest sat in traffic.`:`Chaos: just ${pct}% got there and back easily.`;
-      if(f>=0.75)repAdj(2,'events');else if(f<0.5)repAdj(-(0.5-f)*10,'events');
+      if(f>=0.75)repAdj(2,'events',pid);else if(f<0.5)repAdj(-(0.5-f)*10,'events',pid);
       news(`${head} ${tail} Takings ${money(levy)}.`);e.res={f,levy,t:G.clock};(R.evDoneFx||(R.evDoneFx=[])).push({plot:e.plot,text:`${EVT[e.type].label.toUpperCase()} · ${Math.round(f*100)}% GOT HOME · +${money(levy)}`,t:G.clock,good:f>=0.5});toast(`${EVT[e.type].label}: +${money(levy)}, ${Math.round(f*100)}% got there and back easily.`,null,null,f>=0.5?'goal':'warn',6);
       G.evDone=(G.evDone||0)+1;G.evq.splice(G.evq.indexOf(e),1);scheduleEvent(e.plot);
     }
