@@ -16,6 +16,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 - [Polish audit · 27 Sep 2026](lessons/main-polish-audit.md)
 - [Version 32: ready for what's next · 27 Sep 2026](lessons/main-release-32.md)
+- [#101 A rating that reflects the last day, measured; a network you have to keep, specced · 27 Sep 2026](lessons/101-balance-rating.md)
 - [#95 Systems refactors 4 and 6: clock tables and day stats · 27 Sep 2026](lessons/95-refactor-clocks.md)
 - [Quiet the noise: fold repeated incidents, expire toasts, clear stale tips · 27 Sep 2026](lessons/92-polish-noise.md)
 - [The terminal as a place: checks first · 27 Sep 2026](lessons/90-terminal-place-checks.md)
