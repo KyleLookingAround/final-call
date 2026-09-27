@@ -1,13 +1,11 @@
 # Tests the parts of a split feature together, before they merge: main plus every open PR labelled part:<feature>,
 # merged into a temporary branch on the runner, then npm run check. One comment on each part's PR says how it went and is
-# updated in place. Runs on pushes to those PRs, hourly (only when main or a part has moved since the last report) and on demand.
+# updated in place. Runs on pushes to those PRs and on demand.
 name: Parts together
 
 on:
   pull_request:
     types: [opened, synchronize, reopened, labeled]
-  schedule:
-    - cron: '17 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -30,7 +28,6 @@ jobs:
           script: |
             const {owner,repo}=context.repo,ev=context.eventName,pr=context.payload.pull_request;
             const prs=await github.paginate(github.rest.pulls.list,{owner,repo,state:'open',per_page:100});
-            const main=(await github.rest.repos.getBranch({owner,repo,branch:'main'})).data.commit.sha;
             const byF={};
             for(const p of prs)for(const l of p.labels){const m=l.name.match(/^part:(.+)$/);if(m)(byF[m[1]]||(byF[m[1]]=[])).push({n:p.number,sha:p.head.sha})}
             let want=Object.keys(byF);
@@ -40,11 +37,7 @@ jobs:
             }
             const out=[];
             for(const f of want){
-              const parts=byF[f].sort((a,b)=>a.n-b.n),key=[main.slice(0,7),...parts.map(p=>p.n+'@'+p.sha.slice(0,7))].join(' ');
-              if(ev==='schedule'){ // nothing moved since the last report: skip
-                const cs=await github.paginate(github.rest.issues.listComments,{owner,repo,issue_number:parts[0].n,per_page:100});
-                if(cs.some(c=>c.body.includes(`<!-- parts:${f} -->`)&&c.body.includes(`<!-- key:${key} -->`)))continue;
-              }
+              const parts=byF[f].sort((a,b)=>a.n-b.n);
               out.push({feature:f,parts});
             }
             core.info(JSON.stringify(out));

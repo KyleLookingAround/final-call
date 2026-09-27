@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted.
+Superseded by [ADR-2026-09-27-ci-only-when-needed](ADR-2026-09-27-ci-only-when-needed.md).
 
 ## Context
 
