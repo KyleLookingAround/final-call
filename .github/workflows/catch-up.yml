@@ -5,7 +5,7 @@
 # alone too. docs/decisions/ADR-2026-09-27-fewer-clashes.md has why.
 #
 # Pushes made with the repo's own token don't start pull_request workflows, so without a CATCH_UP_TOKEN secret it starts
-# Checks itself (and Balance when the PR touches the game or the bot). The repo's token also can't push a merge that
+# Checks itself. Never Balance: it runs once per PR, and a session re-runs it with the balance label on the final code. The repo's token also can't push a merge that
 # brings in a change to .github/workflows/; then it comments instead. A CATCH_UP_TOKEN (a fine-grained token with
 # contents, pull requests and workflows write on this repo) lifts both.
 name: Catch up
@@ -96,9 +96,6 @@ jobs:
               say "$pr" "Caught up with \`main\` (${main:0:7}) automatically; nothing to do." quiet
               if [ "$OWN_TOKEN" != true ]; then
                 gh workflow run checks.yml --repo "$REPO" --ref "$head" || true
-                if gh pr diff "$pr" --repo "$REPO" --name-only | grep -qE '^(src/game/|tools/bot\.js|tools/run-bot\.mjs|tools/baseline\.json)'; then
-                  gh workflow run balance.yml --repo "$REPO" --ref "$head" || true
-                fi
               fi
             else
               say "$pr" "Catch up merged \`main\` (${main:0:7}) into \`$head\` but couldn't push it: the branch moved meanwhile, or \`main\` changed a file in \`.github/workflows/\`, which the repo's token may not push. Merge it by hand: \`git fetch origin main && git merge origin/main\`, then push. This comment is updated rather than repeated."
