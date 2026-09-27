@@ -1,0 +1,131 @@
+name: Health check
+
+# Runs npm run check and the bot on seeds 1-3 against main weekly and on demand, the same setup and
+# bot command as checks.yml and balance.yml. When a check fails, the bot errors, or it reaches a
+# level outside tools/baseline.json, it opens one issue labelled `health` (or updates the open one)
+# with a table like the Balance summary, the failing check groups and a link to the run. A later
+# clean run comments and closes it. It never opens a second issue while one is open.
+on:
+  schedule:
+    - cron: '47 4 * * 1' # early Monday UTC, not on the hour
+  workflow_dispatch:
+    inputs:
+      baseline_override:
+        description: >-
+          Tighten tools/baseline.json for this run only, to prove drift is caught: a JSON object of
+          level: [lo, hi], e.g. {"1":[20,21]}. The file itself is never changed. Leave blank for a
+          real run.
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: health-check
+  cancel-in-progress: false
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - id: pw-version
+        run: echo "version=$(node -p "require('./package-lock.json').packages['node_modules/playwright'].version")" >> "$GITHUB_OUTPUT"
+      - id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw-version.outputs.version }}
+      - run: npx playwright install --with-deps chromium
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+      - run: npx playwright install-deps chromium
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+      - name: npm run check
+        id: check
+        continue-on-error: true
+        run: |
+          mkdir -p build
+          set -o pipefail
+          npm run check 2>&1 | tee build/health-check.log
+      - name: Bot, seed 1, 1150 game hours, keeping Classic
+        if: always()
+        continue-on-error: true
+        run: npm run bot -- 1150 --seed 1
+      - name: Bot, seed 2, 1150 game hours, keeping Classic
+        if: always()
+        continue-on-error: true
+        run: npm run bot -- 1150 --seed 2
+      - name: Bot, seed 3, 1150 game hours, keeping Classic
+        if: always()
+        continue-on-error: true
+        run: npm run bot -- 1150 --seed 3
+      - name: Read the bot's table against the baseline
+        if: always()
+        env:
+          HEALTH_BASELINE_OVERRIDE: ${{ inputs.baseline_override }}
+        run: node tools/health.mjs 1 2 3 > build/health.json
+      - name: Open, update or close the health issue
+        if: always()
+        uses: actions/github-script@v7
+        env:
+          CHECK_OUTCOME: ${{ steps.check.outcome }}
+          OVERRIDE: ${{ inputs.baseline_override }}
+        with:
+          script: |
+            const fs = require('fs');
+            const {owner, repo} = context.repo;
+            const marker = '<!-- health-check -->';
+            const run = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
+            const now = new Date().toISOString().slice(0, 16).replace('T', ' ');
+
+            const health = JSON.parse(fs.readFileSync('build/health.json', 'utf8'));
+            const log = fs.existsSync('build/health-check.log') ? fs.readFileSync('build/health-check.log', 'utf8').split('\n') : [];
+            const fails = log.filter(l => l.startsWith('FAIL'));
+            const groups = [...new Set(fails.map(l => l.replace(/^FAIL\s+/, '').split(':')[0].trim()))];
+            const checkOk = process.env.CHECK_OUTCOME === 'success';
+            const drift = health.drift || !checkOk;
+
+            try {
+              await github.rest.issues.getLabel({owner, repo, name: 'health'});
+            } catch (e) {
+              await github.rest.issues.createLabel({owner, repo, name: 'health', color: 'd93f0b', description: 'Weekly health check found drift on main'});
+            }
+
+            const issues = await github.paginate(github.rest.issues.listForRepo, {owner, repo, state: 'open', labels: 'health', per_page: 100});
+            const existing = issues.find(i => i.body && i.body.includes(marker));
+
+            if (drift) {
+              const body = [marker,
+                '### Weekly health check: drift on main', '',
+                checkOk ? '`npm run check`: passing' : `\`npm run check\`: failing (${groups.join(', ') || 'see run'})`,
+                ...fails.slice(0, 10).map(l => '- ' + l.replace(/^FAIL\s+/, '')),
+                ...(fails.length > 10 ? [`- and ${fails.length - 10} more`] : []),
+                '', health.table, '',
+                `Checked ${now} UTC${process.env.OVERRIDE ? ' (a tightened baseline for this run only)' : ''} · [run](${run})`,
+              ].join('\n');
+              if (existing) {
+                await github.rest.issues.update({owner, repo, issue_number: existing.number, body});
+                await github.rest.issues.createComment({owner, repo, issue_number: existing.number, body: `Still drifting as of ${now} UTC · [run](${run})`});
+              } else {
+                await github.rest.issues.create({owner, repo, title: 'Weekly health check: drift on main', body, labels: ['health']});
+              }
+            } else if (existing) {
+              await github.rest.issues.createComment({owner, repo, issue_number: existing.number, body: `Clean as of ${now} UTC · [run](${run}). Closing.`});
+              await github.rest.issues.update({owner, repo, issue_number: existing.number, state: 'closed'});
+            }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: health-check-failures
+          path: build/check
+          if-no-files-found: ignore

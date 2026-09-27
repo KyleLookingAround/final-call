@@ -1,5 +1,9 @@
 /* ================= help, keys, speed ================= */
-function openHelp(on){$('#help').hidden=!on;if(on){R.helpPrev=R.speed;setSpeed(0);$('#help .close').focus()}else if(R.helpPrev){setSpeed(R.helpPrev)}}
+function feedbackRepo(){const m=/^([^.]+)\.github\.io$/.exec(location.hostname);if(!m)return null;const repo=location.pathname.split('/').filter(Boolean)[0];return repo?`${m[1]}/${repo}`:null}
+function feedbackUrl(){const repo=feedbackRepo();if(!repo)return null;
+  const body=['Version: '+UPDATES[0].v,'Level: '+LEVELS[G.level].name,'Layout: '+(LAYOUTS[G.layout]||LAYOUTS.classic).name,'Game day: '+G.day,'Screen: '+innerWidth+'×'+innerHeight,'Device: '+(matchMedia('(pointer:coarse)').matches?'Touch':'Desktop')].join('\n');
+  return `https://github.com/${repo}/issues/new?body=${encodeURIComponent(body)}`}
+function openHelp(on){$('#help').hidden=!on;if(on){R.helpPrev=R.speed;setSpeed(0);const u=feedbackUrl(),fb=$('#feedbackLink');fb.hidden=!u;if(u)fb.href=u;$('#help .close').focus()}else if(R.helpPrev){setSpeed(R.helpPrev)}}
 $('#helpb').addEventListener('click',()=>openHelp(true));
 $('#help').addEventListener('click',e=>{if(e.target.id==='help'||e.target.closest('[data-helpclose]'))openHelp(false)});
 function setSpeed(v){if(v>0)R.lastSpeed=v;R.speed=v;$$('.hud [data-speed]').forEach(x=>x.classList.toggle('on',+x.dataset.speed===v));$('#ptag').hidden=v!==0}
