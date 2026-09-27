@@ -7,7 +7,6 @@ What's being worked on, what's next, and ideas not yet agreed. Anything here get
 - **Sound** (#27, spec `docs/specs/sound.md`, version 29): flight announcements with the words on the board, occasional spoken calls, and ambience that follows the camera.
 - **Level-up screen** (#29, spec `docs/specs/level-up.md`, version 30): a card for each new level with what it unlocked.
 
-- **Looks like a real airport** (#37, spec `docs/specs/real-airport.md`): the groundwork (drawing layers and a lighting pass, no change to play) first, then the parts two or three at a time from their briefs in `docs/briefs/`: apron markings and lighting, better planes and roofs; then weather you can see and vehicles on the apron.
 - **The terminal as a place** (#48, spec `docs/specs/terminal-place.md`, approved): two floors, windows, decor that comes with the building, local character, a roof terrace with spotters, and each layout's own floor plan. Its checks are written first (experiment [D]), then groundwork after the real airport merges, then the parts.
 - **Systems review** (#65, spec `docs/specs/systems-review.md`, proposed): how the systems connect today, ten proposals that link them so choices are interesting, and ten pure refactors ranked with their checks, in a recommended order that waits for the owner's approval.
 
@@ -108,6 +107,7 @@ How sessions work, not the game. Each one is small, measured and recorded in `do
 
 ## Done
 
+- **Version 31: looks like a real airport** (#37, spec `docs/specs/real-airport.md`). Drawing only, built as a groundwork and five parts side by side: apron markings and lighting (#53), better planes (#50), roofs that fade as you zoom in (#52, #63), weather you can see (#61) and vehicles on the apron (#55), brought together with one What's new entry. `__sim.AF_Y` now follows the layout.
 - **A Ko-fi link** (spec `docs/specs/kofi-link.md`). A quiet "Buy me a Ko-fi" button in What's new, Settings and the level-up card, opening `https://ko-fi.com/kylemck` in a new tab. Never on the airport view, the board or in the guided start. For the next release's notes.
 - **A feedback link in Help.** A "Send feedback" link, shown only on GitHub Pages, opens a new GitHub issue for the repo with the version, level, layout, game day, screen size and device type filled into the body. No tracking. For the next release's notes.
 - **Weekly health check.** The "Health check" workflow (`.github/workflows/health.yml`) runs the checks and the bot on seeds 1–3 against `main` weekly and on demand, opening or updating an issue labelled `health` when something drifts, and closing it once a later run is clean.

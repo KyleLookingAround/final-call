@@ -32,6 +32,37 @@ After a PR merges, look back at the session that built it: what it cost, what sl
   - The `graph` check refuses a link to a file that doesn't exist yet, so a spec naming a proposed new file has to describe it rather than link it. No change: the check is right, and the wording is easy.
   - `main` gained the approved terminal-place spec (#49) minutes after this session branched. → Fetch and reset onto `main` again before the first commit, as the lessons for #43 and #49 already say.
 
+## Version 31: the real airport brought together · 27 Sep 2026
+
+- **Numbers:** session `session_01TkZWm4yFBrrCU3XqvBNYHK`, estimate $10: cost not yet reported by `get_session` when the PR opened, 74k of 1M context. Started 14:08, a few minutes after weather (#61) merged. Rate limit `allowed` throughout.
+- **The owner's change mid-session:** after seeing the roofs, the owner asked for the halls to be clear at every zoom and the roof to be a floor you step up to. This PR made that change (a Roof button on the camera bar, `R.floor`, the `roofs` check, `docs/decisions/ADR-2026-09-27-roof-is-a-floor.md`) and updated the approved terminal spec's floor chip to match, touching `13-camera.js` beyond the brief's list because the owner asked. → The terminal's groundwork builds on `R.floor` and the same control.
+- **What it did:** the What's new entry and version 31, screenshots of all nine layouts by day and night at three sizes (and close-ups, a storm and snow), the link preview, the scene's overview in `docs/SYSTEMS.md`, the notes' file table rows, the five parts' look backs below, and `__sim.AF_Y` made live.
+- **Speed together:** medians of three `scene` runs, alternating with three on `main` before #50 (d9ba832) on the same machine: Classic desktop 0.452× (0.337× before), Midfield desktop 0.359× (0.324×), Midfield phone 0.345× (0.323×). All under 0.55×. After the roof became a floor (not drawn unless picked), three more branch runs gave 0.365×, 0.376× and 0.373×. Classic's single runs spread 0.33–0.45× on the branch, so one run says little; alternating base and branch runs kept machine drift out of the comparison.
+- **Lessons:**
+  - One contact sheet per size and zoom (layouts as rows, day and night side by side, drawn in the browser itself since the image has no ImageMagick or PIL) made about 100 screenshots quick to look at; open single shots only where the sheet raises a doubt.
+  - Switching layouts again and again in one page crashes in the passengers' walk (`faceW`), because passengers mid-walk keep the old layout's stands. It's a test-script artefact (players rebuild through `rebuildLayout`), but a script that visits every layout should load a fresh page for each.
+  - The look backs were gathered by a helper on the cheaper model from `get_session` and the PRs, then checked and trimmed here (experiment [C]); it needed telling to leave model names out of anything bound for the repo.
+
+## Real airport parts: #50 planes, #55 vehicles, #52 roofs, #53 markings, #61 weather · 27 Sep 2026
+
+Five parts built side by side from their briefs, merged between 12:39 and 14:08. Each part's own CI stayed green throughout; the Parts workflow's "together" run was red while #53, and later #61, carried a `docs/SYSTEMS.md` conflict.
+
+| PR | Session | Estimate | Cost | Context | Opened → merged | Pushes after opening | `scene` share (budget) |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| #50 planes | `014M9Ym9XzR8Tm3LszDH3Drv` | $10 | $6.21 | 292k | 11:58 → 12:39 | 1 (merge of `main`) | within noise (0.035×) |
+| #55 vehicles | `01CziGnfH8SiWVGbctTgd4Wu` (cheaper model) | $6 | $6.38 | 308k | 12:12 → 12:58 | 1 | within noise (0.035×) |
+| #52 roofs | `01TWd3JDj7LDJoedcSLECf2y` | $10 | $3.94 | 207k | 11:59 → 13:12 | 1 | about 0.004× on Classic, measured on and off (0.030×) |
+| #53 markings | `01HBP9vSppzPL43yK2ASWFJr` | $14 | $5.92 | 278k | 12:02 → 13:27 | 1, with a `docs/SYSTEMS.md` conflict | about 0.01–0.015×, measured on and off (0.040×) |
+| #61 weather | `016YxvgQJZDHp8Skjdasztez` (cheaper model) | $6 | $22.43 | 515k | 12:48 → 14:08 | 4 merges of `main`, two with conflicts | none measurable (0.035×) |
+
+- **Lessons:**
+  - Measuring a layer on and off in one page gave its real cost where three-and-three runs against `main` could not: one run varies by about ±0.05×, more than any part's share. Roofs and markings both settled their share this way. → Recorded here for the next split drawing feature; the spec's method stays as the budget's test.
+  - Each part in its own file with its own check file (`markings`, `roofs`, `weather`, `vehicles`) kept code conflicts to none. The one file they all shared was `docs/SYSTEMS.md`, where each added a bullet to the same section: both #53 and #61 had to resolve it. For the next split feature, give each part's bullet a placeholder line in the groundwork so parts edit different lines.
+  - A red "together" comment names the part that conflicts; #50, #52 and #55 each waited on #53's conflict, not their own. Read the named part before acting.
+  - Weather cost nearly four times its estimate, and its PR doesn't say why, although its brief asks for that past twice the estimate. Being the last part open, it merged `main` four times, but that alone doesn't explain $22. A coordinator reading `get_session` at each sweep would have caught it at twice the estimate, and could have asked for the reason while the session still had it. Four other parts came in at or well under estimate, so estimates for default-model drawing parts can come down.
+  - Found by #50's checks: `Object.assign(SIMX,{get AF_Y(){…}})` copies the getter's value at load, so `__sim.AF_Y` never followed the layout. #50 and #61 worked round it; version 31 moved the getter into the `__sim` list in `tools/build.mjs`, where it stays live. → Any live value for tests belongs in that list, not in `SIMX`.
+  - Good practice seen twice: writing a scope judgement into the PR rather than guessing silently (#52 raised the starting-zoom fade as #51, settled by #63; #61 stated that there is no grass surface to snow on).
+
 ## #51 Clear roofs at the starting zoom · 27 Sep 2026
 
 - **Numbers:** session `session_01DNpd2NAxxaMbr4nBX4SbvS`, estimate $3: `usage.cost_usd` still missing from `get_session` at the first stopping point (the pattern the game logic ideas session hit already), rate limit status stayed `allowed` throughout. Created 13:18, code plus checks plus screenshots plus the preview image done by 13:26.

@@ -13,8 +13,8 @@ export default async function({open,ok,saveText,newest}){
     const shot=(x,y)=>{R.cam.z=1.2;R.cam.tx=null;const k=S.viewK();R.cam.x=x-R.sw/k/2;R.cam.y=y-R.sh/k/2;S.clampCam();
       S.draw();c.getImageData(0,0,1,1);S.draw();return region(x,y,22)};
     const whole=()=>{const cv=document.querySelector('#cv'),d=c.getImageData(0,0,cv.width,cv.height).data;let t=0;for(let i=0;i<d.length;i+=8)t+=d[i];return t};
-    // an apron point clear of every built stand, and a built stand's own centre. S.AF_Y is a snapshot from page load
-    // (Object.assign flattens the getter), so the runway's actual top comes from the windsock's own live position instead
+    // an apron point clear of every built stand, and a built stand's own centre; the runway's top comes from the
+    // windsock's own position (S.AF_Y gives the same)
     const afY=S.windsockPos()[1]-60;
     const boxes=S.SIDX.filter(i=>G.stands[i].built).map(S.standBox);
     let openPt=null;
