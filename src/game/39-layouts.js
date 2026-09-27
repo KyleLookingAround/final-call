@@ -177,7 +177,7 @@ function applyLayout(id){
   fill(STAND_AFTER,L.stands.map((s,i)=>s.after!=null?s.after:(o=>o>0?STAND_ORDER[o-1]:-1)(STAND_ORDER.indexOf(i))));
   fill(SHOP_X,L.shops.map(s=>s[0]));fill(SHOP_NAME,L.shops.map(s=>s[1]));fill(SHOP_PH,L.shops.map(s=>s[2]||1));
   fill(SHOP_Y,L.shops.map(s=>s[4]??452));fill(SHOP_A,L.shops.map(s=>s[5]||0));
-  fill(XF,L.stands.map(standXf));ROOM_DOORS=[...(L.doors||[]),...TERM_DOORS];buildRooms({...L,rooms:[...L.rooms,...TERM_ROOMS],doors:ROOM_DOORS});AF_Y=L.top||0;Y0=AF_Y-180;placeBadges();
+  fill(XF,L.stands.map(standXf));ROOM_DOORS=[...(L.doors||[]),...L.term.doors];buildRooms({...L,rooms:[...L.rooms,...L.term.halls],doors:ROOM_DOORS});AF_Y=L.top||0;Y0=AF_Y-180;placeBadges();
 }
 
 const busMul=i=>STAND_KIND[i]!=='remote'?1:!G.lounges&&(R.fx.rain>G.clock||R.fx.snow>G.clock)?1.4:2.2; // buses outpace walkers, less so in bad weather; mobile lounges don't mind it

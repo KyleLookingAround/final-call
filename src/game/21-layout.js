@@ -1,10 +1,10 @@
 /* ================= layout ================= */
 function resize(){
   const r=$('#stage').getBoundingClientRect();if(!r.width||!r.height)return;
-  const first=R.sw===1;R.sw=r.width;R.sh=r.height;R.dpr=Math.min(2.5,window.devicePixelRatio||1);if(!sheetDrag||!R.baseK)R.baseK=R.sh/H;
+  const first=R.sw===1,wasSh=R.sw<560;R.sw=r.width;R.sh=r.height;R.dpr=Math.min(2.5,window.devicePixelRatio||1);if(!sheetDrag||!R.baseK)R.baseK=R.sh/H;
   cv.width=Math.round(R.sw*R.dpr);cv.height=Math.round(R.sh*R.dpr);
   if(first){if(R.view!=='airport'){R.cam.z=zMin();R.cam.init=1}else{R.cam.z=1;R.cam.x=0;R.cam.y=0}}
-  clampCam();fitHud();
+  clampCam();fitHud();if(!first&&wasSh!==(R.sw<560))renderCam(); // the floor chip's short names on a phone
 }
 function fitHud(){
   const b=document.body,h=$('.hud'),f=$('.fsbar'),p=$('#ptag');if(!h)return;

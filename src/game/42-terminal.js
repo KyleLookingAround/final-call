@@ -16,23 +16,31 @@ const SIMX={}; // functions the checks reach through window.__sim, added by each
 SIMX.FIELDS=FIELDS;SIMX.MIGRATIONS=MIGRATIONS; // saving (03-state.js, 22-save.js)
 const RECT=(x0,y0,x1,y1)=>[[x0,y0],[x1,y0],[x1,y1],[x0,y1]];
 const BAG_HALL=[560,SEC_Y,700,LAND_B]; // x0, y0, x1, y1
-const TERM_ROOMS=[
-  {id:'mkt',poly:RECT(8,SEC_Y,560,SEC_LINE),col:'#1E2429',name:'MARKET PLACE'},
-  {id:'imm',poly:RECT(700,SEC_Y,1240,SEC_LINE),col:'#1B2127',name:'IMMIGRATION',sign:1},
-  {id:'sec',poly:RECT(8,SEC_LINE,560,680),land:1,col:'#191D22',name:'SECURITY',sign:1},
-  {id:'ci',poly:RECT(8,680,560,LAND_B),land:1,col:'#191D22',name:'CHECK-IN',sign:1},
-  {id:'rec',poly:RECT(700,SEC_LINE,1240,700),land:1,col:'#191D22',name:'BAGGAGE RECLAIM'},
-  {id:'cus',poly:RECT(700,700,1240,720),land:1,col:'#1A1F24',name:'CUSTOMS',sign:1},
-  {id:'arh',poly:RECT(700,720,1240,LAND_B),land:1,col:'#191D22',name:'ARRIVALS'},
-  {id:'wlk',poly:RECT(1240,738,1262,752),land:1,need:'hotel',col:'#232A31'},
-  {id:'hot',poly:RECT(1262,690,1472,LAND_B),land:1,need:'hotel',col:'#232A31',name:'HOTEL',sign:1},
-  {id:'out',poly:RECT(0,LAND_B,1480,Y1),land:1,open:1} // the forecourt, stops, station and car park: drawn by drawLandside
-];
-// [hall, hall, x, y, half-width]: the concourse opens wide onto the market place; check-in and security are one space with
-// a barrier; arriving passengers leave the concourse by one door, and the arrivals hall has doors to the forecourt and hotel
-const TERM_DOORS=[['main','mkt',284,SEC_Y,250],['main','imm',1212,SEC_Y,22],['ci','sec',284,680,262],['ci','out',150,LAND_B,34],
-  ['rec','cus',970,700,70],['cus','arh',970,720,70],['arh','out',970,LAND_B,46],['arh','wlk',1240,745,7],['wlk','hot',1262,745,7],['hot','out',1367,LAND_B,26]];
-let ROOM_DOORS=[]; // the layout's doorways and the terminal's, as buildRooms saw them
+// Each layout lists its own terminal, L.term: its halls, and its doorways and floor links. A hall may be on a floor, fl (0 the
+// lower, arrivals; 1 the upper, departures); a room without one (the concourse, the forecourt) is on both. A doorway joins
+// rooms on one floor; a floor link (an escalator or a lift) joins two floors and is a doorway with two more items, [hall, hall,
+// x, y, half-width, 'esc' or 'lift', people a minute]; routing treats it as a doorway. For now every layout has its own copy
+// of the same plan, Classic's, on one floor, so nothing has moved: the floor plans part gives each layout its own.
+const classicTerm=()=>({
+  halls:[
+    {id:'mkt',poly:RECT(8,SEC_Y,560,SEC_LINE),col:'#1E2429',name:'MARKET PLACE'},
+    {id:'imm',poly:RECT(700,SEC_Y,1240,SEC_LINE),col:'#1B2127',name:'IMMIGRATION',sign:1},
+    {id:'sec',poly:RECT(8,SEC_LINE,560,680),land:1,col:'#191D22',name:'SECURITY',sign:1},
+    {id:'ci',poly:RECT(8,680,560,LAND_B),land:1,col:'#191D22',name:'CHECK-IN',sign:1},
+    {id:'rec',poly:RECT(700,SEC_LINE,1240,700),land:1,col:'#191D22',name:'BAGGAGE RECLAIM'},
+    {id:'cus',poly:RECT(700,700,1240,720),land:1,col:'#1A1F24',name:'CUSTOMS',sign:1},
+    {id:'arh',poly:RECT(700,720,1240,LAND_B),land:1,col:'#191D22',name:'ARRIVALS'},
+    {id:'wlk',poly:RECT(1240,738,1262,752),land:1,need:'hotel',col:'#232A31'},
+    {id:'hot',poly:RECT(1262,690,1472,LAND_B),land:1,need:'hotel',col:'#232A31',name:'HOTEL',sign:1},
+    {id:'out',poly:RECT(0,LAND_B,1480,Y1),land:1,open:1} // the forecourt, stops, station and car park: drawn by drawLandside
+  ],
+  // [hall, hall, x, y, half-width]: the concourse opens wide onto the market place; check-in and security are one space with
+  // a barrier; arriving passengers leave the concourse by one door, and the arrivals hall has doors to the forecourt and hotel
+  doors:[['main','mkt',284,SEC_Y,250],['main','imm',1212,SEC_Y,22],['ci','sec',284,680,262],['ci','out',150,LAND_B,34],
+    ['rec','cus',970,700,70],['cus','arh',970,720,70],['arh','out',970,LAND_B,46],['arh','wlk',1240,745,7],['wlk','hot',1262,745,7],['hot','out',1367,LAND_B,26]]});
+for(const L of Object.values(LAYOUTS))L.term=classicTerm();
+const isFloorLink=d=>d[5]==='esc'||d[5]==='lift';
+let ROOM_DOORS=[]; // the layout's doorways and its terminal's (floor links too), as buildRooms saw them
 const roomOn=r=>!(r.ph===2&&!G.pierB)&&!(r.need&&!G.lv[r.need]); // halls that exist yet: second-phase rooms need Pier B, the hotel needs a hotel
 const hallId=id=>ROOM_ID[id];
 // where each part of the terminal is, for checks and the next steps to build on: desks, kiosks and bag belts in the check-in
@@ -58,21 +66,22 @@ function drawTerminalHalls(D){
   for(const y of [630,672]){ctx.fillRect(bx1,y-2,20,4)} // belts out to the carousels
   ctx.strokeStyle='#39414A';ctx.lineWidth=5;ctx.setLineDash([4,3]);ctx.beginPath();ctx.ellipse((bx0+bx1)/2,640,44,26,0,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
   mono('BAGGAGE HALL',(bx0+bx1)/2,540,'#56606A',8.5,'center');
-  for(const r of TERM_ROOMS)if(r.name&&!r.sign&&roomOn(r)){const [x0,y0]=r.poly[0];mono(r.name,x0+8,y0+10,'#56606A',8.5)}
+  for(const r of LAY.term.halls)if(r.name&&!r.sign&&roomOn(r)){const [x0,y0]=r.poly[0];mono(r.name,x0+8,y0+10,'#56606A',8.5)}
 }
 
+// Under a solid roof (roofA() 1) nothing inside a hall is drawn: the roof covers the built rooms, so only the outline of rooms
+// not built yet (drawRooms) and the forecourt's kerb. What stands outside the halls (the taxi rank, the hotel's tower) draws
+// itself on the terminal layer, and the parts' TERM_DRAW only when the halls show.
 function drawTerminal(D){
-  drawRooms();drawTerminalHalls(D);
+  drawRooms();if(roofA()){ctx.fillStyle='#101316';ctx.fillRect(0,LAND_B+2,W,H-LAND_B-2);return}
+  drawTerminalHalls(D);
   const ciW=R.ciQ.length*D.checkin/(D.desks+D.kiosks*0.6),seW=R.secQ.length*D.sec/D.lanes,tint=w=>w>15?'rgba(255,122,138,.11)':w>8?'rgba(255,199,44,.07)':null;
   let tc=tint(ciW);if(tc){ctx.fillStyle=tc;ctx.fillRect(8,680,552,LAND_B-680)}
   tc=tint(seW);if(tc){ctx.fillStyle=tc;ctx.fillRect(8,SEC_LINE,552,80)}
   tc=tint(R.arrQ.length*D.passT/(D.officers+D.egates*1.6));if(tc){ctx.fillStyle=tc;ctx.fillRect(700,SEC_Y,540,SEC_LINE-SEC_Y)}
   ctx.fillStyle='#101316';ctx.fillRect(0,LAND_B+2,W,H-LAND_B-2);
-  for(const i of SIDX){
-    if(!standOpen(i))continue;
-    ctx.fillStyle=G.stands[i].built?'#252C33':'#1F242A';
-    for(let j=0;j<80;j++){const s=spotPos(i,j);ctx.fillRect(s.x-3,s.y-3,6,6)}
-  }
+  for(const b of [1,0]){ctx.fillStyle=b?'#252C33':'#1F242A';ctx.beginPath(); // each gate lounge's seats, built stands' and the rest in one path each
+    for(const i of SIDX){if(!standOpen(i)||!G.stands[i].built!==!b)continue;for(let j=0;j<80;j++){const s=spotPos(i,j);ctx.rect(s.x-3,s.y-3,6,6)}}ctx.fill()}
   if(G.lv.mover&&G.pierB&&LAY.track){ctx.strokeStyle='#2A3037';ctx.lineWidth=3;ctx.beginPath();LAY.track.forEach(([x,y],k)=>k?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke()} // its cars: drawPax
   // bags on the belt behind the check-in desks (check-in and security draw themselves: 43-departures.js)
   ctx.fillStyle='#D9A066';for(const b of R.belt)ctx.fillRect(b.x-2,684.5,4,4);
@@ -81,7 +90,7 @@ function drawTerminal(D){
     else{faceW(i,-118,FACE_Y-6);ctx.fillRect(WP.x-2.5,WP.y-2.5,5,5);if(F&&F.rear){faceW(i,-150,FACE_Y-6);ctx.fillRect(WP.x-2.5,WP.y-2.5,5,5)}}}
   for(const f of TERM_DRAW)f(D);
 }
-// FIZZCO banners along the terminal's apron wall while advertising is on (Office › Policies)
+// FIZZCO banners along the terminal's apron wall while advertising is on (Office › Policies): with the halls, or over the roof
 function drawAds(){if(!pol('ads'))return;ctx.fillStyle='#E5484D';for(let x=60;x<W-100;x+=560){ctx.fillRect(x,TERM_Y-3,220,10);ctx.font='800 9px "Saira Condensed",sans-serif';ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('FIZZCO · FIZZCO · FIZZCO',x+110,TERM_Y+2.5);ctx.fillStyle='#E5484D'}}
 // each queue's length and wait, signed in its hall; the doors in and out on the forecourt
 function drawQueueSigns(D){
@@ -91,5 +100,7 @@ function drawQueueSigns(D){
   w=sign(16,SEC_LINE+4,'SECURITY');mono(`${R.secQ.length+R.ftQ.length} · ~${Math.round(secWait)} min`,16+w+5,SEC_LINE+13,secWait>12?'#FF7A8A':'#909AA4',9);
   const arW=R.arrQ.length*D.passT/(D.officers+D.egates*1.6);w=sign(708,SEC_Y+4,'PASSPORTS');mono(`${R.arrQ.length} waiting · ~${Math.round(arW)} min`,708+w+5,SEC_Y+13,arW>12?'#FF7A8A':'#909AA4',9);
 }
-LAYER.terminal.push(V=>drawTerminal(V.D),drawPlanOver,drawLinks,drawAds); // the layout's escalator tubes, tent roof and links: 40-layout-drawing.js
-LAYER.signs.push(V=>drawQueueSigns(V.D));
+// the layout's escalator tubes and tent roof (drawn by the roof itself when it's on) and its links: 40-layout-drawing.js. A
+// link's stations are the one thing left under the roof: its track and trains run out across the apron
+LAYER.terminal.push(V=>drawTerminal(V.D),()=>{if(!roofA())drawPlanOver()},drawLinks,()=>{if(!roofA())drawAds()});
+LAYER.signs.push(V=>drawQueueSigns(V.D),()=>{if(roofA())drawAds()});

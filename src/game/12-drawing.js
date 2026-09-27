@@ -79,35 +79,45 @@ const MV_AT=[];
 function trackNear(P,x,y){let bx=0,by=0,bd=Infinity,vert=false;for(const g of P.segs){const [x1,y1]=g.a,[x2,y2]=g.b,ux=x2-x1,uy=y2-y1,t=clamp(((x-x1)*ux+(y-y1)*uy)/(g.len*g.len||1),0,1),qx=x1+ux*t,qy=y1+uy*t,d=Math.hypot(qx-x,qy-y);
   if(d<bd){bd=d;bx=qx;by=qy;vert=Math.abs(uy)>Math.abs(ux)}}return [bx,by,vert]}
 function drawMover(){
-  if(!(G.lv.mover&&G.pierB&&LAY.track)){MV_AT.length=0;return}
+  if(!(G.lv.mover&&G.pierB&&LAY.track)||roofA()){MV_AT.length=0;return} // its track runs inside the halls
   const P=LAY.trackP||(LAY.trackP=mkPath(LAY.track)),car=(x,y,vert)=>{ctx.fillStyle='#5CC8FF';vert?rrect(x-5,y-12,10,24,3):rrect(x-12,y-5,24,10,3);ctx.fill()};
   if(!MV_AT.length){const t=(performance.now()/1000*0.12)%2,q=ptAt(P,(t<1?t:2-t)*P.len),s=(t<1?t:2-t)*P.len;car(q[0],q[1],s>P.segs[0].len);return} // cosmetic
   const done=new Set();for(let k=0;k<MV_AT.length;k+=2){const [x,y,vert]=trackNear(P,MV_AT[k],MV_AT[k+1]),key=Math.round(x/90)+','+Math.round(y/90);if(done.has(key))continue;done.add(key);car(x,y,vert)}
   MV_AT.length=0;
 }
-function drawPax(vx0,vx1){
+// Only the floor shown: on the roof, nobody under it; on a floor of halls, nobody whose room is on the other one (53-roofs.js).
+// The dots are drawn in batches, one path for each look (PAX_B), with what goes under them (buggies) before and the marks
+// that go over them (bags, laptops, a shuffle ring) after: thousands of passengers cost a few dozen fills, not two each.
+const PAX_B=new Map(),PAX_V=[]; // look → [x, y, r, …] this frame; the passengers drawn this frame
+function paxDot(fill,stroke,lw,x,y,r){const k=fill+stroke+lw;let a=PAX_B.get(k);if(!a){a=[];a.f=fill;a.s=stroke;a.w=lw;PAX_B.set(k,a)}a.push(x,y,r)}
+function drawPax(V){
+  const roof=roofA()?roofNow():null,fl=floorNow(),vx0=V.x0-10,vx1=V.x1+10,vy0=V.y0-10,vy1=V.y1+10;PAX_V.length=0;
   for(const p of R.pax){
-    if(p.x<vx0-10||p.x>vx1+10){unEase(p);continue}
-    if(paxHidden(p)){if(!p.riding&&onMover(p))MV_AT.push(p.x,p.y);unEase(p);continue} // on the mover: drawn as its car
-    paxEase(p);const x=p.ex,y=p.ey;
+    if(p.x<vx0||p.x>vx1||p.y<vy0||p.y>vy1){unEase(p);continue}
+    if(paxHidden(p)){if(!p.riding&&onMover(p)&&!roof)MV_AT.push(p.x,p.y);unEase(p);continue} // on the mover: drawn as its car
+    if(!roof){const r=p.fl??(p.room!=null&&ROOMS?ROOMS[p.room].fl:null);if(r!=null&&r!==fl){unEase(p);continue}}
+    paxEase(p);const x=p.ex,y=p.ey;if(roof&&underRoof(roof,x,y))continue;
     const inCabin=p.state==='aisle'||p.state==='sitting'||p.state==='dAisle',r=inCabin?clamp(p.F.geo.pitch*0.42,2.7,3.8):3;
+    PAX_V.push(p);
+    if(p.inbound){paxDot('#14171B',p.xfer?'#6BE39A':p.stand===R.sel?'#ECE8DF':'#9FC2E0',1.5,x,y,r);continue}
+    if(!inCabin&&p.type==='prm'&&BUGGY_ST.has(p.state)){if(G.lv.assist){ctx.fillStyle='#CDD4DA';rrect(x-5.5,y-2.2,11,6,1.6);ctx.fill();ctx.fillStyle='#14171B';ctx.fillRect(x-4,y+3.2,2,1.2);ctx.fillRect(x+2,y+3.2,2,1.2)}else{ctx.strokeStyle='#909AA4';ctx.lineWidth=0.9;ctx.beginPath();ctx.moveTo(x+r+0.5,y+r);ctx.lineTo(x+r+0.5,y-r*0.4);ctx.lineTo(x+r+3,y-r*0.4);ctx.lineTo(x+r+3,y+r);ctx.stroke()}}
+    const mark=!inCabin&&(p.xferred||p.stand===R.sel||p.type==='grp');
+    paxDot(paxColor(p),!inCabin&&p.xferred?'#6BE39A':!inCabin&&p.stand===R.sel?'#ECE8DF':!inCabin&&p.type==='grp'?'#FF7AB6':'#14171B',mark?1.1:1,x,y,p.kid?r*0.68:r);
+  }
+  for(const a of PAX_B.values()){if(!a.length)continue;ctx.fillStyle=a.f;ctx.beginPath();for(let j=0;j<a.length;j+=3){ctx.moveTo(a[j]+a[j+2],a[j+1]);ctx.arc(a[j],a[j+1],a[j+2],0,Math.PI*2)}
+    ctx.fill();ctx.strokeStyle=a.s;ctx.lineWidth=a.w;ctx.stroke();a.length=0}
+  for(const p of PAX_V){const x=p.ex,y=p.ey,inCabin=p.state==='aisle'||p.state==='sitting'||p.state==='dAisle',r=inCabin?clamp(p.F.geo.pitch*0.42,2.7,3.8):3;
     if(p.inbound){
-      ctx.fillStyle='#14171B';ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();ctx.strokeStyle=p.xfer?'#6BE39A':p.stand===R.sel?'#ECE8DF':'#9FC2E0';ctx.lineWidth=1.5;ctx.stroke();
       if(p.state==='dAisle'&&p.phase==='grab'){ctx.fillStyle='#D9A066';ctx.fillRect(x+r,y-r-2,4,4)}
       if(p.state==='exitW'&&p.checked){ctx.fillStyle='#D9A066';ctx.fillRect(x+r-1,y-1,4,4)}
-      continue;
-    }
-    const rr=p.kid?r*0.68:r;
-    if(!inCabin&&p.type==='prm'&&BUGGY_ST.has(p.state)){if(G.lv.assist){ctx.fillStyle='#CDD4DA';rrect(x-5.5,y-2.2,11,6,1.6);ctx.fill();ctx.fillStyle='#14171B';ctx.fillRect(x-4,y+3.2,2,1.2);ctx.fillRect(x+2,y+3.2,2,1.2)}else{ctx.strokeStyle='#909AA4';ctx.lineWidth=0.9;ctx.beginPath();ctx.moveTo(x+r+0.5,y+r);ctx.lineTo(x+r+0.5,y-r*0.4);ctx.lineTo(x+r+3,y-r*0.4);ctx.lineTo(x+r+3,y+r);ctx.stroke()}}
-    ctx.fillStyle=paxColor(p);ctx.beginPath();ctx.arc(x,y,rr,0,Math.PI*2);ctx.fill();
-    ctx.strokeStyle=p.xferred&&!inCabin?'#6BE39A':p.stand===R.sel&&!inCabin?'#ECE8DF':p.type==='grp'&&!inCabin?'#FF7AB6':'#14171B';ctx.lineWidth=(p.xferred||p.stand===R.sel||p.type==='grp')&&!inCabin?1.1:1;ctx.stroke();
+      continue}
     if(p.type==='work'&&!inCabin&&!p.kid){ctx.fillStyle='#0E1114';ctx.fillRect(x+r-0.4,y+0.2,2.8,2.3)}
     if(p.state==='aisle'){
       if(p.phase==='stow'){ctx.fillStyle='#D9A066';ctx.fillRect(x+r,y-r-2,4,4)}
       else if(p.phase==='shuffle'){ctx.strokeStyle='#FF7A8A';ctx.lineWidth=1.3;ctx.beginPath();ctx.arc(x,y,r+2.2,0,Math.PI*2);ctx.stroke()}
     }
   }
-  drawMover();
+  PAX_V.length=0;drawMover();
 }
 function statusCol(s){if(s==='DEPLANING'||s==='LANDED'||s==='AT GATE')return '#5CC8FF';if(s==='ARRIVED')return '#6BE39A';if(s==='EXPECTED'||s==='COMPLETE')return '#909AA4';return s==='CARGO'||s==='LOADING'?'#D9A066':s==='BOARDING'||s==='GO TO GATE'?'#6BE39A':s==='FINAL CALL'||s==='BAGGAGE'?'#FFC72C':s==='DELAYED'||s==='TECH DELAY'||s==='CREW DELAY'?'#FF7A8A':s==='CLOSED'?'#5CC8FF':'#909AA4'}
 function gateBadge(i){
@@ -178,5 +188,5 @@ LAYER.apron.push(()=>{
   ctx.fillStyle='#101316';ctx.fillRect(0,AF_Y,W,32);drawPlanApron()});
 LAYER.stands.push(V=>{for(const i of SIDX){const b=standBox(i);if(b[0]+b[2]<V.x0||b[0]>V.x1)continue;drawStandApron(i)}});
 LAYER.bridges.push(()=>{for(const i of SIDX)drawBridge(i)});
-LAYER.pax.push(V=>drawPax(V.x0,V.x1));
+LAYER.pax.push(drawPax);
 LAYER.signs.push(()=>{for(const i of SIDX){if(G.stands[i].built)gateBadge(i)}}); // each queue's sign follows: 42-terminal.js
