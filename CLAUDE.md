@@ -79,6 +79,7 @@ The game is one strict IIFE, split into files in `src/game/`. The build joins th
 | `22-save`, `23-boot` | Saving and migrating (`resetAll`), boot and the frame loop |
 | `24-region-places` to `30-region-ui` | The region: places and stations, helpers, the journey network, events and line building, weather, map drawing, the Region tab |
 | `31-routes` to `36-guided-start` | Routes and the world map, managers and recommendations, Lowmere, airline operations, records/stamps/challenges, guided start |
+| `37-update-check` | Tells a player on the published site when a new version is ready, and reloads to it |
 | `38-updates` | What's new: the `UPDATES` list (every version, newest first) and its card |
 | `39-layouts`, `40-layout-drawing` | Airport layouts: the `LAYOUTS` table, rebuilding and switching, the Airfield › Layout tab; remote stands, buses, rooms, shop units and each layout's buildings |
 | `41-airside` | Stand frames (`XF`, `toW`, `toL`), airside rooms and doorways (`route`, `walk`), and `layoutFaults`, the fit check for 2D layouts |

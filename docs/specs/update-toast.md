@@ -46,8 +46,8 @@ A new group, `update` (`tools/checks/update.mjs`), with a fake `https://someone.
 - `tools/build.mjs`: computes and stamps the build id, writes `dist/version.json`, and adds the new file's functions to `window.__sim`.
 - `tools/checks/update.mjs` (new).
 - `src/shell.html`: the `<meta name="build-id">` marker.
-- `docs/SYSTEMS.md`: a short section for this system and the new check group (once #53 and #61 merge; the brief holds this back until then).
-- Project notes: the `37-update-check` row in the file table (held back the same way).
+- `docs/SYSTEMS.md`: a short section for this system and the new check group.
+- Project notes: the `37-update-check` row in the file table.
 
 ## Left out
 
