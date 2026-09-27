@@ -32,10 +32,9 @@ description: Run the other Final Call sessions building a feature's parts - the 
 
 ## 5. How many at once
 
-- At most three sessions on the default model, started just after a limit resets.
+- Go by `rate_limit_info.status`: `allowed` means run what the plan's order of work allows; `allowed_warning` means add nothing beyond the plan already running; `rejected` or `isUsingOverage` means book a `send_later` for a minute after `resetsAt` and end the turn.
+- The practical limits are CI throughput and parts that touch the same files, not a session count.
 - Small changes and routine jobs (look backs, save fixtures, doc moves, screenshot reviews) go to the cheaper model: `create_session` with `model: "claude-sonnet-5"`.
-- `rate_limit_info.status` at `allowed_warning`: add nothing beyond the plan already running.
-- At `"rejected"` or on overage: book a `send_later` for a minute after `resetsAt` and end the turn.
 
 ## 6. Starting a session
 
@@ -51,3 +50,8 @@ description: Run the other Final Call sessions building a feature's parts - the 
 
 - The coordinator keeps a single `send_later`; parts don't book their own.
 - Between check-ins, PR events and the check-in wake it, not polling.
+
+## 9. Helper agents review, they don't build
+
+- Helper agents (the `Agent` tool, the `code-review` skill) are for reviewing and reading only. Never ask one to write code or push a change.
+- Only the coordinator starts sessions (`create_session`), and only from a brief.

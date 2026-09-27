@@ -2,6 +2,12 @@
 
 After a PR merges, look back at the session that built it: what it cost, what slowed it, and what would have saved time or credits (the `steward` playbook's last step). Newest first. A lesson marked → changed something, and says where.
 
+## Coordinator playbook: limits by plan, helper agents · 27 Sep 2026
+
+- **Numbers:** session `session_01BthEySpo492BqNkhzGTLff`, estimate $3: cost and context read 0 early on, the usual early reading. One PR, no questions for the owner.
+- **Lessons:**
+  - The coordinator playbook session that merged #42 did so at 12:01, before the owner's move to a Max plan and the rule on helper agents reached it: those points arrived in a message that session's PR had already merged and closed, so it never acted on them. → No change to a playbook: this is the record for the next coordinator, so it checks for a message it hasn't acted on before treating a merge as the end of the work.
+
 ## #45 Weekly health check · 27 Sep 2026
 
 - **Numbers:** session `session_012PGwZ7jVPui6Xc9weMjmjt`, estimate $6: $4.01 and 205k of 1M context when the PR opened. Created 11:37, PR opened 11:53 (16 minutes, most of it writing and testing `tools/health.mjs` locally against a short bot run before touching CI); Checks green first time in about 7 minutes. No Balance run: no game code. `main` moved three times while this PR was open, so the branch needed two merges (one, this one, with a `docs/LESSONS.md` conflict) before pushing.
