@@ -25,23 +25,24 @@ Work through these steps in order. Small fixes (a label, a nit, an obvious bug) 
 - New saved state: a default in `DEFAULT()`, handling for its absence in `resetAll`. Never rename or remove saved fields.
 - Randomness that can change the game uses `rnd()`. `Math.random()` only on cosmetic lines ending with `// cosmetic`.
 - Everything reachable from `update()` must work with `R.sim=true` (no DOM, no saving).
-- Tests reach functions through `window.__sim` (list in `tools/build.mjs`).
+- Tests reach functions through `window.__sim`, which the build makes from every top-level name the tools use as `S.<name>` or `__sim.<name>`: there's no list to add to.
 
 ## 4. Prove it
 
 - `npm run build`, then `npm run check -- <group>` while iterating and the full `npm run check` before pushing.
-- Add `rules` checks in `tools/check.mjs` for the new rules; update any rule you changed on purpose.
+- Add `rules` checks in `tools/checks/rules.mjs` for the new rules, or a new group as its own file in `tools/checks/` with an opening comment saying what it covers; update any rule you changed on purpose.
 - `npm run check -- shots`, then read `build/shots/*.png` (phone, tablet, desktop). For other screens, write a Playwright script in `build/`.
 - Economy or progression: follow the `balance` playbook.
 - If a check fails, reproduce it (pages are seeded, so it repeats) and fix the cause. Never weaken or skip a check to get green.
 
 ## 5. Keep the docs true
 
-- A new system gets a section in `docs/SYSTEMS.md` whose heading names its files, and the spec's first line lists its PRs; `npm run check -- graph` fails on a broken link or a section without files, and warns when a system's file changed but its section didn't.
+Every list a session adds to is one file per entry, so two sessions never edit the same lines. Never edit between the `joined` markers in `docs/LESSONS.md`, `docs/ROADMAP.md`, `docs/decisions/README.md` or `docs/SYSTEMS.md`: `npm run build` rebuilds them from the files.
 
-- Project notes: anything about how the code works that changed.
-- `docs/ROADMAP.md`: move the item along.
-- `docs/decisions/`: add a record if the change sets a rule other changes must follow.
+- **The system's notes.** A change to how a system works updates its own file in `docs/systems/`; a new system adds one (`# Name`, then how it works, naming its files), and the spec's first line lists its PRs. `npm run check -- graph` fails on a broken link or a system file that names no game files, and warns when a system's game file changed but its notes didn't. Shared rules (state, time, the sim, checks) are in `docs/SYSTEMS.md`; the project notes keep only the core.
+- **The roadmap item.** Add or edit its own file in `docs/roadmap.d/` (`<date>-<short-name>.md`, first line `Section: now`, `next`, `runbook` or `done`): move it along by changing that line. The owner's order and the ideas in `docs/ROADMAP.md` are edited by hand.
+- **What's new.** A change players will notice adds `src/updates.d/<short-name>.md` (the format is in that folder's README), never an `UPDATES` entry or a `docs/HISTORY.md` row and never a version number: the `release` playbook gives those.
+- **Decisions.** Add a record in `docs/decisions/` if the change sets a rule other changes must follow; the index is joined from the folder.
 
 ## 6. A fresh review before opening
 
@@ -58,7 +59,7 @@ Work through these steps in order. Small fixes (a label, a nit, an obvious bug) 
 ## 8. Learn
 
 - If a bug got through to players, add the check that would have caught it, in the same PR as the fix.
-- After the merge, look back at the session that built it (the `steward` playbook's last step) and log it in `docs/LESSONS.md`.
+- After the merge, look back at the session that built it (the `steward` playbook's last step) in its own file in `docs/lessons/`.
 
 ## Working while the owner is away
 
@@ -70,7 +71,7 @@ Much of the work runs overnight. A question nobody answers costs hours, so:
 - **The needs-owner queue.** When the owner truly has to decide, don't wait in the conversation. Open an issue labelled `needs-owner` with the question, the options, and the one you'll take by default. Carry on with other work, look at the issue at each stopping point, and take the default after 12 hours with no answer; say so on the issue and in the PR, and close the issue.
 - Where anything in the repo conflicts with the brief, the brief wins for that session; fix the conflict in the repo in the same PR.
 - At each stopping point (a PR opened or merged, a spec written), check the session's usage (`get_session`). If `rate_limit_info` says "rejected" or `isUsingOverage`, schedule a `send_later` for a minute after `resetsAt` and end the turn instead of running on overage.
-- **The cost budget.** Compare `usage.cost_usd` with the brief's estimate at each stopping point. It can read 0 early in a session and fill in later: a 0 means not yet known, not free. Past twice the estimate, say why in the PR and in `docs/LESSONS.md`, and trim or split what's left.
+- **The cost budget.** Compare `usage.cost_usd` with the brief's estimate at each stopping point. It can read 0 early in a session and fill in later: a 0 means not yet known, not free. Past twice the estimate, say why in the PR and in its lesson (`docs/lessons/`), and trim or split what's left.
 - **One PR-sized item per session.** When an item merges, the session that merged it writes the next item's brief from `docs/briefs/TEMPLATE.md`, saves it as `docs/briefs/<short-name>.md`, runs `node tools/brief.mjs` on it, and starts a fresh session for it (`create_session`) with the brief as its first message, rather than carrying on with its own history. The brief is committed in the new session's PR, and the `brief` check keeps it complete. Keep two items in one session only when they share code and the second can be built while the first's CI runs (Sound and the level-up card did).
 - In a long-lived checkout, run `git status` before committing and stage paths by name: switching branches carries untracked and newly ignored files across.
 
@@ -79,7 +80,7 @@ Much of the work runs overnight. A question nobody answers costs hours, so:
 Worth it only when the feature has parts that can live in different files. The terminal (issue #17) was built this way; these are its lessons.
 
 1. **Groundwork first, merged.** One PR lays the shared structure the parts plug into: tables and hooks, a file per part, a check group per part. It leaves `PLAY` identical on seeds 1–3. Merge it, then start every part from `main`. Parts started from the unmerged branch look conflicted everywhere once it's squash-merged (the `steward` playbook has the fix).
-2. **How many at once.** Go by `rate_limit_info.status`, as the `coordinator` playbook says: `allowed` runs what the plan's order of work allows, `allowed_warning` adds nothing beyond what's already running, and `rejected` or `isUsingOverage` waits for `resetsAt`. The practical limits are CI throughput and parts that touch the same files. On the old default-model plan, every session drew on the same five-hour usage limit, and five parts plus the coordinator used it up within the hour, with the rest running as overage.
+2. **How many at once.** There's no cap on sessions: they don't share bookkeeping files any more, and the Catch up workflow keeps each PR current with `main`. Go by `rate_limit_info.status`, as the `coordinator` playbook says: `allowed` runs what the plan's order of work allows, `allowed_warning` adds nothing beyond what's already running, and `rejected` or `isUsingOverage` waits for `resetsAt`. Two parts that edit the same game code are ordered in the plan; nothing else needs to wait.
 3. **Each part's brief** is written from `docs/briefs/TEMPLATE.md` and says:
    - its label, `part:<feature>`, which the Parts workflow (`.github/workflows/parts.yml`) uses to merge it with `main` and the other open parts and run `npm run check`, keeping one comment on each part's PR. Read that comment before merging a part: it shows combination problems (conflicts, the parts' checks failing together) while they're still cheap;
    - its files, the shared hooks it may add, and that its notes stay in its own bullet;

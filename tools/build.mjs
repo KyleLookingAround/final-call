@@ -40,8 +40,24 @@ for(const p of parts)for(const m of p.text.matchAll(/^function ([A-Za-z0-9_$]+)/
 const dup=[...new Set(names.filter(([n],i)=>names.findIndex(([o])=>o===n)!==i).map(([n])=>n))];
 if(dup.length)fail('duplicate top-level functions: '+dup.map(n=>`${n} in ${names.filter(([o])=>o===n).map(([,f])=>f).join(' and ')}`).join('; '));
 
-// what the checks and the bot can reach inside the game; add new functions here when a test needs them
-const SIM='window.__sim={get G(){return G},set G(v){G=v},R,update,buyUpgrade,buyStand,buyPier,buyAircraft,buy,capOf,upCost,upLocked,UPG,AIRCRAFT,AC_ORDER,LEVELS,STAND,PIER,METHODS,SHOPS,canBuild,isBuilding,buildSlots,sellValue,serviceCost,dailyPax,levelChecks,upkeepRate,wageBill,loanCap,derived,loadFactor,advise,resetAll,DEFAULT,shopUpCost,standOpen,save,advise,checkGoals,standBuyable,upBuyable,builtCount,shopValue,seasonOf,dayOf,fitsGate,TRIP,regionTick,orderLine,lineQuote,closeLine,setTab,draftTap,startDraft,renderPanel,netGeom,buildDev,MODES,DEV,PLOTS,PLACES,NODES,EDGES,modeLocked,serves,lineCode,linesAt,SUGGEST,update,STN_UP,setView,regionPanel,updateEvents,pol,POLICIES,news,scheduleEvent,has,research,TECH,techState,buyPoint,curGoal,GOALS,checkLevel,openPlan,closePlan,renderPlan,CITY,CITIES,routeLF,cityMarket,cityWill,pickRoute,openRoute,rsOf,promoteRoute,ROUTE_FEE,TIERBASE,worldTap,setView,consultCost,computeTransitRecs,evalRegion,managersTick,transportRecs,routeRecs,lineTweaks,rivShare,rivKeep,rivalDay,buyRival,rivMix,rivalPanel,routesPanel,dayTick,routeCard,crewState,crewTarget,hireCrew,nightChecks,farDelay,checkStamps,chalDay,checkChal,recordsPanel,tourStep,startTour,tourNext,rivBuyCost,rnd,seedRandom,SIDX,STAND_ORDER,SHOP_X,shopOpen,LAYOUTS,applyLayout,switchLayout,rebuildLayout,layoutTick,layoutPanel,STAND_KIND,STAND_X,get LAY(){return LAY},get W(){return W},get AF_Y(){return AF_Y},UPDATES,openNews,layoutFaults,XF,standBox,get ROOMS(){return ROOMS},busMul,buyLounges,LOUNGES,finishBuild,recCands,recKey,applyRec,REC_PAY,upgradeStops,upTargets,nextNum,lineFreq,lineDown,evExtra,mgrStep,mgrHour,UPGRADE,airWorth,terminalFaults,TERM_ROOMS,hallId,BUILD_ID,updCheckNow,updTryShow,updApply,updChecking,feedbackRepo};Object.assign(window.__sim,SIMX);';
+// what the checks and the bot reach inside the game (window.__sim, in build/test.html only): every top-level name the tools
+// use as S.<name> or __sim.<name> (tools/, tools/checks/ and build/*.mjs), found here rather than kept in a list. A top-level let gets a getter and a setter, so it
+// stays live; the terminal's parts can also add to SIMX in their own files.
+const topLevel=new Map(); // name -> 'let' or 'const'/'function'/'class'
+for(const p of parts)for(const line of p.text.split('\n')){
+  const m=line.match(/^(?:async\s+)?(function\*?|const|let|class)\s+([A-Za-z_$][\w$]*)/);if(!m)continue;
+  const kind=m[1]==='let'?'let':'const';topLevel.set(m[2],kind);
+  if(m[1]!=='const'&&m[1]!=='let')continue;
+  let d=0,k=m[0].length;for(;k<line.length;k++){const c=line[k]; // more names in the same declaration, outside brackets
+    if('([{'.includes(c))d++;else if(')]}'.includes(c))d--;else if(c===';'&&d===0)break;else if(c===','&&d===0){const n=line.slice(k+1).match(/^\s*([A-Za-z_$][\w$]*)\s*=(?!=)/);if(n)topLevel.set(n[1],kind)}
+    else if((c==='"'||c==="'"||c==='`')){const e=line.indexOf(c,k+1);if(e<0)break;k=e}}
+}
+// the tools, their check groups, and any throwaway scripts in build/ (git-ignored) a session writes to look at something
+const scripts=d=>existsSync(join(root,d))?readdirSync(join(root,d)).filter(f=>/\.m?js$/.test(f)).map(f=>d+'/'+f):[];
+const toolFiles=[...scripts('tools'),...scripts('tools/checks'),...scripts('build')];
+const used=new Set();for(const f of toolFiles)for(const m of readFileSync(join(root,f),'utf8').matchAll(/\b(?:S|__sim)\.([A-Za-z_$][\w$]*)/g))used.add(m[1]);
+const simNames=[...used].filter(n=>topLevel.has(n)).sort();
+const SIM='window.__sim={'+simNames.map(n=>topLevel.get(n)==='let'?`get ${n}(){return ${n}},set ${n}(v){${n}=v}`:n).join(',')+'};Object.assign(window.__sim,SIMX);';
 
 // the build id: a short hash of the built page, stamped into it (%BUILD_ID%, in the meta tag and in 37-update-check.js)
 // and written to dist/version.json next to index.html, so a running page can tell it's grown stale
@@ -56,4 +72,6 @@ for(const f of readdirSync(pub))copyFileSync(join(pub,f),join(root,'dist',f));
 mkdirSync(join(root,'build'),{recursive:true});
 writeFileSync(join(root,'build/test.html'),withBuildId(page(shell,game.replace('/*SIM_HOOK*/',()=>SIM))));
 {const {build:graph}=await import('./graph.mjs');writeFileSync(join(root,'docs/graph.json'),JSON.stringify(graph(),null,1))} // the map sessions query (tools/graph.mjs)
-console.log(`built dist/index.html (${Math.round(built.length/1024)} KB) from ${parts.length} files, build/test.html and docs/graph.json`);
+// the lists joined from one file per entry (tools/join.mjs): lessons, roadmap, decisions, systems, checks and files
+{const {joinedFiles,rejoin}=await import('./join.mjs');for(const f of joinedFiles()){let s;try{s=rejoin(f)}catch(e){fail(e.message)}if(s!==readFileSync(join(root,f),'utf8'))writeFileSync(join(root,f),s)}}
+console.log(`built dist/index.html (${Math.round(built.length/1024)} KB) from ${parts.length} files, build/test.html (${simNames.length} names in __sim), docs/graph.json and the joined lists`);

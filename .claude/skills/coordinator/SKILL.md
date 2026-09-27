@@ -1,6 +1,6 @@
 ---
 name: coordinator
-description: Run the other Final Call sessions building a feature's parts - the sweep at each check-in, starting and retiring sessions, talking to an idle one, and how many run at once. Use when coordinating several sessions on one feature, or acting as the coordinator yourself.
+description: Run the other Final Call sessions building a feature's parts - the sweep at each check-in, starting and retiring sessions, talking to an idle one, the rate limit, and the lessons tidy Routine. Use when coordinating several sessions on one feature, or acting as the coordinator yourself.
 ---
 
 # Running the other sessions
@@ -30,10 +30,11 @@ description: Run the other Final Call sessions building a feature's parts - the 
 - `fire_trigger` on a session's own one-shot check-in brings it forward. Once it answered "internal error" yet did fire, and the one-shot was then gone, so check `get_session` (status running) before firing again.
 - Never push to another session's branch: ask it. A PR description can be fixed directly.
 
-## 5. How many at once
+## 5. No cap on sessions
 
+- The owner doesn't want a limit on how many sessions run. Sessions no longer share bookkeeping files (lessons, roadmap items, What's new entries, decisions, systems' notes and check groups are each one file), and the Catch up workflow merges `main` into every open PR when it moves, so they don't chase `main`.
 - Go by `rate_limit_info.status`: `allowed` means run what the plan's order of work allows; `allowed_warning` means add nothing beyond the plan already running; `rejected` or `isUsingOverage` means book a `send_later` for a minute after `resetsAt` and end the turn.
-- The practical limits are CI throughput and parts that touch the same files, not a session count.
+- Only parts that edit the same game code are ordered, in the spec's order of work.
 - Small changes and routine jobs (look backs, save fixtures, doc moves, screenshot reviews) go to the cheaper model: `create_session` with `model: "claude-sonnet-5"`.
 
 ## 6. Starting a session
@@ -55,3 +56,10 @@ description: Run the other Final Call sessions building a feature's parts - the 
 
 - Helper agents (the `Agent` tool, the `code-review` skill) are for reviewing and reading only. Never ask one to write code or push a change.
 - Only the coordinator starts sessions (`create_session`), and only from a brief.
+
+## 10. The lessons tidy
+
+- A Routine with no schedule tidies `docs/lessons/`: it merges lessons that say the same thing, groups them by theme, deletes those out of date or already written in, turns a lesson seen three times without a → into a change, and squash-merges its own PR. Its brief, which is also its prompt, is `docs/briefs/lessons-tidy.md`; each firing starts a fresh session.
+- Routine id: `trig_01WWjSqun7aAX15iLCb4PQdc` ("Final Call: tidy the lessons"). It was created with no connectors and no repository attached, so its session clones the repo itself; if a firing can't push or open its PR, recreate it from the claude.ai Routines page with this repo and GitHub attached, and put the new id here.
+- It fires when a look back leaves 8 or more lessons new since the last tidy (`node tools/join.mjs` counts them): the session that added the lesson fires it (`fire_trigger`) and says so, as the `steward` playbook's last step says. Nobody starts it by hand or on a schedule.
+- At a sweep, if a tidy PR (`feature/lessons-tidy-…`) is open, let it finish before firing again. To change what it does, edit the brief and `update_trigger` its prompt to match.
