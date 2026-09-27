@@ -40,6 +40,30 @@ export default async function({open,ok,saveText,newest}){
     await ctx.close();return [s,errs]};
   const [a,e1]=await play(false),[b,e2]=await play(true);
   ok('scene: drawing never changes the game',a===b&&!e1.length&&!e2.length,a===b?`${a.length} bytes of state match`:'state differs after three game hours'+(e1[0]||e2[0]?' '+(e1[0]||e2[0]):''))}
+  // better planes (52-planes.js): a shadow on the apron, the airline's colour on the fin and the engines' cowls, lights
+  // for every plane at night and none by day, and the canvas left as it was found
+  {const {ctx,page,errs}=await open({width:1440,height:900},saveText(newest),false,{still:true});
+  const r=await page.evaluate(()=>{const S=__sim,G=S.G,R=S.R,c=document.querySelector('#cv').getContext('2d');
+    R.sim=true;for(let i=0;i<600;i++)S.update(0.1);R.sim=false;
+    const i=S.SIDX.find(i=>{const F=R.st[i].F;return F&&['deplaning','turnaround','boarding'].includes(F.plane.state)&&!R.st[i].out});
+    const F=R.st[i].F,g=F.geo,T=S.XF[i],day=Math.floor(G.clock/1440)*1440;
+    const b=S.standBox(i);R.cam.z=1.3;const kz=S.viewK();R.cam.x=b[0]+b[2]/2-R.sw/kz/2;R.cam.y=b[1]+b[3]*0.45-R.sh/kz/2;R.cam.tx=R.cam.ty=null;
+    const k=S.viewK()*R.dpr,dev=(x,y)=>[Math.round((x-R.cam.x)*k),Math.round((y-R.cam.y)*k)],
+      local=(lx,ly)=>dev(T.ox+lx*T.c-ly*T.s,T.oy+lx*T.s+ly*T.c),rgb=([x,y])=>[...c.getImageData(x,y,1,1).data].slice(0,3);
+    G.clock=day+13*60;S.draw();
+    const liv=(F.liv||S.livery()).match(/[0-9a-f]{2}/gi).map(h=>parseInt(h,16)),near=p=>p.every((v,j)=>Math.abs(v-liv[j])<=8);
+    const ln=F.ac.short==='T-72'?24:20,le=g.wingY+g.span*0.55*0.36,fin=rgb(local(0,g.end+20)),eng=[-1,1].map(s=>rgb(local(s*(g.fw+g.span*0.36),le-ln+6.5)));
+    const [x0,y0]=dev(b[0],b[1]),[x1,y1]=dev(b[0]+b[2],b[1]+b[3]),box=()=>{S.draw();const w=Math.max(1,Math.min(x1,c.canvas.width)-Math.max(0,x0)),h=Math.max(1,Math.min(y1,c.canvas.height)-Math.max(0,y0));
+      const d=c.getImageData(Math.max(0,x0),Math.max(0,y0),w,h).data;let t=0;for(let j=0;j<d.length;j+=4)t+=d[j]+d[j+1]+d[j+2];return t};
+    const sun={...S.PL_SUN},lit=box();Object.assign(S.PL_SUN,{x:0,y:0});const flat=box();Object.assign(S.PL_SUN,sun);
+    const onStands=S.SIDX.filter(i=>R.st[i].out||(R.st[i].F&&!['wait','approach'].includes(R.st[i].F.plane.state))).length;
+    R.cam.z=0.01;S.clampCam();S.clampCam();S.draw();const noon=S.plLast();G.clock=day+23*60;S.draw();const night=S.plLast();
+    c.setTransform(1,0,0,1,0,0);c.globalAlpha=1;S.drawPlane(F,i,0,true,0.5);S.miniPlane(50,50,1,1,0.25);S.miniPlane(50,50,1,1);
+    const m=c.getTransform(),clean=m.a===1&&m.b===0&&m.c===0&&m.d===1&&m.e===0&&m.f===0&&c.globalAlpha===1;
+    return {liv,fin,eng,finOk:near(fin),engOk:eng.every(near),shadow:lit<flat,noon,night,onStands,clean}});
+  ok('scene: planes have a shadow and their airline\'s colour on the fin and the engines',!errs.length&&r.shadow&&r.finOk&&r.engOk,JSON.stringify({liv:r.liv,fin:r.fin,eng:r.eng,shadow:r.shadow})+(errs.length?' '+errs[0]:''));
+  ok('scene: planes\' lights come on at night only, and drawing a plane leaves the canvas as it was',r.noon===0&&r.night>=3*r.onStands&&r.onStands>0&&r.clean,JSON.stringify({noon:r.noon,night:r.night,onStands:r.onStands,clean:r.clean}));
+  await ctx.close()}
   // how long a frame takes to draw, worst case: fully built, all in view, at night in a storm with fog and snow
   for(const [name,mid,vp,touch] of [['Classic, desktop',false,{width:1440,height:900},false],['Midfield, desktop',true,{width:1440,height:900},false],['Midfield, phone',true,{width:390,height:844},true]]){
     const {ctx,page,errs}=await open(vp,saveText(newest),touch,{still:true});
