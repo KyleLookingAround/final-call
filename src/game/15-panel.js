@@ -197,8 +197,11 @@ function reportsHistory(){
     h+=`<div class="sec">Profit a day<span>last ${money(D[D.length-1].p)}</span></div>`+barSvg(D.map(d=>d.p),D.map(d=>d.d),'Profit on each of the last days',v=>v>=0?'#6BE39A':'#FF7A8A',money);
     h+=`<div class="sec">Rating at day end</div>`+barSvg(D.map(d=>d.rep),D.map(d=>d.d),'Rating at the end of each day',v=>v>=70?'#6BE39A':v>=50?'#FFC72C':'#FF7A8A',v=>v);
   }else h+=`<div class="report">Charts appear after your second day.</div>`;
-  const rows=Object.keys(G.routes||{}).filter(c=>CITY[c]).map(c=>{const r=rsOf(c);return [c,r.n,r.tn?r.lf:null,r.v-(r.c||0),r.p]}).sort((a,b)=>b[3]-a[3]);
-  if(rows.length)h+=`<div class="sec">Routes, last 24 hours<span>${rows.length} open</span></div><table class="fin rtab"><tr><th>Route</th><th>Flights</th><th>Full</th><th>Profit</th></tr>${rows.map(([c,n,lf,p])=>`<tr><td><b>${c}</b> ${CITY[c].name}</td><td>${n.toFixed(n<10?1:0)}</td><td style="color:${lf!=null?lfCol(lf):''}">${lf!=null?Math.round(lf*100)+'%':'–'}</td><td class="${p<0?'neg':''}">${money(p)}</td></tr>`).join('')}</table>`;
+  // profit in whole dollars below $100, so a near-zero route reads $0 like the rest; routes with no flights fold away
+  const rows=Object.keys(G.routes||{}).filter(c=>CITY[c]).map(c=>{const r=rsOf(c),p=r.v-(r.c||0);return [c,r.n,r.tn?r.lf:null,Math.abs(p)<100?Math.round(p)||0:p,r.p]}).sort((a,b)=>b[3]-a[3]);
+  const idle=rows.filter(x=>x[1]<0.05),shown=R.idleRoutes?rows:rows.filter(x=>x[1]>=0.05);
+  if(rows.length)h+=`<div class="sec">Routes, last 24 hours<span>${rows.length} open</span></div>${shown.length?`<table class="fin rtab"><tr><th>Route</th><th>Flights</th><th>Full</th><th>Profit</th></tr>${shown.map(([c,n,lf,p])=>`<tr><td><b>${c}</b> ${CITY[c].name}</td><td>${n.toFixed(n<10?1:0)}</td><td style="color:${lf!=null?lfCol(lf):''}">${lf!=null?Math.round(lf*100)+'%':'–'}</td><td class="${p<0?'neg':''}">${money(p)}</td></tr>`).join('')}</table>`:''}`
+    +(idle.length?`<p class="note"><button class="linkb" data-idlert="1">${R.idleRoutes?'Hide':'Show'} ${idle.length} route${idle.length>1?'s':''} with no flights</button></p>`:'');
   return h;
 }
 /* ---------- space for the camera: a per-device setting, kept out of the save so it doesn't follow the save code ---------- */
@@ -319,6 +322,7 @@ $('#panel').addEventListener('click',e=>{
   if(regionClick(d,b)){refreshUI();return}
   if(routesClick(d)){refreshUI();return}
   if(d.plan){openPlan();return}
+  if(d.idlert){R.idleRoutes=!R.idleRoutes;renderPanel();return}
   if(d.news){openNews(true,false);return}
   if(d.set){const i=d.set.indexOf(':'),k=d.set.slice(0,i);G.set[k]=JSON.parse(d.set.slice(i+1));applySettings();renderPanel();return}
   if(d.gap){try{localStorage.setItem(GAPKEY,d.gap)}catch(e){}applyGap();renderPanel();return}
