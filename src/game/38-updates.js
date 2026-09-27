@@ -1,6 +1,11 @@
 /* ================= WHAT'S NEW: every version's new features, shown after an update and from Settings or Help ================= */
 // Newest first. Add an entry with each release; the checks make sure the newest one matches docs/HISTORY.md.
 const UPDATES=[
+  {v:32,title:'Ready for what’s next',points:[
+    'A toast appears when a new version is published while you’re playing: Update now saves and reloads to it, Later brings it back an hour on.',
+    'A quiet “Buy me a Ko-fi” link in What’s new, Settings and the level-up card.',
+    'A Send feedback link in Help opens a new GitHub issue with your version, level, layout, day and screen already filled in.',
+    'The game now saves on this device only; save codes still move an airport between devices.']},
   {v:31,title:'Looks like a real airport',points:[
     'Planes have engines in their airline’s colours, shadows on the apron, and wingtip lights and beacons at night.',
     'Fuel and catering trucks, baggage tractors and pushback tugs work each turnaround.',
