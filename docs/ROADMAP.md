@@ -47,6 +47,7 @@ How sessions work, not the game. Each one is small, measured and recorded in `do
 
 ## Ideas (not agreed)
 
+- **Idea board, round 4** (`docs/decisions/ADR-2026-09-27-focus-before-ideas.md`): first a focus round, where the owner picks which parts of the game to work on, waiting at https://claude.ai/artifact/HrQBYCajxFFVR1CiqwezH3; then ideas for those areas on the same board.
 - **From the September idea board** (`docs/ideas/board-2026-09.md`), in the owner's order. All 60 rated: 3 loved, 38 liked, 9 parked, 10 no.
   1. **Late runners** (loved). Passengers still shopping at final call run to the gate; the gate holds or closes and the board shows GATE CLOSING. *Owner:* build on it with a story page for any passenger you tap, in the style of RimWorld: where they have been and how they felt, told as a story.
   2. **Famous faces** (loved). Photographers at arrivals, fans at the barrier and a busy café when someone famous flies through.

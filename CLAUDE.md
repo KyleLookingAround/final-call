@@ -26,7 +26,7 @@ Final Call is an airport management game in one HTML page, made of a canvas plus
 
 Every change goes round the same loop, and each round leaves something that makes the next one safer: a check, a save, a note.
 
-1. **Issue.** Work starts from a GitHub issue (Feature, Bug or Balance template). Ideas and priorities live in `docs/ROADMAP.md`; the owner decides what moves up.
+1. **Issue.** Work starts from a GitHub issue (Feature, Bug or Balance template). Ideas and priorities live in `docs/ROADMAP.md`; the owner decides what moves up. An idea session first asks the owner which areas to focus on, then writes ideas for those (`docs/decisions/ADR-2026-09-27-focus-before-ideas.md`).
 2. **Spec.** Anything a player would notice as new gets a one-page spec from `docs/specs/TEMPLATE.md`, approved by the owner before building.
 3. **Build** on a `feature/<short-name>` branch from `main`, one change per branch.
 4. **Prove.** Checks pass, screenshots looked at, and the bot on seeds 1–3 for economy changes.
