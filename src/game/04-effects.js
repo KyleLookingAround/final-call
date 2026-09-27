@@ -8,11 +8,13 @@
 function effect(kind,cause,amount,at){
   if(kind==='rep'){let d=amount;if(d>0&&G.lv.saf)d*=1.25;if(d>0&&G.dev&&devSum('green'))d*=1.1;const v=clamp(G.rep+d,5,100),real=v-G.rep;G.rep=v;const w=R.repWhy||(R.repWhy={});w[cause]=(w[cause]||0)+real;
     if(real){const E=R.repEv||(R.repEv=[]);E.push([G.clock,cause,real,d,at]);while(E.length&&E[0][0]<G.clock-180)E.shift()}return}
-  if(kind==='earn'){G.cash+=amount;G.earned+=amount;G.revBy[cause]=(G.revBy[cause]||0)+amount;hourBucket().rev+=amount;R.minEarn+=amount;if(G.dstat)G.dstat.rev+=amount}
-  else{G.cash-=amount;G.revBy[cause]=(G.revBy[cause]||0)+amount;hourBucket().cost+=amount;R.minEarn-=amount;if(G.dstat)G.dstat.cost+=amount}
+  if(kind==='earn'){G.cash+=amount;G.earned+=amount;G.revBy[cause]=(G.revBy[cause]||0)+amount;hourBucket().rev+=amount;R.minEarn+=amount;dayAdd('rev',amount)}
+  else{G.cash-=amount;G.revBy[cause]=(G.revBy[cause]||0)+amount;hourBucket().cost+=amount;R.minEarn-=amount;dayAdd('cost',amount)}
   if(at!=null)(R.cashAt||(R.cashAt={}))[cause]=at;
 }
 function repAdj(d,why,at){effect('rep',why,d,at)}
+// terminal advertising costs a little rating every hour it runs
+clock(HOUR,'ads',60,0,()=>{if(pol('ads'))repAdj(-0.8,'ads')});
 const REPWHY={care:['passengers who needed help getting around',['assist']],ads:['terminal advertising',[],' Switch it off in Office › Policies.'],noise:['night-flight noise',[],' A curfew (Office › Policies) or noise insulation would help.'],events:['event crowds that couldn’t get home',[],' Give event sites a line that can carry the crowds.'],crowding:['packed buses, trams and trains',[],' Run more services or longer vehicles.'],stranded:['passengers stranded at night',[],' Add night services to your lines.'],traffic:['traffic jams',[],' Trams, trains, the metro or a ring road would ease them.'],queues:['long waits at check-in and security',['lanes','sectech','desks','training','kiosks','online','fasttrack','wifi']],late:['late departures',['atc','crew','tugs','handlers','scanners','bins','walkway']],arrivals:['slow arrivals at passports and reclaim',['officers','egates','training','handlers','wifi']],missed:['missed connections',['walkway','mover']],sponsor:['the sponsorship deal',[]],punctual:['on-time departures',[]],lounge:['crowded gate lounges',[],' Call gates later (Office › Policies › Gate calls).'],bus:['buses out to remote stands',[],' Mobile lounges (Airfield › Layout) replace the buses.'],layout:['your terminal’s layout',[]]};
 const REPLBL={care:'Help for passengers who need it',ads:'Advertising',noise:'Night noise',events:'Match days and events',crowding:'Crowded public transport',stranded:'Stranded without transport',traffic:'Traffic jams',queues:'Check-in and security waits',late:'Late departures',punctual:'On-time departures',arrivals:'Arrivals clearing',missed:'Missed connections',sponsor:'Sponsorship deal',lounge:'Crowded gate lounges',bus:'Buses to remote stands',layout:'Terminal layout'};
 function repRecent(){const o={};for(const [t,w,r,d] of (R.repEv||[]))if(t>=G.clock-180)o[w]=(o[w]||0)+d;return o}

@@ -22,6 +22,7 @@ function allocFlight(i){
   return null;
 }
 function fleetTick(){for(const f of G.fleet)if(!f.sold&&f.st==='away'&&G.clock>=f.back){f.st='base';f.readyAt=f.back}}
+clock(MINUTE,'fleetTick',1,0,fleetTick);
 /* passengers travel as business travellers, leisure travellers, families, groups, or people who need assistance */
 const PTYPE={work:{carry:0.92,checked:0.12,spd:[1,1.35],shop:0.6,ft:3,prio:0.12},lei:{spd:[0.7,1.2],shop:1.15,ft:1,prio:0},fam:{carry:0.5,checked:0.9,spd:[0.64,0.86],shop:1.4,ft:0.5,prio:0},grp:{carry:0.85,checked:0.35,spd:[0.8,1.2],shop:1.3,ft:0.3,prio:0},prm:{carry:0.3,checked:0.85,spd:[0.46,0.52],shop:0.8,ft:0,prio:0}};
 function buildManifest(geo,seatsN,booked,bRows,C,D,i,split){
@@ -110,6 +111,6 @@ function keyOf(p){
 function blockers(p,occ){const F=p.F,base=p.row*F.geo.cols;let n=0;for(const c of F.geo.colBlk[p.col])if((occ||F.occ)[base+c]>=0)n++;return n}
 function moveTo(p,tx,ty,sp,dt){const dx=tx-p.x,dy=ty-p.y,d=Math.hypot(dx,dy);if(d<=sp*dt||d<0.05){p.x=tx;p.y=ty;return true}p.x+=dx/d*sp*dt;p.y+=dy/d*sp*dt;return false}
 function hourBucket(){const h=Math.floor(G.clock/60);let b=G.hours[G.hours.length-1];if(!b||b.h!==h){b={h,rev:0,cost:0,pax:0};G.hours.push(b);if(G.hours.length>24)G.hours.shift()}return b}
-function countPax(arr){hourBucket().pax++;if(G.dstat){if(arr)G.dstat.arr++;else G.dstat.pax++}}
+function countPax(arr){hourBucket().pax++;dayAdd(arr?'arr':'pax')}
 const dailyPax=()=>G.hours.slice(-24).reduce((a,b)=>a+(b.pax||0),0);
 

@@ -68,7 +68,7 @@ function dropPos(F){const f=F.bg,B=bagRT();f.pos=false;B.pos=B.pos.filter(x=>x!=
 function leaveBags(F,n){const f=bgOf(F),B=bagRT();f.cut=true;f.miss+=n;F.checkedTotal-=n;
   B.loop-=f.loop;B.ebs-=f.ebs;f.loop=f.ebs=f.mk=0;
   B.scr=B.scr.filter(g=>g[0]!==F);B.sort=B.sort.filter(g=>g[0]!==F);B.srch=B.srch.filter(s=>s.F!==F);
-  spend(n*F.fare*2,'costs',F.i);repAdj(-0.25*n,'bags',F.i);G.bagMiss=(G.bagMiss||0)+n;if(G.dstat)G.dstat.bagMiss=(G.dstat.bagMiss||0)+n;
+  spend(n*F.fare*2,'costs',F.i);repAdj(-0.25*n,'bags',F.i);G.bagMiss=(G.bagMiss||0)+n;dayAdd('bagMiss',n);
   toW(F.i,0,CABIN_TOP-24);floater(`${n} BAG${n>1?'S':''} LEFT BEHIND`,WP.x,WP.y,'#FF7A8A',true)}
 // every update: bags off each plane onto a cart, tugs to the hall, and the hall onto the flight's carousel
 function updateReclaimBelt(dt){
@@ -88,6 +88,7 @@ function updateReclaimBelt(dt){
     a.acc+=rate*dt;const n=Math.min(a.hall,Math.floor(a.acc),CAR_CAP-load[k]);if(n<=0){if(load[k]>=CAR_CAP&&A.reclaim<5)a.stall+=dt;a.acc=Math.min(a.acc,1);continue} // held up by another flight's bags
     a.stall=0;a.acc-=n;a.hall-=n;a.fed+=n;A.reclaim+=n;load[k]+=n;if(a.first==null)a.first=G.clock;if(a.fed>=A.bags&&a.last==null)a.last=G.clock}
 }
+dayStat('bagMiss','bags left behind');
 // a carousel for an arriving flight: the one with fewest flights on it
 function pickCar(n,A){const B=bagRT();while(B.car.length<n)B.car.push([]);let k=0;for(let j=1;j<n;j++)if(B.car[j].length<B.car[k].length)k=j;B.car[k].push(A);return k}
 function carOf(i){const S=R.st&&R.st[i],A=S&&S.F&&S.F.arr;return A&&A.car!=null?A.car:i%bagCaps().car}
@@ -113,7 +114,7 @@ function bagLive2(){
   h+='</div>';
   const rows=[];for(let k=0;k<C.car;k++){const L=B.car[k]||[];for(const A of L){const a=A.bg||{};rows.push(`<b>Belt ${k+1}</b> ${A.code}${A.no} from ${A.from[1]}: first bag ${a.first!=null?hhmm(a.first):'–'}, last ${a.last!=null?hhmm(a.last):'–'}`)}}
   if(rows.length)h+=`<div class="report">${rows.join('<br>')}</div>`;
-  const t=G.dstat&&G.dstat.bagMiss||0,y=G.lastDay&&G.lastDay.bagMiss||0;
+  const t=dayVal(G.dstat,'bagMiss'),y=dayVal(G.lastDay,'bagMiss');
   h+=`<div class="report">Bags left behind today <b class="${t?'late':''}">${t}</b>${G.lastDay?`, yesterday <b>${y}</b>`:''}</div>`;
   return h;
 }

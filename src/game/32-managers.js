@@ -21,6 +21,7 @@ function managersTick(){ // every six hours: queue a review of each line, and ni
   if(SET().autoFares)for(const c in (G.routes||{})){const r=G.routes[c];if(r.man||!CITY[c])continue;if(rsOf(c).n<1)continue;const b=bestFare(c),f=r.f??1;if(b!==f)r.f=f+Math.sign(b-f)}
   if(!R.sim&&(G.tab==='region'||G.tab==='routes'))renderPanel();
 }
+clock(MINUTE,'managersTick',360,0,managersTick);
 function mgrStep(){ // every game minute during a review: one measurement of one line, so the game never stalls
   const Q=R.mgrQ;if(!Q||!Q.length)return;const j=Q[0],L=G.lines[j.id];
   if(!mgrOn(L)||lineDown(L)||buildOf('line:'+j.id)){Q.shift();return}
@@ -29,12 +30,14 @@ function mgrStep(){ // every game minute during a review: one measurement of one
   Q.shift();const st=R.reg&&R.reg.lines[L.id];
   if(j.best&&j.bv>=Math.max(5,0.03*(st?st.ops:0))){const say=mgrSay(L,j.best);mgrSet(L,j.best);regionTick();mgrNote(`${say}: +${money(Math.round(j.bv))}/h`);if(!R.sim&&G.tab==='region')renderPanel()}
 }
+clock(MINUTE,'mgrStep',1,0,mgrStep);
 function mgrHour(){ // a line so full it costs rating gets more services at once
   if(!SET().autoLines||!R.reg)return;let n=0;
   for(const L of sortedLines()){if(!mgrOn(L)||lineDown(L))continue;const st=R.reg.lines[L.id],fq=MODES[L.mode].freqs,fi=fq.indexOf(L.freq);
     if(!st||st.baseLoad<=1.05||fi<0||fi>=fq.length-1||!trackRoom(L,fq[fi+1]))continue;mgrNote(`${lineCode(L)} was overfull: every ${Math.round(60/fq[fi+1])} min now`);L.freq=fq[fi+1];n++}
   if(n){regionTick();if(!R.sim&&G.tab==='region')renderPanel()}
 }
+clock(HOUR,'mgrHour',60,0,mgrHour);
 // what a change would do to the network, measured by running the region model with it and without it
 const evalFix=()=>({reg:R.reg,air:airPerHour(),ewx:R.reg&&R.reg.ewx||{}}); // the moment a run of measurements compares against
 function evalRegion(mutate,fix){

@@ -171,7 +171,7 @@ function settle(i){
   {const fl=G.fleet[F.fleetIdx];if(fl)fl.wear=(fl.wear||0)+F.ac.wear*(1-0.25*G.lv.hangar)}
   if(nightWin()&&!pol('curfew')){const nz=(1-0.3*G.lv.insul)*(F.freighter?1.5:1)*(1+0.25*G.level);G.noiseDay=(G.noiseDay||0)+nz;R.noiseT=G.clock;repAdj(-0.4*nz,'noise',i)}
   if(!F.partner&&F.city&&!F.freighter){const rs=rsOf(F.city),lf=F.booked/F.seatsN;rs.p+=F.booked;rs.v+=F.rev;rs.n++;rs.c=(rs.c||0)+op;rs.tp+=F.booked;rs.tv+=F.rev;rs.tn++;rs.tc=(rs.tc||0)+op;rs.lf=rs.tn>1?rs.lf*0.7+lf*0.3:lf}
-  G.flights++;G.flown+=F.booked;if(G.dstat){const ds=G.dstat,h=Math.floor(G.clock/60)%24;ds.flights++;if(onTime)ds.ontime++;if(!F.freighter&&F.booked>=F.seatsN)ds.full=(ds.full||0)+1;if(h>=23||h<5)ds.night=(ds.night||0)+1;if(onTime&&R.fx.snow>G.clock)ds.snowOT=(ds.snowOT||0)+1}
+  G.flights++;G.flown+=F.booked;{const h=Math.floor(G.clock/60)%24;dayAdd('flights');if(onTime)dayAdd('ontime');if(!F.freighter&&F.booked>=F.seatsN)dayAdd('full');if(h>=23||h<5)dayAdd('night');if(onTime&&R.fx.snow>G.clock)dayAdd('snowOT')}
   const mins=Math.max(1,G.clock-(F.firstScan??F.boardStart??F.start));
   const profit=F.rev-op;
   G.gstats[i]=(G.gstats[i]||[]).concat([{p:profit,o:onTime}]).slice(-5);
@@ -183,4 +183,5 @@ function settle(i){
   renderHist();save();
   if(G.tab==='office')renderPanel();
 }
+dayStat('full','full departures');dayStat('night','night departures (23:00–05:00)');dayStat('snowOT','departures on time in snow');
 

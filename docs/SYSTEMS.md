@@ -8,6 +8,7 @@ The project notes (`CLAUDE.md`) hold what every change needs. This file holds ho
 - [Airline operations](systems/airline-operations.md) (`34-airline-operations.js`)
 - [Airport layouts](systems/airport-layouts.md) (`39-layouts.js`, `12-drawing.js`)
 - [The airport scene](systems/airport-scene.md) (`50-scene.js`, `51-markings.js`, `55-vehicles.js`, `12-drawing.js`, `52-planes.js`, `53-roofs.js`, `13-camera.js`, `08-stands.js`, `04-geometry.js`, `54-weather.js`, `29-region-map.js`)
+- [Clocks and day stats](systems/clocks.md) (`02-clocks.js`, `08-stands.js`, `34-airline-operations.js`, `45-baggage.js`)
 - [Effects: the rating and money ledger](systems/effects.md) (`04-effects.js`)
 - [Guided start](systems/guided-start.md) (`36-guided-start.js`)
 - [Level-up card](systems/level-up-card.md) (`49-levelup.js`)
@@ -33,7 +34,7 @@ The main names, by file group (the joined table below is the complete list, from
 | Files | What's in them |
 | --- | --- |
 | `00-random` | `rnd()`, the seeded random generator the simulation uses |
-| `01-constants` to `03-state` | Constants and level data, the Masterplan (`TECH`), state (`G`, `R`, `DEFAULT`) |
+| `01-constants` to `03-state` | Constants and level data, the clock tables and day stats (`02-clocks`), the Masterplan (`TECH`), state (`G`, `R`, `DEFAULT`) |
 | `04-effects` | The effects ledger: `effect(kind, cause, amount, at)` behind `repAdj`, `earn` and `spend`, the rating's causes (`REPWHY`, `REPLBL`, `repRecent`) and floaters |
 | `04-geometry` | Airport geometry |
 | `05-flights` to `11-main-update` | Flights, sound, passengers, stands, construction/levels/days, events and toasts, `update()` |
@@ -64,6 +65,7 @@ The main names, by file group (the joined table below is the complete list, from
 | --- | --- |
 | `00-random.js` | random |
 | `01-constants.js` | constants |
+| `02-clocks.js` | clocks |
 | `02-masterplan.js` | the Masterplan: a tech tree bought with planning points |
 | `03-state.js` | state |
 | `04-effects.js` | effects |
@@ -132,9 +134,11 @@ The main names, by file group (the joined table below is the complete list, from
 
 `update(dt)` advances game minutes. The frame loop takes steps of up to 0.034 minutes, or 0.1 minutes at 4× and 8× (the bot's step size, a third of the work). These hooks run from it:
 - The frame loop, four times a second and never in `R.sim`: the board, the goal bar, `soundTick` (which watches the game without changing it) and `lvlTick` (the level-up card).
-- Every game minute: `updateBuilds`, `dayTick`, `checkLevel`, `fleetTick`, `mgrStep` and the terminal's `TERM_MINUTE` hooks.
-- `managersTick` runs every 6 hours, `crewTick` every 30 minutes, and `recordsHour` and `mgrHour` every hour. `nightChecks` runs at 03:00.
-- `dayTick` runs `recordsDay`, `regionDay`, `rivalDay`, `chalDay` and the terminal's `TERM_DAY` hooks.
+- Everything else is a hook in the clock tables (`02-clocks.js`, [Clocks and day stats](systems/clocks.md)): `MINUTE` each game minute, `HOUR` on the hour and half hour, `NIGHT` at 03:00 and `DAY` when the day changes. Each is an ordered list of `{id, every, at, fn}`. The order is listed once, in `CLOCK_ORDER`, and a system registers its hooks from its own file with `clock(T, id, every, at, fn)`.
+  - `MINUTE`: `autoStaff` (every 2 minutes), `updateBuilds`, `layoutTick`, `dayTick`, `checkLevel`, `fleetTick`, `managersTick` (every 6 hours), `mgrStep` and the terminal's `TERM_MINUTE` hooks.
+  - `HOUR`: `mgrHour`, `crewTick` (every 30 minutes), `recordsHour`, `NIGHT` (`nightChecks`) and advertising's cost to the rating.
+  - `DAY`: the day report, `recordsDay`, the new day, `regionDay`, `rivalDay`, `chalDay`, the terminal's `TERM_DAY` hooks and the season's toast.
+- A day's stats are in `G.dstat`, whose fields are listed in `DAY_STATS`. Count with `dayAdd(key, n)` and read with `dayVal(stats, key)`.
 
 ## Headless sim
 
@@ -161,6 +165,8 @@ The main names, by file group (the joined table below is the complete list, from
 - `arrivals`: Arrivals (docs/specs/terminal.md): passengers off domestic flights walk straight past immigration and everyone else goes through it; e-gates take only e-gate passports; about 1 in 40 is checked at customs; everyone who lands ends up out, at a stop or the station, or at the hotel; and nobody arriving walks into a departures hall.
 - `baggage`: The baggage system (src/game/45-baggage.js): every checked bag ends in a hold or is left behind and counted, every arriving bag reaches its carousel, an overloaded sorter backs up, a tight transfer can miss, and early bags wait in the store.
 - `brief`: docs/briefs/TEMPLATE.md and every session brief in docs/briefs/ have all their sections, filled in (tools/brief.mjs).
+- `clocks`: The clocks (02-clocks.js, docs/SYSTEMS.md "Time"): over a seeded day and a bit, the hooks run in the same order and at the same cadence as they did on main before the tables (tools/checks/lib/clocks.json, recorded from main with a log call at each hook), and every hook the order lists is registered once, from its system's own file.
+- `daystats`: A day's stats (DAY_STATS in 09-construction-levels-days.js, docs/SYSTEMS.md "Time"): over two seeded days at a level 9 airport, the day report (G.lastDay) has the fields it had on main (tools/checks/lib/daystats.json, recorded there), every field G.dstat gets is in DAY_STATS, and a new day starts with the fields DAY_STATS resets.
 - `decor`: Decor and local character (docs/specs/terminal-place.md): decor comes with the building, more with each level, is never placed or saved, never stands in anyone's way, and local signs take the region's place names and fit their halls. Written before the code (tools/checks/pending.txt). Reads the names in lib/place.mjs, plus decor() → [{hall, kind, x0, y0, x1, y1}…], the items for the layout as built and the level, and localNames() → [{text, place, hall, w}…], the local signs (place: a key of PLACES; w: the text's width in world units). "Never in the way" also reads where the counters are: deskX, kioskX, laneX, qSlot, secSlot, ftSlot, egSlot, and boothPos, egatePos, carX, carY and arrSlot, which the decor part adds to SIMX.
 - `departures`: Departures (docs/specs/terminal.md): check-in islands with their own queues, bag drop for kiosk and online passengers with bags, and security: the search rate, family and assistance lanes, and no way into the market place but a lane.
 - `effects`: The effects ledger (04-effects.js, docs/SYSTEMS.md): every cause the rating moves for over a day of play has a REPWHY entry (what the advisor says) and a REPLBL label (the Money tab's rating list); R.repWhy adds up to the change in G.rep; and the airport's own rating events carry the stand they happened at.
