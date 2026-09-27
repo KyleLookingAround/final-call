@@ -191,7 +191,7 @@ function drawTraffic(k){
     for(let i=0;i<n;i++){const dir=i%2?1:-1,jit=0.85+((i*37)%10)/40;let s=(i*P.len/n*1.618+dir*G.clock*v*jit)%P.len;if(s<0)s+=P.len;const [x0,y0,ang]=ptOn(P,s),off=dir*1.6;
       car(x0-Math.sin(ang)*off,y0+Math.cos(ang)*off,dir>0?ang:ang+Math.PI,lorries&&e.a==='air'&&i%5===0?'#FF9F43':COLS[(i+3)%5],lorries&&e.a==='air'&&i%5===0,ce>0.6)}}
 }
-function drawFog(x,y,w,h,a){if(!(R.fx.fog>G.clock))return;const t=performance.now()/9000;for(let i=0;i<7;i++){const cx=x+((i*0.23+t*(0.5+i*0.07))%1.2-0.1)*w,cy=y+(0.15+0.12*i)*h,rx=w*0.35,ry=h*0.12;const g=ctx.createRadialGradient(cx,cy,0,cx,cy,rx);g.addColorStop(0,`rgba(205,212,220,${a})`);g.addColorStop(1,'rgba(205,212,220,0)');ctx.fillStyle=g;ctx.save();ctx.translate(cx,cy);ctx.scale(1,ry/rx);ctx.beginPath();ctx.arc(0,0,rx,0,Math.PI*2);ctx.restore();ctx.fill()}}
+function drawFog(x,y,w,h,a){if(!weather.on('fog'))return;const t=performance.now()/9000;for(let i=0;i<7;i++){const cx=x+((i*0.23+t*(0.5+i*0.07))%1.2-0.1)*w,cy=y+(0.15+0.12*i)*h,rx=w*0.35,ry=h*0.12;const g=ctx.createRadialGradient(cx,cy,0,cx,cy,rx);g.addColorStop(0,`rgba(205,212,220,${a})`);g.addColorStop(1,'rgba(205,212,220,0)');ctx.fillStyle=g;ctx.save();ctx.translate(cx,cy);ctx.scale(1,ry/rx);ctx.beginPath();ctx.arc(0,0,rx,0,Math.PI*2);ctx.restore();ctx.fill()}}
 const SHIPPATH=[[1680,975],[1200,940],[800,925],[450,890],[260,800],[150,748]];let SHIPP=null;
 function drawRegionLive(t,k){
   const sc=Math.max(1,0.8/k);
@@ -213,9 +213,9 @@ function drawRegionLive(t,k){
   if(R.evDoneFx)R.evDoneFx=R.evDoneFx.filter(f=>G.clock-f.t<150&&SET().pops!=='off');
   for(const f of (R.evDoneFx||[])){const P=PLOTS.find(p=>p.id===f.plot),a=G.clock-f.t;ctx.globalAlpha=clamp(1.5-a/100,0,1);lblBg(f.text,P.x,P.y-40-a*0.15,f.good?'#6BE39A':'#FF7A8A',10);ctx.globalAlpha=1}
   // roadworks cones
-  if((R.fx.roadworks||0)>G.clock){const Pp=E_BY[R.fx.rwE]?E_BY[R.fx.rwE].P:(ROADP||(ROADP=MOTORWAYS.map(rPath)))[0],s0=Math.max(0,Pp.len/2-45);for(let i=0;i<10;i++){const [x,y]=ptOn(Pp,s0+i*9);ctx.fillStyle=i%2?'#FF9F43':'#ECE8DF';ctx.beginPath();ctx.moveTo(x,y-4*sc);ctx.lineTo(x+2.5*sc,y+2*sc);ctx.lineTo(x-2.5*sc,y+2*sc);ctx.fill()}const [x,y]=ptOn(Pp,s0+40);if(k>0.3)lblBg('ROADWORKS',x,y-14/k,'#FF9F43',9)}
+  if(weather.on('roadworks')){const Pp=E_BY[weather.edge()]?E_BY[weather.edge()].P:(ROADP||(ROADP=MOTORWAYS.map(rPath)))[0],s0=Math.max(0,Pp.len/2-45);for(let i=0;i<10;i++){const [x,y]=ptOn(Pp,s0+i*9);ctx.fillStyle=i%2?'#FF9F43':'#ECE8DF';ctx.beginPath();ctx.moveTo(x,y-4*sc);ctx.lineTo(x+2.5*sc,y+2*sc);ctx.lineTo(x-2.5*sc,y+2*sc);ctx.fill()}const [x,y]=ptOn(Pp,s0+40);if(k>0.3)lblBg('ROADWORKS',x,y-14/k,'#FF9F43',9)}
   // leaves on the line
-  if((R.fx.leaves||0)>G.clock){const g=R.ng;if(g)for(const L of Object.values(G.lines||{})){if(L.mode!=='rail'||!g.lines[L.id])continue;const Pp=g.lines[L.id].P;for(let i=0;i<40;i++){const [x,y]=ptOn(Pp,(i*37.7)%Pp.len);ctx.fillStyle=['#C9772E','#A8552A','#D9A066'][i%3];ctx.fillRect(x+Math.sin(i)*5,y+Math.cos(i*1.7)*5,2.4*sc,1.6*sc)}}}
+  if(weather.on('leaves')){const g=R.ng;if(g)for(const L of Object.values(G.lines||{})){if(L.mode!=='rail'||!g.lines[L.id])continue;const Pp=g.lines[L.id].P;for(let i=0;i<40;i++){const [x,y]=ptOn(Pp,(i*37.7)%Pp.len);ctx.fillStyle=['#C9772E','#A8552A','#D9A066'][i%3];ctx.fillRect(x+Math.sin(i)*5,y+Math.cos(i*1.7)*5,2.4*sc,1.6*sc)}}}
 }
 /* ---------- the transit map: track, coloured lines side by side, stations and vehicles ---------- */
 function netGeom(k){
@@ -277,7 +277,7 @@ function drawNetLines(t,k){
   ctx.lineJoin='miter';ctx.lineCap='butt';
   if(r&&r.over&&k>0.3)for(const key in r.over){if(r.over[key]<=1)continue;const e=E_BY[key.split(':')[0]],m=ptOn(e.P,e.len/2);lblBg('TRACK FULL',m[0],m[1]+14/k,'#FF7A8A',9)}
   for(const L of Ls){const gl=g.lines[L.id];if(!gl)continue;const sel=R.regSel===L.id,down=lineDown(L),rb=replOn(L.id);if(!(k>0.62||sel||down||rb))continue;
-    const q=ptOn(gl.P,gl.P.len*(0.22+0.56*((L.num*0.618+MODE_ORDER.indexOf(L.mode)*0.29)%1)));const txt=rb?`${lineCode(L)} · BUSES`:down?`${lineCode(L)} · ${(R.fx.why||{})[L.id]||'STOPPED'}`:lineCode(L);
+    const q=ptOn(gl.P,gl.P.len*(0.22+0.56*((L.num*0.618+MODE_ORDER.indexOf(L.mode)*0.29)%1)));const txt=rb?`${lineCode(L)} · BUSES`:down?`${lineCode(L)} · ${weather.why(L.id)||'STOPPED'}`:lineCode(L);
     rLabel(txt,q[0],q[1]-11/k,{col:down?'#FF7A8A':'#0B0D10',px:9,bg:down?'rgba(10,12,15,.85)':L.col,pri:sel||down||rb?95:50,must:sel||down||rb,alt:[[0,22,'center']]})}
 }
 function drawStations(t,k){

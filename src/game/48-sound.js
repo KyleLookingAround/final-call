@@ -78,7 +78,7 @@ function ambLevels(){
   const L=SND.lvl,air=R.view==='airport',zoom=clamp(R.cam.z/1.6,0.25,1);
   const hall=air?viewShare(0,TERM_Y,1480,LAND_B):0,inside=hall*zoom; // over the halls and zoomed in, you're indoors
   L.hum=air?0.035*(0.2+0.8*hall)*zoom*(sndNight()?1/3:1):0;
-  const wet=R.fx.storm>G.clock?1:R.fx.rain>G.clock?0.5:0;L.rain=0.05*wet*(1-0.7*inside);
+  const wet=weather.on('storm')?1:weather.on('rain')?0.5:0;L.rain=0.05*wet*(1-0.7*inside);
   L.pan=[0,0];L.cut=[420,420];
   for(let r=0;r<2;r++){const a=R.rwy.act[r];L.jet[r]=0;if(!a||!air)continue;
     const k=a.t/a.dur,HX=W-60,x=a.type==='arr'?W+120-(1-Math.pow(1-k,2))*(W+120-90):HX-10-k*k*(HX+150);

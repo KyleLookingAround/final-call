@@ -16,7 +16,7 @@ export default async function({open,ok,saveText}){
   for(const f of SAVES){const {ctx,page,errs}=await open(undefined,saveText(f),false,{still:true});
     const r=await page.evaluate(at=>{at=eval('('+at+')');const S=__sim,G=S.G,R=S.R,bad=[];let thrown='',paints=0;
       R.sim=true;for(let i=0;i<240;i++)S.update(0.25);R.sim=false;
-      G.wx=[{type:'rain',x:500,y:420,r:240,vx:0,vy:0,seed:3},{type:'fog',x:1200,y:520,r:200,vx:0,vy:0,seed:5}];R.fx.fog=G.clock+600;
+      G.wx=[{type:'rain',x:500,y:420,r:240,vx:0,vy:0,seed:3},{type:'fog',x:1200,y:520,r:200,vx:0,vy:0,seed:5}];S.weather.set('fog',G.clock+600);
       for(const zoom of ['out','in'])for(const h of [12,19.6,23]){at(h,zoom);const before=JSON.stringify(G);
         // drawn, then again as if the zoom had settled (so the land is painted for this view), then three more that mustn't paint it
         try{S.draw();R.regZT=-1e9;S.draw();const T=S.RTER;for(let i=0;i<3;i++)S.draw();if(S.RTER!==T)paints++}catch(e){thrown=thrown||String(e&&e.message||e)}
