@@ -262,7 +262,7 @@ function affordableIn(tab){
 }
 function stars(r){const n=clamp(Math.round(r/20),0,5);return `<span class="stars">${'★'.repeat(n)}<span class="off">${'★'.repeat(5-n)}</span></span> <small style="font-size:11px;color:var(--muted)">${Math.round(r)}</small>`}
 let lastRepShown=-1;
-// with a rating that reflects the last day (R.rateDay, 04-effects.js): an arrow for where it's heading, and the last
+// the rating reflects the last day (R.rateDay, 04-effects.js): an arrow for where it's heading, and the last
 // three hours' biggest cause that way as the chip's title
 function repChipDay(){const t=rateDayTarget(),dir=t>G.rep+1?1:t<G.rep-1?-1:0,rr=repRecent();let why='';
   for(const k in rr)if(dir&&rr[k]*dir>0&&(!why||rr[k]*dir>rr[why]*dir))why=k;
@@ -401,5 +401,8 @@ $$('.hud [data-speed]').forEach(b=>b.addEventListener('click',()=>setSpeed(+b.da
 function syncSound(){$('#snd').classList.toggle('on',G.sound);$('#sndw').style.opacity=G.sound?1:0.15}
 $('#viewb').addEventListener('click',()=>{setView(R.view==='region'?'airport':'region')});
 $('#worldb').addEventListener('click',()=>{setView(R.view==='world'?'airport':'world')});
+// tapping the rating opens its reasons (Office › Progress, the last three hours' causes)
+{const st=$('#sRep').parentElement;st.setAttribute('role','button');st.tabIndex=0;st.setAttribute('aria-label','Rating: see why it moved');
+  const go=()=>{R.oSub='progress';setTab('office')};st.addEventListener('click',go);st.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}})}
 $('#snd').addEventListener('click',()=>{ensureAudio();G.sound=!G.sound;syncSound();save();if(G.tab==='office'&&(R.oSub==='settings'||R.oSub==='airline'))renderPanel()});
 

@@ -24,6 +24,7 @@ The list is joined from the files here by `node tools/join.mjs` (`npm run build`
 | [ADR-2026-09-27-ci-only-when-needed](ADR-2026-09-27-ci-only-when-needed.md) | Run each workflow only when its result can change |
 | [ADR-2026-09-27-fewer-clashes](ADR-2026-09-27-fewer-clashes.md) | One file per entry, lists joined from them, and PRs kept up to date with main (an experiment) |
 | [ADR-2026-09-27-knowledge-graph](ADR-2026-09-27-knowledge-graph.md) | A map of the code and docs, generated from the source (an experiment) |
+| [ADR-2026-09-27-rating-last-day](ADR-2026-09-27-rating-last-day.md) | The rating reflects the last day, and the level baselines move with it |
 | [ADR-2026-09-27-reviewer-step](ADR-2026-09-27-reviewer-step.md) | A fresh review before each PR opens (an experiment) |
 | [ADR-2026-09-27-roof-is-a-floor](ADR-2026-09-27-roof-is-a-floor.md) | The roof is a floor the player picks, not a zoom |
 | [ADR-2026-09-27-session-briefs](ADR-2026-09-27-session-briefs.md) | Sessions start from a checked brief, ask the owner through issues, keep to a cost budget, and parts are tested together (an experiment) |

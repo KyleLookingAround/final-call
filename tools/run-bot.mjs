@@ -4,7 +4,7 @@
 //   npm run bot -- 300 '{"noBuyLow":true}'   (bot options, see tools/bot.js)
 //   npm run bot -- 1150 '{"layouts":true}'   (also rebuilds into better layouts; the baselines are for never rebuilding)
 //   npm run bot -- 1150 '{"recs":true}'      (also follows the transport manager's best suggestion)
-//   npm run bot -- 1150 --rate-day           (the rating reflects the last day, R.rateDay; not in the baselines)
+//   npm run bot -- 1150 --rate-day=off       (the old running-sum rating, for comparing; --rate-day='{"scale":6}' tries constants)
 // The same seed and the same code always give the same run, so a difference between two
 // versions is the code's doing. Compare a few seeds before calling a balance change good.
 // Prints one JSON line per 6 game hours, then LVLAT {level: hour reached}, STATE <fingerprint>, PLAY <fingerprint without settings>, ERR [...], and a
@@ -18,14 +18,15 @@ import {fileURLToPath,pathToFileURL} from 'node:url';
 
 const root=join(dirname(fileURLToPath(import.meta.url)),'..');
 const args=process.argv.slice(2),flag=k=>{const i=args.indexOf(k);return i<0?null:args.splice(i,2)[1]};
-// --rate-day turns on the rating that reflects the last day (04-effects.js); --rate-day='{"scale":3}' also tries its constants
-const rdi=args.findIndex(a=>a.startsWith('--rate-day')),rateDay=rdi<0?null:(v=>v?JSON.parse(v):true)(args.splice(rdi,1)[0].split('=').slice(1).join('='));
-const seed=+(flag('--seed')??1)>>>0,hours=+args[0]||48,opts=JSON.parse(args[1]||'{}'),tag=seed+(opts.layouts?'-layouts':'')+(opts.recs?'-recs':'')+(rateDay?'-rateday':'');
+// --rate-day='{"scale":6}' tries other constants for the rating that reflects the last day (04-effects.js), and
+// --rate-day=off plays the old running sum
+const rdi=args.findIndex(a=>a.startsWith('--rate-day')),rateDay=rdi<0?null:(v=>v==='off'?false:JSON.parse(v||'{}'))(args.splice(rdi,1)[0].split('=').slice(1).join('='));
+const seed=+(flag('--seed')??1)>>>0,hours=+args[0]||48,opts=JSON.parse(args[1]||'{}'),tag=seed+(opts.layouts?'-layouts':'')+(opts.recs?'-recs':'')+(rateDay===false?'-sumrating':rateDay?'-rateday':'');
 const exe=process.env.CHROMIUM_PATH;
 const b=await chromium.launch(exe?{executablePath:exe}:{});
 const ctx=await b.newContext({viewport:{width:1200,height:800}});
 // seed the game before it boots, and stop the frame loop so only the bot moves the game on
-await ctx.addInitScript(([s,rd])=>{window.__seed=s;window.requestAnimationFrame=()=>0;if(rd)window.__rateDay=rd},[seed,rateDay]);
+await ctx.addInitScript(([s,rd])=>{window.__seed=s;window.requestAnimationFrame=()=>0;if(rd!=null)window.__rateDay=rd},[seed,rateDay]);
 const m=await ctx.newPage();
 const errs=[];m.on('pageerror',e=>errs.push(e.message+' '+(e.stack||'').split('\n').slice(1,3).join('|')));
 await m.goto(pathToFileURL(join(root,'build/test.html')).href);await m.waitForTimeout(500);
@@ -45,7 +46,7 @@ const state=createHash('sha256').update(gJson).digest('hex').slice(0,16);
 // PLAY: the same, less the player's settings and the What's new version seen, which a release changes without changing
 // how the game plays; a UI-only change must leave PLAY identical
 const play=createHash('sha256').update(JSON.stringify({...JSON.parse(gJson),set:0,seen:0})).digest('hex').slice(0,16);
-if(!opts.layouts&&!opts.recs&&!rateDay){mkdirSync(join(root,'build/saves'),{recursive:true});for(const k in sv)writeFileSync(join(root,'build/saves/L'+k+'.json'),sv[k])}
+if(!opts.layouts&&!opts.recs&&rateDay==null){mkdirSync(join(root,'build/saves'),{recursive:true});for(const k in sv)writeFileSync(join(root,'build/saves/L'+k+'.json'),sv[k])}
 console.log('SEED',seed);console.log('LVLAT',JSON.stringify(fin.lvlAt));console.log('STATE',state);console.log('PLAY',play);console.log('ERR',JSON.stringify(errs.slice(0,5)));
 await b.close();
 
@@ -57,7 +58,7 @@ const rows=Object.entries(base.levels).map(([lv,[lo,hi]])=>{
   const dev=h<lo?(lo-h)/lo:h>hi?(h-hi)/hi:0;
   return {lv,lo,hi,h,status:dev===0?'ok':dev<=base.tolerance?'near':'off',dev:Math.round(dev*100)};
 });
-const table=[`Bot, seed ${seed}, ${hours} game hours${opts.layouts?', rebuilding into better layouts':''}${opts.recs?', following the transport manager':''}${rateDay?', rating from the last day'+(rateDay===true?'':' '+JSON.stringify(rateDay)):''}${errs.length?`, ${errs.length} error(s)`:', no errors'}`,'',
+const table=[`Bot, seed ${seed}, ${hours} game hours${opts.layouts?', rebuilding into better layouts':''}${opts.recs?', following the transport manager':''}${rateDay===false?', the old running-sum rating':rateDay?', rating constants '+JSON.stringify(rateDay):''}${errs.length?`, ${errs.length} error(s)`:', no errors'}`,'',
   '| Level | Reached at hour | Baseline | |','| --- | --- | --- | --- |',
   ...rows.map(r=>`| ${r.lv} | ${r.h??'—'} | ${r.lo}–${r.hi} | ${r.status}${r.dev?` (${r.dev}% outside)`:''} |`)].join('\n');
 console.log('\n'+table);

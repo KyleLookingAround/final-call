@@ -41,7 +41,7 @@ Make the change, rebuild, and run the same three seeds into `build/after-$s.log`
 
 - `build/saves/L<n>.json` are the bot's airports at each level; seed one through `localStorage['final-call-save-v2']` to look at a stage.
 - Bot options (JSON after the hours) change its strategy; they are read as `opts.*` in `tools/bot.js`. For example `'{"noBuyLow":true}'` never buys Lowmere, and `'{"layouts":true}'` rebuilds into better layouts (`layoutPath` picks which).
-- `--rate-day` turns on the rating that reflects the last day (`R.rateDay`, `docs/systems/effects.md`), and `--rate-day='{"scale":6}'` tries its constants. Its runs aren't in the baselines, don't write `build/saves/`, and add `-rateday` to the bot's file names; the snapshots gain `rdT` (the rating's target) and `rdS` (the day's net score per departure).
+- `--rate-day=off` plays the old running-sum rating, for comparing against the rating that reflects the last day (`docs/systems/effects.md`), and `--rate-day='{"scale":6}'` tries other constants. Those runs don't write `build/saves/`, and they add `-sumrating` or `-rateday` to the bot's file names. The snapshots carry `rdT` (the rating's target) and `rdS` (the day's net score per departure).
 - The Balance workflow runs the three seeds on PRs that touch `src/game/` or the bot, once keeping Classic and once rebuilding: when the PR opens or leaves draft, when the `balance` label is added, and on demand. Its tables are in the run's summary; `off` levels show as warnings. The baselines are for keeping Classic; rebuilding should reach level 9 about 5–10% sooner, so its level 9 row reads `near`.
 
 ## Baselines (bot, 1150 game hours)
@@ -52,8 +52,8 @@ Make the change, rebuild, and run the same three seeds into `build/after-$s.log`
 | --- | --- |
 | 1 Local Airport | 31–41 |
 | 3 City Airport | 95–117 |
-| 5 Gateway Airport | 340–370 |
+| 5 Gateway Airport | 325–360 |
 | 7 Global Hub | 630–770 |
-| 9 Airport of the Year | 1,080–1,115 |
+| 9 Airport of the Year | 1,100–1,160 |
 
-With these baselines there are no errors. They are for an airport that keeps Classic; rebuilding well should reach level 9 about 10% sooner (975–989 on seeds 1–3, measured on `main` 27 Sep 2026: 989.1, 988.9 and 974.6 — see `docs/lessons/89-pax-movement.md`). Since version 27's transport manager, keeping Classic reaches level 9 at 1,051–1,068 and level 5 at 301–322, a little before those ranges and within the tolerance. If the bot ignores Lowmere, its share settles at about 50–60%. Keep pacing within about 15% of these numbers unless the owner asks for a change.
+With these baselines there are no errors. They were set for the rating that reflects the last day (`docs/decisions/ADR-2026-09-27-rating-last-day.md`; before it, level 5 was 340–370 and level 9 1,080–1,115). Keeping Classic, seeds 1–3 reach level 5 at 330–352 and level 9 at 1,117–1,154, with the rating at 78–92. They are for an airport that keeps Classic; rebuilding reaches level 9 about 5–10% sooner (1,000–1,063 on seeds 1–3). If the bot ignores Lowmere, its share settles at about 50–60%. Keep pacing within about 15% of these numbers unless the owner asks for a change.
