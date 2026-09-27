@@ -4,13 +4,13 @@ Issue: none (the owner's idea board, `docs/ideas/board-2026-09.md`, rated Love i
 
 ## What the player gets
 
-Now and then someone famous flies from your airport. The day before, the board and the region news say who and roughly when; on the day, photographers wait in the check-in hall, fans line the barrier, and the café they stop at has a busy hour. Get their flight away on time and the rating gets a small lift; let it slip and it takes a small knock.
+Now and then someone famous flies from your airport. The day before, the board and the region news say who and roughly when; on the day, photographers wait at the check-in doors, fans line the barrier, and the café they stop at has a busy hour. Get their flight away on time and the rating gets a small lift; let it slip and it takes a small knock.
 
 ## What they see
 
 - **The day before:** a gold line under the departures board, `★ TOMORROW ~14:00 · POP STAR LENA WRENFIELD`, and a Region news line: "Tomorrow: pop star Lena Wrenfield flies from here at about 14:00."
 - **On the day:** the line reads `★ TODAY …`, then names the flight once they're booked on one (`★ NW214 · …`). That flight's row on the board shows a ★ before the city. A gold ring marks the celebrity walking through the terminal.
-- **The crowd:** about eight photographers (with flashes) in the check-in hall near the doors, and about fourteen fans along the check-in side of the security barrier, from when their flight is picked until they're through security (the fans stay until the gate call). A small cluster of fans stands outside the café or shop they visit during its busy hour.
+- **The crowd:** eight photographers (with flashes) on the pavement either side of the check-in doors, and fourteen fans (some with signs) along the check-in side of the security barrier, from when their flight is picked until 10 and 30 minutes after the celebrity is through security. A small cluster of fans stands outside the café or shop they visit during its busy hour.
 - **The result:** a Region news line for the outcome, and the rating change shows in the Money tab's rating list as "Famous passengers".
 - Phones (320 px and landscape), tablets and large screens: the board line is one line, ellipsised when narrow; it's only there on the day before and the day itself.
 
@@ -18,7 +18,7 @@ Now and then someone famous flies from your airport. The day before, the board a
 
 - **When:** from level 3 (Regional Airport, `G.level>=2`). At each day change, if no visit is booked and the day has come round, a visit is booked for the next day: at levels 3–4 the next one comes 6–9 days later, at 5–6 after 4–7, from 7 after 3–5 (all through `rnd()`). The hour is between 08:00 and 19:00.
 - **Who:** an invented first name and surname (or a royal's title and an invented realm) and a kind: footballer, pop star, film actor or royal. The lists are made up, and checked not to pair into well-known names.
-- **The flight:** from the visit's hour, the earliest passenger flight at a stand leaving in the next 40–150 minutes carries them; one of its passengers (business class if there is one) is the celebrity. If none turns up by the end of the day, they go by car and the visit quietly lapses.
+- **The flight:** from the visit's hour, the earliest passenger flight at a stand leaving in the next 40–300 minutes, preferring one whose passengers are still arriving, carries them; one of its passengers (business class if there is one) is the celebrity. If none turns up by the end of the day, they go by car and the visit quietly lapses.
 - **The busy hour:** the best café-type unit open (café, coffee cart, bar or restaurant, else any shop) takes 60% more on everything it earns for an hour after the flight is picked, paid through `earn(…,'shops',…,at)` with the flight's stand as the place.
 - **The rating:** when the flight leaves, +1 if on time, −1 if late, through `repAdj(…,'famous',stand)`. A new cause `famous` in `REPWHY` and `REPLBL`.
 - **Managers:** nothing to manage; the good gate running the managers already do pays off.
