@@ -5,8 +5,10 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 ## #43 Description check · 27 Sep 2026
 
 - **Numbers:** session `session_01AoXGiU2yJ1jzRSxvJm7cpK`, estimate $4: cost and context TBD at merge. No game code, so no bot run.
-- **Went well:** `.githooks/commit-msg`'s own patterns carried straight over to `actions/github-script`, and `parts.yml` was a ready template for a checkout-free job.
-- **Lesson:** three PRs (#38, #39, #41) had opened with a tool footer before anyone checked for it on the PR itself, only on commits. → The Description check now catches it at `opened`, `edited`, `reopened` and `synchronize`, so editing the description re-runs it without a push.
+- **Went well:** `.githooks/commit-msg`'s own patterns carried straight over to `actions/github-script`, and `parts.yml` was a ready template for a checkout-free job. The very first proof run needed no staging: the PR opened with a real tool footer (the bug this brief was written for), and the new check caught it and named the line unprompted.
+- **Lessons:**
+  - Three PRs (#38, #39, #41) had opened with a tool footer before anyone checked for it on the PR itself, only on commits. → The Description check now catches it at `opened`, `edited`, `reopened` and `synchronize`, so editing the description re-runs it without a push.
+  - Editing a PR's title or description through the GitHub API re-ran the check once, then further edits the same way stopped triggering a run at all (confirmed against `synchronize`, which fired normally on the next push). No change made here: proving an `edited` re-run took one clean edit, not several; a session that needs more than one should push a small commit instead and rely on `synchronize`.
 
 ## Real airport groundwork, spec and parts' briefs · 27 Sep 2026
 
