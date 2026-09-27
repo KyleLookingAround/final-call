@@ -109,15 +109,7 @@ function keyOf(p){
 }
 function blockers(p,occ){const F=p.F,base=p.row*F.geo.cols;let n=0;for(const c of F.geo.colBlk[p.col])if((occ||F.occ)[base+c]>=0)n++;return n}
 function moveTo(p,tx,ty,sp,dt){const dx=tx-p.x,dy=ty-p.y,d=Math.hypot(dx,dy);if(d<=sp*dt||d<0.05){p.x=tx;p.y=ty;return true}p.x+=dx/d*sp*dt;p.y+=dy/d*sp*dt;return false}
-function repAdj(d,why){if(d>0&&G.lv.saf)d*=1.25;if(d>0&&G.dev&&devSum('green'))d*=1.1;const v=clamp(G.rep+d,5,100),real=v-G.rep;G.rep=v;const w=R.repWhy||(R.repWhy={});w[why]=(w[why]||0)+real;
-  if(real){const E=R.repEv||(R.repEv=[]);E.push([G.clock,why,real,d]);while(E.length&&E[0][0]<G.clock-180)E.shift()}}
-const REPWHY={care:['passengers who needed help getting around',['assist']],ads:['terminal advertising',[],' Switch it off in Office › Policies.'],noise:['night-flight noise',[],' A curfew (Office › Policies) or noise insulation would help.'],events:['event crowds that couldn’t get home',[],' Give event sites a line that can carry the crowds.'],crowding:['packed buses, trams and trains',[],' Run more services or longer vehicles.'],stranded:['passengers stranded at night',[],' Add night services to your lines.'],traffic:['traffic jams',[],' Trams, trains, the metro or a ring road would ease them.'],queues:['long waits at check-in and security',['lanes','sectech','desks','training','kiosks','online','fasttrack','wifi']],late:['late departures',['atc','crew','tugs','handlers','scanners','bins','walkway']],arrivals:['slow arrivals at passports and reclaim',['officers','egates','training','handlers','wifi']],missed:['missed connections',['walkway','mover']],sponsor:['the sponsorship deal',[]],punctual:['on-time departures',[]]};
-const REPLBL={care:'Help for passengers who need it',ads:'Advertising',noise:'Night noise',events:'Match days and events',crowding:'Crowded public transport',stranded:'Stranded without transport',traffic:'Traffic jams',queues:'Check-in and security waits',late:'Late departures',punctual:'On-time departures',arrivals:'Arrivals clearing',missed:'Missed connections',sponsor:'Sponsorship deal'};
-function repRecent(){const o={};for(const [t,w,r,d] of (R.repEv||[]))if(t>=G.clock-180)o[w]=(o[w]||0)+d;return o}
 function hourBucket(){const h=Math.floor(G.clock/60);let b=G.hours[G.hours.length-1];if(!b||b.h!==h){b={h,rev:0,cost:0,pax:0};G.hours.push(b);if(G.hours.length>24)G.hours.shift()}return b}
-function earn(v,kind,x,y,col,F){G.cash+=v;G.earned+=v;G.revBy[kind]=(G.revBy[kind]||0)+v;hourBucket().rev+=v;R.minEarn+=v;if(G.dstat)G.dstat.rev+=v;if(F)F.rev+=v;if(x!=null&&!R.sim)floater('+'+money(v),x,y,col||'#6BE39A')}
-function spend(v,kind){kind=kind||'costs';G.cash-=v;G.revBy[kind]=(G.revBy[kind]||0)+v;hourBucket().cost+=v;R.minEarn-=v;if(G.dstat)G.dstat.cost+=v}
 function countPax(arr){hourBucket().pax++;if(G.dstat){if(arr)G.dstat.arr++;else G.dstat.pax++}}
-function floater(text,x,y,col,big){if(R.sim)return;{const p=SET().pops;if(p==='off'||(p==='big'&&!big))return}if(R.floaters.length>90)R.floaters.shift();R.floaters.push({text,x,y,t:0,col,big})}
 const dailyPax=()=>G.hours.slice(-24).reduce((a,b)=>a+(b.pax||0),0);
 
