@@ -11,11 +11,11 @@ const UPDATES=[
     {b:'A live rating',t:'It follows the last day of flights, with an arrow showing which way it’s heading.'},
     {b:'Yesterday in a minute',t:'Office › Money plays back the day over your airport.',go:'office:money'},
     {b:'Photo mode',t:'Hide the panels and frame a picture, at any time of day or weather.',go:'photo'},
-    {b:'Tidier menus',t:'Settings, challenges, pay and boarding upgrades sit where you’d look.',go:'office:settings'}]},
+    {b:'Tidier menus',t:'Settings and challenges sit where you’d look; the phone top bar is one row.',go:'office:settings'}]},
   {v:32,title:'Ready for what’s next',points:[
     {b:'Update toasts',t:'A new version offers Update now, or Later for an hour.'},
     {b:'Ko-fi',t:'A quiet “Buy me a Ko-fi” link, if you’d like to.'},
-    {b:'Send feedback',t:'How to play opens a GitHub issue with your details filled in.',go:'help'},
+    {b:'Send feedback',t:'A link in How to play opens a GitHub issue, your details filled in.',go:'help'},
     {b:'Saves stay here',t:'The game saves on this device; save codes still move an airport.',go:'office:settings'}]},
   {v:31,title:'Looks like a real airport',points:[
     {b:'Liveried planes',t:'Engines in airline colours, shadows, and wingtip lights at night.'},
@@ -37,7 +37,7 @@ const UPDATES=[
     {b:'Bags that travel',t:'A sorter and tug trains to the plane, carousels for arrivals.'},
     {b:'The market place',t:'People shop until their gate is called; later calls sell more.'},
     {b:'An airport hotel',t:'Rooms for late arrivals, early flyers, crews and the stranded.',go:'sales:landside'},
-    {b:'Twice as fast',t:'The simulation runs about twice as fast.'}]},
+    {b:'Advisor and speed',t:'The advisor spots a full café or hotel, and the game runs twice as fast.'}]},
   {v:27,title:'A smarter transport manager',points:[
     {b:'A smarter manager',t:'It runs your lines by what each change is worth.',go:'tab:region',lv:1},
     {b:'Busy days',t:'It adds services to full lines and extras on event days.',lv:1},

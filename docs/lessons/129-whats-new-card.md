@@ -1,0 +1,9 @@
+Theme: ui
+# What's new, easier to read and act on · 28 Sep 2026
+
+- **Numbers:** estimate $10; about $4.40 by the time the build, reveal and review fixes were in. The spec and draft PR went up within about five minutes, and the owner approved it while the build ran.
+- **A change mid-build:** half an hour in, the owner asked that locked points be revealable ("N more for later levels · Show"), not just hidden. Because hiding was one filter (`newsPts`) and each version drew through one function (`newsRow`), the reveal was a re-render of one version in place and cost one small commit; the spec, notes and check moved with it.
+- **The review caught lost facts:** rewording twenty entries into a lead and one sentence dropped two facts (the one-row phone top bar in version 33, the advisor spotting a full café in version 28) and skewed one (Send feedback). The new check can hold the shape (lead length, one sentence, real targets and levels) but not the meaning: a rewrite of released text needs a side-by-side read against the old text, which the fresh review did.
+- **The local full run crashed its browser** partway through (at `network`, before any group this PR touches), and every later group then failed with "browser has been closed". Running the rest one group at a time passed; the full run in CI is the judge.
+- **Left for the release playbook:** `.claude/skills/release/SKILL.md` still says to fold fragments as plain points; it should copy each `- **Lead.** Sentence. (go: … · level: …)` line into `{b, t, go, lv}`. This PR couldn't edit `.claude/skills/` (a lessons tidy was running there), so `src/updates.d/README.md` holds the style and the `news-card` check fails a release that pastes plain strings.
+- **Went well:** reusing the level-up card's `lvlGo` for most "Show me" targets kept the new code to one validator (`newsOk`) and one dispatcher, and the check taps every real button rather than calling the function.

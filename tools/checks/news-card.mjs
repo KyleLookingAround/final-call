@@ -53,7 +53,7 @@ export default async function({open,ok,saveText,root}){
       await page.evaluate(()=>{const S=__sim;S.setSpeed(2);S.openNews(true,false);document.querySelectorAll('#newsList details').forEach(e=>e.open=true)});
       await page.click(`#newsList [data-newsgo="${g}"]`);
       land[g]=await page.evaluate(g=>{const S=__sim,G=S.G,R=S.R,$=s=>document.querySelector(s),r={card:!$('#news').hidden,tab:G.tab,plan:!$('#plan').hidden,help:!$('#help').hidden,photo:!!R.photo,
-        sub:{office:R.oSub,sales:R.sSub,ground:R.aSub}[g.split(':')[0]]};
+        sub:S.NEWS_SUB[g.split(':')[0]]&&R[S.NEWS_SUB[g.split(':')[0]][0]]};
         if(r.plan)$('#plan .close').click();if(r.help)S.openHelp(false);if(r.photo)S.photoOff();return r},g);
     }
     const wrong=Object.entries(land).filter(([g,r])=>{const [a,b]=g.split(':');if(r.card)return true;
