@@ -131,7 +131,7 @@ function drawRegion(){
   for(const P of PLOTS)if(plotOpen(P))drawPlot(P,t,k);
   // the time of day's colour, then night on the land, under the network and labels so they stay readable; towns glow
   // and their windows shine over it
-  {const [gr,gg,gb,ga]=grade((G.clock/60)%24),na=dk*1.2,a=1-(1-ga)*(1-na),m=(v,n)=>Math.round((n*na+v*ga*(1-na))/(a||1)); // the two washes as one fill
+  {const [gr,gg,gb,ga]=grade(drawnHour()),na=dk*1.2,a=1-(1-ga)*(1-na),m=(v,n)=>Math.round((n*na+v*ga*(1-na))/(a||1)); // the two washes as one fill
     if(a>0){ctx.fillStyle=`rgba(${m(gr,4)},${m(gg,8)},${m(gb,22)},${a.toFixed(3)})`;ctx.fillRect(0,0,RW,RH)}}
   if(dk>0){
     ctx.globalCompositeOperation='lighter';for(const pid in PLACES){const pl=PLACES[pid];if(pl.kind==='air'||pl.kind==='far')continue;const rr=townR(pid)*1.25,g=ctx.createRadialGradient(pl.x,pl.y,0,pl.x,pl.y,rr);g.addColorStop(0,`rgba(255,170,90,${0.3*dk})`);g.addColorStop(1,'rgba(255,170,90,0)');ctx.fillStyle=g;ctx.fillRect(pl.x-rr,pl.y-rr,rr*2,rr*2)}ctx.globalCompositeOperation='source-over';
