@@ -8,6 +8,10 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 ## The lessons
 
 <!-- joined:lessons from docs/lessons/ by tools/join.mjs: don't edit between these lines -->
+### Cost
+
+- [The overnight stall, 27–28 Sep 2026](lessons/main-overnight-stall.md)
+
 ### Merge-chasing
 
 - [#94 Fewer clashes between sessions · 27 Sep 2026](lessons/94-fewer-clashes.md)
