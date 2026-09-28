@@ -13,7 +13,7 @@ const FIELDS={
   revBy:()=>({transit:0,transitOps:0,region:0,wages:0,upkeep:0,interest:0,assets:0,fares:0,inbound:0,landside:0,cargo:0,bags:0,shops:0,fast:0,priority:0,bonus:0,costs:0}),
   hours:()=>[],arrReports:()=>Array(NG).fill(null),savedAt:()=>0,rate:()=>0,lastDest:()=>'',tech:()=>({}),pts:()=>0,ptBought:()=>0,pv:()=>2,
   gdone:()=>({}),routes:()=>({DUB:{f:1},EDI:{f:1},AMS:{f:1}}),rs:()=>({}),crews:()=>[{free:0,back:0,duty:0,res:0},{free:0,back:0,duty:0,res:0}],
-  tour:()=>({s:0}),nv3:()=>1,
+  tour:()=>({s:0}),nv3:()=>1,tip4x:()=>false,
   famous:()=>({next:0,v:null}), // famous faces: the day of the next booking and the booked visit (64-famous-faces.js)
   set:()=>({tips:true,msgs:'all',pops:'all',goal:true,badges:true,recs:true,autoLines:true,autoFares:true,autoCrews:true,autoDuty:true,chal:true,sndAnn:'on',sndVoice:true,sndAmb:true,sndFx:true,lvlCard:true,usage:true}),
   usageSent:()=>({}),
