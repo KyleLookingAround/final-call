@@ -4,7 +4,7 @@ const RECS=[
   ['streak','Longest on-time run',v=>`${v} departures`],['routes','Most destinations',v=>`${v} cities`],['rep','Highest rating',v=>`${v}`],
   ['riders','Busiest hour on public transport',v=>`${num(v)} riders`],['share','Best share against Lowmere',v=>`${v}%`]];
 function setRec(k,v,show){const r=G.rec||(G.rec={});v=Math.round(v);if(!(v>(r[k]||0)))return false;const had=r[k]>0;r[k]=v;
-  if(show&&had&&!R.sim&&SET().pops!=='off'){const d=RECS.find(x=>x[0]===k);floater(`RECORD · ${d[1].toUpperCase()} · ${d[2](v)}`,760,120,'#FFC72C',true)}return had}
+  if(show&&had&&!R.sim){const d=RECS.find(x=>x[0]===k);toast(`Record: <b>${d[1]}</b>. ${d[2](v)}.`,null,null,'goal',5)}return had}
 const railAir=()=>Object.values(G.lines||{}).some(L=>MODES[L.mode].kind==='rail'&&serves(L,'air'));
 const STAMPS=[
   {id:'first',n:'First away',d:'Your first departure',c:'#FFC72C',t:()=>G.flights>=1},
@@ -33,8 +33,10 @@ const STAMPS=[
   {id:'top',n:'Airport of the Year',d:'Reach the top level',c:'#FFC72C',t:()=>G.level>=LEVELS.length-1},
 ];
 function checkStamps(){
-  const st=G.stamps||(G.stamps={});for(const S of STAMPS){if(st[S.id])continue;let ok=false;try{ok=S.t()}catch(e){}if(!ok)continue;st[S.id]=dayOf(G.clock);
-    if(!R.sim){toast(`Stamp: <b>${S.n}</b>. ${S.d}.`,null,null,'goal',6);if(SET().pops!=='off')floater(`STAMP · ${S.n.toUpperCase()}`,760,150,S.c,true)}}
+  const st=G.stamps||(G.stamps={});let did=false;
+  for(const S of STAMPS){if(st[S.id])continue;let ok=false;try{ok=S.t()}catch(e){}if(!ok)continue;st[S.id]=dayOf(G.clock);did=true;
+    if(!R.sim)toast(`Stamp: <b>${S.n}</b>. ${S.d}.`,null,null,'goal',6)}
+  if(did)awardChime();
 }
 // weekly challenges: sized from how your airport did last week
 const CH_POOL=[
@@ -63,12 +65,13 @@ function chalDay(){
 clock(DAY,'chalDay',1,0,chalDay);
 function chalProg(x){const p=CH_POOL.find(q=>q.id===x.id);return Math.max(0,(x.c?p.m(x.c):p.m())-x.base)}
 function checkChal(){
-  const C=G.chal;if(!C||!C.list||SET().chal===false)return;
-  for(const x of C.list){if(x.done||chalProg(x)<x.goal)continue;x.done=1;earn(C.pay,'bonus');
+  const C=G.chal;if(!C||!C.list||SET().chal===false)return;let did=false;
+  for(const x of C.list){if(x.done||chalProg(x)<x.goal)continue;x.done=1;earn(C.pay,'bonus');did=true;
     if(!R.sim)toast(`Challenge done: ${CH_POOL.find(q=>q.id===x.id).n(x.goal,x.c)}. +${money(C.pay)}`,null,null,'goal',6)}
-  if(!C.all&&C.list.length===3&&C.list.every(x=>x.done)){C.all=1;C.sets=(C.sets||0)+1;
+  if(!C.all&&C.list.length===3&&C.list.every(x=>x.done)){C.all=1;C.sets=(C.sets||0)+1;did=true;
     if(TECH.some(T=>!G.tech[T.id])){G.pts=(G.pts||0)+1;renderPlanBtn()}else earn(C.pay*2,'bonus');
     if(!R.sim)toast(`All three challenges done this week. <b>${TECH.some(T=>!G.tech[T.id])?'+1 plan point':'+'+money(C.pay*2)}</b>`,null,null,'goal',8)}
+  if(did)awardChime();
 }
 // daily records, from yesterday's figures
 function recordsDay(s){
