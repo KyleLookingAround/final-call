@@ -15,11 +15,11 @@ The runbook is the way this repo runs sessions: project notes, playbooks, checke
 
 ## The options
 
-Costs in Claude usage come from this repo's own lessons (`docs/LESSONS.md`): a docs-only or small PR runs $2–5, a feature PR $5–20 with a median near $5, a session that fought a busy `main` $20–40, and the coordinator of 27 Sep cost $176 over 25 hours. Fees and takings come from the sources in the game's income spec on its own branch (`feature/income-spec`, `docs/specs/income.md`) and the research for this proposal; where a figure is practitioners' consensus rather than measured, it says so.
+Costs in Claude usage come from this repo's own lessons (`docs/LESSONS.md`): most docs-only or small PRs run $2–5 (an audit that reads the whole game, $15–17), a feature PR $5–20 with a median near $5, a session that fought a busy `main` $20–40, and the coordinator of 27 Sep cost $176 over 25 hours. Fees and takings come from the sources in the game's income spec on its own branch (`feature/income-spec`, `docs/specs/income.md`) and the research for this proposal; where a figure is practitioners' consensus rather than measured, it says so.
 
 ### A. The runbook as a guide, sold on the Ko-fi shop (and Gumroad)
 
-- **What.** A guide, "Running a software project with coding-agent sessions", built from the runbook pack (`npm run pack`, `docs/briefs/runbook-pack.md`): the method in about forty pages, the playbooks and templates as files, and what nobody else has: the measured account of 130 PRs in a week with what each cost, what went wrong (the overnight stall, the merge-chase, the phantom arrows) and what changed because of it. Sold as a zip and PDF at £15–19.
+- **What.** A guide, "Running a software project with coding-agent sessions", built from the runbook pack (`npm run pack`, `docs/briefs/runbook-pack.md`): the method in about forty pages, the playbooks and templates as files, and what nobody else has: the measured account of over a hundred PRs in three days (26–28 Sep, numbered past #130) with what each cost, what went wrong (the overnight stall, the merge-chase, the phantom arrows) and what changed because of it. Sold as a zip and PDF at £15–19.
 - **Who pays and why.** Solo developers and small teams adopting Claude Code who want a working setup with numbers, not a prompt list. Comparable Gumroad listings sit at $15–30 ("Claude Code Workflow Pack", "CLAUDE.md Starter Pack", a $19 migration playbook); none publishes sales, and the free competition is strong (awesome-claude-code, Anthropic's own docs). The measured lessons are the only part a free repo can't copy.
 - **How the runbook builds and runs it.** A new repo (`runbook-guide`) with the project notes and first brief in the appendices. Session 1 builds the guide's source from the pack and a build script that makes the zip, the HTML and a PDF (Chromium is already in the sessions' containers). Session 2 writes a checks script (links resolve, every chapter has its numbers, the pack's files are all present, no attribution lines). Session 3 makes a one-page site on GitHub Pages with a Buy button that links to the shop. Upkeep: one session a month, from a brief, when the tools change.
 - **By hand.** A shop item on Ko-fi (the account exists; 5% on shop sales, none on tips) and optionally Gumroad (10% + 50¢, handles VAT as merchant of record since Jan 2025; identity check and a W-8BEN for a UK seller). One post somewhere the owner already is. Tax: trading income under the £1,000 allowance until it isn't.
@@ -31,18 +31,18 @@ Costs in Claude usage come from this repo's own lessons (`docs/LESSONS.md`): a d
 ### B. Another small game or tool built the Final Call way, with a supporter pack
 
 - **What.** A second one-page game (or a one-page tool) built with the same loop, listed on itch.io as pay-what-you-want and on its own Pages site, with a cosmetic supporter pack unlocked by a signed code checked in the page (the design in `docs/specs/income.md`).
-- **Who pays and why.** One to three players in a hundred tip or buy a one-off unlock in a free game (practitioners' consensus, not a measured figure). itch.io brings browsing players; a Pages site brings none.
+- **Who pays and why.** One to three players in a hundred tip or buy a one-off unlock in a free game: practitioners' consensus on itch.io's forums and guides (for example https://generalistprogrammer.com/tutorials/how-to-make-money-on-itchio-indie-game-guide), not a measured figure. itch.io brings browsing players; a Pages site brings none.
 - **How the runbook builds and runs it.** This is what the runbook is proven at: a new repo from the pack's "Adapting" section, a first spec, a coordinator running parts. itch.io's `butler` tool pushes builds from a workflow, so publishing is automatic once the owner has made the page.
 - **By hand.** An itch.io account, its identity and tax form, the game page and its generated-content tags (itch.io's rule since Nov 2024 covers code, art, text and sound). Then nothing but reading the counter.
 - **Time to first sale.** Weeks to build something worth paying for, then discovery: months.
-- **Realistic takings.** Small creators who publish their itch.io figures report a few hundred to about $3,000 a year across several games; the 2025 Steam median is $249. A thousand players a month at £4 a pack is £35–110 a month. Final Call itself, launched today, is the better bet for this: it already exists.
+- **Realistic takings.** Small creators who publish their itch.io figures report a few hundred to about $3,000 a year across several games (https://www.nathalielawhead.com/candybox/my-gross-revenue-on-itch-io-transparently-sharing-all-my-stats-earnings-and-speaking-on-how-supportive-of-a-base-itch-io-has); the 2025 Steam median is $249, with two thirds of releases under $1,000 (Gamalytic, https://gamedevreports.substack.com/p/gamalytic-67-of-games-on-steam-earned). A thousand players a month at £4 a pack is £35–110 a month. Final Call itself, launched today, is the better bet for this: it already exists.
 - **Running cost.** $100–250 to build (Final Call's features cost $5–40 each and a small game is ten to twenty of them), $5–10 a month after.
 - **Risks.** Discovery; a second game splits the owner's attention from the first; income lags by months.
 
 ### C. A fixed-price "runbook onboarding" for other people's repos
 
 - **What.** For a fixed price (£150–300), a PR to the customer's repo that sets up the five things the pack's README names first: project notes, a brief template with its validator, a checks script, a commit-msg hook and a PR template, plus a first brief written for their next feature. Delivered in a day.
-- **Who pays and why.** Small teams starting with Claude Code who'd rather buy a day than spend a week. Fiverr already lists "Claude Code setup" gigs from $15, and Upwork lists specialists in CLAUDE.md, skills and hooks; the low end is very low, so the price rests on the method's record.
+- **Who pays and why.** Small teams starting with Claude Code who'd rather buy a day than spend a week. Fiverr already lists "Claude Code setup" gigs from $15 (https://www.fiverr.com/gigs/claude-code) and Upwork lists specialists in project notes, skills and hooks (https://www.upwork.com/hire/claude-specialists/); nobody publishes what they earn from them. The low end is very low, so the price rests on the method's record, and the £150–300 is a guess at what a day's deliverable with a record is worth, not a sourced figure.
 - **How the runbook builds and runs it.** The onboarding itself is a brief: the owner's session (their own subscription, one customer at a time) reads the customer's repo and opens the PR. A "customer kit" repo holds the template files and the brief that makes the PR.
 - **By hand.** Finding customers: a listing (Fiverr or Upwork, both allow generated work with disclosure and refinement; both need identity checks) or posts; a call with each customer; access to their repo (the GitHub app installed by them); invoices; support after. This is the most owner input of any option.
 - **Time to first sale.** Days after a listing if anyone bites; weeks in practice.
@@ -93,7 +93,8 @@ Save as the new repo's project notes file (`CLAUDE.md`).
 
 This repo builds a guide to the runbook: the way the Final Call repo runs coding-agent sessions (project notes, playbooks, checked briefs, checks that fail on purpose, a coordinator, one file per lesson, cost budgets). It sells as a zip and a PDF on the owner's Ko-fi shop. Nothing here is a game.
 
-- `pack/` is the runbook pack as `npm run pack` in the Final Call repo makes it; refresh it from there, never edit it here.
+- `pack/` is the runbook pack as `npm run pack` in the Final Call repo makes it; refresh it from there (`add_repo` KyleLookingAround/final-call for reading, run `npm run pack` in that clone, unzip over `pack/`), never edit it here.
+- `.githooks/commit-msg` and `.github/workflows/description.yml` are the pack's copies, unchanged, and `.claude/settings.json` sets the hooks path: they keep attribution out of commits and PR text, as in the Final Call repo.
 - `guide/` is the guide's source, one Markdown file per chapter, numbered. `tools/build.mjs` joins them into `build/guide.html`, prints `build/guide.pdf` with Chromium, and zips both with `pack/` into `build/runbook-guide.zip`. `build/` is git-ignored.
 - `site/index.html` is the one-page site GitHub Pages serves: what the guide is, what's in it, and a Buy button that links to the shop. No scripts, no tracking.
 - `npm run check` runs `tools/check.mjs`: every link in the guide and the site resolves; every chapter has a number in it (a cost, a count or a time) or says why not; the pack has every file its README lists; nothing mentions an assistant by way of attribution.
@@ -101,7 +102,7 @@ This repo builds a guide to the runbook: the way the Final Call repo runs coding
 ## Commits and PRs
 
 - Every commit is authored KyleLookingAround <KyleMck10@hotmail.com>.
-- Commit messages and PR text are a short imperative subject in plain words. No attribution lines, no session links.
+- Commit messages and PR text are a short imperative subject in plain words. No attribution lines, no session links; the hook and the Description check reject them.
 - One change per branch (`feature/<short-name>` from `main`), a PR from the template, squash-merged by the session once checks are green. The session confirms the Pages publish.
 
 ## How we work
@@ -126,7 +127,7 @@ Save as `docs/briefs/guide-first-draft.md` in the new repo and give it to the fi
 
 ## Goal and what it may touch
 
-- Deliver the guide's source and its build: `guide/01-what-the-runbook-is.md` to `guide/08-adapting-it.md`, `tools/build.mjs`, `package.json`, the project notes' `pack/` refreshed from the Final Call repo's `npm run pack`, and `README.md` (two paragraphs and the file map). Branch `feature/first-draft` from `main`, one PR.
+- Deliver the guide's source and its build: `guide/01-what-the-runbook-is.md` to `guide/08-adapting-it.md`, `tools/build.mjs`, `package.json`, `pack/` made from the Final Call repo's `npm run pack` (the project notes say how), the hook, the Description workflow and the editor settings copied from the pack, and `README.md` (two paragraphs and the file map). Branch `feature/first-draft` from `main`, one PR.
 - Chapters, in order: what the runbook is (the loop from issue to lesson); the project notes; briefs and the validator; checks that fail on purpose; sessions that merge their own PRs and the steward; the coordinator, the cap on sessions and the watchdog; lessons, decisions and the tidy; adapting it to another repo (from the pack's README). Each chapter ends with "What it cost", quoting the pack's lessons by file name.
 - It may touch nothing in `pack/` and nothing in `site/`.
 
