@@ -6,7 +6,7 @@
   - `dayTick` runs `DAY` when the day changes. n is the new day, and each hook gets the stats of the day just ended.
   - The order is listed once, in `CLOCK_ORDER`. A system registers its own hooks from its own file with `clock(T, id, every, at, fn)`, which slots each into its place and throws on an id the order doesn't list. A new hook is a line in `CLOCK_ORDER` and a `clock(…)` call next to its function, not an edit to `update()`.
 - **Today's order.**
-  - `MINUTE`: `autoStaff` (every 2), `updateBuilds`, `layoutTick`, `dayTick`, `checkLevel`, `fleetTick`, `managersTick` (every 360), `mgrStep`, `TERM_MINUTE`, `HOUR` (every 30).
+  - `MINUTE`: `autoStaff` (every 2), `updateBuilds`, `layoutTick`, `dayTick`, `checkLevel`, `fleetTick`, `managersTick` (every 360), `mgrStep`, `TERM_MINUTE`, `HOUR` (every 30), `dayRec` (every 5, the Day in a minute recorder).
   - `HOUR`: `mgrHour` (60), `crewTick` (30), `recordsHour` (60), `NIGHT` (03:00), `ads` (60).
   - `NIGHT`: `nightChecks`.
   - `DAY`: `dayReport` and `recordsDay` (the day just ended), `newDay` (`G.day` and a fresh `G.dstat`), `regionDay`, `rivalDay`, `chalDay`, `TERM_DAY`, `season`.

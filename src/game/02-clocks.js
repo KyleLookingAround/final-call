@@ -6,7 +6,7 @@
 // listed once, here, and the clocks check pins it and each hook's cadence to what ran before the tables.
 const MINUTE=[],HOUR=[],DAY=[],NIGHT=[],CLOCKS={MINUTE,HOUR,DAY,NIGHT};
 const CLOCK_ORDER={
-  MINUTE:['autoStaff','updateBuilds','layoutTick','dayTick','checkLevel','fleetTick','managersTick','mgrStep','TERM_MINUTE','HOUR'],
+  MINUTE:['autoStaff','updateBuilds','layoutTick','dayTick','checkLevel','fleetTick','managersTick','mgrStep','TERM_MINUTE','HOUR','dayRec'],
   HOUR:['mgrHour','crewTick','recordsHour','NIGHT','ads'],
   NIGHT:['nightChecks'],
   // dayReport and recordsDay see the day just ended; newDay starts the next one (G.day, G.dstat) for the rest
