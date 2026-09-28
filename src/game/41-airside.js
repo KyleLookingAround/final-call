@@ -44,7 +44,8 @@ function placeBadges(){
 }
 function standHit(i,x,y){toL(i,x,y);const [ax,ay,w,h]=standArea(i);return WP.x>=ax&&WP.x<=ax+w&&WP.y>=ay-40&&WP.y<=ay+h}
 
-// Airside rooms: convex floors joined by doorways and links. Inside a room passengers walk straight to where they're going;
+// Airside rooms: convex floors joined by doorways and links (a floor link, an escalator or lift between the terminal's two
+// floors, is a doorway here: 42-terminal.js). Inside a room passengers walk straight to where they're going;
 // to reach another room they walk through the doorways, and ride the links, on the way.
 let ROOMS=null,ROOM_ID={},ROUTE=null;
 const STAND_ROOM=[],SHOP_ROOM=[];
@@ -110,7 +111,15 @@ function layoutFaults(id){
   ROOMS.forEach(r=>{const P=r.poly,n=P.length;let sgn=0;for(let k=0;k<n;k++){const [a,b]=P[k],[c,d]=P[(k+1)%n],[e,f]=P[(k+2)%n],cr=Math.sign((c-a)*(f-d)-(d-b)*(e-c));if(cr&&sgn&&cr!==sgn){bad.push(`room ${r.id} isn't convex`);break}if(cr)sgn=cr}
     const root=r.land?'out':'main';if(r.id!==root&&!ROUTE[ROOM_ID[r.id]][ROOM_ID[root]])bad.push(`room ${r.id} can't be reached`)}); // landside halls from outside, airside ones from the concourse
   bad.push(...terminalFaults());
-  for(const [a,b,x,y] of ROOM_DOORS)for(const r of [a,b])if(ROOM_ID[r]==null||edgeDist(ROOMS[ROOM_ID[r]].poly,x,y)>3)bad.push(`doorway ${a}–${b} isn't on the wall of ${r}`);
+  // floors: a room's is 0, 1 or none; a doorway is on the wall of both its rooms and joins one floor, and a floor link stands
+  // in both its rooms and joins two
+  ROOMS.forEach(r=>{if(r.fl!=null&&r.fl!==0&&r.fl!==1)bad.push(`room ${r.id} has no floor ${r.fl}`)});
+  const flOf=id=>ROOM_ID[id]!=null?ROOMS[ROOM_ID[id]].fl:undefined;
+  for(const d of ROOM_DOORS){const [a,b,x,y]=d,fa=flOf(a),fb=flOf(b);
+    if(isFloorLink(d)){for(const r of [a,b])if(ROOM_ID[r]==null||!(inPoly(ROOMS[ROOM_ID[r]].poly,x,y)||edgeDist(ROOMS[ROOM_ID[r]].poly,x,y)<=3))bad.push(`the ${d[5]==='lift'?'lift':'escalator'} ${a}–${b} isn't in ${r}`);
+      if(fa==null||fb==null||fa===fb)bad.push(`the ${d[5]==='lift'?'lift':'escalator'} ${a}–${b} doesn't join two floors`);continue}
+    for(const r of [a,b])if(ROOM_ID[r]==null||edgeDist(ROOMS[ROOM_ID[r]].poly,x,y)>3)bad.push(`doorway ${a}–${b} isn't on the wall of ${r}`);
+    if(fa!=null&&fb!=null&&fa!==fb)bad.push(`doorway ${a}–${b} joins two floors`)}
   for(const [a,b,pa,pb] of L.links||[])for(const [r,[x,y]] of [[a,pa],[b,pb]])if(ROOM_ID[r]==null||!inPoly(ROOMS[ROOM_ID[r]].poly,x,y))bad.push(`the link ${a}–${b} has no station in ${r}`);
   SIDX.forEach(i=>{
     for(let j=i+1;j<SIDX.length;j++)if(planes[i].some(A=>planes[j].some(B=>convexOverlap(A,B))))bad.push(`${GATES[i]} and ${GATES[j]} touch`);

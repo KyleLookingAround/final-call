@@ -3,12 +3,7 @@
 # its line comes out, so each part takes out its own lines in its PR. Only the checks-first PR and the coordinator add
 # lines, and the PR that brings the parts together leaves this file with comments only.
 
-# the groundwork: each layout's terminal table, floors on rooms, R.floor and the chip, nothing drawn under a solid roof
-plans: every layout's terminal comes from its own table
-plans: rooms and doorways have floors
-plans: the floor chip
-scene: nothing is drawn inside a hall under the roof
-# needs halls on two floors, so it may wait for the two floors part
+# needs halls on two floors: the groundwork left it for the two floors part
 scene: one floor at a time
 
 # two floors in Classic
@@ -43,10 +38,8 @@ terrace: spotters stay on the roof
 terrace: small takings
 terrace: its card fits a phone
 
-# each layout's own floor plan
+# each layout's own floor plan (the way through, two hours in every layout and old saves already pass with Classic's plan in
+# each layout, so the groundwork switched them on as guards)
 plans: halls inside each main building
-plans: the way through, in order, in every layout
 plans: no layout's walk is a trap
-plans: every layout plays two hours
 plans: rebuilding moves people into the new plan
-plans: old saves load into their layout's plan
