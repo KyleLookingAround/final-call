@@ -118,7 +118,9 @@ export default async function({open,ok,saveText,saves,newest}){
       ok('scene: nothing is drawn inside a hall under the roof',u.a===1&&u.people+u.things===0&&!errs.length,`on the roof (roofA ${u.a}): ${u.people} passengers and ${u.things} other things drawn inside halls`+(errs.length?' '+errs[0]:''));
       const f=await page.evaluate(()=>{const S=__sim,R=S.R,TP=window.TP;for(const k of ['rain','storm','fog','snow'])R.fx[k]=0;TP.day(14);S.setView('airport');const [mx,my]=TP.termMid();TP.look(mx,my,1.6);
         const two=TP.twoFloors(),out={};
-        for(const [f,n] of [['up',1],['down',0]]){R.floor=f;const arcs=TP.drawn().filter(s=>s.k==='arc'&&s.r<=4),other=R.pax.filter(p=>{const x=TP.paxFl(p);return x!=null&&x!==n});
+        // a dot at a passenger's spot is theirs unless someone on the floor shown (or on both, as on the forecourt) is drawn there too
+        for(const [f,n] of [['up',1],['down',0]]){R.floor=f;const on=R.pax.filter(p=>{const x=TP.paxFl(p);return x==null||x===n});
+          const arcs=TP.drawn().filter(s=>s.k==='arc'&&s.r<=4&&!on.some(q=>Math.abs(s.at[0]-q.ex)<0.5&&Math.abs(s.at[1]-q.ey)<0.5)),other=R.pax.filter(p=>{const x=TP.paxFl(p);return x!=null&&x!==n});
           out[f]={other:other.length,drawn:other.filter(p=>arcs.some(a=>Math.abs(a.at[0]-p.x)<0.5&&Math.abs(a.at[1]-p.y)<0.5)).length}}
         R.floor='halls';return {two,...out}});
       ok('scene: one floor at a time',f.two&&!f.up.drawn&&!f.down.drawn&&!errs.length,`${f.two?'':'no halls on two floors yet; '}upstairs drew ${f.up.drawn} of ${f.up.other} passengers downstairs, downstairs drew ${f.down.drawn} of ${f.down.other} upstairs`+(errs.length?' '+errs[0]:''));
