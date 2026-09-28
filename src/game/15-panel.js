@@ -149,7 +149,7 @@ function renderPanel(){
     {const cg=curGoal(),dn=GOALS.filter(g=>G.gdone&&G.gdone[g.id]),up=GOALS.filter(g=>!(G.gdone&&G.gdone[g.id])&&g!==cg&&(!g.need||g.need())).slice(0,4),rw=g=>`${g.r?money(g.r):''}${g.pts?`${g.r?' + ':''}${g.pts} pt`:''}`;
       h+=`<div class="sec">Goals<span>${dn.length}/${GOALS.length}</span></div><ul class="goals">${dn.slice(-3).map(g=>`<li class="done"><span>✓</span><span>${g.t}</span><span class="r">${rw(g)}</span></li>`).join('')}${cg?`<li class="cur"><span>›</span><span>${cg.t}</span><span class="r">${rw(cg)}</span></li>`:''}${up.map(g=>`<li class="fut"><span></span><span>${g.t}</span><span class="r">${rw(g)}</span></li>`).join('')}</ul>`+chalPanel()}
     }if(osub==='money'){
-    if(G.lastDay){const L=G.lastDay;h+=`<div class="sec">Day ${L.day} report</div><div class="report"><b>${num(L.pax)}</b> passengers departed and <b>${num(L.arr)}</b> arrived on <b>${L.flights}</b> flights, <b>${L.ontime}</b> on time${L.bagMiss?`, <b>${L.bagMiss}</b> bags left behind`:''}. Profit <b>${money(L.profit)}</b>.</div>`}
+    if(G.lastDay){const L=G.lastDay;h+=`<div class="sec">Day ${L.day} report</div><div class="report"><b>${num(L.pax)}</b> passengers departed and <b>${num(L.arr)}</b> arrived on <b>${L.flights}</b> flights, <b>${L.ontime}</b> on time${L.bagMiss?`, <b>${L.bagMiss}</b> bags left behind`:''}. Profit <b>${money(L.profit)}</b>.</div>${dimBtn()}`}
     const hrs=G.hours.slice(-12);
     if(hrs.length){
       const nets=hrs.map(b=>b.rev-b.cost),mx=Math.max(1,...nets.map(Math.abs)),bw=300/12;
