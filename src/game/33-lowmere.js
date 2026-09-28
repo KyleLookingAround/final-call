@@ -21,6 +21,7 @@ function rivMix(){ // your share across the routes you both fly, weighted by mar
   let a=0,b=0;for(const c in (G.rival&&G.rival.routes||{})){if(!routeOpen(c))continue;const m=baseMarket(c);a+=m*rivShare(c);b+=m}return b?a/b:null}
 const rivBuyCost=()=>Math.round((1200000+150000*(G.rival?G.rival.lv:1))/10000)*10000;
 function rivalDay(){
+  netDay(); // routes you don't keep go quiet (31-routes.js), before Lowmere picks where to grow
   let V=G.rival;
   if(!V){if(G.level<RIV_LV)return;
     V=G.rival={open:G.clock+3*1440,routes:{},lv:1,rep:54,age:0,hist:[],pax:0,cut:0};
@@ -37,8 +38,8 @@ function rivalDay(){
   }
   V.age++;V.lv=Math.min(Math.max(1,G.level-1),1+Math.floor(V.age/3));V.rep=clamp(54+V.lv*2.2,54,72);
   const rts=Object.keys(V.routes),maxR=3+V.lv*3,maxF=6+V.lv*5,fl=rivFlights(),tm=rivTierMax();
-  const want=c=>{const rs=G.rs&&G.rs[c];return baseMarket(c)*(routeOpen(c)?1+(rs&&rs.tn?Math.max(0,rs.lf-0.7)*2:0):0.6)};
-  // Lowmere backs off where you win clearly, and grows where your flights are full or your service is weak
+  const want=c=>{const rs=G.rs&&G.rs[c];return baseMarket(c)*(routeOpen(c)?1+(rs&&rs.tn?Math.max(0,rs.lf-0.7)*2:0):0.6)*(routeOpen(c)&&netOn()&&serviceOf(c)<wantOf(c)*0.5?1.5:1)};
+  // Lowmere backs off where you win clearly, and grows where your flights are full, your service is weak or you've let a route go quiet
   for(const c of rts){const r=V.routes[c];if(!routeOpen(c)){r.w=0;continue}const sh=rivShare(c);r.w=sh>0.8?(r.w||0)+1:0;
     if(r.w>=4){r.w=0;if(r.f>1)r.f--;else{delete V.routes[c];V.cut=(V.cut||0)+1;if(!R.sim)toast(`Lowmere has stopped flying to ${CITY[c].name}. You won the route.`,null,null,'goal',8)}}}
   if(!has('feat:slots')||rnd()<0.5){
