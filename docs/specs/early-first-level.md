@@ -1,6 +1,6 @@
 # The first level-up in the first morning
 
-Issue: #105 · Status: Approved (the owner's decision of 28 Sep 2026 in the brief `docs/briefs/early-first-level.md` stands in for a spec review) · PRs: added when it opens
+Issue: #105 · Status: Approved (the owner's decision of 28 Sep 2026 in the brief `docs/briefs/early-first-level.md` stands in for a spec review) · PRs: #117
 
 ## What the player gets
 
