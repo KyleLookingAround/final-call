@@ -77,7 +77,7 @@ const SHOPS=[
 ];
 const LEVELS=[
   {name:'Airfield'},
-  {name:'Local Airport',req:{pax:600,rep:50,gates:2},reward:500},
+  {name:'Local Airport',req:{pax:80,rep:50,gates:1},reward:500},
   {name:'Regional Airport',req:{pax:2000,daily:1500,rep:52,gates:3},reward:1500},
   {name:'City Airport',req:{pax:6000,daily:3200,rep:55,gates:3},reward:4000},
   {name:'International Airport',req:{pax:30000,daily:8000,rep:60,gates:4},reward:15000},

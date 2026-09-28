@@ -123,6 +123,7 @@ How sessions work, not the game. Each one is small, measured and recorded in the
 ## Done
 
 <!-- joined:done from docs/roadmap.d/ (Section: done) by tools/join.mjs: don't edit between these lines -->
+- **The first level-up in the first morning** (#105, spec `docs/specs/early-first-level.md`): Local Airport asks for 80 passengers flown at the gate you start with, so a newcomer at 1× reaches it in about five minutes instead of 31–41.
 <!-- /joined:done -->
 
 Before the roadmap was kept as one file per item:
