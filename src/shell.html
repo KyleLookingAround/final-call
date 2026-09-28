@@ -532,6 +532,7 @@ body.fsstack .toasts{top:calc(var(--hb,42px) + 36px)}
 .lreq.chal.done>span:first-child{color:var(--good)}
 .segs.many{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
 .segs.many .chip{flex:none}
+@media (max-width:440px){.segs.set4{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}} /* Office › Settings' four chips, two by two on phones */
 .stamps{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px 10px;margin:10px 2px 4px}
 .stamp{--c:#FFC72C;border:2px solid var(--c);color:var(--c);border-radius:12px;padding:10px 8px 9px;text-align:center;transform:rotate(var(--r,0deg));background:color-mix(in srgb,var(--c) 7%,transparent);box-shadow:inset 0 0 0 3px var(--surface),inset 0 0 0 4px color-mix(in srgb,var(--c) 55%,transparent);display:grid;gap:4px;align-content:center;min-height:88px}
 .stamp b{font:800 14px/1.05 var(--disp);letter-spacing:.08em;text-transform:uppercase}
@@ -759,7 +760,7 @@ body.photo .board,body.photo .side,body.photo .topgap,body.photo .spot,body.phot
       <div class="hk"><i class="sq" style="background:#CDD4DA;width:12px"></i>Assistance buggy</div>
     </div>
     <h3>Growing</h3>
-    <p><b>Levels:</b> hit the targets in Office › Plan to climb ten levels. Each level brings plan points.</p>
+    <p><b>Levels:</b> hit the targets in Office › Progress to climb ten levels. Each level brings plan points.</p>
     <p><b>Masterplan:</b> press <kbd>P</kbd>. Spend plan points to approve plans that unlock aircraft, routes, upgrades, shops and transport. You can’t have everything at once, so choose what your airport needs.</p>
     <p><b>Routes:</b> press <kbd>W</kbd> for the world map. Each city has a market: open new routes when your flights start leaving emptier. Planes fly the best route within their range. Business cities pay more, holiday cities fill up in their season, and some attract groups.</p>
     <p><b>Fleet:</b> bigger jets reach further. More planes keep gates busy; partner airlines fill the gaps for a cut.</p>

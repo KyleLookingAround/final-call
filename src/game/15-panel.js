@@ -14,6 +14,7 @@ function upRow(key){
   else {label=money(cost);dis=false;desc=u.fx(l,false)}
   return `<div class="row${locked?' lockd':''}">${svg(u.icon)}<div><div class="rt">${u.name}${pips(l,u.max,cap)}</div><div class="rd">${desc}</div></div><button class="buy${maxed?' chipd':''}" data-buy="${key}" ${dis?'disabled':`data-cost="${cost}"`}>${label}</button></div>`;
 }
+const polRow=P=>`<div class="polrow"><div class="rt">${P.name}</div><div class="rd">${P.desc}</div><div class="chips">${P.opts.map(([v,n])=>`<button class="chip${pol(P.k)===v?' on':''}" data-pol='${P.k}:${JSON.stringify(v)}'>${n}</button>`).join('')}</div></div>`;
 function segs(key,items){return `<div class="segs${items.length>5?' many':''}">${items.map(([id,n])=>`<button class="chip${(R[key]||items[0][0])===id?' on':''}" data-seg="${key}:${id}">${n}</button>`).join('')}</div>`}
 function upSection(tab,only,skip){
   let h='',sec='';const done=[],later=[];
@@ -98,7 +99,7 @@ function renderPanel(){
   } else if(G.tab==='terminal'){
     const tsub=R.tSub||'dep';h+=segs('tSub',TERM_SUBS);
     const auto=G.lv.roster&&G.auto,sRow=(t,ic,label)=>{const own=OWN[t](),n=staffed(t);return `<div class="row">${svg(ic)}<div><div class="rt">${label}</div><div class="rd">${money(WAGE[t]*(G.wageMul||1))} an hour each${auto?' · set by rostering':''}</div></div><div class="lever"><button data-staff="${t}:-1" ${auto||n<=1?'disabled':''} aria-label="Staff one fewer">−</button><output data-live="staff-${t}">${n}</output><button data-staff="${t}:1" ${auto||n>=own?'disabled':''} aria-label="Staff one more">+</button><span class="live">/ ${own}</span></div></div>`};
-    if(tsub==='staff')h+=`<div class="sec">Staffing<span>wages ${money(wageBill())} an hour</span></div>`+sRow('desks','desk','Check-in desks')+sRow('lanes','lane','Security lanes')+sRow('officers','passport','Passport desks')+(G.lv.roster?`<div class="row">${svg('crew')}<div><div class="rt">Auto rostering</div><div class="rd">${auto?'Opens counters as queues grow and closes them when it’s quiet.':'Off. You choose how many counters are staffed.'}</div></div><button class="buy${auto?'':' ghost'}" data-auto="1">${auto?'On':'Off'}</button></div>`:'')+`<p class="note">Close counters at quiet times to save wages. Kiosks and e-gates cost nothing to run.</p>`;
+    if(tsub==='staff')h+=`<div class="sec">Staffing<span>wages ${money(wageBill())} an hour</span></div>`+sRow('desks','desk','Check-in desks')+sRow('lanes','lane','Security lanes')+sRow('officers','passport','Passport desks')+(G.lv.roster?`<div class="row">${svg('crew')}<div><div class="rt">Auto rostering</div><div class="rd">${auto?'Opens counters as queues grow and closes them when it’s quiet.':'Off. You choose how many counters are staffed.'}</div></div><button class="buy${auto?'':' ghost'}" data-auto="1">${auto?'On':'Off'}</button></div>`:'')+polRow(POLICIES.find(P=>P.k==='pay'))+`<p class="note">Close counters at quiet times to save wages. Kiosks and e-gates cost nothing to run.</p>`;
     h+=upSection('terminal',TERM_SECS[tsub]||[]);h+=(TERM_PANEL[tsub]||[]).map(f=>f()).join('');
   } else if(G.tab==='sales'&&(R.sSub||'prices')==='shops'){
     h+=segs('sSub',[['prices','Prices'],['shops','Shops'],['landside','Landside']]);
@@ -117,7 +118,7 @@ function renderPanel(){
   } else if(G.tab==='ground'){
     const showProj=Object.keys(UPG).some(k=>UPG[k].sec==='Landmark projects'&&has('up:'+k)),showLay=G.layout!=='classic'||Object.keys(LAYOUTS).some(id=>id!=='classic'&&has('lay:'+id));
     const at=[['ops','Operations'],...(showProj?[['build','Projects']]:[]),...(showLay?[['layout','Layout']]:[])],asub=at.some(t=>t[0]===R.aSub)?R.aSub:'ops';if(at.length>1)h+=segs('aSub',at);
-    h+=asub==='layout'?layoutPanel():asub==='ops'?`<p class="note">Planes wait for every bag and passenger. Buildings cost <b>${money(upkeepRate())}</b>/h to run.</p>`+upSection('ground',['Gates','Apron','Runway','Engineering']):upSection('ground',['Landmark projects']);
+    h+=asub==='layout'?layoutPanel():asub==='ops'?`<p class="note">Planes wait for every bag and passenger. Buildings cost <b>${money(upkeepRate())}</b>/h to run.</p>`+upSection('ground',['Boarding kit','Apron','Runway','Engineering']):upSection('ground',['Landmark projects']);
   } else if(G.tab==='sales'&&R.sSub==='landside'){
     h+=segs('sSub',[['prices','Prices'],['shops','Shops'],['landside','Landside']])+upSection('sales',['Landside']);h+=(TERM_PANEL['sales:landside']||[]).map(f=>f()).join('');
   } else if(G.tab==='sales'){
@@ -131,9 +132,9 @@ function renderPanel(){
   } else if(G.tab==='region'){
     h+=regionPanel();
   } else {
-    const osub=R.oSub||'progress';h+=segs('oSub',[['progress','Plan'],['money','Money'],['reports','Reports'],['records','Records'],['policies','Policies'],['settings','Settings']]);
+    const osub=R.oSub||'progress';h+=segs('oSub',[['progress','Progress'],['money','Money'],['reports','Reports'],['records','Records'],['policies','Policies'],['settings','Settings']]);
     if(osub==='records')h+=recordsPanel();
-    if(osub==='policies'){h+=`<p class="note">Standing orders your staff follow automatically.</p>`+POLICIES.filter(P=>!P.show||P.show()).map(P=>`<div class="polrow"><div class="rt">${P.name}</div><div class="rd">${P.desc}</div><div class="chips">${P.opts.map(([v,n])=>`<button class="chip${pol(P.k)===v?' on':''}" data-pol='${P.k}:${JSON.stringify(v)}'>${n}</button>`).join('')}</div></div>`).join('')}
+    if(osub==='policies'){h+=`<p class="note">Standing orders your staff follow automatically.</p>`+POLICIES.filter(P=>!P.show||P.show()).map(polRow).join('')}
     if(osub==='progress'){
     const n=G.level+1;
     h+=`<div class="sec" id="levels">Airport level<span>${G.level+1} of ${LEVELS.length}</span></div><div class="lvlcard"><div class="lvname">${lvlName(G.level)}</div>`;
@@ -143,7 +144,7 @@ function renderPanel(){
     {const rr=repRecent(),ks=Object.keys(rr).filter(k=>Math.abs(rr[k])>=0.5).sort((x,y)=>rr[x]-rr[y]);
       h+=`<div class="sec">Rating<span>last 3 hours</span></div>`+(ks.length?`<table class="fin">${ks.map(k=>`<tr><td>${REPLBL[k]||k}</td><td class="${rr[k]<0?'neg':'pos'}">${rr[k]>0?'+':'−'}${Math.abs(rr[k]).toFixed(1)}</td></tr>`).join('')}</table>`:`<div class="report">Nothing has moved your rating recently.</div>`)+`<p class="note">Short queues and on-time flights raise it. It sets how full flights are, and each level needs a minimum.</p>`}
     {const cg=curGoal(),dn=GOALS.filter(g=>G.gdone&&G.gdone[g.id]),up=GOALS.filter(g=>!(G.gdone&&G.gdone[g.id])&&g!==cg&&(!g.need||g.need())).slice(0,4),rw=g=>`${g.r?money(g.r):''}${g.pts?`${g.r?' + ':''}${g.pts} pt`:''}`;
-      h+=`<div class="sec">Goals<span>${dn.length}/${GOALS.length}</span></div><ul class="goals">${dn.slice(-3).map(g=>`<li class="done"><span>✓</span><span>${g.t}</span><span class="r">${rw(g)}</span></li>`).join('')}${cg?`<li class="cur"><span>›</span><span>${cg.t}</span><span class="r">${rw(cg)}</span></li>`:''}${up.map(g=>`<li class="fut"><span></span><span>${g.t}</span><span class="r">${rw(g)}</span></li>`).join('')}</ul>`}
+      h+=`<div class="sec">Goals<span>${dn.length}/${GOALS.length}</span></div><ul class="goals">${dn.slice(-3).map(g=>`<li class="done"><span>✓</span><span>${g.t}</span><span class="r">${rw(g)}</span></li>`).join('')}${cg?`<li class="cur"><span>›</span><span>${cg.t}</span><span class="r">${rw(cg)}</span></li>`:''}${up.map(g=>`<li class="fut"><span></span><span>${g.t}</span><span class="r">${rw(g)}</span></li>`).join('')}</ul>`+chalPanel()}
     }if(osub==='money'){
     if(G.lastDay){const L=G.lastDay;h+=`<div class="sec">Day ${L.day} report</div><div class="report"><b>${num(L.pax)}</b> passengers departed and <b>${num(L.arr)}</b> arrived on <b>${L.flights}</b> flights, <b>${L.ontime}</b> on time${L.bagMiss?`, <b>${L.bagMiss}</b> bags left behind`:''}. Profit <b>${money(L.profit)}</b>.</div>${dimBtn()}`}
     const hrs=G.hours.slice(-12);
@@ -171,14 +172,7 @@ function renderPanel(){
       <div class="rd" id="loanInfo"></div>
       <div class="lrow"><span class="rd" style="margin:0">${G.loan>0?`Now paying <b>${(loanRate(G.loan)*100).toFixed(1)}%</b>, ${money(G.loan*loanRate(G.loan))} an hour.`:'No loan right now.'}</span><button class="buy" id="loanSet" disabled>No change</button></div></div>`}
     }if(osub==='settings'||osub==='airline'){
-    h+=settingsHTML()+`<div class="sec">Airline</div><div class="namefield"><input id="nameIn" maxlength="16" value="${G.name.replace(/"/g,'')}" aria-label="Airline name"></div>
-      <div class="swatches">${LIVERIES.map(([n,c],k)=>`<button class="swatch${G.livery===k?' on':''}" style="background:${c}" data-liv="${k}" aria-label="${n} livery"></button>`).join('')}</div>
-      <p class="note">Day ${G.day}. ${G.flights.toLocaleString('en-GB')} flights, ${G.flown.toLocaleString('en-GB')} passengers (${(G.xfers||0).toLocaleString('en-GB')} connecting), ${(G.moves||0).toLocaleString('en-GB')} runway movements, best on-time run ${G.bestStreak}.</p>
-      <div class="sec">Your save</div><p class="note">The game saves on this device. To move your airport to another device or browser, copy a save code and paste it there.</p>
-      <div class="namefield"><button class="chip" id="copySave">Copy save code</button></div>
-      <div class="namefield"><input id="saveIn" placeholder="Paste a save code" aria-label="Save code" autocomplete="off" spellcheck="false" style="text-transform:none"><button class="chip" id="loadSave">Load</button></div>
-      <button class="danger" id="reset">Reset progress</button>
-      <div class="kofifoot"><a class="kofi" href="https://ko-fi.com/kylemck" target="_blank" rel="noopener">${svg('cup')}Buy me a Ko-fi</a></div>`;
+    h+=settingsHTML();
     }
   }
   P.innerHTML=h;
@@ -219,22 +213,38 @@ const SETTINGS=[
   ['lvlCard','Level-up card','When the airport reaches a new level, a card shows what it has unlocked, with links straight there. The game waits while it’s open.',[[true,'On'],[false,'Off']]],
   ['badges','Badges','NEW labels on tabs, counts of things you can afford, and points on the Masterplan button.',[[true,'On'],[false,'Off']]],
 ];
+// Office › Settings in four chips, managers first
+const SET_SUBS=[['managers','Managers'],['alerts','Alerts'],['screen','Screen and sound'],['save','Save']];
 function settingsHTML(){
   const S=SET(),row=(k,n,d,opts)=>`<div class="polrow"><div class="rt">${n}</div><div class="rd">${d}</div><div class="chips">${opts.map(([v,l])=>`<button class="chip${S[k]===v?' on':''}" data-set='${k}:${JSON.stringify(v)}'>${l}</button>`).join('')}</div></div>`;
-  let h=`<div class="sec">Notifications</div>`+SETTINGS.map(([k,n,d,o])=>row(k,n,d,o)).join('');
-  h+=`<div class="chips" style="margin-top:10px"><button class="chip" data-setall="quiet">Quiet: hide all of these</button><button class="chip" data-setall="all">Show everything</button></div>`;
-  h+=`<div class="sec">Game</div><div class="polrow"><div class="rt">What's new</div><div class="rd">Every version's new features, newest first.</div><div class="chips"><button class="chip" data-news="1">Open</button></div></div>`+row('chal','Weekly challenges','Three challenges each game week. Each pays cash; finish all three for a plan point.',[[true,'On'],[false,'Off']]);
-  h+=`<div class="sec">Managers</div><p class="note">Staff who run the details for you. Change something yourself and they leave it to you.</p>`;
-  h+=row('autoLines','Transport manager','Runs your lines by what each change is worth: how often they run, fares, meeting flights, night services and extra services on event days.',[[true,'On'],[false,'Off']]);
-  h+=row('autoCrews','Fleet manager','Hires crews to match your fleet, and lets spare ones go.',[[true,'On'],[false,'Off']]);
-  h+=row('autoFares','Route manager','Sets each route’s fare to whatever earns most: dearer where people will pay, cheaper where seats go empty.',[[true,'On'],[false,'Off']]);
-  h+=row('autoDuty','Duty manager','Calls each gate in time for its walk from the market place, so passengers shop for longer without holding flights, and prices hotel rooms.',[[true,'On'],[false,'Off']]);
-  {const g=gapPref();h+=`<div class="sec">Screen</div><div class="polrow"><div class="rt">Space for the camera</div><div class="rd">Leaves a band at the top of the screen so a phone’s camera or notch doesn’t cover the board. Saved on this device only.</div><div class="chips">${[['off','None'],['small','Small'],['medium','Medium'],['large','Large']].map(([v,l])=>`<button class="chip${g===v?' on':''}" data-gap="${v}">${l}</button>`).join('')}</div></div>`}
-  h+=`<div class="sec">Sound</div><div class="polrow"><div class="rt">Sound</div><div class="rd">Everything below, all at once.</div><div class="chips"><button class="chip${G.sound?' on':''}" data-sound="1">On</button><button class="chip${G.sound?'':' on'}" data-sound="0">Off</button></div></div>`;
-  h+=row('sndAnn','Announcements','Calls for your flights: a chime, and the words along the foot of the board.',[['on','On'],['chime','Chime only'],['off','Off']]);
-  h+=row('sndVoice','Spoken calls','Now and then a voice reads a final call or a gate change, at 1× or 2×.',[[true,'On'],[false,'Off']]);
-  h+=row('sndAmb','Ambience','The terminal’s hum, jets on the runway and rain, following the camera.',[[true,'On'],[false,'Off']]);
-  h+=row('sndFx','Effects','Cash tills, and ticks as passengers pay.',[[true,'On'],[false,'Off']]);
+  const sub=SET_SUBS.some(t=>t[0]===R.setSub)?R.setSub:'managers';let h=segs('setSub',SET_SUBS).replace('class="segs','class="segs set4');
+  if(sub==='managers'){
+    h+=`<p class="note">Staff who run the details for you. Change something yourself and they leave it to you.</p>`;
+    h+=row('autoLines','Transport manager','Runs your lines by what each change is worth: how often they run, fares, meeting flights, night services and extra services on event days.',[[true,'On'],[false,'Off']]);
+    h+=row('autoCrews','Fleet manager','Hires crews to match your fleet, and lets spare ones go.',[[true,'On'],[false,'Off']]);
+    h+=row('autoFares','Route manager','Sets each route’s fare to whatever earns most: dearer where people will pay, cheaper where seats go empty.',[[true,'On'],[false,'Off']]);
+    h+=row('autoDuty','Duty manager','Calls each gate in time for its walk from the market place, so passengers shop for longer without holding flights, and prices hotel rooms.',[[true,'On'],[false,'Off']]);
+  }else if(sub==='alerts'){
+    h+=`<div class="sec">Notifications</div>`+SETTINGS.map(([k,n,d,o])=>row(k,n,d,o)).join('');
+    h+=`<div class="chips" style="margin-top:10px"><button class="chip" data-setall="quiet">Quiet: hide all of these</button><button class="chip" data-setall="all">Show everything</button></div>`;
+    h+=`<div class="sec">Game</div><div class="polrow"><div class="rt">What's new</div><div class="rd">Every version's new features, newest first.</div><div class="chips"><button class="chip" data-news="1">Open</button></div></div>`+row('chal','Weekly challenges','Three challenges each game week. Each pays cash; finish all three for a plan point.',[[true,'On'],[false,'Off']]);
+  }else if(sub==='screen'){
+    {const g=gapPref();h+=`<div class="sec">Screen</div><div class="polrow"><div class="rt">Space for the camera</div><div class="rd">Leaves a band at the top of the screen so a phone’s camera or notch doesn’t cover the board. Saved on this device only.</div><div class="chips">${[['off','None'],['small','Small'],['medium','Medium'],['large','Large']].map(([v,l])=>`<button class="chip${g===v?' on':''}" data-gap="${v}">${l}</button>`).join('')}</div></div>`}
+    h+=`<div class="sec">Sound</div><div class="polrow"><div class="rt">Sound</div><div class="rd">Everything below, all at once.</div><div class="chips"><button class="chip${G.sound?' on':''}" data-sound="1">On</button><button class="chip${G.sound?'':' on'}" data-sound="0">Off</button></div></div>`;
+    h+=row('sndAnn','Announcements','Calls for your flights: a chime, and the words along the foot of the board.',[['on','On'],['chime','Chime only'],['off','Off']]);
+    h+=row('sndVoice','Spoken calls','Now and then a voice reads a final call or a gate change, at 1× or 2×.',[[true,'On'],[false,'Off']]);
+    h+=row('sndAmb','Ambience','The terminal’s hum, jets on the runway and rain, following the camera.',[[true,'On'],[false,'Off']]);
+    h+=row('sndFx','Effects','Cash tills, and ticks as passengers pay.',[[true,'On'],[false,'Off']]);
+  }else{
+    h+=`<div class="sec">Airline</div><div class="namefield"><input id="nameIn" maxlength="16" value="${G.name.replace(/"/g,'')}" aria-label="Airline name"></div>
+        <div class="swatches">${LIVERIES.map(([n,c],k)=>`<button class="swatch${G.livery===k?' on':''}" style="background:${c}" data-liv="${k}" aria-label="${n} livery"></button>`).join('')}</div>
+        <p class="note">Day ${G.day}. ${G.flights.toLocaleString('en-GB')} flights, ${G.flown.toLocaleString('en-GB')} passengers (${(G.xfers||0).toLocaleString('en-GB')} connecting), ${(G.moves||0).toLocaleString('en-GB')} runway movements, best on-time run ${G.bestStreak}.</p>
+        <div class="sec">Your save</div><p class="note">The game saves on this device. To move your airport to another device or browser, copy a save code and paste it there.</p>
+        <div class="namefield"><button class="chip" id="copySave">Copy save code</button></div>
+        <div class="namefield"><input id="saveIn" placeholder="Paste a save code" aria-label="Save code" autocomplete="off" spellcheck="false" style="text-transform:none"><button class="chip" id="loadSave">Load</button></div>
+        <button class="danger" id="reset">Reset progress</button>
+        <div class="kofifoot"><a class="kofi" href="https://ko-fi.com/kylemck" target="_blank" rel="noopener">${svg('cup')}Buy me a Ko-fi</a></div>`;
+  }
   return h;
 }
 function applySettings(){R.tipSig=null;renderTip();if(SET().msgs!=='all'){R.toasts=R.toasts.filter(t=>t.choices&&SET().msgs==='key'||t.kind==='warn'&&SET().msgs==='key');renderToasts()}if(SET().pops==='off')R.floaters=[];R.goalSig=null;renderTabs();renderPlanBtn();refreshUI();save()}
