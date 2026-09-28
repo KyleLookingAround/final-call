@@ -1,5 +1,29 @@
 /* ================= save ================= */
-function save(){if(R.sim)return;G.savedAt=Date.now();try{localStorage.setItem(KEY,JSON.stringify(G))}catch(e){}}
+// Saving never loses an airport. It stops, and says so, when the stored save isn't this page's to overwrite (another tab
+// saved since, or a newer build wrote it), when loading it failed (it stays as it was, byte for byte, with a copy under
+// KEY-broken), or after an error in a frame (23-boot.js) until the player carries on. R.saveBlock names why it stopped;
+// R.lastWrite is the stored text this page last read or wrote, so a different one means someone else saved.
+FIELDS.ver=()=>UPDATES[0].v; // the build stamp: the What's new version of the page that wrote the save
+function save(){if(R.sim||R.saveBlock||R.frameErr)return;
+  let cur=null;try{cur=localStorage.getItem(KEY)}catch(e){}
+  if(cur!=null&&R.lastWrite!=null&&cur!==R.lastWrite){stopSaving('tab');return}
+  G.savedAt=Date.now();G.ver=UPDATES[0].v;
+  try{const t=JSON.stringify(G);localStorage.setItem(KEY,t);R.lastWrite=t;R.saveFail=false}
+  catch(e){if(!R.saveFail){R.saveFail=true;saveAlert('saveFull','Your airport couldn’t be saved: this browser’s storage is full. Copy its save code to keep it safe.',[{label:'Copy save',fn:()=>copySaveCode(JSON.stringify(G))}])}}}
+// a save written by a newer page: a later stamp, or upgrades or cities this page doesn't know (which loading would drop)
+const newerSave=s=>!!s&&s.ver!=null&&(s.ver>UPDATES[0].v||Object.keys(s.lv||{}).some(k=>!(k in UPG))||Object.keys(s.routes||{}).some(c=>!CITY[c]));
+// a warning the player sees whatever Settings › Alerts says (toast() lets through a reply to a tap)
+function saveAlert(id,text,choices){R.lastInput=performance.now();toast(text,choices,id,'warn',600)}
+function copySaveCode(json){let code='';try{code=btoa(unescape(encodeURIComponent(json||'')))}catch(e){}
+  const done=ok=>toast(ok?'Save code copied. Keep it somewhere safe.':'Couldn’t copy the save code on this device.',null,null,ok?'goal':'warn',6);
+  try{navigator.clipboard.writeText(code).then(()=>done(true),()=>done(false))}catch(e){done(false)}}
+const reloadChoice=[{label:'Reload',fn:()=>location.reload()},{label:'Got it',fn:()=>{}}];
+function stopSaving(why){R.saveBlock=why;if(R.sim)return;
+  if(why==='tab')saveAlert('saveTab','This airport is open in another tab, which saved it more recently, so this tab has stopped saving.',reloadChoice);
+  else if(why==='newer')saveAlert('saveNewer','This airport was saved by a newer version of the game, so this page won’t save over it. Reload to update.',reloadChoice);
+  else if(why==='broken')saveAlert('saveBroken','Your airport couldn’t be loaded. It’s kept safe as it was, and this fresh one won’t save unless you start afresh.',
+    [{label:'Start afresh',fn:()=>{R.saveBlock=null;save()}},{label:'Copy save',fn:()=>{let t='';try{t=localStorage.getItem(KEY+'-broken')||localStorage.getItem(KEY)}catch(e){}copySaveCode(t)}}]);
+}
 setInterval(save,5000);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});
 // saves across devices were removed: tidy away their old keys once
@@ -60,7 +84,17 @@ const MIGRATIONS=[
   {when:always,note:'the day from the clock, and its stats',up(){G.day=dayOf(G.clock);if(!G.dstat)G.dstat=dayStats()}},
   {when:()=>G.seen==null,note:'What\'s new: new games have seen everything; airports from before it see version 21\'s notes on',up(state){G.seen=state?21:UPDATES[0].v}},
 ];
-function resetAll(state){
+// Loads a save (null for a new game). If a step throws on a save, the half-loaded airport is dropped for a new one that
+// won't save (stopSaving), so the stored save stays as it was; raw, the stored text, is copied to KEY-broken.
+function resetAll(state,raw){
+  if(state&&R.saveBlock==='broken'){R.saveBlock=null;dropToast('saveBroken')} // a save that loads (Settings › Save) saves again
+  try{loadState(state)}catch(e){
+    if(!state||R.sim)throw e;
+    console.error(e);if(raw){try{localStorage.setItem(KEY+'-broken',raw)}catch(e2){}}
+    R.saveBlock='broken';loadState(null);G.tour={done:1};stopSaving('broken');return false} // not a new player: no guided start
+  return true;
+}
+function loadState(state){
   const s=state||{};G={};for(const k in FIELDS)G[k]=s[k];Object.assign(G,s); // the table's fields first, then anything else the save holds
   for(const k in FIELDS)if(G[k]==null)G[k]=FIELDS[k](); // with G in place, as some defaults read the airport
   for(const M of MIGRATIONS)if(M.when(state))M.up(state);
