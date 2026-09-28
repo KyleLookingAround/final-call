@@ -15,7 +15,7 @@ export default async function({open,ok,saveText}){
   const r=await page.evaluate(([ids,texts,KEYS])=>{const S=__sim,R=S.R,TP=window.TP,has=!!S.decor,items=()=>S.decor?S.decor():[];
     // nothing to place: no control in any panel places, moves or buys decor; no saved field is decor's
     const words=/decor|planter|bench|mural|artwork|sculpture/i,controls=[];
-    for(const [tab,sub,ss] of [['stands','gates'],['stands','fleet'],['terminal','dep'],['terminal','arr'],['terminal','staff'],['ground'],['sales','shops'],['sales','landside'],['routes'],['region'],['office','progress'],...['managers','alerts','screen','save'].map(ss=>['office','settings',ss])]){
+    for(const [tab,sub,ss] of [['stands','gates'],['fleet'],['terminal','dep'],['terminal','arr'],['terminal','staff'],['ground'],['sales','shops'],['sales','landside'],['routes'],['region'],['office','progress'],...['managers','alerts','screen','save'].map(ss=>['office','settings',ss])]){
       if(tab==='terminal')R.tSub=sub;else if(tab==='sales')R.sSub=sub;else if(tab==='stands')R.gSub=sub;else if(tab==='office')R.oSub=sub;if(ss)R.setSub=ss;S.setTab(tab);
       for(const b of document.querySelectorAll('#panel button,#panel input,#panel select'))if(words.test(b.textContent+' '+Object.values(b.dataset).join(' ')))controls.push(tab+': '+b.textContent.trim().slice(0,30))}
     const raw=JSON.parse(texts['v29-L9.json']),newG=Object.keys(S.G).filter(k=>!KEYS.G.includes(k)&&!(k in raw)),newLv=Object.keys(S.G.lv).filter(k=>!KEYS.lv.includes(k)&&k!=='terrace'); // not main's DEFAULT(), nor from the save
