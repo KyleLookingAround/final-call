@@ -22,6 +22,8 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 - [Polish audit · 27 Sep 2026](lessons/main-polish-audit.md)
 - [Version 32: ready for what's next · 27 Sep 2026](lessons/main-release-32.md)
+- [#118 Cut release 33: a rating that keeps you on your toes · 28 Sep 2026](lessons/118-release-33.md)
+- [The first level-up in the first morning (#117) · 28 Sep 2026](lessons/117-early-first-level.md)
 - [#116 A network you have to keep · 28 Sep 2026](lessons/116-network-to-keep.md)
 - [The terminal as a place: groundwork, with refactor 9 · 28 Sep 2026](lessons/113-terminal-groundwork.md)
 - [Polish: put things where players look (#112) · 28 Sep 2026](lessons/112-polish-where-to-look.md)
