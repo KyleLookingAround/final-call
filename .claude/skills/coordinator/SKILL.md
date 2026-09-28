@@ -8,7 +8,7 @@ description: Run the other Final Call sessions building a feature's parts - the 
 ## 1. Start fresh, retire the old one
 
 - A coordinator starts fresh for each feature, from a brief, never carrying over a finished feature's conversation.
-- When a new coordinator takes over, it retires the old one: check `list_triggers` has no Routine still bound to it, then `archive_session`. (The coordinator retired on 27 Sep had cost $176 and used 642k of context over 25 hours; look backs record numbers like these.)
+- When a new coordinator takes over, it retires the old one: `list_triggers`, `delete_trigger` its heartbeat (§11) and any other Routine still bound to it, then `archive_session`. (The coordinator retired on 27 Sep had cost $176 and used 642k of context over 25 hours; look backs record numbers like these.)
 
 ## 2. The sweep, at each check-in
 
@@ -29,6 +29,7 @@ description: Run the other Final Call sessions building a feature's parts - the 
 - `create_trigger` with `persistent_session_id` and `run_once_at` a minute or two ahead arrives as a user turn.
 - `fire_trigger` on a session's own one-shot check-in brings it forward. Once it answered "internal error" yet did fire, and the one-shot was then gone, so check `get_session` (status running) before firing again.
 - Never push to another session's branch: ask it. A PR description can be fixed directly.
+- The auto mode safety check on session tools can fail with no verdict for an hour or more (28 Sep 12:35–13:45): GitHub reads still work, the heartbeat (§11) keeps retrying, and a turn stops after ten unanswered calls in a row, so stop trying after two or three rather than running into that wall.
 
 ## 5. A cap on sessions, and quiet windows for refactors
 
@@ -60,18 +61,18 @@ description: Run the other Final Call sessions building a feature's parts - the 
 
 ## 10. The lessons tidy
 
-- A Routine with no schedule tidies `docs/lessons/`: it merges lessons that say the same thing, groups them by theme, deletes those out of date or already written in, turns a lesson seen three times without a → into a change, and squash-merges its own PR. Its brief, which is also its prompt, is `docs/briefs/lessons-tidy.md`; each firing starts a fresh session.
-- Routine id: `trig_01WWjSqun7aAX15iLCb4PQdc` ("Final Call: tidy the lessons"). It was created with no connectors and no repository attached, so its session clones the repo itself; if a firing can't push or open its PR, recreate it from the Routines page with this repo and GitHub attached, and put the new id here.
-- Its 28 Sep 10:01 UTC firing (fired by #124's look back, 23 lessons new) hit exactly that: no repository or GitHub attached, so its session pushed nothing. A session started by hand from the committed brief did the tidy instead (`feature/lessons-tidy-2026-09-28`). The owner is recreating the Routine from the Routines page with the repo and GitHub attached; leave this id as it is until the owner reports a new one.
-- It fires when a look back leaves 8 or more lessons new since the last tidy (`node tools/join.mjs` counts them): the session that added the lesson fires it (`fire_trigger`) and says so, as the `steward` playbook's last step says. Nobody starts it by hand or on a schedule.
-- At a sweep, if a tidy PR (`feature/lessons-tidy-…`) is open, let it finish before firing again. To change what it does, edit the brief and `update_trigger` its prompt to match.
+- Routines are retired (§11): this organisation can't attach connectors to a Routine made from a session, so a Routine that starts a fresh session to tidy `docs/lessons/` can't reach GitHub or the repo either. Its 28 Sep 10:01 UTC firing (from #124's look back, 23 lessons new) hit exactly that: no repository or GitHub attached, so its session pushed nothing, and a session started by hand from the committed brief did the tidy instead (`feature/lessons-tidy-2026-09-28`). The owner isn't recreating that Routine.
+- Instead, the coordinator starts the tidy by hand: `create_session` on the cheaper model, with `docs/briefs/lessons-tidy.md` as its first message. It merges lessons that say the same thing, groups them by theme, deletes those out of date or already written in, turns a lesson seen three times without a → into a change, and ships its own PR per the `steward` playbook (auto-merge, since it changes no game code).
+- A session's look back starts this when it leaves 8 or more lessons new since the last tidy (`node tools/join.mjs` counts them): it says so in the PR, per the `steward` playbook, and the coordinator starts the tidy at its next sweep. Nobody starts it on a schedule.
+- At a sweep, if a tidy PR (`feature/lessons-tidy-…`) is open, let it finish before starting another.
 
 ## 11. The watchdog
 
-- A Routine fires hourly at :50 into a fresh session and re-wakes sessions the account's usage limit stopped mid-turn: the limit kills a session's turn before it can book its own `send_later`, so nothing wakes it after the reset. Its brief, which is also its prompt, is `docs/briefs/watchdog.md`.
-- Routine id: `trig_01BTgHU2LFEezyrUWk9QLL3M` ("Final Call: watchdog"). It was created with no connectors, so if a firing can't call `list_sessions` or `create_trigger`, recreate it from the Routines page with Claude Code Remote attached, and put the new id here.
-- The owner pauses it from the Routines page on a quiet day.
+- Retired, for the same reason as the tidy Routine: a fresh session it started couldn't have reached GitHub or the session tools to re-wake anything either. Its brief, `docs/briefs/watchdog.md`, says so and is no longer anyone's prompt.
+- In its place, the coordinator books its own hourly heartbeat: a Routine bound to its own session (name "Final Call: coordinator heartbeat"), `create_trigger` with an hourly cron expression and no `persistent_session_id` — omitting it binds the trigger to the calling session by default, which is the coordinator creating it. Bound to a persistent session rather than a fresh one, it needs no connectors of its own — the session it wakes already has full tool access — so it survives a usage-limit stall the way the watchdog Routine couldn't (the limit kills the turn, not the trigger).
+- On each firing, it ends the turn at once if a check-in is already booked (§8 keeps a single `send_later`), rather than running the sweep twice; otherwise it runs the sweep (§2).
+- When a new coordinator takes over, it deletes the old one's heartbeat trigger alongside archiving the old session (§1), and books its own.
 
 ## 12. Launch-day triage
 
-During launch week, the coordinator also creates the "Final Call: launch-day triage" Routine from the committed `docs/briefs/launch-triage.md` (a fresh session every two hours, on the cheaper model), retires it once launch week is over, and puts its id here in a follow-up.
+During launch week, the coordinator starts launch-day triage by hand every two hours: `create_session` on the cheaper model, with `docs/briefs/launch-triage.md` as its first message. It stops starting new ones once launch week is over.
