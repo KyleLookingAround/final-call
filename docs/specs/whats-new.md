@@ -1,6 +1,6 @@
 # What's new
 
-Issue: #8 · Status: Built · PRs: #9
+Issue: #8, #128 · Status: Built (#8); Proposed (#128) · PRs: #9
 
 Part of the same release as airport layouts (version 22).
 
@@ -57,7 +57,43 @@ None; this is presentation only.
   - `22-save.js` and `23-boot.js`;
   - the checks, the release playbook, and the project notes.
 
-## Left out
+## Easier to read and act on (#128)
+
+A card that scans in seconds and takes the player to what changed. Release 35 is the biggest card yet, so this lands first.
+
+### What they see
+
+- **Shorter points.** Each point is a **bold lead** of two to four words and one short sentence ("**A Fleet tab.** Your planes, crews and servicing, beside Gates."). Every existing entry is rewritten this way; titles and version numbers stay.
+- **Show me.** A point that names a place has a small "Show me ›" button at its end. It closes the card (the speed comes back, as with Play) and goes there, the way the level-up card's links do: a tab, an Office or Sales sub-tab, the Masterplan, an upgrade, a gate, Pier B, the weekly challenges, How to play or photo mode. Points with no place, or whose tab the save hasn't opened yet, show no button.
+- **Locked points hidden.** A point can carry the level it needs (Famous faces at 3, the Round terminal at 6, Midfield concourses at 9). The card leaves out points above the save's level, never greyed out. A version with every point hidden goes behind the "N earlier versions" summary, where it shows as its title only. Grown saves see everything as before.
+- **Phone fit.** The card becomes a header, a scrolling list and a footer that always holds Play (like the level-up card), so Play is never scrolled out of reach. Points are tighter on phones. At 320×568 and 568×320 the newest entry's title and first points show with Play in view. Tablets and desktops keep a centred card, no taller than the screen.
+- The Ko-fi link stays at the foot of the list, below the versions.
+
+### How it works
+
+- A point in `UPDATES` is either the old plain string (still shown as before) or `{b, t, go, lv}`: the bold lead, the sentence, an optional target and an optional level.
+- Targets reuse the level-up card's grammar (`plan`, `tab:<tab>`, `up:<key>`, `gate:<i>`, `pier`, `chal`) plus `<tab>:<sub-tab>` (for example `office:settings`, `sales:landside`), `help` and `photo`. One function in `38-updates.js` checks a target and one goes there.
+- Fragments in `src/updates.d/` use the same shape in Markdown: `- **Lead.** Sentence. (go: tab:fleet, level: 1)`, the brackets optional. The README sets the style and the release copies it into the entry.
+
+### Saved state
+
+None beyond `G.seen`. Old entries and old saves keep working.
+
+### Balance
+
+None: presentation only. `PLAY` and `STATE` stay identical on seeds 1–3.
+
+### Checks
+
+- **New `news-card` group:** every point's target is valid and every level is a real level (0–9); every point has a lead and a short sentence; a level 1 save hides points above level 1 and a level 9 save shows them all; a real tap on each "Show me" button at level 9 lands on its target (tab, sub-tab, Masterplan, help or photo mode) and closes the card; at 320×568 and 568×320 the newest version's title and Play are both on screen without scrolling.
+- **`noise`** and **`kofi`** keep their checks as the markup moves.
+
+### Left out
+
+- A picture per version (issue #128's idea 4): a later step, once the card's shape has settled.
+- No "Coming later" fold for locked points: they're hidden, as the owner prefers.
+
+## Left out (#8)
 
 - No notifications outside the game, and no tracking of who read what.
 - No images in the card for now; the headline and lines are enough.
