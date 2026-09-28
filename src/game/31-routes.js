@@ -87,7 +87,7 @@ function routesClick(d){
 }
 /* ---------- route demand and the dispatcher: how many people want to fly each route, how full a flight will be, where each plane goes ---------- */
 function rsOf(c){const rs=G.rs||(G.rs={});const s=rs[c]||(rs[c]={s:0,p:0,v:0,n:0,t:G.clock,tp:0,tv:0,tn:0,lf:0});const dt=G.clock-s.t;if(dt>0){const k=Math.exp(-dt/1440);s.s*=k;s.p*=k;s.v*=k;s.n*=k;if(s.c)s.c*=k;s.t=G.clock}return s}
-const attract=()=>0.36+G.rep/100*0.5+0.022*G.lv.marketing+(R.fx.rush>G.clock?0.15:0)+(G.lv.rail?0.06:0);
+const attract=()=>0.36+G.rep/100*0.5+0.022*G.lv.marketing+(weather.on('rush')?0.15:0)+(G.lv.rail?0.06:0);
 const fareEl=m=>Math.exp(-1.3*(1-0.12*G.lv.loyalty)*(m-1));
 function regionMul(C){const r=R.reg;if(!r)return 1;let m=(1+r.T)*(1-0.12*r.cong)*(1+r.surge)*(1+C.biz*r.biz+(1-C.biz)*r.leis);if(r.hsr){if(C.tier<=1)m*=0.85;else if(C.tier>=3)m*=1.12}return m}
 // how many seats a day the route can fill (the market), and how willing each traveller is right now
@@ -112,4 +112,4 @@ function pickRoute(ac){
 }
 function openRoute(c){const C=CITY[c];if(!C||routeOpen(c)||!has('rt:'+C.tier)||!buy(ROUTE_FEE[C.tier]))return false;(G.routes||(G.routes={}))[c]={f:1};rsOf(c);if(!R.sim)toast(`New route: ${C.name}. Planes will start flying there.`,null,null,'goal',5);return true}
 function promoteRoute(c){if(!has('feat:promo')||!routeOpen(c)||promoOn(c)||!buy(promoCost(c)))return false;G.routes[c].promo=G.clock+1440;return true}
-const arrivalRate=F=>2*(1+0.15*G.lv.marketing)*Math.sqrt(F.seatsN/48)*(R.fx.rush>G.clock?1.3:1)*(G.lv.rail?1.1:1);
+const arrivalRate=F=>2*(1+0.15*G.lv.marketing)*Math.sqrt(F.seatsN/48)*(weather.on('rush')?1.3:1)*(G.lv.rail?1.1:1);
