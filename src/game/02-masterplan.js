@@ -77,12 +77,12 @@ function itemName(key){const [k,v]=key.split(':');
 function recommendedTech(b){const rs=TECH.filter(T=>T.b===b&&techState(T)==='ready');return rs.length?rs.reduce((a,c)=>c.t<a.t?c:a):null}
 function planUnlockLine(T){const un=T.u.map(k=>k.startsWith('rt:')?`${itemName(k)}: ${lvlCities(+k.slice(3))}`:itemName(k)).filter(x=>x!==T.n);return T.d+(un.length?' '+un.join(' · ')+'.':'')}
 function research(id){const T=TECH_BY[id];if(!T||techState(T)!=='ready')return false;G.pts-=T.c;(G.tech||(G.tech={}))[id]=1;
-  const nt=new Set(G.newTabs||[]);for(const k of T.u){const [a,v]=k.split(':');if(a==='up'&&UPG[v])nt.add(UPG[v].tab);else if(a==='ac'||a==='meth')nt.add('stands');else if(a==='rt'||a==='feat')nt.add('routes');else if(a==='shop')nt.add('sales');else if(a==='mode'||a==='dev'||a==='stn')nt.add('region')}G.newTabs=[...nt];
+  const nt=new Set(G.newTabs||[]);for(const k of T.u){const [a,v]=k.split(':');if(a==='up'&&UPG[v])nt.add(UPG[v].tab);else if(a==='ac')nt.add('fleet');else if(a==='meth')nt.add('stands');else if(a==='rt'||a==='feat')nt.add('routes');else if(a==='shop')nt.add('sales');else if(a==='mode'||a==='dev'||a==='stn')nt.add('region')}G.newTabs=[...nt];
   if(!R.sim){toast(`Approved: ${T.n}. ${T.u.map(itemName).join(', ')}.`,null,null,'goal',6);kaching();renderTabs();renderPlanBtn()}return true}
 const consultCost=()=>Math.round(20000*Math.pow(1.35,G.ptBought||0));
 function buyPoint(){if(G.level<4)return false;const c=consultCost();if(!buy(c))return false;G.pts=(G.pts||0)+1;G.ptBought=(G.ptBought||0)+1;if(!R.sim)renderPlanBtn();return true}
 const planHint=key=>{const T=TECH_BY[NODE_OF[key]];return T?`Approve <b>${T.n}</b> in the Masterplan${T.t>G.level?` (from ${LEVELS[T.t].name})`:''}.`:''};
-const TABS=[['stands','Gates','plane'],['routes','Routes','globe'],['terminal','Terminal','lane'],['ground','Airfield','runway'],['sales','Sales','ticket'],['region','Region','map'],['office','Office','chart']];
+const TABS=[['stands','Gates','pier'],['fleet','Fleet','plane'],['routes','Routes','globe'],['terminal','Terminal','lane'],['ground','Airfield','runway'],['sales','Sales','ticket'],['region','Region','map'],['office','Office','chart']];
 const nRoutes=()=>Object.keys(G.routes||{}).length;
 const GOALS=[
   {id:'seat',t:'Seat 30 passengers',p:()=>[G.paxSeated,30],r:15},
@@ -92,12 +92,12 @@ const GOALS=[
   {id:'pass',t:'Open a second passport desk',go:['terminal','[data-buy="officers"]'],p:()=>[G.lv.officers,1],r:30},
   {id:'shop',t:'Open a shop in the concourse',go:['sales','.shopcard'],p:()=>[G.shops.filter(Boolean).length,1],r:30},
   {id:'method',t:'Buy a new boarding method',go:['stands','[data-mbuy]'],p:()=>[Object.keys(G.methods).length-1,1],r:40},
-  {id:'plane2',t:'Buy a second plane',go:['stands','[data-acbuy]'],p:()=>[G.fleet.filter(f=>!f.sold).length,2],r:60},
+  {id:'plane2',t:'Buy a second plane',go:['fleet','[data-acbuy]'],p:()=>[G.fleet.filter(f=>!f.sold).length,2],r:60},
   {id:'a2',t:'Open gate A2',go:['stands','[data-standbuy="1"]'],p:()=>[builtCount()-1,1],r:100},
   {id:'l1',t:'Become a Local Airport',go:['office','#levels'],p:()=>[G.level,1],r:0},
   {id:'plan',t:'Approve a plan in the Masterplan',go:['plan'],p:()=>[Object.keys(G.tech||{}).length,1],r:100,need:()=>G.level>=1},
   {id:'route',t:'Open a new route',go:['routes','[data-ropen]'],p:()=>[nRoutes(),4],r:150,need:()=>G.level>=1},
-  {id:'two',t:'Run flights from two gates at once',go:['stands','[data-acbuy]'],p:()=>[R.st.filter((S,k)=>G.stands[k].built&&S.F).length,2],r:120},
+  {id:'two',t:'Run flights from two gates at once',go:['fleet','[data-acbuy]'],p:()=>[R.st.filter((S,k)=>G.stands[k].built&&S.F).length,2],r:120},
   {id:'bus',t:'Run a bus to Harbourgate',go:['region','[data-newline]'],p:()=>[Object.values(G.lines||{}).some(L=>L.mode==='bus'&&serves(L,'air')&&['hbc','old','hbs'].some(n=>serves(L,n)))?1:0,1],r:150,need:()=>G.level>=1},
   {id:'streak',t:'Three on-time departures in a row',p:()=>[G.bestStreak,3],r:150,pts:1},
   {id:'l2',t:'Become a Regional Airport',go:['office','#levels'],p:()=>[G.level,2],r:0},
@@ -120,7 +120,7 @@ const GOALS=[
   {id:'l5',t:'Become a Gateway Airport',go:['office','#levels'],p:()=>[G.level,5],r:0},
   {id:'r20',t:'Fly to 20 destinations',go:['routes','[data-ropen]'],p:()=>[nRoutes(),20],r:20000,pts:1},
   {id:'l6',t:'Become a Major Hub',go:['office','#levels'],p:()=>[G.level,6],r:0},
-  {id:'wide',t:'Fly the W-300 Widebody',go:['stands','[data-acbuy="6"]'],p:()=>[G.fleet.some(f=>f.type===6&&!f.sold)?1:0,1],r:30000,need:()=>has('ac:6')},
+  {id:'wide',t:'Fly the W-300 Widebody',go:['fleet','[data-acbuy="6"]'],p:()=>[G.fleet.some(f=>f.type===6&&!f.sold)?1:0,1],r:30000,need:()=>has('ac:6')},
   {id:'metro',t:'Dig a metro to the city',go:['region','[data-newline]'],p:()=>[anyMode('metro')?1:0,1],r:80000,need:()=>has('mode:metro')},
   {id:'riders',t:'Carry 1,000 riders an hour',go:['region','[data-newline]'],p:()=>[Math.round(R.reg?R.reg.riders:0),1000],r:120000,pts:1,need:()=>G.level>=1},
   {id:'g8',t:'Open all eight gates',go:['stands','[data-standbuy="7"]'],p:()=>[gatesOpen(),8],r:60000,need:()=>G.level>=STAND[7].lvl},
