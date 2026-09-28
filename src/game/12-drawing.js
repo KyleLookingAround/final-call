@@ -164,7 +164,7 @@ function drawAirfield(d){
       ctx.strokeStyle='#2B3238';ctx.lineWidth=1.5;ctx.setLineDash([6,6]);ctx.strokeRect(20,y-h/2,W-40,h);ctx.setLineDash([]);mono('SECOND RUNWAY · FOR SALE',W/2,y+4,'#4A535D',10,'center');continue}
     ctx.fillStyle='#0B0E11';ctx.fillRect(20,y-h/2,W-40,h);
     rwyMarks(y,h,r); // its markings, and its edge lights by night: 51-markings.js
-    if(R.fx.snow>G.clock){ctx.fillStyle='rgba(236,240,245,.12)';ctx.fillRect(20,y-h/2,W-40,h)}
+    if(drawnWx.on('snow')){ctx.fillStyle='rgba(236,240,245,.12)';ctx.fillRect(20,y-h/2,W-40,h)}
   }
   // tower, fire station, fuel farm, solar farm
   if(!(LAY.decor||[]).some(d=>d.t==='tower')){ctx.fillStyle='#2A3037';ctx.fillRect(612,-44,16,30);ctx.fillStyle='#46505A';rrect(604,-58,32,16,4);ctx.fill();ctx.fillStyle='#5CC8FF';ctx.globalAlpha=0.5;ctx.fillRect(608,-54,24,6);ctx.globalAlpha=1;
@@ -202,7 +202,7 @@ function drawLandside(D){ // outside: the road, station and stops sit LAND_DY lo
     if(R.lot[b]>G.clock){occ++;ctx.fillStyle=['#6E7883','#8C97A1','#5C6670','#A7A296','#4F6478'][b%5];rrect(q.x-3.5,q.y-6,7,12,2);ctx.fill()}}
   sign(334,668+LAND_DY,'CAR PARK');mono(`${occ}/${cap} spaces`,390,678+LAND_DY,occ>=cap?'#FF7A8A':'#909AA4',9);
 }
-function darkness(){const h=(G.clock/60)%24;if(h<5||h>=21)return 0.5;if(h<7)return 0.5*(7-h)/2;if(h>=19)return 0.5*(h-19)/2;return 0}
+function darkness(){const h=drawnHour();if(h<5||h>=21)return 0.5;if(h<7)return 0.5*(7-h)/2;if(h>=19)return 0.5*(h-19)/2;return 0}
 function draw(){
   if(R.view==='region'){drawRegion();return}
   if(R.view==='world'){drawWorld();return}

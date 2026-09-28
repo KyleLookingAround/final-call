@@ -45,7 +45,7 @@ function dimBtn(){const P=dimReady();return P?`<button class="buy dimgo" data-di
 // darkness at hour h, the way darkness() (12-drawing.js) works it out from the clock
 function dimDark(h){if(h<5||h>=21)return 0.5;if(h<7)return 0.5*(7-h)/2;if(h>=19)return 0.5*(h-19)/2;return 0}
 function dimPlay(){
-  const P=dimReady();if(!P||R.dimT)return false;
+  const P=dimReady();if(!P||R.dimT||R.photo)return false; // not while photo mode has the view
   const c0=P.s[0].c,c1=P.s[P.s.length-1].c+DIM_EVERY;
   R.dimT={P,c0,c1,dur:DIM_SECS*(c1-c0)/1440,t0:performance.now(),j:0,f:0,clk:c0,speed:R.speed,view:R.view,cam:null,txt:''};
   if(R.sim)return true;

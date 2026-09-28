@@ -595,6 +595,23 @@ body.fs .cam{max-width:calc(100% - 172px)}
   .goal .gt{white-space:normal;overflow:visible;text-overflow:clip}
   .goal .gr{grid-column:1/-1;justify-self:end}
 }
+/* photo mode (62-photo-mode.js): the map alone, full screen, with the photo bar at its foot */
+.hud #photob svg{width:15px;height:15px}
+@media (max-width:600px){.hud #photob{display:none}} /* on a phone the top bar keeps its room: photo mode is in How to play */
+.photobar{position:absolute;left:50%;bottom:calc(10px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:2;display:flex;align-items:center;gap:4px;background:rgba(10,12,15,.8);padding:4px;border-radius:26px;max-width:calc(100% - 16px)}
+.photobar[hidden]{display:none}
+.photobar button{border:0;background:transparent;color:var(--text);font:600 12px/1 var(--mono);height:40px;min-width:40px;padding:0 10px;border-radius:20px;display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
+.photobar button[hidden]{display:none}
+.photobar button b{font-weight:600;color:var(--sign)}
+.photobar svg{width:16px;height:16px;flex:none}
+.photobar button.on{background:var(--sign);color:var(--signInk)}
+.photobar .shutter{width:44px;height:44px;min-width:44px;padding:0;margin:0 4px;border-radius:50%;background:var(--text);box-shadow:inset 0 0 0 3px rgba(10,12,15,.85)}
+.photobar .shutter:active{transform:scale(.92)}
+@media (max-width:360px){.photobar{gap:1px}.photobar button{padding:0 7px;gap:4px;font-size:11px}.photobar .shutter{margin:0 2px}}
+body.photo .stage{position:fixed;inset:0;z-index:48;border-radius:0}
+body.photo .board,body.photo .side,body.photo .topgap,body.photo .spot,body.photo .coach,body.photo .stage>:not(canvas):not(.photobar){display:none!important}
+.stage.phflash::after{content:"";position:absolute;inset:0;background:#fff;pointer-events:none;animation:phflash .35s ease-out forwards}
+@keyframes phflash{from{opacity:.75}to{opacity:0}}
 </style>
 
 <div class="topgap" id="topgap" aria-hidden="true" hidden></div>
@@ -626,6 +643,7 @@ body.fs .cam{max-width:calc(100% - 172px)}
       <button id="worldb" aria-label="Show the world routes" title="Routes map (W)" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18"/></svg></button>
       <button id="planb" aria-label="Masterplan" title="Masterplan (P)" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="6" height="5" rx="1"/><rect x="15" y="9.5" width="6" height="5" rx="1"/><rect x="3" y="16" width="6" height="5" rx="1"/><path d="M9 5.5h3v13H9M12 12h3"/></svg><span class="pb" hidden>0</span></button>
       <button id="fsb" aria-label="Full screen" title="Full screen (F)"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path id="fsi" d="M2 5V2h3M9 2h3v3M12 9v3H9M5 12H2V9"/></svg></button>
+      <button id="photob" aria-label="Photo mode" title="Photo mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 8h4l2-3h6l2 3h4v11H3z"/><circle cx="12" cy="13" r="3.5"/></svg></button>
       <button id="snd" aria-label="Sound"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 5h2.5L8 2v10L4.5 9H2z" fill="currentColor"/><path id="sndw" d="M10 4.5a3.5 3.5 0 010 5M11.5 3a5.5 5.5 0 010 8"/></svg></button>
     </div>
     <div class="toasts" id="toasts" aria-live="polite"></div>
@@ -635,6 +653,13 @@ body.fs .cam{max-width:calc(100% - 172px)}
     <div class="ptag" id="ptag" hidden>Paused<span class="pk"> · Space to resume</span></div>
     <div class="fsbar" aria-live="off"><span class="c" id="fsCash">$0</span><span id="fsClock">06:00</span><span class="k rt2" id="fsOn"></span></div>
     <button class="fsmanage" id="fsManage">Manage<span class="dot" id="fsDot" hidden></span></button>
+    <div class="photobar" id="photobar" role="group" aria-label="Photo mode" hidden>
+      <button data-ph="time" aria-label="Time of day"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg><b>Now</b></button>
+      <button data-ph="sky" aria-label="Weather"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M7 18h10.5a4 4 0 00.4-8A6 6 0 006.3 9.2 4.4 4.4 0 007 18z"/></svg><b>Now</b></button>
+      <button data-ph="pause" aria-label="Pause" aria-pressed="false"><svg viewBox="0 0 14 14" fill="currentColor"><rect x="3" y="2" width="3" height="10"/><rect x="8" y="2" width="3" height="10"/></svg></button>
+      <button data-ph="shoot" class="shutter" aria-label="Save a picture" title="Save a picture"></button>
+      <button data-ph="done" aria-label="Leave photo mode">Done</button>
+    </div>
   </main>
 
   <aside class="side" id="side">
@@ -676,7 +701,7 @@ body.fs .cam{max-width:calc(100% - 172px)}
   <div class="hcard">
     <button class="close" data-helpclose aria-label="Close">×</button>
     <h2 id="helpT">How to play</h2>
-    <p><button class="linkb" id="tourAgain">Replay the guided start</button> · <button class="linkb" id="newsAgain">What's new</button> · <a class="linkb" id="feedbackLink" href="#" target="_blank" rel="noopener" hidden>Send feedback</a></p>
+    <p><button class="linkb" id="tourAgain">Replay the guided start</button> · <button class="linkb" id="newsAgain">What's new</button> · <button class="linkb" id="photoHelp">Photo mode</button> · <a class="linkb" id="feedbackLink" href="#" target="_blank" rel="noopener" hidden>Send feedback</a></p>
     <p>Planes land full. Clear the arrivals, clean the cabin, and board the next flight on time. Short queues and punctual flights raise your rating, which fills more seats.</p>
     <h3>Moving around</h3>
     <div class="hgrid">
