@@ -71,7 +71,7 @@ export default async function({open,ok,saveText,saves,newest}){
   const all=LAYOUT_IDS.map(id=>[id,r[id]]);
   const noTable=all.filter(([,o])=>!o.table).map(([id])=>id),withTerm=noTable.length<LAYOUT_IDS.length;
   ok('plans: every layout\'s terminal comes from its own table',!noTable.length&&all.every(([,o])=>!o.faults.length)&&!errs.length,(errs.length?errs[0]+'; ':'')+
-    noTable.length?`no term table of its own: ${noTable.join(' ')}`:all.filter(([,o])=>o.faults.length).map(([id,o])=>id+': '+o.faults[0]).join('; ')||'9 layouts, no faults');
+    (noTable.length?`no term table of its own: ${noTable.join(' ')}`:all.filter(([,o])=>o.faults.length).map(([id,o])=>id+': '+o.faults[0]).join('; ')||'9 layouts, no faults'));
   ok('plans: rooms and doorways have floors',!noTable.length&&all.every(([,o])=>!o.badFl.length&&!o.badDoor.length),
     noTable.length?`no term table (so no floors or floor links) in ${noTable.join(' ')}`:all.flatMap(([id,o])=>[...o.badFl.map(x=>id+' '+x+' floor'),...o.badDoor.map(x=>id+' doorway '+x)]).slice(0,4).join('; ')||'none wrong');
   ok('plans: halls inside each main building',all.every(([,o])=>o.outside&&!o.outside.length&&!o.overlap.length),

@@ -1,6 +1,7 @@
 # The terminal
 
-**The terminal** (`42-terminal.js` to `47-hotel.js`, spec `docs/specs/terminal.md`). Its halls are rooms like the airside ones, the same in every layout for now (`TERM_ROOMS`, `TERM_DOORS`, merged into each layout's rooms by `applyLayout`), in the order real airports use them.
+**The terminal** (`42-terminal.js` to `47-hotel.js`, spec `docs/specs/terminal.md`). Its halls are rooms like the airside ones, in the order real airports use them. Each layout lists its own terminal, `L.term` (`{halls, doors}`), merged into its rooms and doorways by `applyLayout`; for now every layout has its own copy of the same plan, Classic's (`classicTerm()`), so nothing has moved (the terminal-place groundwork; each layout's own plan is a later part of `docs/specs/terminal-place.md`).
+- **Floors.** A hall may have `fl`: 0 the lower floor (arrivals), 1 the upper (departures); a room without it (the concourse, the forecourt, every hall today) is on both. A doorway joins rooms on one floor. A **floor link** (an escalator or a lift) joins two floors: a doorway with two more items, `[hall, hall, x, y, half-width, 'esc' or 'lift', people a minute]` (`isFloorLink`); routing treats it as a doorway (its queue and capacity come with the two floors part). `layoutFaults` finds a floor that isn't 0 or 1, a doorway joining two floors, and a floor link that doesn't stand in both its rooms or doesn't join two floors. The floor shown is `R.floor` (see The airport scene).
 - **Departing passengers** go from the forecourt (`out`) through the check-in hall (`ci`) and the security hall (`sec`) to the airside market place (`mkt`) and the concourse (`main`).
 - **Arriving passengers** leave the concourse by their own door into the immigration hall (`imm`), then go through reclaim (`rec`), customs (`cus`) and the arrivals hall (`arh`) and out. The hotel's lobby (`hot`) and walkway (`wlk`) exist once there's a hotel (`need`).
 - **Security lanes and passport desks** stand in the wall between a landside hall and an airside one (`SEC_LINE`) and are the only way through. The baggage hall (`BAG_HALL`) between the two sides is for bags only. Everything outside (road, stops, station, car park) sits `LAND_DY` lower than before the halls.
@@ -9,7 +10,7 @@
   - `PAX_STEP[state]` and `ARR_STEP[state]` move departing and arriving passengers each update;
   - `TERM_SUBS` and `TERM_SECS` set the Terminal tab's sub-tabs and their upgrade sections, and `TERM_PANEL[sub]` adds cards (also `'sales:shops'` and `'sales:landside'`);
   - `TERM_SPAWN` can place a new departing passenger (a hotel guest), and `TERM_EXIT` can send an arriving one somewhere other than out;
-  - `TERM_CLICK`, `TERM_MINUTE`, `TERM_DAY` and `TERM_DRAW` handle clicks, every game minute, every day and drawing (`TERM_MINUTE` and `TERM_DAY` each run as one entry of the clocks' `MINUTE` and `DAY` tables);
+  - `TERM_CLICK`, `TERM_MINUTE`, `TERM_DAY` and `TERM_DRAW` handle clicks, every game minute, every day and drawing inside the halls (`TERM_MINUTE` and `TERM_DAY` each run as one entry of the clocks' `MINUTE` and `DAY` tables). `TERM_DRAW` runs only when the halls show, never under the roof; anything outside the halls' walls (the taxi rank, the hotel's tower, the bag tugs on the apron) registers on `LAYER.terminal` itself, so it shows on every floor;
   - `TERM_FIELDS` gives saved fields their defaults for new games and older saves (it is `FIELDS`, the one table of saved fields; see Saves);
   - `SIMX` exposes functions to the checks, and a part's checks go in `tools/checks/<part>.mjs`;
   - new upgrades go in the part's file with `Object.assign(UPG,{...})`.
@@ -25,7 +26,7 @@
   - **Domestic flights** (`DOMESTIC`: Edinburgh, Belfast, Jersey) walk through the domestic channel (`DOM_X`) without queuing.
   - **Customs.** `exitTarget` sends everyone in reclaim through customs first (`toCustoms`, `p.cus`): 1 in 40 (`CUS_ODDS`) waits 1–2 min at a search table in the red channel, then `exitTarget` again asks `TERM_EXIT`, then the station, stops, taxi rank, car hire desks (then the car park) or the forecourt.
   - **Meeters** (`R.meet`) wait at the barrier with signs for flights landed or due within 30 min and walk off with their passenger. They're drawn only, use their own generator (`meetRnd`) and don't run headless.
-  - `drawArrivals` (`TERM_DRAW`) draws the passport desks with officers, e-gates, customs, the arrivals hall and the taxi rank; `TERM_PANEL.arr` shows today's immigration and customs (`R.arrSt`, reset daily).
+  - `drawArrivals` (`TERM_DRAW`) draws the passport desks with officers, e-gates, customs and the arrivals hall, and the taxi rank has its own entry on the terminal layer; `TERM_PANEL.arr` shows today's immigration and customs (`R.arrSt`, reset daily).
 
 - **Baggage** (`45-baggage.js`, Terminal › Baggage). Bags are counts per flight at each stage (`F.bg`, `A.bg`, the queues in `R.bag`); only a sample is drawn.
   - `updateBelt`: checked bags go from the belt through screening (one in 20 to the search room), the sorter (`bagsys` sets its speed) and make-up to tug trains, which take them through the tunnel to the stand, where they count as ready for the hold (`F.bagsIn`).
