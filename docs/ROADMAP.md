@@ -5,12 +5,7 @@ What's being worked on, what's next, and ideas not yet agreed. Now, Next, the ru
 ## Now
 
 <!-- joined:now from docs/roadmap.d/ (Section: now) by tools/join.mjs: don't edit between these lines -->
-- **Sound** (#27, spec `docs/specs/sound.md`, version 29): flight announcements with the words on the board, occasional spoken calls, and ambience that follows the camera.
-- **Level-up screen** (#29, spec `docs/specs/level-up.md`, version 30): a card for each new level with what it unlocked.
 - **The terminal as a place** (#48, spec `docs/specs/terminal-place.md`, approved): two floors, windows, decor that comes with the building, local character, a roof terrace with spotters, and each layout's own floor plan. Its checks are written (experiment [D]) and wait in `tools/checks/pending.txt`; next the groundwork, then the parts.
-- **Polish audit** (brief `docs/briefs/polish-audit.md`): a ranked punch list of everything that looks or feels unfinished, from playing and looking rather than reading code, in `docs/ideas/polish-2026-09.md`; one issue per suggested fix batch, labelled `polish`.
-- **Late runners, and passengers' stories** (spec `docs/specs/late-runners.md`, notes `docs/systems/late-runners.md`): shoppers run for the gate at final call, the gate holds or closes and the board shows GATE CLOSING; tap a passenger for their day as a story.
-- **Launch polish audit** (brief `docs/briefs/launch-audit.md`): what a newcomer arriving from a shared link notices first, from playing a new game and the level 3, 5 and 9 airports at every size, in `docs/ideas/polish-launch.md`; one issue per fix batch, labelled `polish`, with no two batches sharing a file.
 <!-- /joined:now -->
 
 ## The owner's order of bundles
@@ -68,9 +63,9 @@ How sessions work, not the game. Each one is small, measured and recorded in the
 ## Ideas (not agreed)
 
 - **From the September idea board** (`docs/ideas/board-2026-09.md`), in the owner's order. All 60 rated: 3 loved, 38 liked, 9 parked, 10 no.
-  1. **Late runners** (loved). Passengers still shopping at final call run to the gate; the gate holds or closes and the board shows GATE CLOSING. *Owner:* build on it with a story page for any passenger you tap, in the style of RimWorld: where they have been and how they felt, told as a story.
-  2. **Famous faces** (loved). Photographers at arrivals, fans at the barrier and a busy café when someone famous flies through.
-  3. **Day in a minute** (loved). A time-lapse of yesterday at your airport, played back over the map.
+  1. **Late runners** (loved, shipped in #110). Passengers still shopping at final call run to the gate; the gate holds or closes and the board shows GATE CLOSING. Built with a story page for any passenger you tap, in the style of RimWorld: where they have been and how they felt, told as a story.
+  2. **Famous faces** (loved, shipped in version 34). Photographers at arrivals, fans at the barrier and a busy café when someone famous flies through.
+  3. **Day in a minute** (loved, shipped in version 33). A time-lapse of yesterday at your airport, played back over the map.
   4. **A second rival**. Later on, a new airport grows at a coast town in the region, with holiday flights and its own share line.
   5. **Build from the map**. Tap an empty stand site, shop unit or car park on the map to buy it there.
   6. **Building sites you can watch**. Fences, a crane and a progress ring on each site while it’s built.
@@ -102,8 +97,8 @@ How sessions work, not the game. Each one is small, measured and recorded in the
   32. **Tap to explain**. In help mode, tap any building or vehicle to see what it does.
   33. **World rankings**. Past level 9, a yearly world ranking of airports to climb and defend. *Owner:* is there a way to have a real leaderboard without a database we have to maintain?
   34. **Your airport’s story**. A timeline of firsts, each with a snapshot of the map. *Owner:* maybe linked with the stamps.
-  35. **Photo mode**. Hide the panels, pick the time of day and frame your airport for a picture.
-  36. **A rating that reflects the last day (#57, 1)**. The rating moves with how the airport did today, not a sum that sits at 100.
+  35. **Photo mode** (shipped in version 33). Hide the panels, pick the time of day and frame your airport for a picture.
+  36. **A rating that reflects the last day (#57, 1)** (shipped in version 33). The rating moves with how the airport did today, not a sum that sits at 100.
   37. **Airlines that choose you (#57, 2)**. Partner airlines with names and a mood from their turnarounds, who add flights or leave.
   38. **Levels that ask for something new (#57, 3)**. From International Airport, each level asks for one thing besides counts, named on the goal bar.
   39. **Passengers who remember (#57, 4)**. Each city remembers how its travellers were treated, by kind; short-lived reviews on the map.
@@ -119,7 +114,7 @@ How sessions work, not the game. Each one is small, measured and recorded in the
 - **Page size budget.** A check on the size of `dist/index.html`, which grows with every feature.
 - **Accessibility.** Route and line colours that work for colour-blind players, and a larger-text option.
 - **Game logic ideas** (`docs/ideas/game-logic.md`): twelve ideas from the bot on seeds 1–3, ranked, rated on the September board (the liked ones are in the list above; the rest are parked or rejected below). The top three:
-  - **A rating that reflects the last day.** The rating is full from the first day, so nothing that costs rating costs anything.
+  - **A rating that reflects the last day** (shipped in version 33). The rating is full from the first day, so nothing that costs rating costs anything.
   - **Airlines that choose you.** Partner airlines with a mood from their turnarounds, who add flights or leave.
   - **Levels that ask for something new.** One ask per level from 4, so levels 7–9 aren't a wait for passengers flown.
 
@@ -129,6 +124,11 @@ How sessions work, not the game. Each one is small, measured and recorded in the
 - **Version 34: famous faces and a real-looking region.** Invented celebrities flying through from level 3 with photographers, fans and a busy café hour; the region map redrawn with real-looking land, towns and an airport; a Fleet tab beside Gates for planes, crews and servicing, brought together with one What's new entry.
 - **Version 33: a rating that keeps you on your toes.** A rating that follows the last day of flights instead of adding up for ever, Day in a minute (a time-lapse of yesterday over the airport), Photo mode, and settings, weekly challenges, staff pay and boarding upgrades moved to where players look, brought together with one What's new entry.
 - **The first level-up in the first morning** (#105, spec `docs/specs/early-first-level.md`): Local Airport asks for 80 passengers flown at the gate you start with, so a newcomer at 1× reaches it in about five minutes instead of 31–41.
+- **Launch polish audit** (brief `docs/briefs/launch-audit.md`): what a newcomer arriving from a shared link notices first, from playing a new game and the level 3, 5 and 9 airports at every size, in `docs/ideas/polish-launch.md`; one issue per fix batch, labelled `polish`, with no two batches sharing a file. All three fix batches shipped: settings, challenges, staff pay and upgrades moved (#112, version 33), a Fleet tab (#115, version 34), and the first minute on a phone (#124).
+- **Late runners, and passengers' stories** (spec `docs/specs/late-runners.md`, notes `docs/systems/late-runners.md`): shoppers run for the gate at final call, the gate holds or closes and the board shows GATE CLOSING; tap a passenger for their day as a story. Shipped in #110.
+- **Polish audit** (brief `docs/briefs/polish-audit.md`): a ranked punch list of everything that looks or feels unfinished, from playing and looking rather than reading code, in `docs/ideas/polish-2026-09.md`; one issue per suggested fix batch, labelled `polish`. All eight fix batches shipped, in PRs #80, #84, #87, #88 and #92.
+- **Level-up screen** (#29, spec `docs/specs/level-up.md`, version 30): a card for each new level with what it unlocked.
+- **Sound** (#27, spec `docs/specs/sound.md`, version 29): flight announcements with the words on the board, occasional spoken calls, and ambience that follows the camera.
 <!-- /joined:done -->
 
 Before the roadmap was kept as one file per item:
