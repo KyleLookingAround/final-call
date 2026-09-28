@@ -22,7 +22,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 - [Polish audit · 27 Sep 2026](lessons/main-polish-audit.md)
 - [Version 32: ready for what's next · 27 Sep 2026](lessons/main-release-32.md)
-- [Gate cards and the Pier B mover (#119, #120) · 28 Sep 2026](lessons/127-phone-bugs.md)
+- [Gate cards, the Pier B mover, and walking through walls (#119, #120, #121) · 28 Sep 2026](lessons/127-phone-bugs.md)
 - [#126 Cut release 34: famous faces and a real-looking region · 28 Sep 2026](lessons/126-release-34.md)
 - [#124 Polish the first minute on a phone · 28 Sep 2026](lessons/124-polish-first-minute.md)
 - [#122 Anonymous usage counts for launch week · 28 Sep 2026](lessons/122-usage-counts.md)
