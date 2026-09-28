@@ -8,7 +8,8 @@
     "build": "node tools/build.mjs",
     "check": "node tools/build.mjs && node tools/check.mjs",
     "bot": "node tools/build.mjs && node tools/run-bot.mjs",
-    "preview": "node tools/build.mjs && node tools/preview-image.mjs"
+    "preview": "node tools/build.mjs && node tools/preview-image.mjs",
+    "pack": "node tools/pack.mjs"
   },
   "devDependencies": {
     "@fontsource/hind": "5.3.0",
