@@ -117,4 +117,4 @@ function drawStopVehicles(){
 }
 
 // pickets outside the terminal while staff are on strike
-LAYER.weather.push(()=>{if(R.fx.strike>G.clock){const tt=performance.now()/300;for(let k=0;k<9;k++){const px=320+k*20,py=740+Math.sin(tt+k)*1.5;ctx.fillStyle='#ECE8DF';ctx.beginPath();ctx.arc(px,py,2.6,0,Math.PI*2);ctx.fill();ctx.fillStyle='#E5484D';ctx.fillRect(px-5,py-14+Math.sin(tt*1.3+k),10,6);ctx.fillStyle='#8C97A1';ctx.fillRect(px-0.4,py-8,0.8,6)}sign(320,712,'ON STRIKE','#E5484D','#fff')}});
+LAYER.weather.push(()=>{if(weather.on('strike')){const tt=performance.now()/300;for(let k=0;k<9;k++){const px=320+k*20,py=740+Math.sin(tt+k)*1.5;ctx.fillStyle='#ECE8DF';ctx.beginPath();ctx.arc(px,py,2.6,0,Math.PI*2);ctx.fill();ctx.fillStyle='#E5484D';ctx.fillRect(px-5,py-14+Math.sin(tt*1.3+k),10,6);ctx.fillStyle='#8C97A1';ctx.fillRect(px-0.4,py-8,0.8,6)}sign(320,712,'ON STRIKE','#E5484D','#fff')}});
