@@ -20,3 +20,10 @@ description: Cut a Final Call release - claim the version, fold the What's new f
 4. **Link preview.** If the game looks noticeably different, `npm run preview`, look at `src/public/preview.jpg`, and commit it.
 5. **Roadmap.** Add `docs/roadmap.d/<date>-release-<version>.md` with `Section: done` and a line for the version, and change the shipped items' own files from `Section: now` to `Section: done`. `npm run build` rejoins the roadmap.
 6. **Ship** it as a PR (see the `steward` playbook). After the merge, confirm the "Publish to GitHub Pages" run finished green.
+
+## Launch week
+
+For a launch week (players are being pointed at the game for the first time), release more carefully than usual:
+
+- **One release a day at most**, hotfixes excepted. The update toast comes back hourly on "Later", so five versions in a day nags the players a launch is trying to keep.
+- **No new systems for 48 hours after the launch post.** Sessions spend that window fixing what players report (bugs, balance) and polishing, not building.
