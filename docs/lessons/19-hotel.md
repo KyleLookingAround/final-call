@@ -1,3 +1,4 @@
+Theme: parts
 # #19 Airport hotel · 26 Sep 2026
 
 - **Numbers:** $8.40, 270k of 1M context. Started 20:37, PR opened 21:03, merged 21:14. One commit; CI green first time.

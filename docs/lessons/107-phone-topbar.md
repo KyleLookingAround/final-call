@@ -1,3 +1,4 @@
+Theme: ui
 # #107 The phone's top bar back on one row · 27 Sep 2026
 
 - **Numbers:** session `session_01QcAcdd4xFeLRUFB1MmEXQQ`, estimate $5: $2.89 when the PR opened. Started 21:40 UTC, PR opened 21:56.

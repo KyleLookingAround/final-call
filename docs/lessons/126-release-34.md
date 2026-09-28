@@ -1,3 +1,4 @@
+Theme: releases
 # #126 Cut release 34: famous faces and a real-looking region · 28 Sep 2026
 
 - **Numbers:** session `session_01BHqvrauWfqwi3fcWhVPke4` (continued from #118). Estimate $6 for both releases combined; $7.79 at the point #118 merged, $13.37 by the time #126 merged and its Pages publish was confirmed — past twice the estimate. The overrun was almost entirely the multi-hour rate-limit stall and the repeated CI status polling once heavy repo-wide contention (many sessions' PRs catching up and re-checking at once) made each check run take 10+ minutes instead of 1–2; the fold and PR work itself was cheap and matched the estimate.

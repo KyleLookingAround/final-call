@@ -1,3 +1,4 @@
+Theme: checks
 # #98 Systems refactor 8: weather in one place · 27 Sep 2026
 
 - **Numbers:** session `session_01RbHtkifRjwyi4F81wVQM9g`, estimate $8. Its cost wasn't reported yet (`get_session` gave no usage) when this was written. Started 21:00 UTC, PR opened 21:19. Seeds 1–3 of the bot, run locally against a build of `main` (a git worktree), gave identical `STATE` and `PLAY`, and `perf` was within noise.

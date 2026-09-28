@@ -1,3 +1,4 @@
+Theme: parts
 # #21 Baggage system · 26 Sep 2026
 
 - **Numbers:** $21.80, 370k of 1M context. Started 20:37, PR opened 21:40, merged 22:14. Three commits, none after the PR opened; CI green first time.

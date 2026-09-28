@@ -1,3 +1,4 @@
+Theme: review
 # Photo mode (#100) · 27 Sep 2026
 
 - **Numbers:** estimate $10; the session's cost wasn't reported yet at the PR's first stopping point. One build round, one review round, and two full local check runs before CI.

@@ -1,3 +1,4 @@
+Theme: coordinator
 # Coordinator playbook · 27 Sep 2026
 
 - **Numbers, this session:** session `session_01AvgXx1pvHYkeuWni23ymZz`, estimate $4: cost and context read 0 while the PR was being built, the usual early reading (`#28` and earlier lessons). One PR, no questions for the owner.

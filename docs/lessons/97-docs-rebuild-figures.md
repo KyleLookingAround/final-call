@@ -1,3 +1,4 @@
+Theme: docs
 # Rebuild figures and the moving walkways follow-up · 27 Sep 2026
 
 - **Numbers:** session `session_01Q1sE41U8AfqEFUYe6Euq7U`, estimate $3. PR #97 opened 21:10, docs only, one commit. `npm run check` and `npm run build` clean; the two touched check groups (`graph`, `brief`) pass.

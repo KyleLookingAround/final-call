@@ -1,3 +1,4 @@
+Theme: merge-chasing
 # A Ko-fi link · 27 Sep 2026
 
 - **Numbers:** session `session_01Metkx2JhFRvAsn8KzuXG5C`, estimate $6: past $12 (twice the estimate) by the sixth merge attempt, entirely from the merge-chase below, not the feature. Started 11:45; the full check suite (157–166 checks across the branch's life) passed first time on every run, no page errors. `PLAY` is unaffected: nothing in `update()` changed, so no bot run was needed to prove it; the Balance workflow confirmed it once CI ran (six green `bot` jobs).

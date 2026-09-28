@@ -1,3 +1,4 @@
+Theme: ci
 # Day in a minute (#102) · 28 Sep 2026
 
 - **Numbers:**

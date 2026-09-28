@@ -1,3 +1,4 @@
+Theme: tools
 # #32 Knowledge graph · 27 Sep 2026
 
 - **Numbers:** built in the same session; opened 06:58, merged 07:07. No pushes after it opened; CI green first time.

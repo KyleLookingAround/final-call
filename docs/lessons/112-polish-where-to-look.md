@@ -1,3 +1,4 @@
+Theme: ui
 # Polish: put things where players look (#112) · 28 Sep 2026
 
 - **Numbers:** estimate $12; about $5 by the merge. Started 21:45 UTC, then stopped from about 22:20 to 04:05 when the account's five-hour limit ran out and nothing woke the session. The PR opened at 04:19 and merged at 04:34 on the first CI round.

@@ -1,3 +1,4 @@
+Theme: parts
 # Bringing the terminal together (version 28) · 27 Sep 2026
 
 - **Numbers:** a fresh finishing session, $14.80 and 375k of 1M context when #26 merged. It merged #24 (23:45) and #23 (05:56), then #26 (06:10). #26 had no pushes after it opened, and CI was green first time.

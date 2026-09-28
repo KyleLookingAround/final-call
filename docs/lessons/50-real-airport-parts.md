@@ -1,3 +1,4 @@
+Theme: parts
 # Real airport parts: #50 planes, #55 vehicles, #52 roofs, #53 markings, #61 weather · 27 Sep 2026
 
 Five parts built side by side from their briefs, merged between 12:39 and 14:08. Each part's own CI stayed green throughout; the Parts workflow's "together" run was red while #53, and later #61, carried a `docs/SYSTEMS.md` conflict.

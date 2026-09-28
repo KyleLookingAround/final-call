@@ -1,3 +1,4 @@
+Theme: coordinator
 # One session for four PRs (#28, #30, #32, #33) · 27 Sep 2026
 
 - **Numbers:** one session built Sound, the level-up card, the knowledge graph and the level-up redesign, from 06:11 to about 07:20: $16.60, 417k of 1M context, and 45.8M tokens read back from the cache (the whole history, re-read turn after turn). Every PR was green first time, except the redesign's stray-file push. Its figures read 0 until late in the session.
