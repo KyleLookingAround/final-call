@@ -15,7 +15,8 @@ const FIELDS={
   gdone:()=>({}),routes:()=>({DUB:{f:1},EDI:{f:1},AMS:{f:1}}),rs:()=>({}),crews:()=>[{free:0,back:0,duty:0,res:0},{free:0,back:0,duty:0,res:0}],
   tour:()=>({s:0}),nv3:()=>1,tip4x:()=>false,
   famous:()=>({next:0,v:null}), // famous faces: the day of the next booking and the booked visit (64-famous-faces.js)
-  set:()=>({tips:true,msgs:'all',pops:'all',goal:true,badges:true,recs:true,autoLines:true,autoFares:true,autoCrews:true,autoDuty:true,chal:true,sndAnn:'on',sndVoice:true,sndAmb:true,sndFx:true,lvlCard:true}),
+  set:()=>({tips:true,msgs:'all',pops:'all',goal:true,badges:true,recs:true,autoLines:true,autoFares:true,autoCrews:true,autoDuty:true,chal:true,sndAnn:'on',sndVoice:true,sndAmb:true,sndFx:true,lvlCard:true,usage:true}),
+  usageSent:()=>({}),
 };
 const DEFAULT=()=>{const s={};for(const k in FIELDS)s[k]=FIELDS[k]();return s};
 const SET=()=>G.set||{};

@@ -173,6 +173,7 @@ function settle(i){
   if(F.partner&&F.city&&routeOpen(F.city)){const rs=rsOf(F.city);rs.pn=(rs.pn||0)+1}
   if(!F.partner&&F.city&&!F.freighter){const rs=rsOf(F.city),lf=F.booked/F.seatsN;rs.p+=F.booked;rs.v+=F.rev;rs.n++;rs.c=(rs.c||0)+op;rs.tp+=F.booked;rs.tv+=F.rev;rs.tn++;rs.tc=(rs.tc||0)+op;rs.lf=rs.tn>1?rs.lf*0.7+lf*0.3:lf}
   G.flights++;G.flown+=F.booked;{const h=Math.floor(G.clock/60)%24;dayAdd('flights');if(onTime)dayAdd('ontime');if(!F.freighter&&F.booked>=F.seatsN)dayAdd('full');if(h>=23||h<5)dayAdd('night');if(onTime&&weather.on('snow'))dayAdd('snowOT')}
+  if(G.flights===1)usageEvent('first-flight');
   const mins=Math.max(1,G.clock-(F.firstScan??F.boardStart??F.start));
   const profit=F.rev-op;
   G.gstats[i]=(G.gstats[i]||[]).concat([{p:profit,o:onTime}]).slice(-5);

@@ -14,7 +14,7 @@ npm run bot -- 1150    # bot plays 1,150 game hours and reports when each level 
 npm run preview        # remakes the link-preview image and home-screen icon in src/public/
 ```
 
-Open `dist/index.html` in a browser to play the local build. Progress saves in this browser on this device. To move an airport to another device, copy a save code from Office › Settings › Save and paste it there.
+Open `dist/index.html` in a browser to play the local build. Progress saves in this browser on this device. To move an airport to another device, copy a save code from Office › Settings › Save and paste it there. The published site can send anonymous, cookie-free usage counts; turn them off in Office › Settings › Screen and sound.
 
 The source is `src/game/*.js` (logic and drawing, in numbered files joined in order) and `src/shell.html` (CSS and HTML). See `CLAUDE.md` for how the code fits together and how changes are made, and `docs/` for the roadmap, specs, decision records and history.
 
