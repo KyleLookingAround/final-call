@@ -14,12 +14,15 @@ const GOLD={ // recorded on main before save migration became a table
   'v32-L3.json':'6025665f69921d71','v32-L5.json':'7a8f5cdb8b02f564','v32-L9.json':'e4542b2808e2bfa6',
 };
 const hash=s=>createHash('sha256').update(s).digest('hex').slice(0,16);
+// fields added to FIELDS since GOLD was recorded: left out of the hash, and every save must load them at their default
+const ADDED=['famous'];
 
 export default async function({open,ok,saves,saveText}){
   const {ctx,page,errs}=await open(undefined,null,false,{still:true});
   const got={};
-  for(const f of saves)got[f]=hash(await page.evaluate(t=>{const S=__sim;S.R.sim=true;S.seedRandom(1);S.resetAll(JSON.parse(t));S.R.sim=false;
-    const G=S.G,o={};for(const k of Object.keys(G).sort())o[k]=k==='savedAt'?0:G[k];return JSON.stringify(o)},saveText(f)));
+  for(const f of saves)got[f]=hash(await page.evaluate(([t,ADDED])=>{const S=__sim;S.R.sim=true;S.seedRandom(1);S.resetAll(JSON.parse(t));S.R.sim=false;
+    const G=S.G,o={};for(const k of Object.keys(G).sort())if(!ADDED.includes(k))o[k]=k==='savedAt'?0:G[k];
+    const off=ADDED.filter(k=>JSON.stringify(G[k])!==JSON.stringify(S.FIELDS[k]()));return JSON.stringify(o)+(off.length?' not at their default: '+off.join(' '):'')},[saveText(f),ADDED]));
   const bad=saves.filter(f=>GOLD[f]&&got[f]!==GOLD[f]),added=saves.filter(f=>!GOLD[f]);
   ok('migrate: every save loads to the same airport as before',!bad.length&&!added.length,
     bad.length?`changed: ${bad.join(' ')}`:added.length?`no hash yet, add to GOLD: ${added.map(f=>`'${f}':'${got[f]}',`).join(' ')}`:`${saves.length} saves`);
