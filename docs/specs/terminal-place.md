@@ -1,182 +1,214 @@
 # The terminal as a place
 
-Issue: #48 · Status: Approved (the owner approved it on 27 Sep 2026, with the default for each of its six choices; see below) · PRs: #49 (this spec; the rest added as they open)
+Issue: #48, refreshed for #133 · Status: Approved (the owner re-approved the refresh on 28 Sep 2026, #139: all five choices at their defaults, and every suggestion but one; spotters no longer crowd for rare arrivals) · PRs: #49 (the first spec), #113 (groundwork), this refresh; the rest added as they open
 
-Bundle 3 of `docs/ROADMAP.md`, plus its follow-up, each layout's own terminal floor plan (step 3 of `docs/specs/terminal.md`). From the idea board, the owner loved the two-level terminal and the viewing terrace with spotters, said yes to windows and to local character, and said no to placing decor. They also chose a richer top-down view, "both" for more to look at and more to decide, and "both" for a lively crowd and individuals. The checks come first (experiment [D]): the Checks section is the heart of this spec, and the first PR writes them before any code.
+Bundle 3 of `docs/ROADMAP.md`, plus each layout's own terminal floor plan (step 3 of `docs/specs/terminal.md`). The owner loved the two-level terminal and the viewing terrace, said yes to windows and local character, and no to placing decor. On 28 Sep 2026 (#133) they asked for the whole thing as a "fully fleshed out feature overhaul": "Roof should also be a floor that's accessible so people can watch planes and celebs go up there and people take photos whilst waiting." This refresh makes the roof terrace a third floor passengers use, folds in what the last month changed, and re-measures the budgets on `main`. The checks still come first (experiment [D]).
 
-**The owner's choices (#48):**
-1. Two floors from the start, in every layout.
+**The owner's choices so far (#48, 27 Sep 2026), which stand:**
+1. Two floors in every layout (the roof makes three stops, not three floors of halls).
 2. Decor doesn't change the rating.
-3. The terrace is a Terminal upgrade from level 3, and its café earns at most 2% of a day's income.
-4. Departures (the upper floor) shows first. (Changed by the owner on 27 Sep 2026: floors are picked, not zoomed; see below.)
-5. The drawing budget stays 0.55×, and the groundwork wins room back.
+3. The terrace is a Terminal upgrade from level 3.
+4. Floors are picked on the camera bar, never by zooming (`docs/decisions/ADR-2026-09-27-roof-is-a-floor.md`).
+5. The drawing budget stays 0.55×.
 6. One part draws the other eight layouts' floor plans, split in two only if its brief finds it too big.
+
+**The owner's choices this refresh asked for** (#139): approved on 28 Sep 2026, all at their defaults; see "Choices for the owner" at the end.
 
 ## What the player gets
 
-The terminal stops being one flat diagram shared by every layout. It becomes a building worth zooming into, with departures upstairs and arrivals below and escalators between them. It has glass along the apron, where passengers gather when a big jet taxis past, and a roof terrace that fills with spotters when something rare lands. Its halls carry the region's names and fill with planters, art and benches as the airport grows. Each layout gets a floor plan shaped to its own main building. The player places nothing: the decor comes with the building.
+The terminal stops being one flat diagram. Departures are upstairs, arrivals below, with escalators and a lift between them, and above them a roof terrace passengers go up to while they wait: to watch the planes, take photos, get a coffee, and catch a glimpse of a famous face. Glass along the apron draws a crowd when a big jet taxis past. The halls carry the region's names and fill with planters, art and benches as the airport grows. Each layout gets a floor plan shaped to its own main building. The player places nothing: it all comes with the building.
 
 ## What they see
 
-- **Floors, at any zoom** (the owner, 27 Sep 2026: "I don't want to zoom in to see the customers… go up and down layers to see floors, roof as a floor"). One floor at a time, picked on the map's camera bar, never by zooming. Version 31 added the first stop, **Roof**, over the halls; this feature splits the halls in two, so the control goes **Roof / Departures / Arrivals**, up and down. It shows only in the airport view.
-- **On the roof:** the roofs, and once it's built the terrace cut into it at the apron edge, with spotters on it. Nothing inside the halls is drawn under the roof.
-  - **Upper floor (departures):** check-in, security, the market place and the gate lounges. Passengers reach the stands by the air bridges.
-  - **Lower floor (arrivals):** immigration, reclaim, customs, the arrivals hall, the baggage hall and the hotel walkway.
-  - **Between floors:** the concourse links both. Escalators and a lift stand where they meet. Arriving passengers ride down, and families and those who need help take the lift.
-  - The other floor isn't drawn. Tapping a hall's name, an advisor tip or a board line flies the camera there and switches to its floor.
-- **Windows.** Glass along every airside wall that faces the apron, with a sheen by day and lit at night: warm pools on the apron from the lighting pass. Passengers who are waiting drift to the glass when a wide-body taxis or pushes back nearby, and back to their seats. Nobody misses a flight to watch.
-- **Decor that comes with the building.** Every hall gets planters, benches, art, a grand departures board and signs, fitted to its shape. More come with each level, and a hall's decor appears when the hall is built. Decor is never in a queue, lane, doorway or walkway.
-- **Local character.** Some shops, cafés and the art take their names and colours from the region's places (Harbourgate, Millbrook, Castleton…): "Castleton Kitchen", "Harbourgate Coffee", a Millbrook mural. A new place in the region can name the next unit.
-- **Roof terrace and spotters** (a Terminal upgrade from level 3; hidden before). A strip of roof with railings, a café kiosk and people with cameras. A handful come on an ordinary day and crowd it when something rare arrives: a type not seen here this week, a new route's first arrival, or the biggest type you handle. Fewer come at night or in rain. The crowd on the roof is the only sign: no toast, no text event.
-- **Each layout's own floor plan.** The Round terminal's halls wrap the landside half of the ring, Midfield's sit in its main terminal ahead of the train, and the Satellite's and the Starfish's sit in their main buildings. The pier layouts (Remote, Staggered, Curved front, Hall and finger pier) fit Classic's plan to their own building's width.
-- **In the panel:** the terrace's card, with today's spotters and takings, sits under Terminal › Staff. Nothing else is new in the panel.
-- **Screens:** the floor chip fits a 320 px phone (portrait and landscape), clear of the phone camera band (Settings › Screen) and the bottom sheet's handle. Tablets and large screens show the same.
+- **Three stops on the camera bar, at any zoom:** **Roof / Departures / Arrivals** (Dep and Arr under 560 px), already there since the groundwork (#113). Each shows a different floor, only in the airport view. Tapping a hall's name, an advisor tip or a board line flies the camera there and switches to its floor.
+  - **Departures (upper):** check-in, security, the market place, the gate lounges, and the stairs and lift up to the terrace. Passengers reach the stands by the air bridges.
+  - **Arrivals (lower):** immigration, reclaim, customs, the arrivals hall, the baggage hall and the hotel walkway.
+  - **Between them:** escalators and a lift where the concourse meets both floors. Arriving passengers ride down; families and those who need help (`p.famL`) take the lift. A queue shows at a busy escalator.
+  - **Roof:** the roofs, and once built the terrace cut into the roof at the apron edge. Two sides split by a glass screen: the **passengers' side** (airside, from the departures floor) with benches, a café kiosk and people at the rail; the **public side** (landside, by its own lift from the forecourt) with spotters and their cameras. Nothing inside the halls is drawn under the roof.
+- **On the terrace:** waiting passengers lean on the rail, raise phones as a plane lands or pushes back, and drift back down when their gate is called. At night, camera flashes (cosmetic; still with reduced motion). A steady handful of spotters stand on the public side through the day (the owner declined crowds for rare arrivals, 28 Sep 2026). Fewer at night; in rain, snow or a storm the passengers' side closes and the public side thins to a few die-hards. The crowd is the only sign: no toast, no text event.
+- **Famous faces on the roof** (building on famous faces, #111): if the terrace is built and the celebrity has 40 minutes or more before their gate is called, they go up for a while with their gold ring. Photographers and fans gather on the public side against the glass, a clutch of passengers crowd the celebrity's end of the passengers' side, and the flashes go off. The existing crowd at check-in and security stays as it is.
+- **Late runners on the roof:** a passenger on the terrace can be a dawdler like one in the shops. At final call they run: down the stairs (never the lift queue), then to the gate. The story card says so: "12:40 Up on the roof terrace", "12:52 Ran from the roof for gate 14", and if they miss, "Still on the roof when gate 14 closed".
+- **Windows.** Glass along every airside wall on the departures floor that faces the apron (and the arrivals floor where a hall of it faces the apron), with a sheen by day, lit at night with warm pools on the apron. Waiting passengers drift to the glass when a wide-body taxis or pushes back nearby. Nobody misses a flight to watch.
+- **Decor that comes with the building.** Planters, benches, art, a grand departures board and signs in every hall, more with each level, never in a queue, lane, doorway or walkway. The terrace gets its own: rail, benches, parasols, a telescope on the public side.
+- **Local character.** Shops, cafés and art take names and colours from the region's places ("Castleton Kitchen", "Harbourgate Coffee", a Millbrook mural). The terrace café is named for a place too.
+- **Each layout's own floor plan,** its terrace included: the Round terminal's halls wrap the landside half of the ring, Midfield's sit in its main terminal ahead of the train, the Satellite's and the Starfish's sit in their main buildings; the pier layouts fit Classic's plan to their own building's width. The people mover and the train run on the concourse, which is on both floors.
+- **In the panel:** the terrace's card under Terminal › Staff: today's passengers up, spotters, takings, and its rating line. Nothing else new in the panel.
+- **What's new:** each part a player would notice leaves one fragment in `src/updates.d/` in the card's shape (a lead, one sentence, a "Show me" target such as the floor stop or the terrace card, and a level: the terrace's is level 3).
+- **Photo mode** works on every floor: the shutter keeps the floor shown, and Time and Sky dress the terrace like the rest of the map.
+- **Screens:** the floor stops, the terrace card and the story card's roof lines fit a 320 px phone (portrait and landscape), clear of the camera band (Settings › Screen) and the bottom sheet's handle. Tablets and large screens show the same.
 
 ## How it works
 
-- **Floors are a field on rooms.** A hall gets `fl` (0 lower, 1 upper); a room without it (the concourse, the forecourt) is on both. A doorway joins rooms on the same floor. A **floor link** (escalator or lift) is a doorway between floors with a capacity per minute; passengers queue for it like a door, and `p.famL` passengers take the lift. Routing (`route`, `walk`) is unchanged apart from treating links as doorways. Bags don't use floor links: the belts drop to the baggage hall.
-- **Each layout lists its own terminal** (`L.term`: halls, doorways, floor links and where each part's counters sit), in place of the shared `TERM_ROOMS` and `TERM_DOORS`. The groundwork moves today's plan into Classic's entry and gives the other layouts a copy, so nothing moves until the floor plans part. Everything that places a desk, lane, booth, carousel or queue reads the layout's table, not a constant.
-- **The view:** `R.floor` (runtime; version 31 has `'halls'` and `'roof'`, and the groundwork replaces `'halls'` with `'up'` and `'down'`, defaulting to `'up'`) picks the floor drawn, through `setFloor` in `53-roofs.js`. The terminal's layers draw only the rooms and passengers on that floor. Nothing inside a hall is drawn on the roof (`roofA()` is 1).
-- **Spotters** are a count, not passengers: `R.spot` goes up and down with the hour, the weather and rare arrivals, and a sample of at most 40 is drawn. They never enter the terminal's queues. The terrace café earns a little per spotter.
-- **Windows** are edges of airside rooms that face the apron, worked out from each layout's rooms. A watcher is a passenger already waiting for their gate call, within reach of the glass. They go to the glass, stay until the plane has passed, and go back, and never after their gate is called.
-- **Decor** is worked out from the layout's rooms, what's built and the level. It is drawn only, never saved or placed, and has no effect on the rating (the owner's choice).
-- **Local names** come from `PLACES` in the region, picked with a hash of the unit's index, not with `rnd()`, so they never change the game.
-- **Unlocks:** two floors, windows, decor and local names from the start. The terrace is an upgrade from level 3, `G.lv.terrace`, hidden before. Each layout's plan comes with the layout.
-- **Managers and recommendations:** nothing to manage. The advisor's tips and the board's lines fly the camera to the right floor. The duty manager ignores the terrace.
-- **Fitting round the real airport:** the floor picked decides when halls show, never the zoom. Two floors never draw under the roof, and the terrace is cut into the roof, drawn at every zoom. Window lights use `LIGHTS` and `lamp()`. Everything is in drawing layers (`LAYER.terminal`, `pax`, `roofs`, `lit`), with no new lines in `draw()`.
+- **Floors are a field on rooms** (built by the groundwork). A hall has `fl`: 0 arrivals, 1 departures, and now 2 for the terrace; a room without it (the concourse, the forecourt) is on floors 0 and 1. A **floor link** (`[hall, hall, x, y, half-width, 'esc'|'lift'|'stairs', people a minute]`) is a doorway between floors; passengers queue for it like a door, `p.famL` passengers take the lift, and routing (`route`, `walk`) treats it as a doorway. Bags never use floor links: the belts drop to the baggage hall.
+- **The terrace is a room, not a count.** `ter` (`fl` 2) with a third floor link, stairs and a lift from the departures floor's airside (the market place, or the concourse where a layout has no market place over the apron). Its public side is drawn but not routed: spotters, fans and photographers never enter the terminal's rooms or queues.
+- **Who goes up.** When `nextAct` would send a waiting passenger to a seat in the market place, 1 in 6 goes up instead if the terrace is built, open (not in rain, snow or a storm, from 06:00 to 22:00) and under its capacity (40 on the passengers' side). More go when a wide-body is on the apron. They stay 10–30 minutes, and leave when their gate is called, like shoppers: `airside` sends them to the gate. A dawdler (`DAWDLE`, as late runners) lingers until final call and runs: stairs only, 1.8× pace, and the stairs' queue lets runners go first. This choice uses `rnd()` like the rest of `nextAct`, so `PLAY` changes.
+- **Spotters stay a count.** `R.spot` (runtime) is now the public side only: it follows the hour and the weather only, a steady handful of 2–12 by day (no crowds for rare arrivals: the owner declined them), plus the famous faces' crowd while a celebrity is up; a sample of at most 40 is drawn. Passengers on the passengers' side are counted by their room, not in `R.spot`.
+- **Famous faces.** With the terrace built and 40 minutes or more before their gate is called, the celebrity goes up for 10–20 minutes (`famousPax`'s passenger; one `rnd()` draw). While they're up, `R.spot` gains 6 photographers and 10 fans, and passengers on the terrace move to the celebrity's end. The landside crowd from famous faces is unchanged.
+- **Earnings (within the 2% cap).** Two small sources, together at most 2% of a day's income at level 9: the terrace café kiosk, earned per passenger up through `earn(…,'shops',…,at)` like any café (and eligible for the famous face's busy hour), and a small charge on the public side, per spotter, through `earn(…,'landside',…)` like the hotel. The spec keeps the 2% cap: the terrace is a delight, not an income line, and income changes are on hold (#135, #136).
+- **Its own rating line.** A new cause `terrace` in `REPWHY` and `REPLBL` ("The roof terrace"): each passenger who went up and then boarded on time gives +0.01, up to +0.4 a day; one who missed their flight from the roof takes −0.6 through the runners' existing `runner` cause (not twice). A crowded terrace (at capacity for over an hour) costs −0.1. Watchers and decor still don't touch the rating.
+- **Windows** are edges of airside rooms on each floor that face the apron. A watcher is a passenger already waiting for their gate call, within reach of the glass on their own floor. They go, stay until the plane has passed, and go back, never after their gate is called.
+- **Decor** is worked out from the layout's rooms, what's built and the level. Drawn only, never saved or placed, no effect on the rating.
+- **Local names** come from `PLACES`, picked with a hash of the unit's index, not `rnd()`.
+- **The view:** `R.floor` (`'roof'`, `'up'`, `'down'`) picks the floor drawn through `setFloor` (`53-roofs.js`). `onFloor(fl)` shows a room or passenger on the floor drawn; the roof stop now draws the terrace's room and its passengers (`fl` 2) as well as the roofs, and nothing else inside a hall. `paxEase`'s catch-up through `p.doors` (the wall fix of #127) includes floor links, so nobody is drawn sliding across a floor they're not on.
+- **Unlocks:** two floors, windows, decor and local names from the start. The terrace is `G.lv.terrace`, from level 3, hidden before (the famous faces start at level 3 too). Each layout's plan comes with the layout.
+- **Managers and recommendations:** nothing to manage. The advisor recommends the terrace once at level 3 when the market place is busy. The advisor's tips and the board's lines fly the camera to the right floor.
+- **Fitting round the rest:** window lights use `LIGHTS` and `lamp()`; everything draws in the existing layers (`LAYER.terminal`, `pax`, `roofs`, `lit`), with no new lines in `draw()`; the terrace's weather follows `drawnFx()` and its lighting `drawnHour()`, so photo mode dresses it. A network you have to keep (#116) spreads flights thinner, so a check that needs an event (a final call, a celebrity's flight, a pushback) causes it rather than waiting for the traffic.
 
 ## Saved state
 
-- `G.lv.terrace` (0 or 1), an upgrade key added with `Object.assign(UPG,{…})` like the terminal's others: `DEFAULT().lv` gives 0 and `resetAll` already fills missing keys.
-- The terrace café's takings are counted in the existing income, as the hotel's are; if a new key is needed it defaults to 0.
-- No other saved field: the floor shown, spotters, watchers, decor and local names are runtime or worked out.
-- **Old saves:** each loads into its layout's plan. A passenger in a hall when the save loads is put on that hall's floor, or at the nearest doorway if the hall moved. Nothing is renamed or removed.
+- `G.lv.terrace` (0 or 1), an upgrade key added with `Object.assign(UPG,{…})`: `DEFAULT().lv` gives 0 and `resetAll` fills missing keys.
+- `G.terrace` (`FIELDS`: `()=>({d:0,up:0,take:0})`): today's passengers up and takings for the card. Older saves get the default; no migration step.
+- A passenger's floor comes from their room; `p.fl` is set only while they ride a floor link. The floor shown, spotters, watchers, decor and local names are runtime or worked out.
+- **Old saves:** each loads into its layout's plan. A passenger in a hall is put on that hall's floor, or at the nearest doorway on that floor if the hall moved. Nobody loads on the terrace from a save older than it. Nothing is renamed or removed.
 
 ## Balance
 
-- Walks change: stacked halls and each layout's plan change how far passengers walk, so queues and shop time shift. The pass mark is pacing within tolerance of `tools/baseline.json` on seeds 1–3, keeping Classic and rebuilding, with no tuning expected. Each part that moves halls runs the Balance workflow.
-- The terrace's income is small: at most 2% of a day's income at level 9.
-- Watchers and decor don't touch the rating.
-- If pacing leaves tolerance, the part stops and the coordinator rebalances when the parts come together, as the terminal did.
+- **Walks change:** stacked halls, floor links, the terrace trip and each layout's plan change how far passengers walk, so queues, shop time and dawdlers shift. The pass mark is pacing within 15% of `tools/baseline.json` on seeds 1–3, keeping Classic and rebuilding. Every part that moves halls or passengers runs the Balance workflow (it runs when the PR leaves draft; add the `balance` label after later code changes).
+- **The terrace takes passengers out of the market place,** so shop takings may dip a little; its café makes some back. Its income stays at most 2% of a day's income at level 9, and its rating at most +0.4 a day.
+- **Late runners:** misses from the roof should be no likelier than from the shops; the terrace check holds it.
+- If pacing leaves tolerance, the part stops and says so, and the PR that brings the parts together rebalances with the owner's word, as the terminal did.
 
 ## Speed budget
 
-Measured on `main` before this spec (27 Sep 2026, the session's machine; three `scene` runs, one `perf` run):
+Measured on `main` (4c841dc) on 28 Sep 2026, this session's machine: three `scene` runs, three `plans` zoomed-in runs, one `perf` run.
 
-| Check | `main` | Budget |
-| --- | --- | --- |
-| Late-game simulation | 0.152× | 0.25× |
-| Sixteen stands of Midfield | 0.129× | 0.375× |
-| Phone at 8×, CPU slowed 4× | 7.2 of 8 game min/s | reported |
-| Phone at 8×, sixteen stands | 4.7 of 8 game min/s | reported |
-| `scene`, Classic, desktop | 0.292–0.311× (median 0.297×) | 0.55× |
-| `scene`, Midfield, desktop | 0.319–0.360× (median 0.351×) | 0.55× |
-| `scene`, Midfield, phone | 0.307–0.349× (median 0.341×) | 0.55× |
+| Check | `main` 27 Sep | `main` 28 Sep | Budget | Left |
+| --- | --- | --- | --- | --- |
+| Late-game simulation | 0.152× | 0.151× | 0.25× | 0.099× |
+| Sixteen stands of Midfield | 0.129× | 0.248× | 0.375× | 0.127× |
+| Phone at 8×, CPU slowed 4× | 7.2 of 8 game min/s | 6.9 | reported | |
+| Phone at 8×, sixteen stands | 4.7 of 8 game min/s | 3.0 | reported | |
+| `scene`, Classic, desktop | 0.297× | 0.331–0.353× (median 0.332×) | 0.55× | 0.218× |
+| `scene`, Midfield, desktop | 0.351× | 0.324–0.383× (median 0.382×) | 0.55× | 0.168× |
+| `scene`, Midfield, phone | 0.341× | 0.283–0.326× (median 0.318×) | 0.55× | 0.232× |
+| Zoomed in, Classic, desktop | 0.22× | 0.176–0.207× (median 0.203×) | 0.33× | 0.127× |
+| Zoomed in, Midfield, desktop | 0.252× | 0.243–0.263× (median 0.262×) | 0.378× | 0.116× |
+| Zoomed in, Midfield, phone | 0.208× | 0.161–0.256× (median 0.226×) | 0.312× | 0.086× |
 
-- **Drawing.** The real airport's parts hold 0.175× of the drawing headroom. If they spend it all, the worst scene reaches about 0.53×, leaving about 0.02×, which is not enough for this bundle. So:
-  1. The groundwork must win room back: it stops drawing inside halls where the roof is solid, and draws one floor, not two. Its budget is below zero: the worst scene must get faster by at least 0.03× (median of three against `main` after the real airport merges).
-  2. The checks-first PR adds a second timed scene: zoomed in on the terminal at 1.6×, night, fully built Classic and Midfield, the busiest hour of a level 9 save, desktop and phone. That's where this bundle's drawing is seen. Its budget is set at 1.5 times `main`'s median when that PR opens.
-  3. What's left after the groundwork in both scenes is shared: two floors 30%, windows 15%, decor and local names 25%, terrace and spotters 15%, the floor plans 15%. The coordinator writes the numbers into each part's brief after measuring.
-- **Simulation.** Headroom is about 0.10× (late game) and 0.25× (Midfield) on this machine. Two floors 0.02×, windows (watchers) 0.01×, terrace (a count) 0.005×, floor plans 0.02× on Midfield. Decor and local names get none: they are drawing only.
-- One run varies by about ±0.05× for drawing and ±0.02× for simulation. Each part measures its cost as the median of three runs on its branch minus three on `main`, on the same machine, and puts both in its PR. The Parts workflow checks the open parts together.
+- **What moved in a day:** Midfield's simulation nearly doubled and the throttled phone at sixteen stands fell from 4.7 to 3.0 game minutes a second: the network you have to keep (#116), late runners and famous faces all run per passenger or per minute. The phone is now the tightest place, which is why refactor 7 goes first (see the order of work).
+- **Drawing shares** of what's left in each scene (the tightest is the zoomed-in phone, 0.086×): two floors 25%, windows 15%, decor and local names 20%, the terrace floor 25% (real passengers, the public crowd and flashes), the floor plans 15%. The part's brief turns these into numbers from the medians on `main` when it starts.
+- **Simulation shares:** two floors 0.02× (late game), windows 0.01×, the terrace 0.02× (passengers on a third floor, one more floor link), the floor plans 0.02× on Midfield. Decor and local names get none. Together 0.05× of the late game's 0.099× and 0.07× of Midfield's 0.127×, leaving room for refactor 7's measurement noise. The throttled phone at sixteen stands must not fall by more than 0.3 game minutes a second in any part.
+- One run varies by about ±0.05× for drawing (the zoomed-in phone ranged 0.161–0.256× today) and ±0.02× for simulation. Each part measures the median of three runs on its branch against three on `main`, alternately, on the same machine, and puts both in its PR. The Parts workflow checks the open parts together.
 
 ## Checks
 
-The checks-first PR writes all of these before any code. Each is named with its group and a short phrase, so `tools/checks/pending.txt` can list it. Each gives what it sets up, what it measures and its pass mark. Checks that already pass on `main` are guards: they go in switched on. Every other check must fail on `main` for the right reason when it's written. A check that can't fail on `main` tests nothing and gets rewritten.
+The pending mechanism is in place (`tools/check.mjs`, `tools/checks/pending.txt`, `docs/SYSTEMS.md` "Pending checks"): a pending check prints `PEND` while it fails and fails the run once it passes, so each part removes its own lines. Checks whose play takes seconds wait until their code exists; `TP_ALL=1` plays them anyway. A part may change a pre-written check only to fix a mistake, saying what and why; loosening a pass mark needs the coordinator. Each change is counted for [D].
 
-**How pending checks wait for code (the simplest way with `tools/check.mjs`):**
-- `tools/checks/pending.txt` lists pending checks, one per line: a check's full name, or a group name and `*` for the whole group. `#` starts a comment naming the part that switches it on.
-- In `ok()`, a failing pending check prints `PEND` and isn't counted as a failure. A passing pending check prints `FAIL … pending, but passes: switch it on` and **is** a failure, so a part must remove its lines when it builds them, and a vacuous check is caught.
-- A group listed with `*` may throw before its code exists (a missing `__sim` function). The runner catches the throw and prints one `PEND` line for the group.
-- The summary prints `N pending`. The Checks and Parts workflows need no change.
-- Only the checks-first PR and the coordinator add lines. Each part removes its own lines in its PR, and the PR that brings the parts together leaves the file empty.
-- A part may change a pre-written check only to fix a mistake in it, saying what and why in its PR. Loosening a pass mark needs the coordinator. Each change is counted for [D].
+**Guards, on now:** `scene: drawing never changes the game`, `scene: drawing speed` (three scenes), `scene: drawing speed, terminal zoomed in` (three scenes), both `perf` simulation checks, `saves`, `layout` (320 px to 2560 px), `layouts`, `terminal`, `roofs`, `late-runners`, `famous-faces`, `photo-mode`, `news-card`, `phone-bugs`, `movement`, and the groundwork's `plans` checks (every layout from its own table, rooms and doorways have floors, nothing drawn under the roof, the floor chip, the way through, two hours in every layout, old saves). They must stay green.
 
-**Guards, on from the start:**
-- `scene: drawing never changes the game`, `scene: drawing speed` (three scenes), both `perf` simulation checks, `saves`, `layout` (320 px to 2560 px), `layouts`, `terminal`, and the terminal parts' groups. They exist already and must stay green.
-- `scene: drawing speed, terminal zoomed in` (new, three scenes: Classic desktop, Midfield desktop, Midfield phone). Setup: `v29-L9.json`, seed 1, one game hour of simulation, 21:00, camera at 1.6× on the terminal's middle. Measure: the same frame timing as the worst scene. Pass: at most 1.5 times `main`'s median.
+**Unchanged, still pending:** `scene: one floor at a time`; the seven `floors:` checks; the four `windows:` checks; the five `decor:` checks; `terrace: hidden until it can be built`, `spotters stay on the roof`, `its card fits a phone`; `plans: halls inside each main building`, `no layout's walk is a trap`, `rebuilding moves people into the new plan`. Their setups and pass marks are as in the first spec (#49) and `tools/checks/*.mjs`.
 
-**Groundwork (`plans` and `scene`):**
-- `plans: every layout's terminal comes from its own table`. Setup: a new game, each of the nine layouts in turn with `switchLayout`, fully built. Measure: the rooms merged into `ROOMS` equal that layout's `L.term` halls, and `layoutFaults()` is empty. Pass: nine layouts, no faults.
-- `plans: rooms and doorways have floors`. Setup: as above. Measure: every hall's `fl` is 0, 1 or absent; every doorway joins two rooms that share a floor, or is a floor link. Pass: none wrong.
-- `scene: nothing is drawn inside a hall under the roof`. Setup: the worst scene (zoomed out, `v29-L9.json`, night, storm) with `R.floor='roof'`. Measure: spy on `TERM_DRAW` and on the `pax` layer, and count passengers and furniture drawn inside a hall where `roofA` is 1. Pass: 0.
-- `scene: one floor at a time`. Setup: zoomed in at 1.6×, `R.floor='up'`, then `'down'`. Measure: passengers drawn whose room is on the other floor. Pass: 0 each way.
-- `plans: the floor chip`. Setup: the airport view zoomed out, zoomed in, and the region view, on a 320×568 phone and 1440×900. Measure: the floor control is shown in the airport view at every zoom, and not in the region view; Roof, Departures and Arrivals where the layout has two floors. Its box sits inside the canvas, clear of the camera band (`#topgap`) and the bottom sheet's handle. Tapping each stop sets `R.floor`. Pass: all.
+**Changed** (the checks refresh rewrites them; the old names come out of `pending.txt` and the new ones go in):
+- `terrace: seen at every zoom` becomes **`terrace: on the Roof at every zoom, and only there`**. Setup: bought, Classic, by day, `R.floor='roof'` zoomed out and at 1.6×, then `'up'` and `'down'`. Measure: pixels over the terrace against the roof's colour; passengers drawn whose room is `ter`. Pass: different from the roof at both zooms on the Roof; no terrace passengers drawn on the other two floors.
+- `terrace: fewer at night and in rain` becomes **`terrace: fewer at night and in rain, and closed to passengers in the wet`**. Measure: `R.spot` at 02:00, and at 14:00 with rain on and off; passengers on the terrace after 20 minutes of rain. Pass: `R.spot` at most 2 at 02:00, rain at most half of dry; 0 passengers up in rain.
+- `terrace: spotters crowd for something rare` becomes **`terrace: a steady handful of spotters`** (the owner declined rare crowds). Setup: `v29-L9.json` with the terrace, seed 1, 14:00 on a dry day; a scripted arrival of the biggest type, then an ordinary one. Measure: `R.spot` before and 30 game minutes after each. Pass: between 2 and 12 throughout, and within ±20% of before after each arrival.
+- `terrace: the crowd is the only sign` keeps its name with a new setup: the famous face going up (as in the check below) instead of a rare arrival. Measure: toasts and board lines about the terrace or its crowd. Pass: none.
+- `terrace: small takings` keeps its name. Measure: café and public-side takings together against the day's income. Pass: more than 0 and at most 2%, and both sources above 0.
 
-**Two floors (`floors`):**
-- `floors: departures upstairs, arrivals below`. Setup: Classic, fully built. Measure: `ci`, `sec` and `mkt` have `fl` 1; `imm`, `rec`, `cus`, `arh`, the baggage hall and `wlk` have `fl` 0; no two rooms on one floor overlap (intersection area 0). Pass: all.
-- `floors: people change floor only on escalators and lifts`. Setup: `v29-L5.json`, seed 1, three game hours. Measure: every step where a passenger's floor changes, and its distance to the nearest floor link. Pass: every change within 12 units of a link, and at least 50 changes seen.
-- `floors: families take the lift`. Setup: as above. Measure: the share of `famL` passengers who change floor by lift, and of the rest. Pass: at least 80% of `famL`, at most 5% of others.
-- `floors: nobody is stuck between floors`. Setup: as above, fully built. Measure: passengers in one state for over 90 game minutes (not counting the hotel), and flights held at the door by missing passengers compared with `main` (recorded in the check by the checks-first PR). Pass: 0 stuck; held flights at most `main`'s plus 5%.
-- `floors: walks stay about the same`. Setup: Classic, `v29-L5.json`, seed 1, six game hours. Measure: the mean time from the forecourt to the gate lounge, and from the stand to the forecourt, against `main`'s (recorded by the checks-first PR). Pass: each within ±15%.
-- `floors: tapping a hall goes to its floor`. Setup: zoomed in, `R.floor='up'`. Measure: tapping reclaim's name, and an advisor tip about reclaim. Pass: `R.floor` becomes `'down'` and the camera centres on reclaim, both times.
-- `floors: old saves land on the right floor`. Setup: every save in `tools/saves/`. Measure: after one game minute, passengers whose floor doesn't match their room's. Pass: 0 for every save.
+**New:**
+- `terrace: waiting passengers go up and come down`. Setup: `v29-L9.json` with the terrace, seed 1, 12:00–14:00, dry. Measure: passengers who reach `ter`; their floor changes; passengers on the terrace after their gate is called who aren't runners. Pass: at least 10 go up; every floor change within 12 units of the terrace's link; 0 left up after their call.
+- `terrace: runners come down in time, or the story says why`. Setup: as above; make three terrace passengers dawdlers and bring their flight's final call forward (caused, not waited for). Measure: each one's floor link (stairs, not the lift), whether they board, and their story's last line. Pass: none takes the lift; each boards or their story names the roof.
+- `terrace: a famous face goes up, and the fans follow`. Setup: famous faces' level 5 save with the terrace bought, the celebrity booked on a flight 90 minutes out (caused). Measure: the celebrity's room over the next hour, and `R.spot` before and while they're up. Pass: they reach `ter` and come down before their gate is called; `R.spot` rises by at least 12 while they're up.
+- `terrace: its own line in the rating`. Setup: `v29-L9.json` with the terrace, one game day. Measure: `REPLBL.terrace`, and the rating moved by cause `terrace`. Pass: the label exists; the day's total is above 0 and at most +0.4.
+- `floors: runners take the stairs or escalator`. Setup: `v29-L5.json`, seed 1, a dawdler caused on a flight whose gate is upstairs from where they wait. Measure: floor links used by runners. Pass: no runner queues for a lift.
+- `floors: nobody is drawn through a floor`. Setup: as `floors: people change floor only on escalators and lifts`, drawing at 4× and 8×. Measure: `paxEase`'s drawn position for passengers changing floor. Pass: every drawn point between two floors lies within 12 units of a floor link (the wall fix of #127, extended to floors).
 
-**Windows (`windows`):**
-- `windows: glass on every airside wall facing the apron`. Setup: each layout fully built. Measure: edges of airside rooms that border the apron (not another room) without glass, and glass on an edge that doesn't face the apron. Pass: 0 and 0.
-- `windows: passengers watch a big jet go by`. Setup: `v29-L9.json`, seed 1; move a wide-body to push back from the stand nearest the market place's glass, scripted at a set time. Measure: waiting passengers within 8 units of glass on that side, before and during the pushback. Pass: at least 3 more during it, and every one of them boards before the door closes.
-- `windows: nobody watches after their gate is called`. Setup: as above, over two game hours. Measure: watchers whose gate has been called. Pass: 0.
-- `windows: lit at night`. Setup: Classic, 23:00 and 12:00. Measure: a pixel on the apron just outside the glass, with the windows' lights in and taken out. Pass: brighter with them at 23:00; the same at 12:00.
+**CI's time limit (#132, #134).** A full run took about 14 minutes on the publish runner against a 15-minute limit; #134 raised `checks.yml` and `pages.yml` to 25 minutes, so there is room again, but not for careless groups. Measured locally today (each includes a sub-second build): the pending groups cost `floors` 2 s (43 s with `TP_ALL`), `windows` 2 s (5 s), `decor` 2 s (3 s), `terrace` 4 s (9 s), and `plans` 82 s either way. Switching everything on adds about 55 s locally before the new checks. So:
+1. Each group plays one seeded page for all its checks, as `news-card` now does: `floors` must come down from 43 s to at most 20 s (one three-hour play for its play checks, not one each), and `terrace` stays at most 15 s with its new checks. Each part's PR says its group's run time locally and on CI.
+2. The PR that brings the parts together must leave the full run no longer than `main`'s plus 90 s on CI, well inside 25 minutes. `plans` (82 s) is the biggest terminal group: the floor plans part plays the nine layouts in one page, not nine.
+3. No workflow change is needed. If a full run on CI passes 20 minutes, the next part stops and the coordinator splits the run into two parallel jobs before it goes on.
 
-**Decor and local character (`decor`):**
-- `decor: nothing to place`. Setup: `v29-L9.json`. Measure: controls in any panel that place, move or buy decor, and saved fields added by decor (`G` keys against `DEFAULT()` from before the bundle). Pass: 0 and 0.
-- `decor: it comes with the building`. Setup: `v29-L1.json`, `v29-L5.json`, `v29-L9.json`. Measure: decor items per hall, and items in rooms not yet built (`roomOn`). Pass: every hall's count at L1 ≤ L5 ≤ L9, the total rising at each; 0 in unbuilt rooms.
-- `decor: never in the way`. Setup: each layout fully built at L9. Measure: decor footprints overlapping a desk, kiosk, lane, booth, e-gate, carousel, queue slot (`ciSlot`, `secSlot`, `arrSlot`, `ftSlot`), doorway, floor link, or a walk path (8 units either side of the routes between doorways). Pass: 0.
-- `decor: local names from the region`. Setup: `v29-L5.json`. Measure: local signs and the places they name. Pass: every local name contains a `PLACES` name; at least 3 different places; the same names after a reload (not random).
-- `decor: signs fit their halls`. Setup: each layout. Measure: each sign's text width in world units against its hall's width. Pass: every sign at most the hall's width minus 16.
+**Screenshots:** `layouts` adds each layout's three stops at desktop size; each part adds its own at phone (390×844, 320×568), tablet and desktop, by day and night, zoomed out and at 1.6×.
 
-**Roof terrace and spotters (`terrace`):**
-- `terrace: hidden until it can be built`. Setup: `v29-L1.json`, then the same airport set to level 3. Measure: the upgrade in the Terminal tab, the card, the terrace drawn, spotters. Pass: none at L1; the upgrade shown at L3, and the rest once it's bought.
-- `terrace: seen at every zoom`. Setup: bought, Classic, by day; zoomed out (roof solid) and at 1.6×. Measure: pixels over the terrace against the roof's colour. Pass: different from the roof at both zooms.
-- `terrace: spotters crowd for something rare`. Setup: `v29-L9.json` with the terrace, seed 1; a scripted arrival of the biggest type, then an ordinary one, each at 14:00 on a dry day. Measure: `R.spot` before and 30 game minutes after each. Pass: after the rare one at least 12 and three times before; after the ordinary one within ±20%; back within 20% of before inside three game hours.
-- `terrace: fewer at night and in rain`. Setup: as above. Measure: `R.spot` at 02:00, and at 14:00 with `R.fx.rain` on and off. Pass: at most 2 at 02:00; rain at most half of dry.
-- `terrace: the crowd is the only sign`. Setup: the rare arrival above. Measure: toasts and board lines added. Pass: none.
-- `terrace: spotters stay on the roof`. Setup: a game day. Measure: spotters in any terminal queue, and drawn spotters. Pass: 0 in queues; at most 40 drawn.
-- `terrace: small takings`. Setup: `v29-L9.json`, a game day. Measure: the terrace's takings against the day's income. Pass: more than 0 and at most 2%.
-- `terrace: its card fits a phone`. Setup: 320×568 and 390×844 phones. Measure: sideways overflow of Terminal › Staff with the card. Pass: none.
-
-**Each layout's floor plan (`plans`):**
-- `plans: halls inside each main building`. Setup: each layout fully built. Measure: halls outside the layout's main building outline, or overlapping an airside room or a stand's frame. Pass: 0.
-- `plans: the way through, in order, in every layout`. Setup: as above. Measure: routes from the forecourt to each gate lounge, and back from each stand. Pass: departures pass `ci`, `sec`, `mkt` in that order; arrivals pass `imm`, `rec`, `cus`, `arh`; no route joins a departures hall to an arrivals hall except through the airside concourse.
-- `plans: no layout's walk is a trap`. Setup: each layout fully built, the same seed. Measure: the mean forecourt-to-gate walk distance. Pass: every layout within 0.7–1.5× of Classic's.
-- `plans: every layout plays two hours`. Setup: each layout fully built, seed 1. Measure: errors, and passengers stuck over 90 game minutes. Pass: none.
-- `plans: rebuilding moves people into the new plan`. Setup: `v29-L9.json`, mid-hour, switch to each unlocked layout. Measure: passengers outside any room on their floor after the switch. Pass: 0.
-- `plans: old saves load into their layout's plan`. Setup: every save in `tools/saves/`. Measure: passengers outside any room after load. Pass: 0.
-- Screenshots: `layouts` adds each layout's upper and lower floor at desktop size; the parts add their own at phone, tablet and desktop, by day and night, zoomed out and in.
-
-**Measuring [D].** For each part, its PR records:
-- (a) bugs in game code that a pre-written check caught before the PR opened;
-- (b) bugs in game code found after it opened: CI red from its own code, real bugs from review, and problems found when the parts came together or after merge;
-- (c) pre-written checks it had to fix, and how.
-
-Baseline, the terminal's five parts (`docs/LESSONS.md`): three game-code bugs found after PRs opened or at bringing together (the parts' speed together, late gate calls no longer meaning more shopping, level 1's pacing on seed 1), about 0.6 a part; plus three check bugs found late (the hotel's crew rooms, the courier's cost, the baggage check losing passengers). [D] stays if (b) is at most half the terminal's (0.3 a part) and the checks-first PR costs under 15% of the bundle. The look back after the last part records the result in `docs/LESSONS.md`.
+**Measuring [D].** As in the first spec: each part's PR records (a) game-code bugs a pre-written check caught before it opened, (b) game-code bugs found after, and (c) pre-written checks it had to fix. The groundwork recorded one (c). [D] stays if (b) is at most 0.3 a part.
 
 ## Order of work
 
-1. **Checks first** (one PR, from `main` after this spec is approved): the pending mechanism in `tools/check.mjs`, `tools/checks/pending.txt`, and the groups `floors`, `windows`, `decor` and `terrace` (new files in `tools/checks/`). It adds the `plans` checks and the zoomed-in scene to `terminal.mjs` or a new `plans.mjs`, whichever reads better, and records `main`'s numbers the checks compare with. It shows each pending check failing on `main` for the right reason, and is green with them pending. No game code.
-2. **Groundwork** (one PR, after the real airport has merged, since it needs roofs): floors on rooms, floor links as doorways, `L.term` per layout with today's plan in each, `R.floor` and the chip, nothing drawn under a solid roof, and `roofA` if the roofs part doesn't give it. `PLAY` identical on seeds 1–3; the worst scene at least 0.03× faster. It switches on the groundwork's checks and writes the parts' briefs with their measured shares.
-3. **First batch, three parts side by side**, each from `main` after the groundwork, labelled `part:terminal-place`:
-   - two floors in Classic (halls stacked, escalators and the lift, old saves);
-   - windows and watchers;
-   - decor and local character.
-4. **Second batch, two parts**, once the first has merged:
-   - the roof terrace and spotters;
-   - each layout's own floor plan (all eight other layouts, using two floors). If its brief finds it too big, it splits into the pier layouts and the rest.
-   Both may go to the cheaper model (experiment [C]) if their briefs are routine.
-5. **Bring it together:** balance on seeds 1–3 keeping Classic and rebuilding, the speed of every part together, `pending.txt` empty, screenshots of every layout's two floors by day and night, the What's new entry and version, save fixtures, link previews and `docs/SYSTEMS.md`. Then the [D] look back.
+Each step opens one PR from `main`, in this order; a step starts once the one before it has merged unless it says otherwise. Parts are labelled `part:terminal-place`. Their briefs (`docs/briefs/terminal-place-*.md`) are rewritten after approval, with the measured shares.
+
+1. **This spec** (#133 step 1). Owner approval.
+2. **Checks refresh and refactor 7, side by side,** before any part:
+   - **Checks refresh** (no game code): the changed and new checks above in `terrace.mjs` and `floors.mjs`; `floors` down to one play; `pending.txt` updated (see below). It shows each new check failing on `main` for the right reason.
+   - **Refactor 7, one pass over passengers** (`docs/specs/systems-review.md`, step 7), two PRs each with `PLAY` identical: the per-state index and its readers, then the merged pass. **Why before the parts:** the throttled phone is now the tightest budget (3.0 of 8 game minutes a second), and the refactor is the one change expected to win it back; watchers and terrace visitors need "who is waiting" per floor, which the index gives cheaply instead of each part scanning `R.pax`; and the parts register into the three loops it merges, so running it while four parts are open is a merge risk for nothing. It touches no file the checks refresh does, so both run at once. It costs about a day before step 3.
+3. **Two floors in Classic** (#133 step 2): halls stacked, escalators and the lift with queues, runners on the stairs, `paxEase` across floors, tapping a hall's name, old saves. Alone, since every later part stands on its floor links.
+4. **Windows and watchers, and decor and local character** (#133 step 3), two parts side by side.
+5. **The roof terrace floor** (#133 step 4): the terrace room and its link, who goes up, the public side and `R.spot`, famous faces on the roof, runners from the roof and their story lines, the café, the charge, the rating line, the card and the upgrade.
+6. **Each layout's own floor plan** (#133 step 5), terrace included, for all eight other layouts; split into the pier layouts and the rest only if its brief finds it too big. May go to the cheaper model if its brief is routine.
+7. **Bring it together** (#133 step 6): balance on seeds 1–3 keeping Classic and rebuilding, the speed of every part together, `pending.txt` left with comments only, the full run within `main`'s plus 90 s, screenshots of every layout's three stops by day and night, save fixtures, link previews, `docs/SYSTEMS.md`. Then the [D] look back.
+
+One release a day, so the parts can ship one by one; each writes its own What's new fragment.
+
+**`tools/checks/pending.txt` after the checks refresh** (written by step 2, not by this PR). Each part removes its own lines:
+
+```
+# needs halls on two floors: the two floors part
+scene: one floor at a time
+
+# two floors in Classic
+floors: departures upstairs, arrivals below
+floors: people change floor only on escalators and lifts
+floors: families take the lift
+floors: runners take the stairs or escalator
+floors: nobody is stuck between floors
+floors: nobody is drawn through a floor
+floors: walks stay about the same
+floors: tapping a hall goes to its floor
+floors: old saves land on the right floor
+
+# windows and watchers
+windows: glass on every airside wall facing the apron
+windows: passengers watch a big jet go by
+windows: nobody watches after their gate is called
+windows: lit at night
+
+# decor and local character
+decor: nothing to place
+decor: it comes with the building
+decor: never in the way
+decor: local names from the region
+decor: signs fit their halls
+
+# the roof terrace floor
+terrace: hidden until it can be built
+terrace: on the Roof at every zoom, and only there
+terrace: waiting passengers go up and come down
+terrace: runners come down in time, or the story says why
+terrace: a steady handful of spotters
+terrace: a famous face goes up, and the fans follow
+terrace: fewer at night and in rain, and closed to passengers in the wet
+terrace: the crowd is the only sign
+terrace: spotters stay on the roof
+terrace: small takings
+terrace: its own line in the rating
+terrace: its card fits a phone
+
+# each layout's own floor plan
+plans: halls inside each main building
+plans: no layout's walk is a trap
+plans: rebuilding moves people into the new plan
+```
 
 ## Files
 
-- **Checks first:** `tools/check.mjs` (the pending list), `tools/checks/pending.txt`, `floors.mjs`, `windows.mjs`, `decor.mjs`, `terrace.mjs`, and `plans.mjs` or `terminal.mjs`.
-- **Groundwork:** `41-airside` (floors and floor links in routing), `42-terminal` (`L.term` in place of the shared tables), `39-layouts` (each layout's entry), `43`–`47` (places read from the layout's table), and `50-scene` (one floor, nothing under a solid roof).
-- **Parts:** each in its own new file, numbered after the real airport's (from 56): `56-floors`, `57-windows`, `58-decor`, `59-terrace`, `60-plans`. They edit only the tables and hooks their briefs name.
+- **Checks refresh:** `tools/checks/terrace.mjs`, `tools/checks/floors.mjs` and `tools/checks/pending.txt`.
+- **Refactor 7:** `07-passengers.js`, `08-stands.js`, `11-main-update.js`, `46-market.js`, as its own spec says.
+- **Parts:** each in its own new file after the last one on `main`: floors, windows, decor, terrace and plans. They edit only the tables and hooks their briefs name; the terrace part adds one hook each to `46-market.js` (`nextAct`), `61-late-runners.js` (the stairs and story lines) and `64-famous-faces.js` (the celebrity going up).
+- **Notes:** `docs/systems/terminal.md` and `airport-scene.md`, and a new file per part in `docs/systems/`.
 
 ## Left out
 
-- Placing, moving or buying decor (the owner said no).
-- Decor that changes the rating (the owner chose not to).
-- More than two floors, mezzanines and cutaway views of both floors at once.
+- Placing, moving or buying decor; decor that changes the rating.
+- More than two floors of halls, mezzanines and cutaway views of two floors at once.
+- Spotters as passengers with trips; arriving passengers on the terrace; a terrace ticket the player prices.
 - Staff as people; kinds of passenger and their reviews (bundle 4).
-- An isometric view.
-- Spotters as passengers with trips.
-- Seasons.
+- An isometric view; seasons.
+
+## Choices for the owner
+
+All five approved at their defaults on 28 Sep 2026 (#139). Of the spec's suggestions, the owner declined only spotters crowding for rare arrivals: spotters are a steady handful instead.
+
+1. **The terrace's two sides** (passengers airside, the public landside by its own lift). Default: yes. Otherwise passengers only, with spotters drawn among them as a count.
+2. **What it earns:** a café for passengers and a small charge on the public side, together at most 2% of a day's income. Default: both, capped at 2%. Otherwise the café only, or a higher cap (up to 4%) with the Balance workflow's word.
+3. **Its rating line:** a small lift for passengers who went up and made their flight (at most +0.4 a day), a small cost when it's crowded. Default: yes. Otherwise no rating effect, like decor.
+4. **Closed to passengers in rain, snow and storms.** Default: yes.
+5. **Refactor 7 before the parts.** Default: yes, side by side with the checks refresh. Otherwise alongside the first parts.

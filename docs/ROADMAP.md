@@ -5,7 +5,7 @@ What's being worked on, what's next, and ideas not yet agreed. Now, Next, the ru
 ## Now
 
 <!-- joined:now from docs/roadmap.d/ (Section: now) by tools/join.mjs: don't edit between these lines -->
-- **The terminal as a place** (#48, spec `docs/specs/terminal-place.md`, approved): two floors, windows, decor that comes with the building, local character, a roof terrace with spotters, and each layout's own floor plan. Its checks are written (experiment [D]) and wait in `tools/checks/pending.txt`; next the groundwork, then the parts.
+- **The terminal as a place, multiple floors** (#48, #133; spec `docs/specs/terminal-place.md`, refreshed and re-approved 28 Sep 2026): departures upstairs and arrivals below, a roof terrace passengers go up to (with spotters, famous faces and photos), windows, decor that comes with the building, local character, and each layout's own floor plan. The groundwork has merged and the checks wait in `tools/checks/pending.txt`; next the checks refresh and refactor 7, then the parts in order.
 <!-- /joined:now -->
 
 ## The owner's order of bundles
