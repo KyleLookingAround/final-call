@@ -1,5 +1,5 @@
 // Page size budget (docs/decisions/ADR-2026-09-28-page-size-budget.md): dist/index.html, which grows with every feature,
-// stays under a byte budget. Reads the file the build already made; starts no browser.
+// stays under a byte budget. Reads the file the build already made rather than opening a page.
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
 
@@ -8,13 +8,15 @@ import {join} from 'node:path';
 const BUDGET=861_000;
 
 const KB=n=>(n/1000).toFixed(1)+' KB';
+// the byte offset of a marker, or a thrown error (which fails the whole group loudly) if the page's shape changed
+const at=(html,marker,from=0)=>{const i=html.indexOf(marker,from);if(i<0)throw new Error(`page-size: no ${marker} in dist/index.html`);return i};
 
 export default async function({ok,root}){
-  const html=readFileSync(join(root,'dist/index.html'),'utf8');
-  const size=Buffer.byteLength(html,'utf8');
+  const buf=readFileSync(join(root,'dist/index.html'));
+  const size=buf.length,html=buf.toString('utf8');
 
-  const styleStart=html.indexOf('<style>'),styleEnd=html.indexOf('</style>')+'</style>'.length;
-  const scriptStart=html.indexOf('<script>',styleEnd),scriptEnd=html.indexOf('</script>',scriptStart)+'</script>'.length;
+  const styleStart=at(html,'<style>'),styleEnd=at(html,'</style>',styleStart)+'</style>'.length;
+  const scriptStart=at(html,'<script>',styleEnd),scriptEnd=at(html,'</script>',scriptStart)+'</script>'.length;
   const css=html.slice(styleStart,styleEnd),script=html.slice(scriptStart,scriptEnd);
   const markup=html.slice(0,styleStart)+html.slice(styleEnd,scriptStart)+html.slice(scriptEnd);
   const data=[...markup.matchAll(/data:[^"'\s)]+/g)].reduce((n,m)=>n+Buffer.byteLength(m[0],'utf8'),0);

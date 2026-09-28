@@ -15,7 +15,7 @@ Accepted.
 
 ### Option 2: A check group with a fixed byte budget
 **Description:** `tools/checks/page-size.mjs` reads the `dist/index.html` the build already made and fails if it's over a budget, printing the size, the budget and a breakdown by CSS, script and inline images/data.
-**Pros:** costs nothing extra in CI (no browser, one file read); catches a size regression on the PR that causes it, with enough detail to see which part grew.
+**Pros:** the check itself is one file read, no browser; on a full run (every group, already paying for a browser) it adds negligible time, and it catches a size regression on the PR that causes it, with enough detail to see which part grew.
 **Cons:** a budget can go stale and needs raising on purpose sometimes.
 
 ## Decision
