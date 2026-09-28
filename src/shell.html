@@ -238,6 +238,15 @@ body.fs .tabs .drawclose{display:grid}
 .tip .tt b{font-weight:600}
 .tip .buy{min-width:0;padding:7px 9px 6px;font-size:12.5px}
 .tip .snooze{border:0;background:none;color:var(--muted);font:600 14px/1 var(--mono);padding:4px;flex:none}
+.dim{position:absolute;inset:0;z-index:15;cursor:pointer;touch-action:none}
+.dimbar{position:absolute;top:8px;left:8px;right:8px;display:flex;flex-wrap:wrap;justify-content:center;align-items:baseline;gap:3px 12px;background:rgba(10,12,15,.86);padding:7px 10px 9px;border-radius:6px;font:500 12.5px/1.25 var(--mono);font-variant-numeric:tabular-nums;color:var(--muted);overflow:hidden;pointer-events:none}
+.dimbar b{color:#ECE8DF;font-weight:600} .dimbar b.neg{color:var(--bad)}
+#dimClock{color:var(--sign);font-size:17px;font-weight:700}
+.dimk{font:700 11px/1.4 var(--disp);letter-spacing:.14em;text-transform:uppercase}
+#dimProg{position:absolute;left:0;bottom:0;height:3px;width:0;background:var(--sign)}
+.dimgo{margin-top:8px}
+.stage.dimming>:not(canvas):not(.dim):not(.toasts){visibility:hidden}
+@media (max-width:420px){.dimbar{gap:2px 9px;font-size:11.5px}}
 .ptag{position:absolute;top:8px;left:50%;transform:translateX(-50%);background:var(--sign);color:var(--signInk);font:700 11px/1 var(--disp);letter-spacing:.14em;text-transform:uppercase;padding:6px 9px 5px;border-radius:4px;white-space:nowrap;pointer-events:none}
 .help{position:fixed;inset:0;z-index:50;background:rgba(5,6,8,.72);display:grid;place-items:center;padding:16px}
 .hcard{background:var(--surface);border:1px solid var(--line);border-radius:12px;width:min(640px,100%);max-height:100%;overflow:auto;padding:18px 20px 20px}
@@ -523,6 +532,7 @@ body.fsstack .toasts{top:calc(var(--hb,42px) + 36px)}
 .lreq.chal.done>span:first-child{color:var(--good)}
 .segs.many{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
 .segs.many .chip{flex:none}
+@media (max-width:440px){.segs.set4{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}} /* Office › Settings' four chips, two by two on phones */
 .stamps{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px 10px;margin:10px 2px 4px}
 .stamp{--c:#FFC72C;border:2px solid var(--c);color:var(--c);border-radius:12px;padding:10px 8px 9px;text-align:center;transform:rotate(var(--r,0deg));background:color-mix(in srgb,var(--c) 7%,transparent);box-shadow:inset 0 0 0 3px var(--surface),inset 0 0 0 4px color-mix(in srgb,var(--c) 55%,transparent);display:grid;gap:4px;align-content:center;min-height:88px}
 .stamp b{font:800 14px/1.05 var(--disp);letter-spacing:.08em;text-transform:uppercase}
@@ -655,6 +665,7 @@ body.photo .board,body.photo .side,body.photo .topgap,body.photo .spot,body.phot
     <div class="toasts" id="toasts" aria-live="polite"></div>
     <div class="cam" id="cam" role="group" aria-label="Camera"></div>
     <div class="tip" id="tip" hidden></div>
+    <div class="dim" id="dim" hidden role="button" aria-label="Stop the time-lapse"><div class="dimbar"><span class="dimk">Yesterday · <span id="dimDay"></span></span><b id="dimClock">00:00</b><span><b id="dimFl">0</b> flights</span><span><b id="dimPax">0</b> passengers</span><span><b id="dimOt">–</b> on time</span><span><b id="dimMoney">$0</b></span><span class="dimk dimstop">Tap to stop</span><i id="dimProg"></i></div></div>
     <div class="ptag" id="ptag" hidden>Paused<span class="pk"> · Space to resume</span></div>
     <div class="fsbar" aria-live="off"><span class="c" id="fsCash">$0</span><span id="fsClock">06:00</span><span class="k rt2" id="fsOn"></span></div>
     <button class="fsmanage" id="fsManage">Manage<span class="dot" id="fsDot" hidden></span></button>
@@ -749,7 +760,7 @@ body.photo .board,body.photo .side,body.photo .topgap,body.photo .spot,body.phot
       <div class="hk"><i class="sq" style="background:#CDD4DA;width:12px"></i>Assistance buggy</div>
     </div>
     <h3>Growing</h3>
-    <p><b>Levels:</b> hit the targets in Office › Plan to climb ten levels. Each level brings plan points.</p>
+    <p><b>Levels:</b> hit the targets in Office › Progress to climb ten levels. Each level brings plan points.</p>
     <p><b>Masterplan:</b> press <kbd>P</kbd>. Spend plan points to approve plans that unlock aircraft, routes, upgrades, shops and transport. You can’t have everything at once, so choose what your airport needs.</p>
     <p><b>Routes:</b> press <kbd>W</kbd> for the world map. Each city has a market: open new routes when your flights start leaving emptier. Planes fly the best route within their range. Business cities pay more, holiday cities fill up in their season, and some attract groups.</p>
     <p><b>Fleet:</b> bigger jets reach further. More planes keep gates busy; partner airlines fill the gaps for a cut.</p>
