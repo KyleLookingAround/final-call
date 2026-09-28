@@ -1,6 +1,6 @@
 # A network you have to keep
 
-Issue: #96 · Status: Proposed · PRs: (added as they open)
+Issue: #96 · Status: Built · PRs: #101 (spec), the build PR (added when it opens)
 
 From `docs/specs/systems-review.md`, Part 2, proposal 1. Not built: the owner approves this first.
 
@@ -53,3 +53,12 @@ Today the dispatcher sends every plane to the few routes that pay most per hour,
 - Plane sizes, running costs and the "biggest plane wins" rule (#57 idea 5, parked): the frequency term is the only part taken.
 - Closing routes, losing the route fee, slots (proposal 6) and Lowmere fighting back (#57 idea 8).
 - The rating that reflects the last day (#96's other half), which this doesn't need but makes bite harder.
+
+## As built
+
+- **Want.** It's base market ÷ 400, from 1 to 4 a day, not ÷ 150. At ÷ 150 most routes wanted more flights than the whole fleet flies. Service counts partners' departures as well as yours.
+- **Frequency term.** It's centred, `1 + 0.15 × biz × (min(1, service ÷ want) − 0.5)`, so a route flown at half its want is neutral and total demand hardly moves.
+- **Route card.** The card has a service line ("Flown 0.4× a day (partners 0.3×); it wants 3. 88% of its market is left: it's going quiet.") and Keep chips (Off, 1, 2 or 4 a day). There's no separate bar.
+- **Route manager.** It recommends "Keep" for the biggest route going quiet. It doesn't mark routes Keep or Let go by itself when Auto is on. That, and "Let go", are left for later.
+- **Bot.** Unchanged: its fleet buying still ends on widebodies, and it never uses Keep. Partners keep the network alive for it.
+- **Daily step.** It runs first thing in `rivalDay` rather than as a new `DAY` hook, so the recorded clock order is unchanged.

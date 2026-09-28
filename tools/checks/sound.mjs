@@ -27,9 +27,12 @@ export default async function({open,ok,saveText}){
   const sim=await page.evaluate(()=>{const S=__sim,R=S.R;S.ensureAudio();R.sim=true;for(let k=0;k<600;k++){S.update(0.1);S.soundTick(1e6+k*100)}R.sim=false;
     return {log:S.SND.log.length,q:S.SND.q.length,osc:__snd.osc.length,amb:!!S.SND.amb}});
   ok('sound: nothing is watched, queued or played in the headless sim',!sim.log&&!sim.q&&!sim.osc&&!sim.amb,JSON.stringify(sim));
-  // a morning at 1x: your own flights' boarding, gate calls and final calls, each once
-  const day=await page.evaluate(()=>{const S=__sim,R=S.R,G=S.G;toHour(8);let partners=0,freighters=0;
-    for(let m=0;m<300;m++){drive(1,1);for(const i of S.SIDX){const F=R.st[i].F;if(F&&F.partner)partners++;if(F&&F.freighter)freighters++}}
+  // a morning at 1x: your own flights' boarding, gate calls and final calls, each once. Whether a flight is still boarding
+  // 10 minutes before it leaves depends on how full the day's flights are, so the first of yours to start boarding
+  // has its departure brought forward, to be sure of one final call
+  const day=await page.evaluate(()=>{const S=__sim,R=S.R,G=S.G;toHour(8);let partners=0,freighters=0,late=null;
+    for(let m=0;m<300;m++){drive(1,1);for(const i of S.SIDX){const F=R.st[i].F;if(F&&F.partner)partners++;if(F&&F.freighter)freighters++;
+      if(!late&&F&&!F.partner&&!F.freighter&&F.plane&&F.plane.state==='boarding'&&S.isCalled(F)&&F.seated<F.booked-5){late=F;F.std=Math.min(F.std,G.clock+9)}}}
     const L=S.SND.log,dup=new Set(),twice=L.filter(x=>{const k=x.k+x.f;if(dup.has(k))return true;dup.add(k);return false}).map(x=>x.k+' '+x.f);
     return {kinds:kinds(L),notOwn:L.filter(x=>!x.own).length,twice,partners,freighters,played:S.SND.played.length,words:S.SND.played.filter(p=>p.words).length,line:document.querySelector('#bann').hidden?null:document.querySelector('#bann').textContent}});
   ok('sound: your flights’ boarding, gate calls and final calls each announce once, never a partner’s or freighter’s',

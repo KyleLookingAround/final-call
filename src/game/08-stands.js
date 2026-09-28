@@ -170,6 +170,7 @@ function settle(i){
   const op=F.partner?0:(F.op??F.ac.op*fuelMul());if(op)spend(op,'costs',i);else earn(F.ac.op*0.6,'handling',null,null,null,F,i);
   {const fl=G.fleet[F.fleetIdx];if(fl)fl.wear=(fl.wear||0)+F.ac.wear*(1-0.25*G.lv.hangar)}
   if(nightWin()&&!pol('curfew')){const nz=(1-0.3*G.lv.insul)*(F.freighter?1.5:1)*(1+0.25*G.level);G.noiseDay=(G.noiseDay||0)+nz;R.noiseT=G.clock;repAdj(-0.4*nz,'noise',i)}
+  if(F.partner&&F.city&&routeOpen(F.city)){const rs=rsOf(F.city);rs.pn=(rs.pn||0)+1}
   if(!F.partner&&F.city&&!F.freighter){const rs=rsOf(F.city),lf=F.booked/F.seatsN;rs.p+=F.booked;rs.v+=F.rev;rs.n++;rs.c=(rs.c||0)+op;rs.tp+=F.booked;rs.tv+=F.rev;rs.tn++;rs.tc=(rs.tc||0)+op;rs.lf=rs.tn>1?rs.lf*0.7+lf*0.3:lf}
   G.flights++;G.flown+=F.booked;{const h=Math.floor(G.clock/60)%24;dayAdd('flights');if(onTime)dayAdd('ontime');if(!F.freighter&&F.booked>=F.seatsN)dayAdd('full');if(h>=23||h<5)dayAdd('night');if(onTime&&weather.on('snow'))dayAdd('snowOT')}
   const mins=Math.max(1,G.clock-(F.firstScan??F.boardStart??F.start));

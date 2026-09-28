@@ -167,6 +167,9 @@ function routeRecs(){
   if(rivLive()){const weak=open.filter(c=>rivRoute(c)&&rsOf(c).n>=1).map(c=>[c,rivShare(c)]).filter(x=>x[1]<0.55).sort((a,b)=>a[1]-b[1])[0];
     if(weak){const [c,sh]=weak,fi=routeFareIx(c),cut=fi>0&&rivShare(c,fi-1)>sh+0.04;
       out.push({text:`Defend ${CITY[c].name}`,sub:`Lowmere takes ${Math.round((1-sh)*100)}% of its travellers. ${cut?'A lower fare wins some back, as do more flights and punctuality.':'More flights a day and better punctuality win travellers back.'}`,btn:cut?`<button class="buy ghost" data-rfare="${c}:${fi-1}">Cut fare</button>`:`<button class="buy ghost" data-rlook="${c}">Show</button>`,tag:'LOW'})}}
+  // a route going quiet: the biggest market you're losing, with Keep one tap away
+  if(netOn()){const q=open.filter(c=>keepOf(c)<0.95&&!G.routes[c].keep&&serviceOf(c)<wantOf(c)*0.5).sort((a,b)=>baseMarket(b)-baseMarket(a))[0];
+    if(q)out.push({text:`Keep ${CITY[q].name}`,sub:`Flown ${serviceOf(q).toFixed(1)}× a day, so ${Math.round((1-keepOf(q))*100)}% of its travellers have gone elsewhere.${rivRoute(q)?' Lowmere flies there.':''} Keeping it flown once a day stops the slide.`,btn:`<button class="buy ghost" data-rkeep="${q}:1">Keep 1 a day</button>`,tag:'ROUTE'})}
   // fleet: a jet for routes nobody can fly, or more planes when every flight is full and gates wait
   {const reach=Math.max(...open.map(c=>CITY[c].tier),0);if(reach>mt){const t=AC_ORDER.filter(t=>!AIRCRAFT[t].freighter&&has('ac:'+t)&&AIRCRAFT[t].tier>=reach&&(AIRCRAFT[t].tier<4||G.pierB)).sort((a,b)=>AIRCRAFT[a].cost-AIRCRAFT[b].cost)[0];
       if(t!=null)out.push({text:`Buy an ${AIRCRAFT[t].name}`,sub:`None of your planes can reach your ${RT_NAMES[reach].toLowerCase()} routes.`,btn:`<button class="buy" data-acbuy="${t}" data-cost="${AIRCRAFT[t].cost}">${money(AIRCRAFT[t].cost)}</button>`,tag:'PLANE'})}
