@@ -17,6 +17,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 - [Polish audit · 27 Sep 2026](lessons/main-polish-audit.md)
 - [Version 32: ready for what's next · 27 Sep 2026](lessons/main-release-32.md)
+- [Day in a minute (#102) · 28 Sep 2026](lessons/102-day-in-a-minute.md)
 - [Photo mode (#100) · 27 Sep 2026](lessons/100-photo-mode.md)
 - [#98 Systems refactor 8: weather in one place · 27 Sep 2026](lessons/98-refactor-weather.md)
 - [Rebuild figures and the moving walkways follow-up · 27 Sep 2026](lessons/97-docs-rebuild-figures.md)
