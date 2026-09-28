@@ -22,6 +22,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 - [Polish audit · 27 Sep 2026](lessons/main-polish-audit.md)
 - [Version 32: ready for what's next · 27 Sep 2026](lessons/main-release-32.md)
+- [Gate cards and the Pier B mover (#119, #120) · 28 Sep 2026](lessons/127-phone-bugs.md)
 - [The terminal as a place: groundwork, with refactor 9 · 28 Sep 2026](lessons/113-terminal-groundwork.md)
 - [Polish: put things where players look (#112) · 28 Sep 2026](lessons/112-polish-where-to-look.md)
 - [Famous faces (#111) · 28 Sep 2026](lessons/111-famous-faces.md)
