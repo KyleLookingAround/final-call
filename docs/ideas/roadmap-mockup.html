@@ -1,0 +1,182 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Final Call Roadmap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=Saira+Condensed:wght@500;600;700;800&display=swap">
+<style>
+/* The game's own palette and faces (src/shell.html), so this board can move into the game as it is. One dark look, like the terminal's boards. */
+:root{
+  color-scheme:dark;
+  --ground:#14171B; --surface:#1B2025; --surface2:#232930; --line:#323A43; --text:#ECE8DF; --muted:#909AA4;
+  --sign:#FFC72C; --signInk:#17181A; --good:#6BE39A; --board:#0A0C0F; --flap:#1A1D22; --sky:#7CC4FF; --champ:#F5D08A;
+  --disp:'Saira Condensed','Arial Narrow',system-ui,sans-serif;
+  --body:Hind,system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+html{background:var(--ground)}
+body{background:var(--ground);color:var(--text);font:16px/1.5 var(--body);padding-inline:16px;padding-block:20px 40px}
+.wrap{max-width:980px;margin:0 auto;display:grid;gap:22px}
+
+/* the yellow wayfinding sign */
+header{display:grid;gap:10px}
+.sign{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;background:var(--sign);color:var(--signInk);border-radius:6px;padding:10px 16px}
+.sign h1{margin:0;font:800 clamp(28px,6vw,44px)/1 var(--disp);letter-spacing:.02em;text-transform:uppercase;text-wrap:balance}
+.sign .arrow{font:700 clamp(24px,5vw,36px)/1 var(--disp)}
+.sign .clock{margin-left:auto;font:600 14px/1 var(--mono);letter-spacing:.04em}
+.lede{margin:0;max-width:62ch;color:var(--muted)}
+.lede b{color:var(--text);font-weight:600}
+
+/* filters */
+.filters{display:flex;flex-wrap:wrap;gap:8px}
+.filters button{font:700 14px/1 var(--disp);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:10px 14px;min-height:40px;cursor:pointer}
+.filters button[aria-pressed="true"]{background:var(--text);color:var(--signInk);border-color:var(--text)}
+.filters button:focus-visible,.row summary:focus-visible{outline:2px solid var(--sign);outline-offset:2px}
+.filters .n{font-family:var(--mono);font-weight:500;letter-spacing:0;margin-left:6px;opacity:.75}
+
+/* the board */
+.board{background:var(--board);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.bhead,.row summary{display:grid;grid-template-columns:5.5rem 1fr 9.5rem;gap:12px;align-items:center;padding-inline:14px}
+.bhead{padding-block:10px;background:var(--surface);border-bottom:1px solid var(--line);font:700 12px/1 var(--disp);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.bhead span:last-child{text-align:right}
+.group{padding:14px 14px 6px;font:700 13px/1 var(--disp);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);border-top:1px solid var(--line)}
+.group:first-of-type{border-top:0}
+.group small{font:400 13px/1.4 var(--body);letter-spacing:0;text-transform:none;display:block;margin-top:4px}
+.row{border-top:1px solid #1C2127}
+.row summary{list-style:none;cursor:pointer;padding-block:11px}
+.row summary::-webkit-details-marker{display:none}
+.row summary:hover{background:#11151A}
+.code{font:600 15px/1 var(--mono);color:var(--sign);letter-spacing:.04em}
+.what{min-width:0}
+.what b{display:block;font:700 clamp(17px,2.6vw,21px)/1.15 var(--disp);letter-spacing:.03em;text-transform:uppercase;color:var(--text)}
+.what span{display:block;color:var(--muted);font-size:14.5px;line-height:1.35;margin-top:3px}
+.status{justify-self:end;display:flex;gap:3px}
+.flap{display:inline-grid;place-items:center;min-width:1.05em;height:1.6em;padding:0 1px;background:var(--flap);border-radius:2px;font:600 14px/1 var(--mono);position:relative;overflow:hidden}
+.flap::after{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:#000;opacity:.7}
+.st-landed .flap{color:var(--muted)}
+.st-next .flap{color:var(--good)}
+.st-boarding .flap{color:var(--sign)}
+.st-scheduled .flap{color:var(--text)}
+.st-radar .flap{color:var(--sky)}
+.detail{padding:2px 14px 16px calc(14px + 5.5rem + 12px);display:grid;gap:8px}
+.detail ul{margin:0;padding-left:1.1em;display:grid;gap:4px;max-width:64ch}
+.detail li::marker{color:var(--sign)}
+.detail p{margin:0;max-width:64ch;color:var(--muted);font-size:14.5px}
+.what .chev{display:inline-block;margin-top:0;transition:transform .15s;color:var(--muted);margin-left:6px;font-size:12px}
+.row[open] .what .chev{transform:rotate(90deg)}
+
+.legend{display:flex;flex-wrap:wrap;gap:10px 22px;color:var(--muted);font-size:14px}
+.legend span{display:inline-flex;gap:8px;align-items:center}
+.legend i{width:10px;height:10px;border-radius:2px;display:inline-block}
+footer{color:var(--muted);font-size:14px;display:grid;gap:6px;max-width:70ch}
+footer a{color:var(--sign)}
+
+@media (max-width:620px){
+  .bhead,.row summary{grid-template-columns:1fr auto;gap:6px 10px}
+  .bhead span:first-child,.code{display:none}
+  .status .flap{min-width:.95em;height:1.45em;font-size:12px}
+  .detail{padding-left:14px}
+}
+@media (max-width:360px){ .status .flap{min-width:.85em;font-size:11px} }
+@media (prefers-reduced-motion:reduce){ .chev{transition:none} }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="sign"><span class="arrow" aria-hidden="true">↗</span><h1>Final Call Roadmap</h1><span class="clock" id="clock">UPDATED 28 SEP</span></div>
+    <p class="lede">What's coming to your airport. <b>Landed</b> is already in the game, <b>Next update</b> is finished and on its way, <b>Boarding</b> is being planned now, <b>Scheduled</b> is in the queue, and <b>On the radar</b> is ideas we like that aren't promised yet. Tap a flight for the details.</p>
+  </header>
+
+  <nav class="filters" id="filters" aria-label="Show"></nav>
+
+  <section class="board" aria-label="Roadmap board">
+    <div class="bhead" aria-hidden="true"><span>Flight</span><span>Destination</span><span>Status</span></div>
+    <div id="rows"></div>
+  </section>
+
+  <div class="legend" aria-hidden="true">
+    <span><i style="background:var(--muted)"></i>Landed</span>
+    <span><i style="background:var(--good)"></i>Next update</span>
+    <span><i style="background:var(--sign)"></i>Boarding</span>
+    <span><i style="background:var(--text)"></i>Scheduled</span>
+    <span><i style="background:var(--sky)"></i>On the radar</span>
+  </div>
+
+  <footer>
+    <p>Plans change as the game grows, and ideas on the radar may never fly. Anything on this board keeps your saved airport: older saves always load.</p>
+    <p>Play at <a href="https://kylelookingaround.github.io/final-call/">kylelookingaround.github.io/final-call</a>. Something you'd like to see? Use Send feedback in the game's Help.</p>
+  </footer>
+</div>
+
+<script>
+// One list, so the game can show the same board one day. st: landed, next, boarding, scheduled, radar.
+const ROADMAP=[
+  {st:'next',code:'FC35',t:'Late runners',s:'Shoppers sprint for the gate at final call.',d:['Passengers still in the shops when the board says FINAL CALL run for their gate, and it may close on them.','Tap a departing passenger to read their day as a story, and how they feel about it.']},
+  {st:'next',code:'FC35',t:'Routes you have to keep',s:'Neglected routes fade; partners fill the gaps.',d:['A route you rarely fly goes quiet and its travellers drift away, and Lowmere moves in.','Partner airlines fill the routes you fly least, so you see them on the board.','Mark a route Keep and your planes fly it at least that often.']},
+  {st:'next',code:'FC35',t:'A sooner first level',s:'Local Airport in about five minutes.',d:['Local Airport now asks for 80 passengers flown, so the Masterplan and the region open in the first morning.','Later levels ask what they did before.']},
+  {st:'next',code:'FC35',t:'A What’s new you can act on',s:'Short points with a Show me button.',d:['Each change is a bold lead and one short line.','Show me takes you straight to what changed, and points for levels you haven’t reached wait until you get there.']},
+  {st:'next',code:'FC35',t:'Phone polish',s:'The first minute on a phone, smoothed out.',d:['The guided start’s “tap gate A1” step points where you can tap.','Tabs, the board, stats and the goal bar no longer clip on small phones, and buttons are easier to hit.','Stand cards no longer overlap, the Pier B mover glides, and nobody walks through walls.']},
+
+  {st:'boarding',code:'SOON',t:'Multiple floors',s:'Departures upstairs, arrivals below, and a roof you can visit.',d:['Departures on the upper floor: check-in, security, the market place and the gate lounges. Arrivals below: immigration, reclaim, customs and the arrivals hall.','Escalators and a lift between them, with their own queues. Families and passengers who need help take the lift.','A roof terrace passengers go up to while they wait, to watch the planes and take photos. When someone famous flies through, fans and photographers crowd it.','Glass along the apron, lit at night, where people gather when a big jet taxis past.','Planters, benches, art and signs that come with the building, and shops named after towns in your region.','Every layout gets its own floor plan, and the Roof, Departures and Arrivals buttons each show their own floor.'],n:'The plan is being written now. It will be built in stages and may arrive over more than one update.'},
+
+  {st:'scheduled',code:'TBA',t:'Passengers with a voice',s:'Hear what your travellers think, and where it hurts.',d:['Different kinds of passenger, with their own wants.','Reviews that pop up on the map where they happened.','A heat map of where passengers are unhappy, and a tap on a complaint takes you to its fix.','Follow one passenger through their trip.']},
+  {st:'scheduled',code:'TBA',t:'A 24-hour airport with stakes',s:'Ground crews, cargo, night flights and airlines that leave.',d:['Ground crews and turnarounds you can see and plan.','Cargo and night flights, with the noise that comes with them.','Airlines that walk away if they’re treated badly, so an airport can really fail.']},
+  {st:'scheduled',code:'TBA',t:'Hub and a second airport',s:'Connecting waves, and running Lowmere.',d:['Arrival and departure waves that turn your airport into a hub.','Run a second airport, starting with Lowmere.','Rivals and airline alliances.']},
+
+  {st:'radar',code:'IDEA',t:'A second rival',s:'A new airport grows at a coast town.',d:['Later on, a holiday airport grows in the region with its own flights and its own share of travellers.']},
+  {st:'radar',code:'IDEA',t:'Build from the map',s:'Tap an empty site to buy it there.',d:['Tap an empty stand, shop unit or car park on the map to buy it on the spot.']},
+  {st:'radar',code:'IDEA',t:'Building sites you can watch',s:'Fences, a crane and a progress ring.',d:['Each site shows its fences and crane while it’s built, with a ring for how far along it is.']},
+  {st:'radar',code:'IDEA',t:'Holding points and rapid exits',s:'A queue for the runway at busy times.',d:['Planes queue at the holding point at peaks, and a rapid-exit taxiway clears landings sooner.']},
+  {st:'radar',code:'IDEA',t:'A card for each plane',s:'Age, hours, wear, routes, and a name.',d:['Tap a plane for its story so far, and name it for the board.']},
+  {st:'radar',code:'IDEA',t:'Route openings',s:'A water-cannon salute for a first flight.',d:['A new route’s first flight gets a salute, and its first week is shown against the forecast on the world map.']},
+  {st:'radar',code:'IDEA',t:'Charters and big groups',s:'A school trip or a stag party, all at once.',d:['Short-notice charters for a club, a tour or a school, and big groups that swamp check-in, flagged on the board a day ahead.']},
+  {st:'radar',code:'IDEA',t:'Car parks by kind',s:'Short stay, long stay, valet, and a multi-storey.',d:['Each priced on its own, with a shuttle from the long-stay park and a multi-storey you can see.']},
+  {st:'radar',code:'IDEA',t:'Toilets and cleaners',s:'Busy halls need looking after.',d:['Queues at busy toilets and messy halls at peaks, kept right by cleaners you roster.']},
+  {st:'radar',code:'IDEA',t:'Find anything',s:'Type a flight, gate, city or line.',d:['The camera goes straight to whatever you type.']},
+  {st:'radar',code:'IDEA',t:'Easier to see and read',s:'Colour-blind friendly lines, and larger text.',d:['Route and line colours that work for colour-blind players, and a larger-text option.']},
+  {st:'radar',code:'IDEA',t:'Music',s:'A calm score that follows your day.',d:['Music that shifts with the time of day and how busy the airport is.']},
+
+  {st:'landed',code:'V34',t:'Famous faces and a real-looking region',s:'Celebrities fly through; the region looks like a real map.',d:['From level 3, an invented footballer, pop star, film actor or royal flies through now and then, with photographers and fans.','The region map is redrawn with relief, fields, woods and towns that glow at night.','A Fleet tab beside Gates for your planes, crews and servicing.']},
+  {st:'landed',code:'V33',t:'A rating that keeps you on your toes',s:'Plus Day in a minute and Photo mode.',d:['Your rating follows the last day of flights, with an arrow for which way it’s heading.','Day in a minute plays back yesterday over your airport.','Photo mode hides the panels so you can frame a picture.']},
+  {st:'landed',code:'V31',t:'Looks like a real airport',s:'Planes, vehicles, markings, lights and weather.',d:['Detailed planes, turnaround trucks, painted stands, night lighting, and rain, snow and fog you can see.']},
+];
+const STATUS={landed:'LANDED',next:'NEXT UPDATE',boarding:'BOARDING',scheduled:'SCHEDULED',radar:'ON RADAR'};
+const SHORT={landed:'LANDED',next:'NEXT',boarding:'BOARDING',scheduled:'LATER',radar:'IDEA'};
+const GROUPS=[
+  ['next','Next update','Finished and on its way.'],
+  ['boarding','Boarding','Being planned now.'],
+  ['scheduled','Scheduled','In the queue, in this order.'],
+  ['radar','On the radar','Ideas we like. Not promised.'],
+  ['landed','Landed','Recently arrived in the game.'],
+];
+const FILTERS=[['all','All'],...GROUPS.map(g=>[g[0],g[1]])];
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const narrow=()=>matchMedia('(max-width:620px)').matches;
+const flaps=(st)=>{const w=narrow()?SHORT[st]:STATUS[st];return [...w].map(c=>`<span class="flap">${c===' '?'&nbsp;':esc(c)}</span>`).join('')};
+
+let current='all';
+try{const v=localStorage.getItem('fc-roadmap-filter');if(v&&FILTERS.some(f=>f[0]===v))current=v}catch(e){}
+
+function render(){
+  const f=document.getElementById('filters');
+  f.innerHTML=FILTERS.map(([k,l])=>{const n=k==='all'?ROADMAP.length:ROADMAP.filter(r=>r.st===k).length;return `<button type="button" id="f-${k}" data-k="${k}" aria-pressed="${k===current}">${esc(l)}<span class="n">${n}</span></button>`}).join('');
+  const out=[];
+  for(const [k,label,sub] of GROUPS){
+    if(current!=='all'&&current!==k)continue;
+    out.push(`<div class="group">${esc(label)}<small>${esc(sub)}</small></div>`);
+    for(const r of ROADMAP.filter(r=>r.st===k)){
+      out.push(`<details class="row st-${k}"><summary><span class="code">${esc(r.code)}</span><span class="what"><b>${esc(r.t)}<span class="chev" aria-hidden="true">▸</span></b><span>${esc(r.s)}</span></span><span class="status" aria-label="${STATUS[k]}">${flaps(k)}</span></summary><div class="detail"><ul>${r.d.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>${r.n?`<p>${esc(r.n)}</p>`:''}</div></details>`);
+    }
+  }
+  document.getElementById('rows').innerHTML=out.join('');
+}
+document.getElementById('filters').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-k]');if(!b)return;
+  current=b.dataset.k;try{localStorage.setItem('fc-roadmap-filter',current)}catch(e){}
+  render();
+});
+let wasNarrow=narrow();
+addEventListener('resize',()=>{if(narrow()!==wasNarrow){wasNarrow=narrow();render()}});
+render();
+</script>
+
+</body></html>
