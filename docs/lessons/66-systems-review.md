@@ -1,3 +1,4 @@
+Theme: review
 # Systems review · 27 Sep 2026
 
 - **Numbers:** session `session_016cnDJAUK5qfd7mjnFwXcDo`, estimate $15: `usage.cost_usd` was not reported by the time the PR opened (the usual early reading). Started 13:39; the three bot runs on `main` ran side by side in the background from the first minute (about 12 minutes) while the docs and the core files were read; four helper agents mapped the region, the terminal's hooks, the UI and the tools in parallel (about 4 minutes each) and their reports were read in place of the files. Docs only, so no Balance run.

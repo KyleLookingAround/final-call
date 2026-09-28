@@ -1,3 +1,4 @@
+Theme: saves
 # Refactor 5: save migration as a table · 27 Sep 2026
 
 - **Numbers:** session `session_01BT11eSAxLaaa9PSCHgEf1D`, estimate $8: about $5 by the merge, under the estimate. Started 17:21 UTC, PR #86 opened 17:37, checks and Balance green by 17:45; the merge waited on a local bot run of `main` (below). Four `main` merge-ins, two past the brief's two (below).

@@ -1,3 +1,4 @@
+Theme: ci
 # #46 Runbook experiment [B], first half: cache Playwright's Chromium · 27 Sep 2026
 
 - **Cache is in from:** commit `32eb850` (this PR's only commit). Experiment [A]'s time-to-green for "Looks like a real airport" reads slower before that commit and faster after it for a reason unrelated to that experiment.

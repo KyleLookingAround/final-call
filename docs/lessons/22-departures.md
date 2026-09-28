@@ -1,3 +1,4 @@
+Theme: parts
 # #22 Departures · 26 Sep 2026
 
 - **Numbers:** $14.10, 329k of 1M context. Started 20:36, PR opened 21:49, merged 22:24. Two commits; CI green first time.

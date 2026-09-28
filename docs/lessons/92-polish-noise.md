@@ -1,3 +1,4 @@
+Theme: merge-chasing
 # Quiet the noise: fold repeated incidents, expire toasts, clear stale tips · 27 Sep 2026
 
 - **Numbers:** session `session_011MouyB94tFGXSCooETWSaS`, estimate $6: about $18 and 440k of 1M context by this merge, three times over. Started 17:20 UTC, PR #92 opened 18:51; Checks, Balance and Description green on the first head; several `main` merge-ins past the brief's two, each needed to reach a mergeable head (a `tools/build.mjs` conflict from the terminal-place PR's own SIM-exposure rewrite, then its later replacement with the auto-discovery version; `docs/LESSONS.md`'s repeated same-line insertion conflict, resolved for good by #94's move to one file per PR).

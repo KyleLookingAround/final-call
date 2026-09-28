@@ -23,6 +23,7 @@ description: Drive a Final Call pull request to green and merged - reading CI fa
 ## Check-ins, not polling
 
 - CI takes about 8 minutes; polling every 20–30 (the coordinator's sweep, every 30–45) wastes most of a PR's wall time waiting for the next check-in. Subscribe to your own PR's events (`subscribe_pr_activity`) once it's open, and keep a `send_later` (about 20 minutes) as the fallback in case an event is missed. The coordinator subscribes to nothing; it relies on the sweep and each session's own subscription.
+- Once `rate_limit_info` shows the five-hour window is close to running out, book that fallback `send_later` for a minute after `resetsAt` instead of the usual ~20 minutes: a check-in that fires while the limit is on is lost (the limit kills the turn before it can book the next one), and nothing else wakes a session waiting on CI until the next sweep or the watchdog Routine.
 
 ## Review comments
 

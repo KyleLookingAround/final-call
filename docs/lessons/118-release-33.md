@@ -1,3 +1,4 @@
+Theme: releases
 # #118 Cut release 33: a rating that keeps you on your toes · 28 Sep 2026
 
 - **Numbers:** session `session_01BHqvrauWfqwi3fcWhVPke4`, estimate $6 (two small releases). About $2 at PR open. Claimed the version at 04:00 UTC, folded and opened the PR at 05:19 UTC, just past the 05:00 UTC target.

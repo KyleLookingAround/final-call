@@ -1,3 +1,4 @@
+Theme: merge-chasing
 # Rebuilding twice no longer stops the game (#83, bug #78) · 27 Sep 2026
 
 - **Numbers:** estimate $6: about $3.50 at merge. Started 17:20, PR opened 17:36, CI green first time on every check but Description (the tool's footer, gone once the description was edited). Three pushes after opening, each merging `main`, which merged about a dozen PRs that evening. CI never started on the first two, because each time `main` had already moved again and GitHub doesn't run PR workflows on a conflicted head. The third merged at 19:50, and #94 (one file per entry) landed while its CI ran, so a fourth merge moved this look back here and the checks list into its joined form.

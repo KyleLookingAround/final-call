@@ -1,3 +1,4 @@
+Theme: checks
 # #28 Sound · 27 Sep 2026
 
 - **Numbers:** started 06:11, PR opened 06:33, merged 06:44. No pushes after it opened, and CI was green first time (Checks 6 min, Balance 3.5 min). Its cost is in the whole session's entry above.

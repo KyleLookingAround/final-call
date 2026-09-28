@@ -1,3 +1,4 @@
+Theme: ui
 # Polish: phone chrome and touch targets · 27 Sep 2026
 
 - **Numbers:** session `session_01BNMAt5vgY9kVSc98GujRBt`, estimate $8: $5.97 and 285k of 1M context by the merge, under the estimate. Started 17:20 UTC, PR opened 17:37 (17 minutes: reading the four issues and the audit's fix-batch table, writing the CSS, screenshotting five sizes by hand since none of the built-in `npm run check -- shots` sizes matched the brief's list, and a fresh review). Checks green the same minute; merged shortly after, one `main` merge-in (the polish audit doc PR, #77, landing under it).

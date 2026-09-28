@@ -1,3 +1,4 @@
+Theme: checks
 # Famous faces (#111) · 28 Sep 2026
 
 - **Numbers:** estimated at $12; about $5 when the PR opened. One build round, one review round, two full local check runs and three bot seeds each way before CI. Merging `main` hit one conflict, in the joined file table of `docs/SYSTEMS.md`. Taking `main`'s side and running `npm run build` fixed it.

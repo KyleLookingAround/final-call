@@ -1,3 +1,4 @@
+Theme: ui
 # #124 Polish the first minute on a phone · 28 Sep 2026
 
 - **Numbers:** session `session_01YGtc5uZK8g52jjniY3g2uQ`, estimate $8: $42.53 and 714k of 1M context by merge, about 5.3× the estimate. PR opened 09:02 UTC, merged 09:59 (57 minutes). One push of its own after opening (a merge-conflict resolution), then seven merges of `main` in that window — all but one picked up as fast-forwards from the Catch up workflow, one needing a manual `git merge` for a real conflict (both branches added a `FIELDS` line; `main` had also just introduced the `ADDED`-array pattern in the migrate check, so the fix was to adopt that pattern with `tip4x` rather than keep the recomputed GOLD hashes). No CI failure: Checks passed on every head it got to run against.
