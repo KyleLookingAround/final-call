@@ -200,7 +200,7 @@ table.fin tr.tot td{color:var(--sign);font-weight:600;border-bottom:0}
 
 /* ---- UI/UX pass ---- */
 [hidden]{display:none!important}
-.tabs button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 4px 8px;font-size:11px;letter-spacing:.08em;min-width:54px}
+.tabs button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 1px 8px;font-size:11px;letter-spacing:.02em;min-width:0;flex:1 1 auto} /* eight tabs share the strip by the width of their labels */
 .tabs button svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 .tabs button .cnt{position:absolute;top:4px;left:calc(50% + 7px);min-width:15px;height:15px;padding:0 4px;border-radius:8px;background:var(--sign);color:var(--signInk);font:700 9.5px/15px var(--mono);letter-spacing:0}
 .tabs button.on::after{left:22%;right:22%}
@@ -279,7 +279,7 @@ body.fs .tabs .drawclose{display:grid}
   .stats{padding-top:2px}
   .tip{font-size:12.5px}
   .tabs{padding-inline:0}
-  .tabs button{flex:1 1 0;min-width:0;padding:8px 1px 7px;font-size:10px;letter-spacing:.03em}
+  .tabs button{flex:1 1 auto;min-width:0;padding:8px 1px 7px;font-size:10px;letter-spacing:.03em}
   .tabs button .cnt{left:calc(50% + 5px)}
   .toast{font-size:12.5px;padding:7px 9px 9px 8px}
   .toast .acts{margin-top:6px}

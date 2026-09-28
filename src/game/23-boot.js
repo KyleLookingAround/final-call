@@ -24,7 +24,7 @@ function start(data){
   else if(wasOld)toast(`New: levels, Pier B, the region map and plenty more. You start as ${aL(G.level,1)} (Office tab).`,null,null,'goal',14);
   else if(!data?.save&&away>90&&G.rate>0){const gain=Math.round(G.rate*Math.min(away,10800)*0.35);if(gain>=1){earn(gain,'bonus');toast(`Welcome back. The airport earned about ${money(gain)} while you were away.`,null,null,'goal',10)}}
   else if(!s)startTour();
-  if(s&&!s.nv3&&!fresh)toast('New: Lowmere opens a rival airport once you are a City Airport. Your planes need crews (Gates › Fleet), and the Office has Records and weekly challenges.',null,'nv3','goal',16);G.nv3=1;
+  if(s&&!s.nv3&&!fresh)toast('New: Lowmere opens a rival airport once you are a City Airport. Your planes need crews (Fleet), and the Office has Records and weekly challenges.',null,'nv3','goal',16);G.nv3=1;
   R.newsBoot=newsDue()?'due':'none';if(R.newsBoot==='due')setTimeout(()=>{openNews(true,true);R.newsBoot='shown'},400); // the checks wait on R.newsBoot
   requestAnimationFrame(frame);
 }
