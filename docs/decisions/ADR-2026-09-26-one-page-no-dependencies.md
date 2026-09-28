@@ -54,6 +54,8 @@ Portability between the two hosts and zero upkeep matter more than framework con
 
 **Exception:** link previews need a real image address, so `preview.jpg` and the home-screen icon are published next to the page from `src/public/`. The game never loads them, and the tab icon is inlined, so the page still works on its own.
 
+**Exception:** anonymous usage counts (`docs/systems/usage-counts.md`, `65-usage-counts.js`, the owner's brief of 28 Sep 2026) load one script tag, GoatCounter, but only on the published site, only once the owner has set a site code, and only if the player hasn't turned it off. With no code set — the default until the owner has one — nothing loads and the page works exactly as before; the script is never required, only optional telemetry.
+
 ## Related
 
 - [ADR-2026-09-26-source-in-numbered-files](ADR-2026-09-26-source-in-numbered-files.md)
