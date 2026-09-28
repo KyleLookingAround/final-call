@@ -37,6 +37,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 ### Coordinator
 
+- [#134 Playbooks without Routines, auto-merge, CI time limit · 28 Sep 2026](lessons/134-playbooks-no-routines.md)
 - [Coordinator playbook: limits by plan, helper agents · 27 Sep 2026](lessons/59-coordinator-limits.md)
 - [Coordinator playbook · 27 Sep 2026](lessons/42-coordinator-playbook.md)
 - [One session for four PRs (#28, #30, #32, #33) · 27 Sep 2026](lessons/34-one-session-four-prs.md)
@@ -47,6 +48,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 ### Docs
 
+- [Roadmap tidy: move what has shipped out of Now · 28 Sep 2026](lessons/141-roadmap-tidy.md)
 - [Rebuild figures and the moving walkways follow-up · 27 Sep 2026](lessons/97-docs-rebuild-figures.md)
 - [#39 Saves on the device only · 27 Sep 2026](lessons/39-device-saves.md)
 - [#20 Slimmer project notes and parallel-work lessons · 26 Sep 2026](lessons/20-slimmer-notes.md)
