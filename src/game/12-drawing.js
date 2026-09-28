@@ -86,7 +86,7 @@ function drawMover(){
   MV_AT.length=0;
 }
 // Only the floor shown: on the roof, nobody under it; on a floor of halls, nobody whose room is on the other one (53-roofs.js).
-// The dots are drawn in batches, one path for each look (PAX_B), with what goes under them (buggies) before and the marks
+// The dots are drawn in batches by look (PAX_B), zoomed out as one path each, with what goes under them (buggies) before and the marks
 // that go over them (bags, laptops, a shuffle ring) after: thousands of passengers cost a few dozen fills, not two each.
 const PAX_B=new Map(),PAX_V=[]; // look → [x, y, r, …] this frame; the passengers drawn this frame
 function paxDot(fill,stroke,lw,x,y,r){const k=fill+stroke+lw;let a=PAX_B.get(k);if(!a){a=[];a.f=fill;a.s=stroke;a.w=lw;PAX_B.set(k,a)}a.push(x,y,r)}
@@ -104,8 +104,11 @@ function drawPax(V){
     const mark=!inCabin&&(p.xferred||p.stand===R.sel||p.type==='grp');
     paxDot(paxColor(p),!inCabin&&p.xferred?'#6BE39A':!inCabin&&p.stand===R.sel?'#ECE8DF':!inCabin&&p.type==='grp'?'#FF7AB6':'#14171B',mark?1.1:1,x,y,p.kid?r*0.68:r);
   }
-  for(const a of PAX_B.values()){if(!a.length)continue;ctx.fillStyle=a.f;ctx.beginPath();for(let j=0;j<a.length;j+=3){ctx.moveTo(a[j]+a[j+2],a[j+1]);ctx.arc(a[j],a[j+1],a[j+2],0,Math.PI*2)}
-    ctx.fill();ctx.strokeStyle=a.s;ctx.lineWidth=a.w;ctx.stroke();a.length=0}
+  const one=V.z>=0.6; // close up, a circle on its own fills quicker than one in a big path
+  for(const a of PAX_B.values()){if(!a.length)continue;ctx.fillStyle=a.f;ctx.strokeStyle=a.s;ctx.lineWidth=a.w;
+    if(one)for(let j=0;j<a.length;j+=3){ctx.beginPath();ctx.arc(a[j],a[j+1],a[j+2],0,Math.PI*2);ctx.fill();ctx.stroke()}
+    else{ctx.beginPath();for(let j=0;j<a.length;j+=3){ctx.moveTo(a[j]+a[j+2],a[j+1]);ctx.arc(a[j],a[j+1],a[j+2],0,Math.PI*2)}ctx.fill();ctx.stroke()}
+    a.length=0}
   for(const p of PAX_V){const x=p.ex,y=p.ey,inCabin=p.state==='aisle'||p.state==='sitting'||p.state==='dAisle',r=inCabin?clamp(p.F.geo.pitch*0.42,2.7,3.8):3;
     if(p.inbound){
       if(p.state==='dAisle'&&p.phase==='grab'){ctx.fillStyle='#D9A066';ctx.fillRect(x+r,y-r-2,4,4)}
