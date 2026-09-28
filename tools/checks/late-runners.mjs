@@ -14,7 +14,7 @@ export default async function({open,ok,saveText}){
         S.update(0.1);const D=S.derived();
         for(const [p,[x,y,tx,ty]] of before){const t=S.taleOf(p);if(!t||t.run!==1&&t.run!==2||p.state!=='toGate'||p.way||tx!==p.tx||ty!==p.ty)continue;
           const d=Math.hypot(p.x-x,p.y-y),left=Math.hypot(p.tx-p.x,p.ty-p.y);if(left<1)continue;seen.add(p);
-          const w=D.cwalk*p.spd*S.walkMul(p);pace.push(d/0.1/Math.min(w,S.RUN_TOP/1.16));if(G.clock<p.F.std-S.RUN_AT&&!S.runsOf(p.F).fc&&!early)early=`${p.F.code}${p.F.no} ran at ${Math.round(p.F.std-G.clock)} min to go`}
+          const w=D.cwalk*p.spd*S.walkMul(p);pace.push(d/0.1/Math.min(w,S.RUN_TOP/1.16));if(G.clock<p.F.std-S.RUN_AT&&!S.runsOf(p.F).fc&&!t.ev.some(e=>e[1]==='linger')&&!early)early=`${p.F.code}${p.F.no} ran at ${Math.round(p.F.std-G.clock)} min to go`}
         if(k%10)continue;
         for(const i of S.SIDX){const F=R.st[i].F;if(!F||F.freighter)continue;const s=S.statusText(F);if(s==='GATE CLOSING'){closing++;const u=S.runsOf(F);if(!u||!u.n)closingNoRun++}}
         if(k%600===0)for(const p of R.pax){const t=S.taleOf(p);if(t&&!p.inbound)lines=Math.max(lines,S.taleLines(p).length)}

@@ -10,7 +10,7 @@
 // passengers keep their one shape (05-flights.js seatPax) and nothing is saved.
 const RUN_AT=12,RUN_CLOSING=5,RUN_MUL=1.8,RUN_PRM=1.2,RUN_TOP=280,RUN_MISS=-0.6; // minutes before departure; pace (top: the best walking pace, so the drawn catch-up stays under the movement check's 330); rating
 const RUN_HOLD={wait:3,close:1}; // minutes the gate holds for runners once the rest are seated, by the Late passengers policy
-const DAWDLE=0.05,LINGER=15,FC_LEFT=3; // odds a shopper browses on past the gate call, for up to LINGER minutes more; final call comes early with this many others left to board
+const DAWDLE=0.05,LINGER=15,LINGER_MKT=40,FC_LEFT=3; // odds a shopper browses on past the gate call, for up to LINGER minutes more; final call comes early with this many others left to board
 const TALES=new WeakMap(),RUNS=new WeakMap(); // passenger → their story; flight → its runners {list, n (can miss), holdAt}
 const RUN_LOG={started:0,boarded:0,missed:0}; // what the checks read
 Object.assign(REPWHY,{runner:['passengers who ran for their gate and missed it',['walkway','mover'],' Calling gates earlier (Office › Policies) gives shoppers more time.']});REPLBL.runner='Runners who missed their flight';
@@ -46,7 +46,7 @@ const runPace=(p,D)=>{const v=D.cwalk*p.spd*walkMul(p),m=p.type==='prm'?RUN_PRM:
 // to the gate: at a walk, or at a run after final call
 {const f=PAX_STEP.toGate;PAX_STEP.toGate=(p,dt,D)=>{
   const F=p.F; // only a late shopper can be called before the last 12 minutes, so only they need the flight's runners looked up
-  if((G.clock>=F.std-RUN_AT||p.late&&RUNS.get(F)?.fc)&&F.plane.state==='boarding'){const t=tale(p);if(!t.run)startRun(p,t,F);
+  if((G.clock>=F.std-RUN_AT||p.late&&(RUNS.get(F)?.fc||TALES.get(p)?.run))&&F.plane.state==='boarding'){const t=tale(p);if(!t.run)startRun(p,t,F);
     if(t.run<3){if(walk(p,runPace(p,D),dt)){p.state='gate';PAX_STEP.gate(p,0);endRun(p,t,3);RUN_LOG.boarded++;note(p,'gate',p.stand,1.2)}return}}
   f(p,dt,D);if(p.state!=='toGate'){const t=TALES.get(p);if(t&&(t.run===1||t.run===2))endRun(p,t,3);if(p.state==='gate')note(p,'gate',p.stand,0.2)}
 }}
@@ -63,11 +63,11 @@ function missRun(p,i){
 function dawdle(F){
   const d=runsOf(F).daw,lead=new Set(),stay=p=>{const x=Math.max(0,Math.min(F.std-G.clock,p.t+LINGER)-p.t);p.late=true;p.t+=x;p.t0+=x;d.push(p)}; // a longer visit, and a full spend for it
   // or sits on in the market place, holding no seat or shop spot, until final call (state linger)
-  const sit=p=>{p.state='linger';p.late=true;p.sl=-1;R.occOut=true;d.push(p);note(p,'linger',p.act,0.3)},on=p=>p.state==='shop'?stay(p):sit(p);
+  const sit=p=>{p.state='linger';p.late=true;p.sl=-1;p.t=G.clock+LINGER_MKT;R.occOut=true;d.push(p);note(p,'linger',p.act,0.3)},on=p=>p.state==='shop'?stay(p):sit(p);
   for(const p of R.pax)if(p.F===F&&(p.state==='shop'||p.state==='mkt')&&!p.late&&!p.inbound&&!p.leader&&!p.kid&&rnd()<DAWDLE){on(p);lead.add(p)}
   if(lead.size)for(const p of R.pax)if(p.leader&&lead.has(p.leader)&&(p.state==='shop'||p.state==='mkt')&&!p.late)on(p); // a party dawdles together
 }
-PAX_STEP.linger=p=>{const F=p.F;if(G.clock>=F.std-RUN_AT&&F.plane.state==='boarding'||F.plane.state==='closing')toGate(p)}; // an early final call sends them too
+PAX_STEP.linger=p=>{const F=p.F;if(G.clock>=F.std-RUN_AT&&F.plane.state==='boarding'||F.plane.state==='closing')toGate(p);else if(G.clock>=p.t){if(F.plane.state==='boarding')startRun(p,tale(p),F);toGate(p)}}; // an early final call sends them too; after LINGER_MKT they remember, and run if it's boarding
 // Final call: 12 minutes before departure, or sooner once all but a few are aboard, so dawdlers never hold a plane that
 // would otherwise leave early. Then the dawdlers leave their shops and run.
 function finalCall(F,r){
