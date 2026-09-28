@@ -1,4 +1,21 @@
 /* ---------- disruptions ---------- */
+/* ---------- weather and event flags: the one place R.fx is set and read ---------- */
+// R.fx holds, for each kind, the game minute it lasts until (0 or missing when off): the weather (fog, snow, rain, storm),
+// the terminal's events (rush, sick, strike), fuel prices (hedge, fuelUp, fuelDown) and the region's (leaves, roadworks,
+// and per line: line for a fault, repl for its replacement buses). Set it with weather.set and read it with weather.on.
+// (Not wx: that's 41-airside.js's stand-to-world transform.) Some drawing and terminal files still read R.fx directly
+// (docs/systems/weather.md), so its shape stays as it is.
+const weather={
+  on:(k,id)=>(id==null?R.fx[k]||0:(R.fx[k]||{})[id]||0)>G.clock,
+  until:k=>R.fx[k]||0,
+  set(k,until,id){if(id==null)R.fx[k]=until;else (R.fx[k]||(R.fx[k]={}))[id]=until},
+  raise(k,until){R.fx[k]=Math.max(R.fx[k],until)}, // keeps a longer spell already set
+  fault(id,until,why){weather.set('line',until,id);(R.fx.why||(R.fx.why={}))[id]=why},
+  why:id=>(R.fx.why||{})[id],
+  roadworks(until,edge){R.fx.roadworks=until;R.fx.rwE=edge},
+  edge:()=>R.fx.rwE, // the road edge the roadworks are on, while weather.on('roadworks')
+  reset(){R.fx={fog:0,rush:0,sick:0,strike:0,hedge:0,fuelUp:0,fuelDown:0,snow:0,storm:0,rain:0,line:{},leaves:0,roadworks:0}},
+};
 /* ---------- weather: moving cells with real effects ---------- */
 const WX={fog:{col:'205,212,220',a:0.28,r:[170,240],spd:[3,5]},rain:{col:'120,150,185',a:0.22,r:[200,300],spd:[5,8]},snow:{col:'235,240,248',a:0.3,r:[200,280],spd:[3.5,6]},storm:{col:'70,80,105',a:0.42,r:[140,210],spd:[5,8]}};
 const WXW={Spring:{rain:4,fog:3,storm:2},Summer:{storm:4,rain:3,fog:1},Autumn:{fog:4,rain:4,storm:2},Winter:{snow:5,fog:3,storm:1,rain:1}};
@@ -13,8 +30,8 @@ function updateWeather(dt){
   for(const c of G.wx){c.x+=c.vx*dt;c.y+=c.vy*dt}
   G.wx=G.wx.filter(c=>c.x-c.r<RW+40&&c.y+c.r>-60&&c.y-c.r<RH+60);
   const at=wxAt(900,640);
-  if(at){const t=at.c.type;if(t==='fog'&&at.d<0.85)R.fx.fog=Math.max(R.fx.fog,G.clock+1);if(t==='snow'&&at.d<0.85)R.fx.snow=Math.max(R.fx.snow,G.clock+1);
-    if(t==='storm'&&at.d<(G.lv.radar?0.3:0.6))R.fx.storm=G.clock+1;if(t==='rain'||t==='storm')R.fx.rain=G.clock+1}
+  if(at){const t=at.c.type;if(t==='fog'&&at.d<0.85)weather.raise('fog',G.clock+1);if(t==='snow'&&at.d<0.85)weather.raise('snow',G.clock+1);
+    if(t==='storm'&&at.d<(G.lv.radar?0.3:0.6))weather.set('storm',G.clock+1);if(t==='rain'||t==='storm')weather.set('rain',G.clock+1)}
 }
 function wxForecast(){let best=null;for(const c of (G.wx||[])){const dx=900-c.x,dy=640-c.y,v=Math.hypot(c.vx,c.vy)||1,along=(dx*c.vx+dy*c.vy)/v,perp=Math.abs(dx*c.vy-dy*c.vx)/v;if(along<=0||perp>c.r*0.85)continue;const eta=(along-c.r*0.85)/v;if(eta>0&&(!best||eta<best.eta))best={type:c.type,eta}}return best}
 function drawWeatherCells(k){
@@ -27,19 +44,34 @@ function drawWeatherCells(k){
     if(k>0.3)lblBg(c.type.toUpperCase(),c.x,c.y-c.r*0.6,c.type==='storm'?'#FFC72C':'#CDD4DA',9);
   }
 }
-function news(t){(G.news||(G.news=[])).unshift({d:dayOf(G.clock),t:hhmm(G.clock),m:t});G.news.length=Math.min(G.news.length,14)}
+const NEWS_INCIDENT=/^A (signal failure|wire fault) stopped (\S+) for [\d.]+ min\.$/;
+function news(t){
+  const L=G.news||(G.news=[]),d=dayOf(G.clock),top=L[0],m=NEWS_INCIDENT.exec(t);
+  if(m&&top&&top.d===d){
+    const f=top.fold||(()=>{const p=NEWS_INCIDENT.exec(top.m);return p&&{kinds:[p[1]],codes:[p[2]]}})();
+    if(f){
+      if(!f.kinds.includes(m[1]))f.kinds.push(m[1]);
+      if(!f.codes.includes(m[2]))f.codes.push(m[2]);
+      const label=f.kinds.length>1?'Signal and wire faults':f.kinds[0]==='signal failure'?'Signal failures':'Wire faults';
+      top.fold=f;top.t=hhmm(G.clock);
+      top.m=`${label} have stopped ${f.codes.join(', ').replace(/, ([^,]*)$/,' and $1')} today.`;
+      return;
+    }
+  }
+  L.unshift({d,t:hhmm(G.clock),m:t});L.length=Math.min(L.length,14);
+}
 function regionEvent(){
   const Ls=Object.values(G.lines||{}).filter(L=>!lineDown(L));if(!Ls.length)return false;
-  const sea=seasonOf(dayOf(G.clock)).name,dur=m=>G.lv.control?m/2:m,R2=R.fx.line||(R.fx.line={});
+  const sea=seasonOf(dayOf(G.clock)).name,dur=m=>G.lv.control?m/2:m;
   const rails=Ls.filter(L=>['rail','metro','hsr'].includes(L.mode)),trams=Ls.filter(L=>L.mode==='tram'),roads=Ls.filter(L=>MODES[L.mode].kind==='road');
   const opts=[];if(rails.length)opts.push('signal');if(trams.length)opts.push('wire');if(roads.length)opts.push('roadworks');if(sea==='Autumn'&&Ls.some(L=>L.mode==='rail'))opts.push('leaves','leaves');
   if(!opts.length)return false;const ev=pickOf(opts);
   if(ev==='signal'||ev==='wire'){const L=pickOf(ev==='signal'?rails:trams),m=dur(ev==='signal'?60:45),cost=Math.round(40+L.freq*MODES.bus.vh*6*(1+G.level));
-    R2[L.id]=G.clock+m;(R.fx.why||(R.fx.why={}))[L.id]=ev==='signal'?'SIGNAL FAILURE':'WIRE FAULT';
-    if(pol('repl')&&G.cash>=cost){spend(cost,'transitOps',L.id);(R.fx.repl||(R.fx.repl={}))[L.id]=G.clock+m;news(`A ${R.fx.why[L.id].toLowerCase()} hit ${lineCode(L)}: replacement buses ran (${money(cost)}).`)}
-    else{repAdj(-2,'stranded',L.id);news(`A ${R.fx.why[L.id].toLowerCase()} stopped ${lineCode(L)} for ${m} min.`)}}
-  else if(ev==='roadworks'){const L=pickOf(roads),RE=routeEdges(L.mode,L.stops)||[];if(!RE.length)return false;R.fx.roadworks=G.clock+dur(150);R.fx.rwE=pickOf(RE).e.id}
-  else if(ev==='leaves'){R.fx.leaves=G.clock+dur(240)}
+    weather.fault(L.id,G.clock+m,ev==='signal'?'SIGNAL FAILURE':'WIRE FAULT');
+    if(pol('repl')&&G.cash>=cost){spend(cost,'transitOps',L.id);weather.set('repl',G.clock+m,L.id);news(`A ${weather.why(L.id).toLowerCase()} hit ${lineCode(L)}: replacement buses ran (${money(cost)}).`)}
+    else{repAdj(-2,'stranded',L.id);news(`A ${weather.why(L.id).toLowerCase()} stopped ${lineCode(L)} for ${m} min.`)}}
+  else if(ev==='roadworks'){const L=pickOf(roads),RE=routeEdges(L.mode,L.stops)||[];if(!RE.length)return false;weather.roadworks(G.clock+dur(150),pickOf(RE).e.id)}
+  else if(ev==='leaves'){weather.set('leaves',G.clock+dur(240))}
   regionTick();return true;
 }
 

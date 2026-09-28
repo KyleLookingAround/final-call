@@ -1,11 +1,12 @@
 /* ================= WEATHER: rain, settled snow, puddles, fog banks, cloud shadows and a windsock ================= */
-// Drawing only, reading R.fx and wxForecast() and never changing them (docs/specs/real-airport.md): everything here is
-// worked out fresh each frame from V.t and G.clock, so a game plays the same with or without frames drawn.
-// how wet or snowy the ground still looks: full while the weather is on (R.fx.rain/snow is a rolling "until" clock,
-// nudged forward every tick it's active), fading out over the minutes after it stops - never a new saved field
-const wetness=()=>clamp(1-Math.max(0,G.clock-R.fx.rain)/20,0,1);
-const snowCover=()=>clamp(1-Math.max(0,G.clock-R.fx.snow)/40,0,1);
-const windStrength=()=>R.fx.storm>G.clock?1:R.fx.rain>G.clock?0.55:0.2;
+// Drawing only, reading weather.on, weather.until (through drawnWx, for photo mode) and wxForecast() and never changing them
+// (docs/specs/real-airport.md): everything here is worked out fresh each frame from V.t and G.clock, so a game plays the
+// same with or without frames drawn. How wet or snowy the ground still looks: full while the weather is on (rain's and
+// snow's until is a rolling game minute, nudged forward every tick it's active), fading out over the minutes after it
+// stops - never a new saved field
+const wetness=()=>clamp(1-Math.max(0,G.clock-drawnWx.until('rain'))/20,0,1);
+const snowCover=()=>clamp(1-Math.max(0,G.clock-drawnWx.until('snow'))/40,0,1);
+const windStrength=()=>drawnWx.on('storm')?1:drawnWx.on('rain')?0.55:0.2;
 // nine ground spots for puddles, spread across the apron band and moving with the layout's runway (AF_Y)
 const WX_N=9;
 function wxSpot(k){const y0=AF_Y+40,y1=TERM_Y-24;return [40+((k*217+53)%(W-80)),y0+((k*131+29)%Math.max(1,y1-y0))]}
@@ -40,7 +41,7 @@ function wxShine(V){
 }
 // rain streaks, moved from draw() (12-drawing.js)
 function wxRain(V){
-  if(!(R.fx.rain>G.clock))return;const tt=V.t,st=R.fx.storm>G.clock;
+  if(!drawnWx.on('rain'))return;const tt=V.t,st=drawnWx.on('storm');
   ctx.fillStyle=`rgba(20,30,50,${st?0.22:0.1})`;ctx.fillRect(0,Y0,W,Y1-Y0);
   ctx.strokeStyle='rgba(170,195,225,.35)';ctx.lineWidth=1;ctx.beginPath();
   for(let i=0;i<220;i++){const px=(i*97.3+tt*60)%W,py=Y0+((i*53.1+tt*260)%(Y1-Y0));ctx.moveTo(px,py);ctx.lineTo(px-4,py+12)}
@@ -50,13 +51,13 @@ function wxRain(V){
 }
 // falling snow, moved from draw() (12-drawing.js)
 function wxFalling(V){
-  if(!(R.fx.snow>G.clock))return;const tt=V.t;
+  if(!drawnWx.on('snow'))return;const tt=V.t;
   ctx.fillStyle='rgba(230,236,244,.05)';ctx.fillRect(0,Y0,W,TERM_Y-Y0);
   ctx.fillStyle='rgba(240,244,250,.6)';
   for(let k=0;k<160;k++){const x=(k*157.3+tt*20*(1+(k%3)))%W,y=Y0+((k*97.1+tt*40*(1+(k%4)*0.3))%(TERM_Y-Y0));ctx.fillRect(x,y,1.6,1.6)}
 }
-// fog banks, moved from draw() (12-drawing.js): drawFog (29-region-map.js) already gates itself on R.fx.fog
-function wxFog(){drawFog(0,Y0,W,TERM_Y-Y0+120,0.3)}
+// fog banks, moved from draw() (12-drawing.js): drawnFog (62-photo-mode.js) gates drawFog on the drawn fog
+function wxFog(){drawnFog(0,Y0,W,TERM_Y-Y0+120,0.3)}
 // cloud shadows drifting over the airfield, a little darker and faster as wxForecast() sees a storm closing in
 function wxClouds(V){
   const fc=wxForecast(),soon=fc&&fc.type==='storm'?clamp(1-fc.eta/60,0,1):0;

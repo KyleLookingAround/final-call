@@ -11,11 +11,18 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 ### Merge-chasing
 
 - [#94 Fewer clashes between sessions · 27 Sep 2026](lessons/94-fewer-clashes.md)
+- [#46 Runbook experiment [B], second half: only the touched check groups on drafts · 27 Sep 2026](lessons/79-ci-touched.md)
 
 ### Not sorted yet
 
 - [Polish audit · 27 Sep 2026](lessons/main-polish-audit.md)
 - [Version 32: ready for what's next · 27 Sep 2026](lessons/main-release-32.md)
+- [#101 A rating that reflects the last day, measured and switched on; a network you have to keep, specced · 27 Sep 2026](lessons/101-balance-rating.md)
+- [Photo mode (#100) · 27 Sep 2026](lessons/100-photo-mode.md)
+- [#98 Systems refactor 8: weather in one place · 27 Sep 2026](lessons/98-refactor-weather.md)
+- [Rebuild figures and the moving walkways follow-up · 27 Sep 2026](lessons/97-docs-rebuild-figures.md)
+- [#95 Systems refactors 4 and 6: clock tables and day stats · 27 Sep 2026](lessons/95-refactor-clocks.md)
+- [Quiet the noise: fold repeated incidents, expire toasts, clear stale tips · 27 Sep 2026](lessons/92-polish-noise.md)
 - [The terminal as a place: checks first · 27 Sep 2026](lessons/90-terminal-place-checks.md)
 - [Passengers who suddenly sped down the piers (#82) · 27 Sep 2026](lessons/89-pax-movement.md)
 - [#88 Masterplan on a small phone · 27 Sep 2026](lessons/88-masterplan-small-phone.md)

@@ -10,7 +10,7 @@
   - `PAX_STEP[state]` and `ARR_STEP[state]` move departing and arriving passengers each update;
   - `TERM_SUBS` and `TERM_SECS` set the Terminal tab's sub-tabs and their upgrade sections, and `TERM_PANEL[sub]` adds cards (also `'sales:shops'` and `'sales:landside'`);
   - `TERM_SPAWN` can place a new departing passenger (a hotel guest), and `TERM_EXIT` can send an arriving one somewhere other than out;
-  - `TERM_CLICK`, `TERM_MINUTE`, `TERM_DAY` and `TERM_DRAW` handle clicks, every game minute, every day and drawing inside the halls. `TERM_DRAW` runs only when the halls show, never under the roof; anything outside the halls' walls (the taxi rank, the hotel's tower, the bag tugs on the apron) registers on `LAYER.terminal` itself, so it shows on every floor;
+  - `TERM_CLICK`, `TERM_MINUTE`, `TERM_DAY` and `TERM_DRAW` handle clicks, every game minute, every day and drawing inside the halls (`TERM_MINUTE` and `TERM_DAY` each run as one entry of the clocks' `MINUTE` and `DAY` tables). `TERM_DRAW` runs only when the halls show, never under the roof; anything outside the halls' walls (the taxi rank, the hotel's tower, the bag tugs on the apron) registers on `LAYER.terminal` itself, so it shows on every floor;
   - `TERM_FIELDS` gives saved fields their defaults for new games and older saves (it is `FIELDS`, the one table of saved fields; see Saves);
   - `SIMX` exposes functions to the checks, and a part's checks go in `tools/checks/<part>.mjs`;
   - new upgrades go in the part's file with `Object.assign(UPG,{...})`.
@@ -49,4 +49,4 @@
   - Crews finishing a duty rest there for 9 h instead of 12 (`crewRest`, from `crewAway`).
   - `hotelStranded`: from level 4, a departure held an hour late at night by fog or a storm owes its passengers rooms; yours are cheap, the rest go to dear city hotels and cost rating.
   - Rooms are cheap, standard or premium (`G.hotelPrice`); the duty manager (`SET().autoDuty`) re-prices each noon from last night. The card is in Sales › Landside; `drawHotel` lights a window per guest.
-- **Advisor.** `advise` (`16-advisor.js`) points at the fullest café (a café, coffee cart, bar or dining room that turned away more than 7 in the last hour, from `R.awayH`) and at a hotel that turned away 10 or more guests last night.
+- **Advisor.** `advise` (`16-advisor.js`) points at the fullest café (a café, coffee cart, bar or dining room that turned away more than 7 in the last hour, from `R.awayH`) and at a hotel that turned away 10 or more guests last night. Its tip (`renderTip`) only shows over the airport view; it clears while looking at the region or world map, since it's about the airport.

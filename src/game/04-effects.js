@@ -6,13 +6,30 @@
 // R.cashAt keeps the last place each kind of money came in or went out. Nothing here allocates per call but the
 // rating event, as before.
 function effect(kind,cause,amount,at){
-  if(kind==='rep'){let d=amount;if(d>0&&G.lv.saf)d*=1.25;if(d>0&&G.dev&&devSum('green'))d*=1.1;const v=clamp(G.rep+d,5,100),real=v-G.rep;G.rep=v;const w=R.repWhy||(R.repWhy={});w[cause]=(w[cause]||0)+real;
+  if(kind==='rep'){let d=amount;if(d>0&&G.lv.saf)d*=1.25;if(d>0&&G.dev&&devSum('green'))d*=1.1;let real;
+    if(R.rateDay){const b=rdBucket();b.s+=d;R.rdSum=(R.rdSum||0)+d;if(cause==='punctual'||cause==='late')b.n++;real=d}else{const v=clamp(G.rep+d,5,100);real=v-G.rep;G.rep=v}const w=R.repWhy||(R.repWhy={});w[cause]=(w[cause]||0)+real;
     if(real){const E=R.repEv||(R.repEv=[]);E.push([G.clock,cause,real,d,at]);while(E.length&&E[0][0]<G.clock-180)E.shift()}return}
-  if(kind==='earn'){G.cash+=amount;G.earned+=amount;G.revBy[cause]=(G.revBy[cause]||0)+amount;hourBucket().rev+=amount;R.minEarn+=amount;if(G.dstat)G.dstat.rev+=amount}
-  else{G.cash-=amount;G.revBy[cause]=(G.revBy[cause]||0)+amount;hourBucket().cost+=amount;R.minEarn-=amount;if(G.dstat)G.dstat.cost+=amount}
+  if(kind==='earn'){G.cash+=amount;G.earned+=amount;G.revBy[cause]=(G.revBy[cause]||0)+amount;hourBucket().rev+=amount;R.minEarn+=amount;dayAdd('rev',amount)}
+  else{G.cash-=amount;G.revBy[cause]=(G.revBy[cause]||0)+amount;hourBucket().cost+=amount;R.minEarn-=amount;dayAdd('cost',amount)}
   if(at!=null)(R.cashAt||(R.cashAt={}))[cause]=at;
 }
 function repAdj(d,why,at){effect('rep',why,d,at)}
+// A rating that reflects the last day (docs/ideas/game-logic.md, idea 1; docs/decisions/ADR-2026-09-27-rating-last-day.md).
+// Each change goes into its hour's bucket of a rolling 24-hour score instead of onto G.rep, and each hour the rating eases
+// towards base + span × (the day's net score per departure ÷ scale), in its 5–100 clamp. Every departure settles as
+// punctual or late, so those two causes count the departures; until minFl have gone in the last day, the target leans
+// towards the rating as it is, so a new airport or a loaded save holds while the score fills. The score is runtime only
+// and starts again when a save loads (G is a new object). R.rateDay holds the constants; window.__rateDay (never saved)
+// can pass others to try, or false for the old running sum (the bot's --rate-day).
+const RATE_DAY={base:68,span:32,scale:7,ease:0.15,minFl:6};
+R.rateDay=window.__rateDay===false?null:Object.assign({},RATE_DAY,typeof window.__rateDay==='object'?window.__rateDay:{});
+function rdScore(){if(R.rdG!==G){R.rdG=G;R.rdB=[]}return R.rdB}
+function rdBucket(){const h=Math.floor(G.clock/60),B=rdScore(),k=h%24;let b=B[k];if(!b||b.h!==h)b=B[k]={h,s:0,n:0};return b}
+function rateDayTarget(){const C=R.rateDay,h=Math.floor(G.clock/60);let s=0,n=0;for(const b of rdScore())if(b&&b.h>h-24&&b.h<=h){s+=b.s;n+=b.n}
+  const t=clamp(C.base+C.span*s/Math.max(n,1)/C.scale,5,100),w=Math.min(1,n/C.minFl);return G.rep+(t-G.rep)*w}
+function rateDayEase(){const t=R.rdT=rateDayTarget();G.rep=clamp(G.rep+(t-G.rep)*R.rateDay.ease,5,100)}
+// terminal advertising costs a little rating every hour it runs; then the rating eases towards the day's target
+clock(HOUR,'ads',60,0,()=>{if(pol('ads'))repAdj(-0.8,'ads');if(R.rateDay)rateDayEase()});
 const REPWHY={care:['passengers who needed help getting around',['assist']],ads:['terminal advertising',[],' Switch it off in Office › Policies.'],noise:['night-flight noise',[],' A curfew (Office › Policies) or noise insulation would help.'],events:['event crowds that couldn’t get home',[],' Give event sites a line that can carry the crowds.'],crowding:['packed buses, trams and trains',[],' Run more services or longer vehicles.'],stranded:['passengers stranded at night',[],' Add night services to your lines.'],traffic:['traffic jams',[],' Trams, trains, the metro or a ring road would ease them.'],queues:['long waits at check-in and security',['lanes','sectech','desks','training','kiosks','online','fasttrack','wifi']],late:['late departures',['atc','crew','tugs','handlers','scanners','bins','walkway']],arrivals:['slow arrivals at passports and reclaim',['officers','egates','training','handlers','wifi']],missed:['missed connections',['walkway','mover']],sponsor:['the sponsorship deal',[]],punctual:['on-time departures',[]],lounge:['crowded gate lounges',[],' Call gates later (Office › Policies › Gate calls).'],bus:['buses out to remote stands',[],' Mobile lounges (Airfield › Layout) replace the buses.'],layout:['your terminal’s layout',[]]};
 const REPLBL={care:'Help for passengers who need it',ads:'Advertising',noise:'Night noise',events:'Match days and events',crowding:'Crowded public transport',stranded:'Stranded without transport',traffic:'Traffic jams',queues:'Check-in and security waits',late:'Late departures',punctual:'On-time departures',arrivals:'Arrivals clearing',missed:'Missed connections',sponsor:'Sponsorship deal',lounge:'Crowded gate lounges',bus:'Buses to remote stands',layout:'Terminal layout'};
 function repRecent(){const o={};for(const [t,w,r,d] of (R.repEv||[]))if(t>=G.clock-180)o[w]=(o[w]||0)+d;return o}

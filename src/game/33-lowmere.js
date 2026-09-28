@@ -56,6 +56,7 @@ function rivalDay(){
   let px=0;for(const c in V.routes)px+=baseMarket(c)*(routeOpen(c)?1-rivShare(c):0.7);V.pax=Math.round(px);
   const mx=rivMix();if(mx!=null){V.hist.push(Math.round(mx*100));if(V.hist.length>14)V.hist.shift()}
 }
+clock(DAY,'rivalDay',1,0,rivalDay);
 function rivFare(){const n=G.flown||0;return n>500?(G.revBy.fares||0)/n:4}
 function buyRival(){const V=G.rival;if(!V||V.owned||G.level<RIV_BUY_LV||!buy(rivBuyCost()))return false;V.owned=1;V.ownedAt=G.clock;
   toast('Lowmere Airport is yours. It stops competing and pays you a share of its traffic every day.',null,null,'goal',10);return true}

@@ -60,6 +60,7 @@ function chalDay(){
   const ds=(G.days||[]).slice(-7),pr=ds.length?ds.reduce((a,x)=>a+Math.max(0,x.p),0)/ds.length:G.rate*60*12;C.pay=Math.max(100,Math.round(pr*0.12/50)*50);
   if(!R.sim)toast('New weekly challenges are in the Office.',[{label:'Show',fn:()=>{R.oSub='records';setTab('office')}},{label:'Later',fn:()=>{}}],'chal','',12);
 }
+clock(DAY,'chalDay',1,0,chalDay);
 function chalProg(x){const p=CH_POOL.find(q=>q.id===x.id);return Math.max(0,(x.c?p.m(x.c):p.m())-x.base)}
 function checkChal(){
   const C=G.chal;if(!C||!C.list||SET().chal===false)return;
@@ -73,11 +74,13 @@ function checkChal(){
 function recordsDay(s){
   if(!s||!s.flights)return;
   setRec('dayPax',s.pax,true);setRec('dayProfit',s.rev-s.cost,true);if(s.flights>=10)setRec('dayOT',s.ontime/s.flights*100,true);
-  const r=G.rec;r.fullDay=Math.max(r.fullDay||0,s.full||0);r.nightDay=Math.max(r.nightDay||0,s.night||0);r.snowDay=Math.max(r.snowDay||0,s.snowOT||0);
-  r.crewRunCur=(s.crewDl||0)===0&&s.flights>=20?(r.crewRunCur||0)+1:0;r.crewRun=Math.max(r.crewRun||0,r.crewRunCur);
+  const r=G.rec;r.fullDay=Math.max(r.fullDay||0,dayVal(s,'full'));r.nightDay=Math.max(r.nightDay||0,dayVal(s,'night'));r.snowDay=Math.max(r.snowDay||0,dayVal(s,'snowOT'));
+  r.crewRunCur=dayVal(s,'crewDl')===0&&s.flights>=20?(r.crewRunCur||0)+1:0;r.crewRun=Math.max(r.crewRun||0,r.crewRunCur);
   {const mx=rivMix();if(mx!=null)setRec('share',mx*100,true)}
 }
+clock(DAY,'recordsDay',1,0,recordsDay);
 function recordsHour(){setRec('streak',G.bestStreak);setRec('routes',nRoutes());setRec('rep',G.rep);if(R.reg)setRec('riders',R.reg.riders||0);checkStamps();checkChal()}
+clock(HOUR,'recordsHour',60,0,recordsHour);
 function recordsPanel(){
   let h='';const C=G.chal;
   if(SET().chal!==false){h+=`<div class="sec">This week’s challenges<span>${C&&C.list&&C.list.length?`${7-((G.day-1)%7)} day${7-((G.day-1)%7)===1?'':'s'} left`:''}</span></div>`;

@@ -5,7 +5,7 @@ function toast(text,choices,id,kind,ttl){
   id=id||('t'+(++R.toastId));
   if(R.toasts.some(t=>t.id===id))return;
   const tl=ttl??(choices?30:8);R.toasts.push({id,text,choices:choices||null,kind:kind||'',ttl:tl,max:tl});
-  if(R.toasts.length>3){const k=R.toasts.findIndex(t=>!t.choices);R.toasts.splice(k>=0?k:0,1)}
+  if(R.toasts.length>3){const k=R.toasts.findIndex(t=>!t.choices),i=k>=0?k:0,ev=R.toasts[i];if(ev.choices)ev.choices[ev.choices.length-1].fn();R.toasts.splice(i,1)}
   renderToasts();
   if(choices)alertTone();
 }
@@ -38,10 +38,10 @@ function fireEvent(){
   const winter=seasonOf(dayOf(G.clock)).name==='Winter',p=pol('pay');
   const opts=['rush','rush'];if(G.lv.lanes>0){opts.push('sick');if(p===0)opts.push('sick','sick');if(p===1)opts.push('sick')}if(G.flights>=8){if(p===0)opts.push('strike','strike');if(p===1&&rnd()<0.4)opts.push('strike')}
   const e=opts[Math.floor(rnd()*opts.length)];
-  if(e==='fog')R.fx.fog=G.clock+45;
-  else if(e==='snow')R.fx.snow=G.clock+90;
-  else if(e==='rush')R.fx.rush=G.clock+90;
-  else if(e==='strike'){R.fx.strike=G.clock+45;floater('STAFF WALKOUT',150,700,'#FF7A8A',true)}
-  else if(e==='sick'){const cost=Math.round(30+G.lv.lanes*30);if(pol('agency')&&G.cash>=cost){spend(cost,'costs');floater(`AGENCY COVER ${money(cost)}`,400,608,'#FFC72C',true)}else{R.fx.sick=G.clock+40;floater('LANE CLOSED · STAFF SICK',400,608,'#FF7A8A',true)}}
+  if(e==='fog')weather.set('fog',G.clock+45);
+  else if(e==='snow')weather.set('snow',G.clock+90);
+  else if(e==='rush')weather.set('rush',G.clock+90);
+  else if(e==='strike'){weather.set('strike',G.clock+45);floater('STAFF WALKOUT',150,700,'#FF7A8A',true)}
+  else if(e==='sick'){const cost=Math.round(30+G.lv.lanes*30);if(pol('agency')&&G.cash>=cost){spend(cost,'costs');floater(`AGENCY COVER ${money(cost)}`,400,608,'#FFC72C',true)}else{weather.set('sick',G.clock+40);floater('LANE CLOSED · STAFF SICK',400,608,'#FF7A8A',true)}}
 }
 

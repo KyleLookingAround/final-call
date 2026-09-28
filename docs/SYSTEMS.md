@@ -7,20 +7,23 @@ The project notes (`CLAUDE.md`) hold what every change needs. This file holds ho
 <!-- joined:systems from docs/systems/ by tools/join.mjs: don't edit between these lines -->
 - [Airline operations](systems/airline-operations.md) (`34-airline-operations.js`)
 - [Airport layouts](systems/airport-layouts.md) (`39-layouts.js`, `12-drawing.js`)
-- [The airport scene](systems/airport-scene.md) (`50-scene.js`, `51-markings.js`, `55-vehicles.js`, `12-drawing.js`, `42-terminal.js`, `07-passengers.js`, `28-region-weather.js`, `04-effects.js`, `01-constants.js`, `52-planes.js`, `53-roofs.js`, `13-camera.js`, `08-stands.js`, `04-geometry.js`, `54-weather.js`, `29-region-map.js`)
-- [Effects: the rating and money ledger](systems/effects.md) (`04-effects.js`)
+- [The airport scene](systems/airport-scene.md) (`50-scene.js`, `51-markings.js`, `55-vehicles.js`, `12-drawing.js`, `42-terminal.js`, `07-passengers.js`, `28-region-weather.js`, `04-effects.js`, `01-constants.js`, `62-photo-mode.js`, `54-weather.js`, `52-planes.js`, `53-roofs.js`, `13-camera.js`, `08-stands.js`, `04-geometry.js`, `29-region-map.js`)
+- [Clocks and day stats](systems/clocks.md) (`02-clocks.js`, `08-stands.js`, `34-airline-operations.js`, `45-baggage.js`)
+- [Effects: the rating and money ledger](systems/effects.md) (`04-effects.js`, `15-panel.js`)
 - [Guided start](systems/guided-start.md) (`36-guided-start.js`)
 - [Level-up card](systems/level-up-card.md) (`49-levelup.js`)
 - [Levels and Masterplan](systems/levels-and-masterplan.md) (`02-masterplan.js`, `09-construction-levels-days.js`, `18-masterplan-ui.js`)
 - [Lowmere](systems/lowmere.md) (`33-lowmere.js`)
+- [Photo mode](systems/photo-mode.md) (`62-photo-mode.js`, `12-drawing.js`, `50-scene.js`, `54-weather.js`, `29-region-map.js`)
 - [Records, stamps and challenges](systems/records.md) (`35-records.js`)
-- [Region](systems/region.md) (`24-region-places.js`, `30-region-ui.js`)
+- [Region](systems/region.md) (`24-region-places.js`, `30-region-ui.js`, `28-region-weather.js`)
 - [Routes](systems/routes.md) (`31-routes.js`, `03-state.js`)
 - [Saves](systems/saves.md) (`22-save.js`, `03-state.js`)
 - [Sound](systems/sound.md) (`06-sound.js`, `48-sound.js`, `23-boot.js`)
 - [The terminal](systems/terminal.md) (`42-terminal.js`, `47-hotel.js`, `05-flights.js`, `43-departures.js`)
 - [Transport manager](systems/transport-manager.md) (`32-managers.js`)
 - [Update check](systems/update-check.md) (`37-update-check.js`)
+- [Weather and events](systems/weather.md) (`28-region-weather.js`, `10-events-toasts.js`, `54-weather.js`, `41-airside.js`, `07-passengers.js`, `12-drawing.js`, `39-layouts.js`, `43-departures.js`, `47-hotel.js`, `04-geometry.js`)
 - [What's new](systems/whats-new.md) (`38-updates.js`)
 <!-- /joined:systems -->
 
@@ -33,7 +36,7 @@ The main names, by file group (the joined table below is the complete list, from
 | Files | What's in them |
 | --- | --- |
 | `00-random` | `rnd()`, the seeded random generator the simulation uses |
-| `01-constants` to `03-state` | Constants and level data, the Masterplan (`TECH`), state (`G`, `R`, `DEFAULT`) |
+| `01-constants` to `03-state` | Constants and level data, the clock tables and day stats (`02-clocks`), the Masterplan (`TECH`), state (`G`, `R`, `DEFAULT`) |
 | `04-effects` | The effects ledger: `effect(kind, cause, amount, at)` behind `repAdj`, `earn` and `spend`, the rating's causes (`REPWHY`, `REPLBL`, `repRecent`) and floaters |
 | `04-geometry` | Airport geometry |
 | `05-flights` to `11-main-update` | Flights, sound, passengers, stands, construction/levels/days, events and toasts, `update()` |
@@ -53,7 +56,7 @@ The main names, by file group (the joined table below is the complete list, from
 | `51-markings` | Apron, stand and runway markings, and the airfield's lights at night (`rwyMarks`, `grade`) |
 | `52-planes` | Planes on the stands and runway: engines, shadows, airline colours and their lights (`drawPlane`, `miniPlane`) |
 | `53-roofs` | Roofs over the built halls, shown when the player picks the roof floor (`R.floor`, `setFloor`, `roofNow`) |
-| `54-weather` | Rain, puddles, settled snow, fog, cloud shadows and the windsock, read from `R.fx` |
+| `54-weather` | Rain, puddles, settled snow, fog, cloud shadows and the windsock, read from `R.fx` (through `drawnFx()`, for photo mode) |
 | `55-vehicles` | Fuel and catering trucks, baggage tractors and pushback tugs at each turnaround (`vehicleWork`) |
 | `99-start` | The `/*SIM_HOOK*/` marker and the call that starts the game |
 
@@ -64,6 +67,7 @@ The main names, by file group (the joined table below is the complete list, from
 | --- | --- |
 | `00-random.js` | random |
 | `01-constants.js` | constants |
+| `02-clocks.js` | clocks |
 | `02-masterplan.js` | the Masterplan: a tech tree bought with planning points |
 | `03-state.js` | state |
 | `04-effects.js` | effects |
@@ -119,6 +123,7 @@ The main names, by file group (the joined table below is the complete list, from
 | `53-roofs.js` | ROOFS: the terminal and its piers seen from above, a floor the player steps up to |
 | `54-weather.js` | WEATHER: rain, settled snow, puddles, fog banks, cloud shadows and a windsock |
 | `55-vehicles.js` | VEHICLES: ground vehicles working each stand's turnaround |
+| `62-photo-mode.js` | PHOTO MODE: hide the panels, pick a drawn time and sky, and save a picture |
 | `99-start.js` | the `/*SIM_HOOK*/` marker and the call that starts the game |
 <!-- /joined:files -->
 
@@ -132,9 +137,11 @@ The main names, by file group (the joined table below is the complete list, from
 
 `update(dt)` advances game minutes. The frame loop takes steps of up to 0.034 minutes, or 0.1 minutes at 4× and 8× (the bot's step size, a third of the work). These hooks run from it:
 - The frame loop, four times a second and never in `R.sim`: the board, the goal bar, `soundTick` (which watches the game without changing it) and `lvlTick` (the level-up card).
-- Every game minute: `updateBuilds`, `dayTick`, `checkLevel`, `fleetTick`, `mgrStep` and the terminal's `TERM_MINUTE` hooks.
-- `managersTick` runs every 6 hours, `crewTick` every 30 minutes, and `recordsHour` and `mgrHour` every hour. `nightChecks` runs at 03:00.
-- `dayTick` runs `recordsDay`, `regionDay`, `rivalDay`, `chalDay` and the terminal's `TERM_DAY` hooks.
+- Everything else is a hook in the clock tables (`02-clocks.js`, [Clocks and day stats](systems/clocks.md)): `MINUTE` each game minute, `HOUR` on the hour and half hour, `NIGHT` at 03:00 and `DAY` when the day changes. Each is an ordered list of `{id, every, at, fn}`. The order is listed once, in `CLOCK_ORDER`, and a system registers its hooks from its own file with `clock(T, id, every, at, fn)`.
+  - `MINUTE`: `autoStaff` (every 2 minutes), `updateBuilds`, `layoutTick`, `dayTick`, `checkLevel`, `fleetTick`, `managersTick` (every 6 hours), `mgrStep` and the terminal's `TERM_MINUTE` hooks.
+  - `HOUR`: `mgrHour`, `crewTick` (every 30 minutes), `recordsHour`, `NIGHT` (`nightChecks`) and advertising's cost to the rating.
+  - `DAY`: the day report, `recordsDay`, the new day, `regionDay`, `rivalDay`, `chalDay`, the terminal's `TERM_DAY` hooks and the season's toast.
+- A day's stats are in `G.dstat`, whose fields are listed in `DAY_STATS`. Count with `dayAdd(key, n)` and read with `dayVal(stats, key)`.
 
 ## Headless sim
 
@@ -161,9 +168,11 @@ The main names, by file group (the joined table below is the complete list, from
 - `arrivals`: Arrivals (docs/specs/terminal.md): passengers off domestic flights walk straight past immigration and everyone else goes through it; e-gates take only e-gate passports; about 1 in 40 is checked at customs; everyone who lands ends up out, at a stop or the station, or at the hotel; and nobody arriving walks into a departures hall.
 - `baggage`: The baggage system (src/game/45-baggage.js): every checked bag ends in a hold or is left behind and counted, every arriving bag reaches its carousel, an overloaded sorter backs up, a tight transfer can miss, and early bags wait in the store.
 - `brief`: docs/briefs/TEMPLATE.md and every session brief in docs/briefs/ have all their sections, filled in (tools/brief.mjs).
+- `clocks`: The clocks (02-clocks.js, docs/SYSTEMS.md "Time"): over a seeded day and a bit, the hooks run in the same order and at the same cadence as they did on main before the tables (tools/checks/lib/clocks.json, recorded from main with a log call at each hook), and every hook the order lists is registered once, from its system's own file.
+- `daystats`: A day's stats (DAY_STATS in 09-construction-levels-days.js, docs/SYSTEMS.md "Time"): over two seeded days at a level 9 airport, the day report (G.lastDay) has the fields it had on main (tools/checks/lib/daystats.json, recorded there; DAYSTATS_RECORD=1 writes it again after a change that moves the dice on purpose, such as #101's rating), every field G.dstat gets is in DAY_STATS, and a new day starts with the fields DAY_STATS resets.
 - `decor`: Decor and local character (docs/specs/terminal-place.md): decor comes with the building, more with each level, is never placed or saved, never stands in anyone's way, and local signs take the region's place names and fit their halls. Written before the code (tools/checks/pending.txt). Reads the names in lib/place.mjs, plus decor() → [{hall, kind, x0, y0, x1, y1}…], the items for the layout as built and the level, and localNames() → [{text, place, hall, w}…], the local signs (place: a key of PLACES; w: the text's width in world units). "Never in the way" also reads where the counters are: deskX, kioskX, laneX, qSlot, secSlot, ftSlot, egSlot, and boothPos, egatePos, carX, carY and arrSlot, which the decor part adds to SIMX.
 - `departures`: Departures (docs/specs/terminal.md): check-in islands with their own queues, bag drop for kiosk and online passengers with bags, and security: the search rate, family and assistance lanes, and no way into the market place but a lane.
-- `effects`: The effects ledger (04-effects.js, docs/SYSTEMS.md): every cause the rating moves for over a day of play has a REPWHY entry (what the advisor says) and a REPLBL label (the Money tab's rating list); R.repWhy adds up to the change in G.rep; and the airport's own rating events carry the stand they happened at.
+- `effects`: The effects ledger (04-effects.js, docs/SYSTEMS.md): every cause the rating moves for over a day of play has a REPWHY entry (what the advisor says) and a REPLBL label (the Money tab's rating list); R.repWhy adds up to the change in the day's score the rating follows; and the airport's own rating events carry the stand they happened at.
 - `feedback`: The feedback link in Help (docs/specs/feedback-link.md): hidden outside GitHub Pages; on GitHub Pages it opens a prefilled issue for the repo the page is served from, and the body stays well under GitHub's URL length limit.
 - `floors`: Two floors (docs/specs/terminal-place.md): departures upstairs and arrivals below, people changing floor only on the escalators and the lift (families and those who need help by lift), nobody stuck, walks about as long as before, taps going to a hall's floor, and old saves landing on the right floor. Written before the code (tools/checks/pending.txt). Reads the names in lib/place.mjs, plus a baggage hall room 'bag', hallLabel(id) → [x, y] where a hall's name is drawn, and an advisor tip {hall: id} flying the camera to that hall.
 - `graph`: The map in tools/graph.mjs: every link in the docs resolves, every system in docs/systems/ names its files, and the joined lists (tools/join.mjs) are sound; a system's file changed without its notes is a warning, and so are notes naming three or more functions that live in one file outside the system's own (a file its first line mentions only after a ";" isn't its own).
@@ -178,8 +187,11 @@ The main names, by file group (the joined table below is the complete list, from
 - `migrate`: Loading saves (22-save.js): every save in tools/saves loads to exactly the airport it did when its hash below was recorded, and every field of a new game has its default in FIELDS. Each save is loaded headless with the same seed; the hash is of JSON.stringify(G) with savedAt zeroed (wall-clock time) and G's own keys sorted, since the order of G's top-level keys is not game state (nothing walks them) while the order inside each field is. A new fixture fails until its line is added to GOLD: the check prints the hash to add.
 - `movement`: How passengers are seen to move (07-passengers.js walkMul, 41-airside.js walk, 12-drawing.js paxEase and drawMover): over a seeded half hour at the 1× frame step, nobody drawn walking moves faster than a walking top speed, and no one's drawn speed jumps by more than a set factor from one step to the next. The only exceptions are named, drawn changes: boarding a train, the people mover or a bus (hidden, drawn as it), appearing again (drawn where they are), and stepping onto a walkway link (drawn), where the pace doubles. Run on Classic with the people mover, and on layouts with walkway links (Round) and trains (Satellite). Speeds are in px per game minute: the top is the moving walkways upgrade's best pace (80×2.6×1.35) and a little to catch up; a walkway link doubles it, and a layout built for connections (LAY.xfer) speeds connecting passengers, drawn ringed.
 - `news`: What's new opens once for an older save and not again, never for a new game, and from Settings with every version. It waits for the page's state (R.newsBoot), not set times.
+- `noise`: Less noise (polish audit rows 11, 15, 16, 27): repeated region incidents fold into one Reports line; a full stack of choice toasts still resolves the one the cap evicts, and informational toasts expire on their own; the advisor's tip clears off the airport view and returns on it; a young save's What's new folds older versions away. Row 29 (the update-checker's fetch) is confirmed by reading the source: it's already wrapped in try/catch, so nothing here exercises it.
 - `perf`: How long a level 9 airport, and a fully built sixteen-stand Midfield, take to simulate, against a calibration run so machines compare (fails over its budget), and how close a CPU-throttled phone gets to full speed at 8x with each (reported only).
+- `photo-mode`: Photo mode (src/game/62-photo-mode.js, docs/specs/photo-mode.md): the camera button hides every panel, chip, toast and the phone chrome at every screen size and leaves the map and the photo bar; every drawn time and sky draws, in the airport view and the Region; the shutter makes a PNG the size of the canvas; Done, Esc and a tap leave and bring the panels back; and none of it changes G, R.fx or the random stream.
 - `plans`: "The terminal as a place" (docs/specs/terminal-place.md): each layout's own terminal table, floors on rooms and doorways, the floor chip, each layout's floor plan, and the scene checks the bundle adds (nothing drawn inside a hall under the roof, one floor at a time, and how fast the terminal draws zoomed in). Written before the code: tools/checks/pending.txt lists the checks still waiting for it. The names they read are in lib/place.mjs, plus hallLabel(id) → [x, y], where a hall's name is drawn (tapping it goes to that hall's floor).
+- `rating-day`: A rating that reflects the last day (04-effects.js, docs/systems/effects.md): on by default, it moves over a seeded day with fog and storms in the morning, stays inside its 5–100 floor and cap, and saves from every version still load; window.__rateDay=false (never saved) still plays the old running sum, for comparing.
 - `rebuild`: Rebuilding twice (bug #78, src/game/39-layouts.js): switching layouts back to back with a busy airport never throws or loses anyone. A flight at a stand the new layout drops moves to a free built stand with everyone who belongs to it; with no stand free, the switch waits for those stands to empty, as a rebuild does.
 - `reports`: Reports and the region at night (docs/briefs/polish-reports.md, #76): Office › Reports folds routes with no flights behind a link and shows near-zero profit in whole dollars; Region › Transport names the busiest lines and says when a quicker line takes a line's riders; and the region map darkens at night while its towns' windows shine.
 - `roofs`: Roofs over the terminal and its piers (src/game/53-roofs.js, docs/specs/real-airport.md): a floor the player steps up to with the Roof stop on the camera bar (Roof, Departures, Arrivals), never drawn over the halls on their own at any zoom, never over a room not built yet, and taps still reach the shops under them and the stands.
@@ -197,9 +209,12 @@ The main names, by file group (the joined table below is the complete list, from
 - `transport`: The transport manager: its suggestions are buildable, pay back within a week and come one per line; Not now hides one; extensions and upgrades work (the old line runs until the new one opens, which takes a reserved number); it leaves lines you've taken over alone, reviews the rest, adds services to an overfull line within the hour and runs event extras only while crowds travel.
 - `update`: The update-check toast (docs/specs/update-toast.md, src/game/37-update-check.js): quiet when the running build matches dist/version.json, a toast when it doesn't, Update now saves then reloads, Later holds it back an hour, and none of it runs off GitHub Pages or in the headless sim.
 - `vehicles`: Vehicles working each stand's turnaround (src/game/55-vehicles.js, docs/specs/real-airport.md): vehicleWork(i) reads only the stand's own state, so it's a turnaround (docked, or easing back off the stand) exactly when the stand says so, and never at an empty stand or one whose plane is still on its way in.
+- `weather-fx`: Weather and events in one place (28-region-weather.js, docs/systems/weather.md): over a seeded day and a bit on the level 9 save, the weather and event flags in R.fx (fog, snow, rain, storm, rush, sick, strike, fuel, the lines' faults, replacement buses, roadworks and leaves) come on and go off at the same minutes as they did on main before weather.set and weather.on (tools/checks/lib/weather-fx.json, recorded from main; WEATHER_FX_RECORD=1 writes it again).
 - `weather`: Weather you can see (src/game/54-weather.js, docs/specs/real-airport.md): rain, settled snow, puddles, fog and cloud shadows draw only while R.fx says they're on (fading out after, never a new saved field), settled snow is cleared from every built stand, and the windsock is always up.
 - `windows`: Windows (docs/specs/terminal-place.md): glass on every airside wall that faces the apron, passengers who are waiting drifting to it when a wide-body goes by and never after their gate is called, and lit at night. Written before the code (tools/checks/pending.txt). Reads the names in lib/place.mjs, plus glass() → [[x1, y1, x2, y2]…], the glass for the layout as built; p.watch, set while a passenger watches; and glassLights, the function the windows add to LIGHTS.
 <!-- /joined:checks -->
+
+On a **draft** PR, the Checks workflow (`checks.yml`) only runs the groups `tools/touched.mjs` says the changed files touch, plus `brief` and `graph` (cheap) and `sim` (a floor); marking the PR ready for review, a non-draft PR, or a manual run all run every group instead. Only `src/game/` files, `tools/graph.mjs`, `tools/brief.mjs` and `tools/checks/*.mjs` map to a narrower set; anything else (`tools/build.mjs`, `src/shell.html`, `package*.json`, a workflow file, `tools/check.mjs`…) falls back to every group, same as a diff it fails to read.
 
 ## The bot
 

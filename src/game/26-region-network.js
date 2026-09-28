@@ -10,7 +10,7 @@ function nodeAttr(){ // jobs and visitors drawn to each station
   return {jobs,tour};
 }
 function carTimes(C){ // minutes by car between stations (parking included), and the roads each trip uses; the last answer is kept, as measuring changes asks the same again
-  const key=C+'|'+((R.fx.roadworks||0)>G.clock?R.fx.rwE:'')+devOn('ringroad')+devOn('lowtraffic');if(R.carC&&R.carC.k===key)return R.carC.T;
+  const key=C+'|'+(weather.on('roadworks')?weather.edge():'')+devOn('ringroad')+devOn('lowtraffic');if(R.carC&&R.carC.k===key)return R.carC.T;
   const spd=r=>(r===2?34:22)*(1-0.45*C)*(devOn('ringroad')&&r===1?1.15:1),park=n=>NODES[n].pl==='city'?(devOn('lowtraffic')?14:8):n==='air'?4:2,T={},P={};
   for(const s of NODE_IDS){const d={[s]:0},pv={},done=new Set();
     for(;;){let u=null;for(const k in d)if(!done.has(k)&&(u==null||d[k]<d[u]))u=k;if(u==null)break;done.add(u);
@@ -143,4 +143,5 @@ function regionDay(){
     for(const n of NODE_IDS)if(NODES[n].pl===pid)tgt+=(G.tod[n]||0)*(pid==='city'?14:8);
     const cur=placePop(pid);G.pop[pid]=Math.round((cur+(tgt-cur)*0.2)*10)/10}
 }
+clock(DAY,'regionDay',1,0,regionDay);
 

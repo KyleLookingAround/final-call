@@ -43,6 +43,8 @@ const BAY=i=>i<360?{x:344+Math.floor(i/5)*12,y:686+LAND_DY+(i%5)*19}:{x:1264+Mat
 const carCap=(l=G.lv.carpark)=>60+60*l, carFeeBase=(l=G.lv.carpark)=>0.8*(1+0.35*l);
 const WAGE={desks:3,lanes:4,officers:3.5},OWN={desks:()=>1+G.lv.desks,lanes:()=>1+G.lv.lanes,officers:()=>1+G.lv.officers};
 function staffed(t){const own=OWN[t]();if(G.lv.roster&&G.auto)return clamp((R.autoN&&R.autoN[t])||own,1,own);const v=G.open&&G.open[t];return v==null?own:clamp(v,1,own)}
+// the roster: every other game minute, open as many desks, lanes and passport officers as the queues need
+clock(MINUTE,'autoStaff',2,0,()=>{if(G.lv.roster&&G.auto)R.autoN={desks:clamp(Math.ceil(R.ciQ.length/6),1,OWN.desks()),lanes:clamp(Math.ceil(R.secQ.length/6),1,OWN.lanes()),officers:clamp(Math.ceil(R.arrQ.length/6),1,OWN.officers())}});
 const fuelMul=()=>(R.fx.hedge>G.clock?0.8:R.fx.fuelUp>G.clock?1.35:R.fx.fuelDown>G.clock?0.85:1)*(1-0.06*G.lv.fuelfarm)*(G.lv.saf?0.8:1);
 const sellValue=f=>Math.round(AIRCRAFT[f.type].cost*0.6*Math.max(0.4,1-(f.wear||0)*0.03));
 const shopSpentEst=s=>{let t=SHOPS[s.type].cost;for(let k=0;k<s.lvl;k++)t+=Math.round(SHOPS[s.type].cost*0.8*Math.pow(1.7,k));return t};

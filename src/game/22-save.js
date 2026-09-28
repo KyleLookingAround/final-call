@@ -57,7 +57,7 @@ const MIGRATIONS=[
     G.routes={};for(let t=0;t<5;t++){if(!has('rt:'+t))continue;CITIES.filter(c=>c[2]===t).sort((x,y)=>y[4]-x[4]).slice(0,t===0?5:4).forEach(c=>G.routes[c[0]]={f:1})}}},
   {when:always,note:'routes only to cities that exist',up(){G.routes=G.routes||{};G.rs=G.rs||{};for(const c in G.routes)if(!CITY[c])delete G.routes[c]}},
   {when:state=>state&&!state.gdone,note:'before goals: mark those already met',up(){for(const g of GOALS){try{const [v,t]=g.p();if(v>=t)G.gdone[g.id]=1}catch(e){}}}},
-  {when:always,note:'the day from the clock, and its stats',up(){G.day=dayOf(G.clock);if(!G.dstat)G.dstat={pax:0,arr:0,flights:0,ontime:0,rev:0,cost:0,rep0:G.rep}}},
+  {when:always,note:'the day from the clock, and its stats',up(){G.day=dayOf(G.clock);if(!G.dstat)G.dstat=dayStats()}},
   {when:()=>G.seen==null,note:'What\'s new: new games have seen everything; airports from before it see version 21\'s notes on',up(state){G.seen=state?21:UPDATES[0].v}},
 ];
 function resetAll(state){
@@ -67,7 +67,7 @@ function resetAll(state){
   applyLayout(G.layout||'classic');
   R.rwy={q:[],act:[null,null]};R.lot=new Array(540).fill(0);R.platform=[];R.train={state:'away',t:3,x:null};R.lotFull=0;
   R.arrQ=[];R.booths=[];R.egates=[];R.arrBelt=[];
-  R.pax=[];R.ciQ=[];R.secQ=[];R.ftQ=[];R.desks=[];R.kiosks=[];R.lanes=[];R.ftL={p:null,t:0};R.belt=[];R.st=[...Array(NG).keys()].map(mkStandRT);R.st.forEach((S,i)=>S.hold=i*6);R.floaters=[];R.toasts=[];R.fx={fog:0,rush:0,sick:0,strike:0,hedge:0,fuelUp:0,fuelDown:0,snow:0,storm:0,rain:0,line:{},leaves:0,roadworks:0};R.autoN={};R.tram={state:'away',t:2,x:null};R.bus={state:'away',t:1,x:null};R.tramQ=[];R.busQ=[];R.reg=null;for(const P of PLOTS)scheduleEvent(P.id);regionTick();
+  R.pax=[];R.ciQ=[];R.secQ=[];R.ftQ=[];R.desks=[];R.kiosks=[];R.lanes=[];R.ftL={p:null,t:0};R.belt=[];R.st=[...Array(NG).keys()].map(mkStandRT);R.st.forEach((S,i)=>S.hold=i*6);R.floaters=[];R.toasts=[];weather.reset();R.autoN={};R.tram={state:'away',t:2,x:null};R.bus={state:'away',t:1,x:null};R.tramQ=[];R.busQ=[];R.reg=null;for(const P of PLOTS)scheduleEvent(P.id);regionTick();
   R.nextEvent=G.clock+60;R.lastMin=Math.floor(G.clock);R.sel=G.stands.findIndex(s=>s.built);if(R.sel<0)R.sel=0;
   if(R.sim)return;
   setView(G.tab==='region'?'region':G.tab==='routes'?'world':'airport');$('#airline').textContent=G.name;$('#lvlName').textContent=lvlName(G.level);renderPlanBtn();boardSig='';renderBoard();renderHist();renderTabs();renderPanel();renderCam();renderToasts();syncSound();save();

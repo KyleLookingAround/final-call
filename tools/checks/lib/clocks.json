@@ -1,0 +1,38 @@
+{
+ "calls": 11388,
+ "minutes": 1500,
+ "hash": "423a576d",
+ "cadence": {
+  "updateBuilds": "1500× every 1 at 0",
+  "layoutTick": "1500× every 1 at 0",
+  "dayTick": "1500× every 1 at 0",
+  "checkLevel": "1500× every 1 at 0",
+  "fleetTick": "1500× every 1 at 0",
+  "mgrStep": "1500× every 1 at 0",
+  "TERM_MINUTE": "1500× every 1 at 0",
+  "autoStaff": "750× every 2 at 0",
+  "mgrHour": "25× every 60 at 0",
+  "crewTick": "50× every 30 at 0",
+  "recordsHour": "25× every 60 at 0",
+  "ads": "25× every 60 at 0",
+  "nightChecks": "1× every 1440 at 180",
+  "managersTick": "4× every 360 at 0",
+  "dayReport": "1× every 1440 at 0",
+  "recordsDay": "1× every 1440 at 0",
+  "newDay": "1× every 1440 at 0",
+  "regionDay": "1× every 1440 at 0",
+  "rivalDay": "1× every 1440 at 0",
+  "chalDay": "1× every 1440 at 0",
+  "TERM_DAY": "1× every 1440 at 0",
+  "season": "1× every 1440 at 0"
+ },
+ "patterns": {
+  "updateBuilds layoutTick dayTick checkLevel fleetTick mgrStep TERM_MINUTE": 750,
+  "autoStaff updateBuilds layoutTick dayTick checkLevel fleetTick mgrStep TERM_MINUTE mgrHour crewTick recordsHour ads": 20,
+  "autoStaff updateBuilds layoutTick dayTick checkLevel fleetTick mgrStep TERM_MINUTE": 700,
+  "autoStaff updateBuilds layoutTick dayTick checkLevel fleetTick mgrStep TERM_MINUTE crewTick": 25,
+  "autoStaff updateBuilds layoutTick dayTick checkLevel fleetTick mgrStep TERM_MINUTE mgrHour crewTick recordsHour nightChecks ads": 1,
+  "autoStaff updateBuilds layoutTick dayTick checkLevel fleetTick managersTick mgrStep TERM_MINUTE mgrHour crewTick recordsHour ads": 3,
+  "autoStaff updateBuilds layoutTick dayTick dayReport recordsDay newDay regionDay rivalDay chalDay TERM_DAY season checkLevel fleetTick managersTick mgrStep TERM_MINUTE mgrHour crewTick recordsHour ads": 1
+ }
+}
