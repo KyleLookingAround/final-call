@@ -1,7 +1,12 @@
 // The game's rules: the same seed plays the same game; cheaper fares fill more seats and keep more travellers from
 // Lowmere; costs rise with level; planes lose value with wear; levels ask for more each time; every layout is sound;
 // plan and goal ids are sound; the newest What's new version matches docs/HISTORY.md; the sim hook reads live
-// values; and loading a save twice changes nothing.
+// values; loading a save twice changes nothing; and each passenger goes through the same states as on main over a seeded
+// hour (tools/checks/lib/pax-states.json, recorded from main before refactor 7; RULES_PAX_RECORD=1 writes it again).
+import {readFileSync,writeFileSync} from 'node:fs';
+import {join,dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
+const PAX_REC=join(dirname(fileURLToPath(import.meta.url)),'lib/pax-states.json');
 
 export default async function({open,ok,saveText,newest,out,HIST_TOP}){
   const run=async seed=>{const {ctx,page}=await open(undefined,null,false,{seed,still:true});
@@ -69,4 +74,20 @@ export default async function({open,ok,saveText,newest,out,HIST_TOP}){
     return out},HIST_TOP);
   for(const [name,pass,info] of res)ok(name,pass&&!errs.length,info+(errs.length?' '+errs[0]:''));
   await ctx.close();
+  // the passes over passengers (refactor 7): over a seeded hour on the level 9 save, each passenger, numbered in the order
+  // they're first seen, goes through the same states, read after every step, as on main
+  {const {ctx,page,errs}=await open(undefined,saveText('v32-L9.json'),false,{still:true});
+  const now=await page.evaluate(()=>{const S=__sim,G=S.G,R=S.R;R.sim=true;const id=new Map(),seq=[],who=[];
+    const end=G.clock+60;while(G.clock<end){S.update(0.1);
+      for(const p of R.pax){let k=id.get(p);if(k==null){k=seq.length;id.set(p,k);seq.push([]);const F=p.F||p.A;who.push(`#${k} ${p.inbound?'arriving':'departing'} ${F?F.code+F.no:''} ${p.type||''}, first seen at ${Math.floor(G.clock)} as ${p.state}`)}
+        const s=seq[k];if(s[s.length-1]!==p.state)s.push(p.state)}}
+    R.sim=false;
+    const h=t=>{let x=2166136261;for(const c of t)x=Math.imul(x^c.charCodeAt(0),16777619)>>>0;return x.toString(16).padStart(8,'0')};
+    return {n:seq.length,hashes:seq.map(s=>h(s.join(' '))),seqs:seq.map(s=>s.join(' ')),who}});
+  if(process.env.RULES_PAX_RECORD)writeFileSync(PAX_REC,JSON.stringify({n:now.n,hashes:now.hashes.join(' ')})+'\n');
+  const rec=JSON.parse(readFileSync(PAX_REC,'utf8')),was=rec.hashes.split(' ');
+  const at=now.hashes.findIndex((x,k)=>x!==was[k]),k=at>=0?at:now.n!==rec.n?Math.min(now.n,rec.n):-1;
+  ok('rules: each passenger goes through the same states as on main over a seeded hour',k<0&&!errs.length,
+    k<0?`${now.n} passengers`+(errs.length?' '+errs[0]:''):k<now.n?`first differs: ${now.who[k]}, now ${now.seqs[k].slice(0,300)}`:`${now.n} passengers, was ${rec.n}`);
+  await ctx.close()}
 }
