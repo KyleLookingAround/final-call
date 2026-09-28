@@ -26,7 +26,7 @@ A newcomer at 1× reaches Local Airport, the game's first real moment, in about 
 
 ## Balance
 
-- Level 1 moves from 31–41 to 3–6 game hours; the baseline becomes 3–6 (`tools/baseline.json`, the `balance` playbook). The 500 reward and 6 points a day earlier bring level 3 forward by 2–7 hours (99–110, still inside 95–117) and levels 5 and 7 by 0–30 hours (300–353 and 618–626, `ok` or `near`); level 9 is unchanged within the runs' noise. The owner asked for this change (#105, the brief).
+- Level 1 moves from 31–41 to 3–6 game hours; the baseline becomes 3–6 (`tools/baseline.json`, the `balance` playbook). The 500 reward and 6 points a day earlier bring level 3 forward by 2–7 hours (99–110, still inside 95–117) and levels 5 and 7 by 0–30 hours (300–353 and 618–684, `ok` or `near`); level 9 is unchanged within the runs' noise. The owner asked for this change (#105, the brief).
 
 ## Checks
 
