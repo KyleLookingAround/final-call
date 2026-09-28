@@ -43,8 +43,10 @@ export default async function({open,ok,saveText,newest,out,HIST_TOP,root}){
     t('rules: there are enough crews for the fleet',S.crewTarget()>=G.fleet.filter(f=>!f.sold).length,`${S.crewTarget()} for ${G.fleet.filter(f=>!f.sold).length} planes`);
     bad=[];for(let n=2;n<S.LEVELS.length;n++){const p=S.LEVELS[n-1].req,q=S.LEVELS[n].req;if(!(q.pax>=p.pax&&q.gates>=p.gates))bad.push(n)}
     t('rules: each level asks for at least as much as the one before',!bad.length,few(bad));
-    {bad=[];for(let n=1;n<S.LEVELS.length;n++){const g=S.GOALS.find(x=>x.id==='l'+n),rows=S.levelChecks(n),min=rows.reduce((a,c)=>c[1]/c[2]<a[1]/a[2]?c:a),[v,tg]=g.p();if(v!==min[1]||tg!==min[2])bad.push('l'+n)}
-      t('rules: a level goal\'s bar and text follow its least-met requirement',!bad.length,few(bad))}
+    {bad=[];for(let n=1;n<S.LEVELS.length;n++){const g=S.GOALS.find(x=>x.id==='l'+n),[v,tg]=g.p();
+        if(G.level>=n){if(v!==1||tg!==1)bad.push('l'+n+' (reached, should read as met)')}
+        else{const min=S.levelChecks(n).reduce((a,c)=>c[1]/c[2]<a[1]/a[2]?c:a);if(v!==min[1]||tg!==min[2])bad.push('l'+n)}}
+      t('rules: a level goal\'s bar and text follow its least-met requirement, and reads as met once the level is reached',!bad.length,few(bad))}
     {const gids=S.GOALS.map(g=>g.id);
       t('rules: the Lowmere market-share goal leads only from Gateway on, where slot agreements are within reach',gids.indexOf('low1')>gids.indexOf('l5'),`low1 at ${gids.indexOf('low1')}, l5 at ${gids.indexOf('l5')}`)}
     {const before={level:G.level,flown:G.flown,rep:G.rep,hours:G.hours,pol:G.pol,cash:G.cash,pts:G.pts,newTabs:G.newTabs,built:G.stands.map(s=>s.built)},

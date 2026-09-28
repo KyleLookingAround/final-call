@@ -96,7 +96,9 @@ const nRoutes=()=>Object.keys(G.routes||{}).length;
 // a level goal's bar and text follow whichever of that level's requirements is least met, not the level count
 // (row 6): levelChecks(n) already has each requirement's value, target, display size and unit
 const levelGoalReq=n=>levelChecks(n).reduce((a,c)=>c[1]/c[2]<a[1]/a[2]?c:a);
-const levelGoalProgress=n=>{const r=levelGoalReq(n);return [r[1],r[2]]};
+// once the level itself is reached, the goal counts as met even if a requirement (rating, an old save's numbers) has
+// since slipped back below its target: reaching the level, not holding every number forever after, is the goal
+const levelGoalProgress=n=>{if(G.level>=n)return [1,1];const r=levelGoalReq(n);return [r[1],r[2]]};
 const levelGoalText=n=>{const [,v,tg,big,unit]=levelGoalReq(n);return `${LEVELS[n].name}: ${big?num(v):v} / ${big?num(tg):tg} ${unit}`};
 const GOALS=[
   {id:'seat',t:'Seat 30 passengers',p:()=>[G.paxSeated,30],r:15},
