@@ -81,10 +81,14 @@ function pickAct(p){const a=ACT_OF(p);if(a)return a;const r=rnd();return r<0.4?'
 /* ---------- who is where: each shop's and each market spot's occupants ---------- */
 // Gathered at most once a step, and only when someone has left a spot since (nextAct, toGate and leaveShop set R.occOut)
 // or the layout has changed: a spot someone leaves frees up at the next step, and a spot taken is added in freeSpot, so
-// the lists are the same as gathering them at every step
+// the lists are the same as gathering them at every step. They're gathered from byState(): anyone in the market's states
+// when it was taken, or sent into them since (toShop and goAct add them with stateIn), who is in one now, once each (someone
+// can be listed twice only once stateIn has added anyone)
+const OCC_ST=['shop','toShop','mkt','toMkt'];
 function occ(){
-  if(!R.occ||R.occOut&&R.occStep!==R.step||R.occLay!==G.layout){R.occOut=false;R.occStep=R.step;R.occLay=G.layout;const o=R.occ={};
-    for(const p of R.pax){const st=p.state,k=st==='shop'||st==='toShop'?'s'+p.shop:st==='mkt'||st==='toMkt'?p.act:null;if(k&&p.sl>=0)(o[k]||(o[k]=[])).push(p.sl)}}
+  if(!R.occ||R.occOut&&R.occStep!==R.step||R.occLay!==G.layout){R.occOut=false;R.occStep=R.step;R.occLay=G.layout;const o=R.occ={},by=byState(),seen=R.bsIn?new Set():null;
+    for(const s of OCC_ST)for(const p of by[s]){const st=p.state,k=st==='shop'||st==='toShop'?'s'+p.shop:st==='mkt'||st==='toMkt'?p.act:null;
+      if(k&&p.sl>=0){if(seen){if(seen.has(p))continue;seen.add(p)}(o[k]||(o[k]=[])).push(p.sl)}}}
   return R.occ;
 }
 function freeSpot(key,n){const o=occ(),u=o[key]||(o[key]=[]);if(u.length>=n)return -1;for(let s=0;s<n;s++)if(!u.includes(s)){u.push(s);return s}return -1}
@@ -130,11 +134,11 @@ function pickShop(p,first){
 // a place along shop j's front: t along it, e out from its back wall (47 is just outside)
 function shopPt(j,t,e){const a=SHOP_A[j]*Math.PI/180,c=exact(Math.cos(a)),s=exact(Math.sin(a));WP.x=SHOP_X[j]+t*c-e*s;WP.y=SHOP_Y[j]+t*s+e*c;return WP}
 function toShop(p,j,s){
-  p.state='toShop';p.shop=j;p.sl=s;p.late=isCalled(p.F);const t=8+(s%8)*10;shopPt(j,t,47);p.tx=WP.x;p.ty=WP.y;p.su=t;route(p,SHOP_ROOM[j]);
+  p.state='toShop';p.shop=j;p.sl=s;stateIn(p);p.late=isCalled(p.F);const t=8+(s%8)*10;shopPt(j,t,47);p.tx=WP.x;p.ty=WP.y;p.su=t;route(p,SHOP_ROOM[j]);
 }
 function goAct(p,a){
   const M=mktPlan(),list=M[a]||M.seats;let s=freeSpot(a,list.length);
-  p.state='toMkt';p.act=a;p.sl=s;
+  p.state='toMkt';p.act=a;p.sl=s;stateIn(p);
   if(s>=0){p.tx=list[s][0];p.ty=list[s][1]}
   else{const Z=a==='play'||a==='playB'||a==='food'||a==='window'?M.stand[0]:M.stand[1];p.tx=Z[0]+rnd()*(Z[2]-Z[0]);p.ty=Z[1]+rnd()*(Z[3]-Z[1])}
   route(p,hallId('mkt'));
