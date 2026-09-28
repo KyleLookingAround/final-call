@@ -145,7 +145,9 @@ TERM_DRAW.push(D=>{
     ctx.fillStyle='#D9A066';for(let j=0;j<bags;j++){const t=((j/20+now/9)%1)*2*Math.PI;ctx.fillRect(cx+Math.cos(t)*40-2,cy+Math.sin(t)*10-2,4,4)}
     mono(String(k+1),cx,cy+3,'#909AA4',9,'center');
     if(L.length){const A=L[0],a=A.bg||{};mono(`${A.code}${A.no} ${a.first!=null?hhmm(a.first):'--:--'}–${a.last!=null?hhmm(a.last):'--:--'}`,cx,cy+18,a.stall>2?'#FF7A8A':'#FFC72C',6,'center')}}
-  // tug trains: out through the tunnel under the concourse to the stand, and back
+});
+// tug trains out on the apron, on every floor: out through the tunnel under the concourse to the stand, and back
+LAYER.terminal.push(()=>{const B=bagRT();
   for(const T of B.tugs){if(T.t<0)continue;const b=bagPt(T.i),k=clamp(T.t/T.T,0,1),dir=T.out?k:1-k,tun=(HALL_OUT.y-TUNNEL.y),all=tun+Math.hypot(b.x-TUNNEL.x,b.y-TUNNEL.y),s=dir*all;
     if(s<tun)continue; // in the tunnel
     const f=(s-tun)/Math.max(1,all-tun),x=TUNNEL.x+(b.x-TUNNEL.x)*f,y=TUNNEL.y+(b.y-TUNNEL.y)*f,a=Math.atan2(b.y-TUNNEL.y,b.x-TUNNEL.x)+(T.out?0:Math.PI);

@@ -30,12 +30,13 @@ description: Run the other Final Call sessions building a feature's parts - the 
 - `fire_trigger` on a session's own one-shot check-in brings it forward. Once it answered "internal error" yet did fire, and the one-shot was then gone, so check `get_session` (status running) before firing again.
 - Never push to another session's branch: ask it. A PR description can be fixed directly.
 
-## 5. No cap on sessions
+## 5. A cap on sessions, and quiet windows for refactors
 
-- The owner doesn't want a limit on how many sessions run. Sessions no longer share bookkeeping files (lessons, roadmap items, What's new entries, decisions, systems' notes and check groups are each one file), and the Catch up workflow merges `main` into every open PR when it moves, so they don't chase `main`.
-- Go by `rate_limit_info.status`: `allowed` means run what the plan's order of work allows; `allowed_warning` means add nothing beyond the plan already running; `rejected` or `isUsingOverage` means book a `send_later` for a minute after `resetsAt` and end the turn.
+- At most about four default-model sessions run at once; put the rest on the cheaper model (`create_session` with `model: "claude-sonnet-5"`) and stagger their starts. On `allowed_warning`, start nothing new; `rejected` or `isUsingOverage` still means book a `send_later` for a minute after `resetsAt` and end the turn. Ten default-model sessions started within 45 minutes on 27–28 Sep spent the five-hour allowance in about 80 minutes and killed every one of their turns mid-way (lesson #18, then `main-overnight-stall.md`).
+- Sessions don't share bookkeeping files (lessons, roadmap items, What's new entries, decisions, systems' notes and check groups are each one file), and the Catch up workflow merges `main` into every open PR when it moves, so they don't chase `main`.
 - Only parts that edit the same game code are ordered, in the spec's order of work.
-- Small changes and routine jobs (look backs, save fixtures, doc moves, screenshot reviews) go to the cheaper model: `create_session` with `model: "claude-sonnet-5"`.
+- Small changes and routine jobs (look backs, save fixtures, doc moves, screenshot reviews) go to the cheaper model.
+- A refactor that changes what other files call (a hook signature, a shared read) runs in a quiet window, before or after a wave of feature sessions, never alongside one: refactor 8 changing how weather was read while eight feature branches were open needed a merge commit in each of them, and #102 went red after a clean Catch up merge.
 
 ## 6. Starting a session
 
@@ -63,5 +64,13 @@ description: Run the other Final Call sessions building a feature's parts - the 
 - Routine id: `trig_01WWjSqun7aAX15iLCb4PQdc` ("Final Call: tidy the lessons"). It was created with no connectors and no repository attached, so its session clones the repo itself; if a firing can't push or open its PR, recreate it from the Routines page with this repo and GitHub attached, and put the new id here.
 - It fires when a look back leaves 8 or more lessons new since the last tidy (`node tools/join.mjs` counts them): the session that added the lesson fires it (`fire_trigger`) and says so, as the `steward` playbook's last step says. Nobody starts it by hand or on a schedule.
 - At a sweep, if a tidy PR (`feature/lessons-tidy-…`) is open, let it finish before firing again. To change what it does, edit the brief and `update_trigger` its prompt to match.
+
+## 11. The watchdog
+
+- A Routine fires hourly at :50 into a fresh session and re-wakes sessions the account's usage limit stopped mid-turn: the limit kills a session's turn before it can book its own `send_later`, so nothing wakes it after the reset. Its brief, which is also its prompt, is `docs/briefs/watchdog.md`.
+- Routine id: `trig_01BTgHU2LFEezyrUWk9QLL3M` ("Final Call: watchdog"). It was created with no connectors, so if a firing can't call `list_sessions` or `create_trigger`, recreate it from the Routines page with Claude Code Remote attached, and put the new id here.
+- The owner pauses it from the Routines page on a quiet day.
+
+## 12. Launch-day triage
 
 During launch week, the coordinator also creates the "Final Call: launch-day triage" Routine from the committed `docs/briefs/launch-triage.md` (a fresh session every two hours, on the cheaper model), retires it once launch week is over, and puts its id here in a follow-up.
