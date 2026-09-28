@@ -14,9 +14,11 @@ export default async function({open,ok,saveText}){
       booked=G.famous.v&&{...G.famous.v};news=(G.news||[]).find(n=>/^Tomorrow: /.test(n.m));
       // the line under the board, in a page that draws
       R.sim=false;S.famousLine();line=document.querySelector('#ffLine').hidden?'':document.querySelector('#ffLine').textContent;R.sim=true;
-      for(let k=0;k<50*600&&G.famous.v&&G.famous.v.st!==2;k++){S.update(0.1);
+      // every place shop money moves at in a step, since another shopper can pay after the busy hour's top-up
+      const at=[];{let cur=R.cashAt.shops;Object.defineProperty(R.cashAt,'shops',{configurable:true,enumerable:true,get:()=>cur,set:x=>{cur=x;at.push(x)}})}
+      for(let k=0;k<50*600&&G.famous.v&&G.famous.v.st!==2;k++){at.length=0;S.update(0.1);
         const f=R.famous,v=G.famous.v;if(f){crowd=Math.max(crowd,f.ph.length+f.fan.length)}
-        if(v&&(v.paid||0)>paid){paid=v.paid;if(paidAt==null)paidAt=R.cashAt.shops}
+        if(v&&(v.paid||0)>paid){paid=v.paid;if(paidAt==null)paidAt=R.famous&&at.includes(R.famous.F.i)?R.famous.F.i:at[0]}
         if(!rep){const e=(R.repEv||[]).find(e=>e[1]==='famous');if(e)rep={d:e[3],at:e[4]}}}
       const v=G.famous.v;after={st:v&&v.st,crowd:!!R.famous,at:v&&v.at,paid:v&&v.paid||0,paidAt};
       const told=(G.news||[]).find(n=>/left (on time|\d+ min late) on /.test(n.m));

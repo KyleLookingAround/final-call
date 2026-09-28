@@ -21,12 +21,13 @@ export default async function({open,ok,saveText}){
     R.sim=false;return {deps,missed,arrDone,bad:bad.slice(0,3),maxSort,xin:S.bagRT().xin||0,board:[...board]}});
   ok('baggage: every checked bag ends in a hold or is left behind and counted',r.deps>=10&&r.missed>0&&r.xin>0&&!r.bad.some(b=>!b.startsWith('arrival'))&&!errs.length,`${r.deps} departures, ${r.missed} bags left behind, ${r.xin} transfer bags through the hall ${r.bad.join('; ')}${errs[0]||''}`);
   ok('baggage: every arriving bag reaches its carousel, and the board says which',r.arrDone>=10&&r.board.includes('ON BELT n')&&!r.bad.some(b=>b.startsWith('arrival')),`${r.arrDone} arrivals cleared, board: ${r.board.join(', ')} ${r.bad.join('; ')}`);
-  // the sorter: the same pile of bags clears more slowly without the automated system, and backs up
+  // the sorter: the same pile of bags, for the same flights, clears more slowly without the automated system, and backs up
   const s=await page.evaluate(()=>{const S=__sim,G=S.G,R=S.R;R.sim=true;
     const run=l=>{G.lv.bagsys=l;G.lv.screen=5;G.lv.makeup=6;const B=S.bagRT();B.scr=[];B.sort=[];B.late=0;
       const Fs=S.SIDX.map(i=>R.st[i].F).filter(F=>F&&!F.freighter&&F.bg&&!F.bg.cut);for(const F of Fs){S.givePos(F);B.sort.push([F,300])}
       const n0=B.sort.reduce((s,g)=>s+g[1],0);for(let k=0;k<100;k++)S.update(0.1);const left=B.sort.reduce((s,g)=>s+g[1],0);return {moved:n0-left,left,late:B.late}};
-    const slow=run(0),fast=run(3);R.sim=false;return {slow,fast,cap:[S.bagCaps().sort]}});
+    const built=S.SIDX.map(i=>S.G.stands[i].built);S.SIDX.forEach(i=>{S.G.stands[i].built=false}); // the stands wait, so both runs sort for the same flights
+    const slow=run(0),fast=run(3);S.SIDX.forEach((i,k)=>{S.G.stands[i].built=built[k]});R.sim=false;return {slow,fast,cap:[S.bagCaps().sort]}});
   ok('baggage: an overloaded sorter backs up, and the automated system clears it faster',s.slow.left>0&&s.slow.late>=3&&s.slow.moved<=21*10&&s.fast.moved>s.slow.moved*1.8,JSON.stringify(s));
   // a carousel full of one flight's uncollected bags holds up the next flight's: the board says so for that one only
   const c=await page.evaluate(()=>{const S=__sim,R=S.R;R.sim=true;const B=S.bagRT();
