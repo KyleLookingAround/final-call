@@ -14,7 +14,7 @@ function lvlUnlocks(from,to){
   for(const T of TECH)if(newAt(T.t)&&!researched(T.id)){const x=T.u.filter(k=>/^(ac|rt|mode):/.test(k)).map(k=>k.startsWith('rt:')?`${itemName(k)}: ${lvlCities(+k.slice(3))}`:itemName(k));
     out.plans.push({t:T.n,d:T.d+(x.length?' '+x.join(' · ')+'.':''),br:T.b,ic:LV_BR_IC[T.b],go:'plan'})}
   if(newAt(1)){out.open.push({t:'The Region',d:'Run lines to the towns, build stations and develop sites.',ic:'map',go:'tab:region'},{t:'The World map',d:'Open routes and set their fares.',ic:'globe',go:'tab:routes'},
-    {t:'Weekly challenges',d:'Three a week, for cash and plan points (Office › Records).',ic:'chart',go:'office:records'},{t:'Night flights',d:'Choose a curfew or keep flying all night (Office › Policies).',ic:'book',go:'office:policies'})}
+    {t:'Weekly challenges',d:'Three a week, for cash and plan points (Office › Progress).',ic:'chart',go:'chal'},{t:'Night flights',d:'Choose a curfew or keep flying all night (Office › Policies).',ic:'book',go:'office:policies'})}
   if(newAt(RIV_LV))out.open.push({t:'A rival at Lowmere',d:'Lowmere starts building an airport to compete on your routes.',ic:'tower',go:'tab:routes'});
   if(newAt(4))out.open.push({t:'Consultants',d:'Buy extra plan points in the Masterplan.',ic:'crew',go:'plan'});
   if(newAt(RIV_BUY_LV))out.open.push({t:'Buy Lowmere Airport',d:'Take over your rival for a daily dividend (Routes).',ic:'store',go:'tab:routes'});
@@ -57,7 +57,7 @@ function lvlTick(){if(R.sim||!R.lvlCard||!$('#lvlup').hidden||$$('.help:not([hid
 function lvlGo(g){
   lvlCardOpen(false);const i=g.indexOf(':'),a=i<0?g:g.slice(0,i),b=g.slice(i+1);
   if(a==='plan')openPlan();else if(a==='tab')setTab(b);else if(a==='up')goTo(UPG[b].tab,`[data-buy="${b}"]`);
-  else if(a==='gate')goTo('stands',`[data-standbuy="${b}"]`);else if(a==='pier')goTo('stands','[data-pierbuy]');else if(a==='office'){R.oSub=b;setTab('office')}
+  else if(a==='gate')goTo('stands',`[data-standbuy="${b}"]`);else if(a==='pier')goTo('stands','[data-pierbuy]');else if(a==='chal')goTo('office','#chal');else if(a==='office'){R.oSub=b;setTab('office')}
 }
 $('#lvlup').addEventListener('click',e=>{const g=e.target.closest('[data-lvgo]');if(g){lvlGo(g.dataset.lvgo);return}if(e.target.id==='lvlup'||e.target.closest('[data-lvclose]'))lvlCardOpen(false)});
 document.addEventListener('keydown',e=>{if(!$('#lvlup').hidden&&e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();lvlCardOpen(false)}},true);

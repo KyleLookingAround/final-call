@@ -58,7 +58,7 @@ function chalDay(){
   for(const p of CH_POOL){if(p.city)for(const k of Object.keys(G.routes||{}))snap[p.id+k]=p.m(k);else snap[p.id]=p.m()}
   C.wk=wk;C.start=G.day;C.snap=snap;C.all=0;
   const ds=(G.days||[]).slice(-7),pr=ds.length?ds.reduce((a,x)=>a+Math.max(0,x.p),0)/ds.length:G.rate*60*12;C.pay=Math.max(100,Math.round(pr*0.12/50)*50);
-  if(!R.sim)toast('New weekly challenges are in the Office.',[{label:'Show',fn:()=>{R.oSub='records';setTab('office')}},{label:'Later',fn:()=>{}}],'chal','',12);
+  if(!R.sim)toast('New weekly challenges are in the Office.',[{label:'Show',fn:()=>goTo('office','#chal')},{label:'Later',fn:()=>{}}],'chal','',12);
 }
 clock(DAY,'chalDay',1,0,chalDay);
 function chalProg(x){const p=CH_POOL.find(q=>q.id===x.id);return Math.max(0,(x.c?p.m(x.c):p.m())-x.base)}
@@ -81,13 +81,17 @@ function recordsDay(s){
 clock(DAY,'recordsDay',1,0,recordsDay);
 function recordsHour(){setRec('streak',G.bestStreak);setRec('routes',nRoutes());setRec('rep',G.rep);if(R.reg)setRec('riders',R.reg.riders||0);checkStamps();checkChal()}
 clock(HOUR,'recordsHour',60,0,recordsHour);
-function recordsPanel(){
+// this week's challenges, under the goals on Office › Progress
+function chalPanel(){
   let h='';const C=G.chal;
-  if(SET().chal!==false){h+=`<div class="sec">This week’s challenges<span>${C&&C.list&&C.list.length?`${7-((G.day-1)%7)} day${7-((G.day-1)%7)===1?'':'s'} left`:''}</span></div>`;
+  if(SET().chal!==false){h+=`<div class="sec" id="chal">This week’s challenges<span>${C&&C.list&&C.list.length?`${7-((G.day-1)%7)} day${7-((G.day-1)%7)===1?'':'s'} left`:''}</span></div>`;
     if(!C||!C.list||!C.list.length)h+=`<p class="note">${G.level<1?'Challenges start when you become a Local Airport.':'New challenges arrive at the start of the next game day.'}</p>`;
     else{h+=C.list.map(x=>{const p=CH_POOL.find(q=>q.id===x.id),v=chalProg(x);return `<div class="lreq chal${x.done?' done':''}"><span>${x.done?'✓ ':''}${p.n(x.goal,x.c)}</span><span class="live"><b>${num(Math.min(v,x.goal))}</b> / ${num(x.goal)}</span><div class="prog"><i style="width:${clamp(v/x.goal,0,1)*100}%;background:${x.done?'var(--good)':'var(--sign)'}"></i></div></div>`}).join('');
       h+=`<p class="note">Each pays ${money(C.pay)}. Finish all three for ${TECH.some(T=>!G.tech[T.id])?'a plan point':'a bonus'}.</p>`}}
-  const r=G.rec||{};h+=`<div class="sec">Records</div><table class="fin rec">${RECS.filter(([k])=>r[k]>0).map(([k,n,f])=>`<tr><td>${n}</td><td>${f(r[k])}</td></tr>`).join('')||'<tr><td>Finish a day to set your first records.</td><td></td></tr>'}</table>`;
+  return h;
+}
+function recordsPanel(){
+  let h='';const r=G.rec||{};h+=`<div class="sec">Records</div><table class="fin rec">${RECS.filter(([k])=>r[k]>0).map(([k,n,f])=>`<tr><td>${n}</td><td>${f(r[k])}</td></tr>`).join('')||'<tr><td>Finish a day to set your first records.</td><td></td></tr>'}</table>`;
   const st=G.stamps||{},got=STAMPS.filter(S=>st[S.id]),left=STAMPS.length-got.length;
   h+=`<div class="sec">Stamps<span>${got.length} of ${STAMPS.length}</span></div><div class="stamps">${got.map((S,i)=>`<div class="stamp" style="--c:${S.c};--r:${((i*37)%13)-6}deg" title="${S.d}"><b>${S.n}</b><span>${S.d}</span><i>Day ${st[S.id]}</i></div>`).join('')}</div>${left?`<p class="note">${left} more to find.</p>`:''}`;
   return h;
