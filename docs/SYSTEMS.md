@@ -9,6 +9,7 @@ The project notes (`CLAUDE.md`) hold what every change needs. This file holds ho
 - [Airport layouts](systems/airport-layouts.md) (`39-layouts.js`, `12-drawing.js`)
 - [The airport scene](systems/airport-scene.md) (`50-scene.js`, `51-markings.js`, `55-vehicles.js`, `12-drawing.js`, `42-terminal.js`, `07-passengers.js`, `28-region-weather.js`, `04-effects.js`, `01-constants.js`, `62-photo-mode.js`, `54-weather.js`, `52-planes.js`, `53-roofs.js`, `13-camera.js`, `08-stands.js`, `04-geometry.js`, `29-region-map.js`)
 - [Clocks and day stats](systems/clocks.md) (`02-clocks.js`, `08-stands.js`, `34-airline-operations.js`, `45-baggage.js`)
+- [Day in a minute](systems/day-in-a-minute.md) (`63-day-in-a-minute.js`)
 - [Effects: the rating and money ledger](systems/effects.md) (`04-effects.js`, `15-panel.js`)
 - [Guided start](systems/guided-start.md) (`36-guided-start.js`)
 - [Level-up card](systems/level-up-card.md) (`49-levelup.js`)
@@ -124,6 +125,7 @@ The main names, by file group (the joined table below is the complete list, from
 | `54-weather.js` | WEATHER: rain, settled snow, puddles, fog banks, cloud shadows and a windsock |
 | `55-vehicles.js` | VEHICLES: ground vehicles working each stand's turnaround |
 | `62-photo-mode.js` | PHOTO MODE: hide the panels, pick a drawn time and sky, and save a picture |
+| `63-day-in-a-minute.js` | DAY IN A MINUTE: a time-lapse of yesterday, played back over the airport view |
 | `99-start.js` | the `/*SIM_HOOK*/` marker and the call that starts the game |
 <!-- /joined:files -->
 
@@ -168,7 +170,8 @@ The main names, by file group (the joined table below is the complete list, from
 - `arrivals`: Arrivals (docs/specs/terminal.md): passengers off domestic flights walk straight past immigration and everyone else goes through it; e-gates take only e-gate passports; about 1 in 40 is checked at customs; everyone who lands ends up out, at a stop or the station, or at the hotel; and nobody arriving walks into a departures hall.
 - `baggage`: The baggage system (src/game/45-baggage.js): every checked bag ends in a hold or is left behind and counted, every arriving bag reaches its carousel, an overloaded sorter backs up, a tight transfer can miss, and early bags wait in the store.
 - `brief`: docs/briefs/TEMPLATE.md and every session brief in docs/briefs/ have all their sections, filled in (tools/brief.mjs).
-- `clocks`: The clocks (02-clocks.js, docs/SYSTEMS.md "Time"): over a seeded day and a bit, the hooks run in the same order and at the same cadence as they did on main before the tables (tools/checks/lib/clocks.json, recorded from main with a log call at each hook), and every hook the order lists is registered once, from its system's own file.
+- `clocks`: The clocks (02-clocks.js, docs/SYSTEMS.md "Time"): over a seeded day and a bit, the hooks run in the same order and at the same cadence as they did on main before the tables (tools/checks/lib/clocks.json, recorded from main with a log call at each hook, and re-recorded with the hooks added since, such as dayRec), and every hook the order lists is registered once, from its system's own file.
+- `day-in-a-minute`: Day in a minute (src/game/63-day-in-a-minute.js, docs/systems/day-in-a-minute.md): after a seeded day the recording holds samples across the whole of it, within its caps and 2 MB, and nothing is recorded headless (R.sim); recording costs at most 0.01x of the perf budget; the Office's button plays it back, every frame draws without throwing on a desktop and a phone, and a tap stops it and puts the speed back; G and the random stream are the same with and without it.
 - `daystats`: A day's stats (DAY_STATS in 09-construction-levels-days.js, docs/SYSTEMS.md "Time"): over two seeded days at a level 9 airport, the day report (G.lastDay) has the fields it had on main (tools/checks/lib/daystats.json, recorded there; DAYSTATS_RECORD=1 writes it again after a change that moves the dice on purpose, such as #101's rating), every field G.dstat gets is in DAY_STATS, and a new day starts with the fields DAY_STATS resets.
 - `decor`: Decor and local character (docs/specs/terminal-place.md): decor comes with the building, more with each level, is never placed or saved, never stands in anyone's way, and local signs take the region's place names and fit their halls. Written before the code (tools/checks/pending.txt). Reads the names in lib/place.mjs, plus decor() → [{hall, kind, x0, y0, x1, y1}…], the items for the layout as built and the level, and localNames() → [{text, place, hall, w}…], the local signs (place: a key of PLACES; w: the text's width in world units). "Never in the way" also reads where the counters are: deskX, kioskX, laneX, qSlot, secSlot, ftSlot, egSlot, and boothPos, egatePos, carX, carY and arrSlot, which the decor part adds to SIMX.
 - `departures`: Departures (docs/specs/terminal.md): check-in islands with their own queues, bag drop for kiosk and online passengers with bags, and security: the search rate, family and assistance lanes, and no way into the market place but a lane.

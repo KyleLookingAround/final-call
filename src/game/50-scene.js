@@ -12,7 +12,7 @@ const V={x0:0,x1:0,y0:0,y1:0,k:1,z:1,t:0,d:0,hour:0,D:null};
 function sceneView(D){const k=R.baseK*R.cam.z,s=k*R.dpr;
   ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='#0F1215';ctx.fillRect(0,0,cv.width,cv.height);ctx.setTransform(s,0,0,s,-R.cam.x*s,-R.cam.y*s);
   V.x0=R.cam.x;V.x1=R.cam.x+R.sw/k;V.y0=R.cam.y;V.y1=R.cam.y+R.sh/k;V.k=k;V.z=R.cam.z;
-  V.t=performance.now()/1000;V.hour=drawnHour();V.d=darkness();V.D=D;return V}
+  V.t=performance.now()/1000;V.hour=drawnHour();V.d=darkness();V.D=D;if(R.dimT)dimFrame(V);return V} // a playback's hour: 63-day-in-a-minute.js
 function layer(n){const L=LAYER[n];for(let j=0;j<L.length;j++)L[j](V)}
 function inView(x,y,r){return x+r>=V.x0&&x-r<=V.x1&&y+r>=V.y0&&y-r<=V.y1}
 // a pool of light: a radial glow of colour rgb ('255,214,150') and strength a at its middle, skipped off screen
