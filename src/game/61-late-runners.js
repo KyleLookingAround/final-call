@@ -48,7 +48,7 @@ const runPace=(p,D)=>{const v=D.cwalk*p.spd*walkMul(p),m=p.type==='prm'?RUN_PRM:
   const F=p.F; // only a late shopper can be called before the last 12 minutes, so only they need the flight's runners looked up
   if((G.clock>=F.std-RUN_AT||p.late&&RUNS.get(F)?.fc)&&F.plane.state==='boarding'){const t=tale(p);if(!t.run)startRun(p,t,F);
     if(t.run<3){if(walk(p,runPace(p,D),dt)){p.state='gate';PAX_STEP.gate(p,0);endRun(p,t,3);RUN_LOG.boarded++;note(p,'gate',p.stand,1.2)}return}}
-  f(p,dt,D);if(p.state==='gate')note(p,'gate',p.stand,0.2);
+  f(p,dt,D);if(p.state!=='toGate'){const t=TALES.get(p);if(t&&(t.run===1||t.run===2))endRun(p,t,3);if(p.state==='gate')note(p,'gate',p.stand,0.2)}
 }}
 // a runner the gate closed on walks slowly back to the market place and leaves the airport's books
 PAX_STEP.missed=(p,dt,D)=>{if(walk(p,D.cwalk*p.spd*0.6,dt))p.dead=true};
@@ -61,13 +61,15 @@ function missRun(p,i){
 // When a gate is called, a few of its passengers in the shops lose track of time and browse on until final call, when
 // the shop sends them out (46-market.js, p.late): they're the runners. A look over the passengers once per call.
 function dawdle(F){
-  const d=runsOf(F).daw;
-  for(const p of R.pax)if(p.F===F&&p.state==='shop'&&!p.late&&!p.inbound&&rnd()<DAWDLE){p.late=true;p.t=Math.max(p.t,F.std-G.clock);d.push(p)}
+  const d=runsOf(F).daw,lead=new Set(),stay=p=>{p.late=true;p.t=Math.max(p.t,F.std-G.clock);d.push(p)};
+  for(const p of R.pax)if(p.F===F&&p.state==='shop'&&!p.late&&!p.inbound&&!p.leader&&!p.kid&&rnd()<DAWDLE){stay(p);lead.add(p)}
+  if(lead.size)for(const p of R.pax)if(p.leader&&lead.has(p.leader)&&p.state==='shop'&&!p.late)stay(p); // a party browses on together
 }
 // Final call: 12 minutes before departure, or sooner once all but a few are aboard, so dawdlers never hold a plane that
 // would otherwise leave early. Then the dawdlers leave their shops and run.
 function finalCall(F,r){
-  if(r.fc||F.plane.state!=='boarding'||G.clock<F.std-RUN_AT&&!(r.daw.length&&F.seated>=F.booked-r.daw.length-FC_LEFT))return;
+  if(r.fc||F.plane.state!=='boarding')return;if(r.daw.length)r.daw=r.daw.filter(p=>p.state==='shop'&&p.F===F);
+  if(G.clock<F.std-RUN_AT&&!(r.daw.length&&F.seated>=F.booked-r.daw.length-FC_LEFT))return;
   r.fc=true;for(const p of r.daw)if(p.state==='shop'&&p.F===F)leaveShop(p);r.daw.length=0;
 }
 // every game minute: the gates just called, then, once everyone else is seated after the departure time, hold the gate
@@ -80,11 +82,11 @@ TERM_MINUTE.push(()=>{
     if(F.plane.state!=='boarding'||G.clock<F.std||F.manifest.length||F.straggler||F.seated<F.booked-r.n){r.holdAt=null;continue}
     if(r.holdAt==null)r.holdAt=G.clock;
     if(G.clock-r.holdAt<(RUN_HOLD[pol('late')]??RUN_HOLD.wait))continue;
-    const gone=r.list.filter(p=>tale(p).run===1);for(const p of gone)missRun(p,i);
+    const gone=r.list.filter(p=>tale(p).run===1&&p.state==='toGate');for(const p of gone)missRun(p,i);
     toW(i,0,CABIN_TOP-24);floater('GATE CLOSED',WP.x,WP.y,'#FF7A8A',true);r.holdAt=null;
   }
 });
-BOARD_STATUS.push(F=>{const r=RUNS.get(F);return r&&r.list.length&&(G.clock>=F.std-RUN_CLOSING||G.clock<F.std-RUN_AT)?'GATE CLOSING':null});
+BOARD_STATUS.push(F=>{const r=RUNS.get(F);return r&&r.n&&G.clock>=F.std-RUN_CLOSING?'GATE CLOSING':null}); // only while the gate may close on someone
 
 /* ---------- drawing: speed lines behind each runner, and a ring on the passenger whose story is open ---------- */
 LAYER.pax.push(()=>{
@@ -109,7 +111,7 @@ const TALE_HOW={train:'Came by train',tram:'Came by tram',bus:'Came by bus',car:
 const pick=(a,p,k)=>a[Math.floor(((p.rand*9973*(k+1))%1)*a.length)];
 function whoIs(p){
   const n=Math.floor(p.rand*1e6),first=TALE_FIRST[n%TALE_FIRST.length],last=TALE_LAST[Math.floor(n/37)%TALE_LAST.length],F=p.F,t=tale(p);
-  const home=t.how==='xfer'&&F.arr?null:NODES[TALE_HOME[Math.floor(n/7)%TALE_HOME.length]].n,why=p.kid?'a family trip':pick(TALE_WHY[p.type]||TALE_WHY.lei,p,1);
+  const home=t.how==='xfer'?null:NODES[TALE_HOME[Math.floor(n/7)%TALE_HOME.length]].n,why=p.kid?'a family trip':pick(TALE_WHY[p.type]||TALE_WHY.lei,p,1);
   return {name:first+(p.kid?'':' '+last),first,home,to:F.dest[1],why,kid:p.kid};
 }
 function moodOf(m){return m>=2?['Delighted','#6BE39A']:m>=0.8?['Happy','#6BE39A']:m>-0.8?['Fine','#ECE8DF']:m>-2.5?['Fed up','#FFC72C']:['Furious','#FF7A8A']}
@@ -157,15 +159,15 @@ function openStory(p){
 function closeStory(){R.story=null;if(storyEl){storyEl.hidden=true;$('#stage').classList.remove('story')}}
 function refreshStory(){
   const s=R.story;if(!s||!storyEl)return;if(R.view!=='airport'){closeStory();return}
-  const p=s.p,t=tale(p),st=p.state;if((st==='bridge'||st==='aisle'||st==='sitting'||p.dead)&&!t.ev.some(e=>e[1]==='board'))t.ev.push([G.clock,'board',0,0.5]); // noticed here, for the one passenger shown
+  const p=s.p,t=tale(p),st=p.state;if(!p.dead&&!R.pax.includes(p)){closeStory();return} // a load or a new gameif((st==='bridge'||st==='aisle'||st==='sitting'||p.dead)&&!t.ev.some(e=>e[1]==='board'))t.ev.push([G.clock,'board',0,0.5]); // noticed here, for the one passenger shown
   const h=storyHTML(p);if(h!==s.html){s.html=h;storyEl.innerHTML=h}
 }
 setInterval(refreshStory,400); // cosmetic: the open card keeps up with its passenger
 // a tap on the airport view: the nearest departing passenger in reach opens their story; any other tap closes it
 const TAP_OUT=new Set(['aisle','sitting','bridge','missed']);
 PAX_TAP.push((wx,wy,k)=>{
-  if(R.floor==='roof'){closeStory();return false}
-  let best=null,bd=Math.max(6,16/k);
+  if(R.floor==='roof'||k<0.9||G.tour&&!G.tour.done){closeStory();return false} // zoomed in far enough to pick one out
+  let best=null,bd=Math.max(4,12/k); // a small reach, so taps on shops and stands still land
   for(const p of R.pax){if(p.inbound||p.dead||TAP_OUT.has(p.state)||paxHidden(p))continue;const x=p.ex??p.x,y=p.ey??p.y,d=Math.hypot(x-wx,y-wy);if(d<bd){bd=d;best=p}}
   if(!best){closeStory();return false}
   openStory(best);return true;

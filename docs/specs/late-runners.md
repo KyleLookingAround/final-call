@@ -10,7 +10,7 @@ The last minutes before a departure get a little drama: passengers still airside
 
 - **On the map:** runners move visibly faster, with speed lines behind them, eased like every other walker. The gate's badge shows GATE CLOSING in red while runners are on their way.
 - **On the board:** the status flaps flip to GATE CLOSING (alternating GATE / CLOSING, since the column holds ten flaps).
-- **The passenger card:** tap a departing passenger on the airport view. A small card over the map, top left, with an amber ring on the passenger while it's open:
+- **The passenger card:** zoom in and tap a departing passenger on the airport view (not during the guided start). A small card over the map, top right under the speed buttons, with an amber ring on the passenger while it's open:
   - who: a name, where they're from, where they're going and why (a meeting in Frankfurt, a family holiday, a stag weekend);
   - today: up to eight lines with times ("07:12 Came by train", "07:20 Checked in at a desk, 6 min queue", "07:31 Through security, 9 min queue", "07:40 Coffee at the Coffee cart", "08:02 Ran for gate 14", "08:05 Made it on board");
   - a mood (Delighted, Happy, Fine, Fed up, Furious) and two or three plain sentences that tell the day.
@@ -18,11 +18,11 @@ The last minutes before a departure get a little drama: passengers still airside
 
 ## How it works
 
-- **Final call** is 12 minutes before departure while the plane boards (the same moment shops send their last browsers out and security stops searching bags), or sooner once all but three of the flight's other passengers are aboard. When a gate is called, 1 in 20 of its passengers in the shops browse on until final call. From then, anyone of that flight walking to the gate runs: 1.8× their walking pace, never above 280 px a minute (the best walking pace) unless already faster (1.2× for passengers who need help).
-- **GATE CLOSING** shows from 5 minutes before departure while any runner is on their way, so FINAL CALL (10 to 5 minutes) is still seen and announced.
+- **Final call** is 12 minutes before departure while the plane boards (the same moment shops send their last browsers out and security stops searching bags), or sooner once all but three of the flight's other passengers are aboard. When a gate is called, 1 in 20 of its passengers in the shops browse on until final call, a party together. From then, anyone of that flight walking to the gate runs: 1.8× their walking pace, never above 280 px a minute (the best walking pace) unless already faster (1.2× for passengers who need help).
+- **GATE CLOSING** shows from 5 minutes before departure while any runner who could miss is on their way, so FINAL CALL (10 to 5 minutes) is still seen and announced.
 - **Holding the gate:** a runner who started before the departure time can miss. Once everyone else is seated after the departure time, the gate holds 3 minutes (policy "Wait for them") or 1 minute ("Close on time"), then closes. Each runner still on the way misses: the flight goes without them and it costs 0.6 rating (a new cause, `runner`, at the stand). Their fare was never taken (fares are paid on sitting down). Bags stay as they are.
 - Latecomers who reach the airside after the departure time (the existing late passenger, long queues) still run, but the gate waits for them as before.
-- **Stories** are runtime only: a small record per passenger kept in a `WeakMap`, filled as they leave a handful of walking steps (`walkIn`, `bpGate`, `bpTap`, `repack`, `secOut`, `df`, `toShop`, `toMkt`, `toGate`), never per step for waiting passengers. Names and flavour come from the passenger's own `rand`, so they cost no `rnd()` and change nothing.
+- **Stories** are runtime only: a small record per passenger kept in a `WeakMap`, filled as they leave a handful of walking steps (`walkIn`, `bpGate`, `bpTap`, `repack`, `secOut`, `toShop`, `toMkt`, `toGate`), never per step for waiting passengers. Names and flavour come from the passenger's own `rand`, so they cost no `rnd()` and change nothing.
 - From the start: no unlock. Nothing for managers to do; the policy "Late passengers" already chooses wait or close.
 
 ## Saved state

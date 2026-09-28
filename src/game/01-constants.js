@@ -26,7 +26,7 @@ const AIRCRAFT=[
   {name:'F-200 Freighter',short:'F-200',rows:22,blocks:[3,3],fare:0,perPax:1,cost:18000,op:220,tier:2,span:45,lvl:3,wear:1,freighter:1,cargo:80,blurb:'All cargo, no passengers. No queues, and happy to fly at night.'}
 ];
 const POLICIES=[
-  {k:'late',name:'Late passengers',opts:[['wait','Wait for them'],['close','Close on time']],desc:'Waiting risks a delay. Closing on time refunds their fare and hurts your rating.'},
+  {k:'late',name:'Late passengers',opts:[['wait','Wait for them'],['close','Close on time']],desc:'Waiting risks a delay. Closing on time refunds their fare and hurts your rating. Either way, the gate holds only briefly for runners.'},
   {k:'xfer',name:'Connections',opts:[['hold','Hold the flight'],['leave','Leave on time']],desc:'Leaving pays half the fare as compensation and upsets them.'},
   {k:'repair',name:'Faults',opts:[['std','Standard repair'],['rush','Rush repair']],desc:'Rush repairs cost double the flight’s fuel but take 4 min, not 20.'},
   {k:'pay',name:'Staff pay',opts:[[0,'Low −20%'],[1,'Standard'],[2,'Good +25%']],desc:'Low pay: 10% slower staff, more sick days and strikes. Good pay: 10% faster, no strikes.'},
