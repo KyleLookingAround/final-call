@@ -39,5 +39,5 @@ KyleLookingAround <KyleMck10@hotmail.com> (the session-start hook sets it; check
 
 - Estimate: about $<fill: dollars> (<fill: why: its size, how many CI rounds>).
 - At each stopping point (a PR opened, CI back, a merge), read `get_session`: `usage.cost_usd` against the estimate (a 0 means not yet known, not free), and `rate_limit_info`. If status is "rejected" or `isUsingOverage` is true, schedule a `send_later` for a minute after `resetsAt` and end the turn.
-- Starting another session (`create_session`)? Keep at most four default-model sessions running at once, the rest on the cheaper model, starts staggered; start nothing new on `allowed_warning` (`coordinator` playbook §5).
+- Starting another session (`create_session`)? Keep at most about four default-model sessions running at once, the rest on the cheaper model, starts staggered; start nothing new on `allowed_warning` (`coordinator` playbook §5).
 - Past twice the estimate: say why in the PR and in its lesson (`docs/lessons/`), and trim or split what's left.
