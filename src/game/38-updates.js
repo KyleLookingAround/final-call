@@ -1,6 +1,10 @@
 /* ================= WHAT'S NEW: every version's new features, shown after an update and from Settings or Help ================= */
 // Newest first. Only a release adds an entry, folding in the fragments in src/updates.d/ (the release playbook); the checks make sure the newest one matches docs/HISTORY.md.
 const UPDATES=[
+  {v:34,title:'Famous faces and a real-looking region',points:[
+    'From level 3, footballers, pop stars, film actors and royals fly through now and then: the board and region news say who the day before, with photographers, fans and a busy café hour on the day.',
+    'The region looks like a real map: hills, fields, woods, a softer coast, towns that spread as they grow, and an airport with its own runways and terminal. Towns and runway lights glow at night.',
+    'A Fleet tab beside Gates holds your planes, crews and servicing once you’re ready to buy a second plane.']},
   {v:33,title:'A rating that keeps you on your toes',points:[
     'Your rating now follows the last day of flights: delays, queues and night noise pull it down within hours, and a good run lifts it back, with an arrow showing which way it’s heading.',
     'Office › Money can play back yesterday over your airport in about a minute, planes coming and going at their stands as the halls glow where it was busy.',

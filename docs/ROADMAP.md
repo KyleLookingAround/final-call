@@ -126,6 +126,7 @@ How sessions work, not the game. Each one is small, measured and recorded in the
 ## Done
 
 <!-- joined:done from docs/roadmap.d/ (Section: done) by tools/join.mjs: don't edit between these lines -->
+- **Version 34: famous faces and a real-looking region.** Invented celebrities flying through from level 3 with photographers, fans and a busy café hour; the region map redrawn with real-looking land, towns and an airport; a Fleet tab beside Gates for planes, crews and servicing, brought together with one What's new entry.
 - **Version 33: a rating that keeps you on your toes.** A rating that follows the last day of flights instead of adding up for ever, Day in a minute (a time-lapse of yesterday over the airport), Photo mode, and settings, weekly challenges, staff pay and boarding upgrades moved to where players look, brought together with one What's new entry.
 - **The first level-up in the first morning** (#105, spec `docs/specs/early-first-level.md`): Local Airport asks for 80 passengers flown at the gate you start with, so a newcomer at 1× reaches it in about five minutes instead of 31–41.
 <!-- /joined:done -->
