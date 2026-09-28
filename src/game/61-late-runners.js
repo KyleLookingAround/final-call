@@ -10,7 +10,7 @@
 // passengers keep their one shape (05-flights.js seatPax) and nothing is saved.
 const RUN_AT=12,RUN_CLOSING=5,RUN_MUL=1.8,RUN_PRM=1.2,RUN_TOP=280,RUN_MISS=-0.6; // minutes before departure; pace (top: the best walking pace, so the drawn catch-up stays under the movement check's 330); rating
 const RUN_HOLD={wait:3,close:1}; // minutes the gate holds for runners once the rest are seated, by the Late passengers policy
-const DAWDLE=0.05,FC_LEFT=3; // odds a shopper browses on past the gate call; final call comes early with this many others left to board
+const DAWDLE=0.05,LINGER=15,FC_LEFT=3; // odds a shopper browses on past the gate call, for up to LINGER minutes more; final call comes early with this many others left to board
 const TALES=new WeakMap(),RUNS=new WeakMap(); // passenger → their story; flight → its runners {list, n (can miss), holdAt}
 const RUN_LOG={started:0,boarded:0,missed:0}; // what the checks read
 Object.assign(REPWHY,{runner:['passengers who ran for their gate and missed it',['walkway','mover'],' Calling gates earlier (Office › Policies) gives shoppers more time.']});REPLBL.runner='Runners who missed their flight';
@@ -61,7 +61,7 @@ function missRun(p,i){
 // When a gate is called, a few of its passengers in the shops lose track of time and browse on until final call, when
 // the shop sends them out (46-market.js, p.late): they're the runners. A look over the passengers once per call.
 function dawdle(F){
-  const d=runsOf(F).daw,lead=new Set(),stay=p=>{p.late=true;p.t=Math.max(p.t,F.std-G.clock);d.push(p)};
+  const d=runsOf(F).daw,lead=new Set(),stay=p=>{const x=Math.max(0,Math.min(F.std-G.clock,p.t+LINGER)-p.t);p.late=true;p.t+=x;p.t0+=x;d.push(p)}; // a longer visit, and a full spend for it
   for(const p of R.pax)if(p.F===F&&p.state==='shop'&&!p.late&&!p.inbound&&!p.leader&&!p.kid&&rnd()<DAWDLE){stay(p);lead.add(p)}
   if(lead.size)for(const p of R.pax)if(p.leader&&lead.has(p.leader)&&p.state==='shop'&&!p.late)stay(p); // a party browses on together
 }
