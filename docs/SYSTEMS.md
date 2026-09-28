@@ -7,13 +7,14 @@ The project notes (`CLAUDE.md`) hold what every change needs. This file holds ho
 <!-- joined:systems from docs/systems/ by tools/join.mjs: don't edit between these lines -->
 - [Airline operations](systems/airline-operations.md) (`34-airline-operations.js`)
 - [Airport layouts](systems/airport-layouts.md) (`39-layouts.js`, `12-drawing.js`)
-- [The airport scene](systems/airport-scene.md) (`50-scene.js`, `51-markings.js`, `55-vehicles.js`, `12-drawing.js`, `52-planes.js`, `53-roofs.js`, `13-camera.js`, `08-stands.js`, `04-geometry.js`, `54-weather.js`, `29-region-map.js`)
+- [The airport scene](systems/airport-scene.md) (`50-scene.js`, `51-markings.js`, `55-vehicles.js`, `12-drawing.js`, `62-photo-mode.js`, `54-weather.js`, `52-planes.js`, `53-roofs.js`, `13-camera.js`, `08-stands.js`, `04-geometry.js`, `29-region-map.js`)
 - [Clocks and day stats](systems/clocks.md) (`02-clocks.js`, `08-stands.js`, `34-airline-operations.js`, `45-baggage.js`)
 - [Effects: the rating and money ledger](systems/effects.md) (`04-effects.js`, `15-panel.js`)
 - [Guided start](systems/guided-start.md) (`36-guided-start.js`)
 - [Level-up card](systems/level-up-card.md) (`49-levelup.js`)
 - [Levels and Masterplan](systems/levels-and-masterplan.md) (`02-masterplan.js`, `09-construction-levels-days.js`, `18-masterplan-ui.js`)
 - [Lowmere](systems/lowmere.md) (`33-lowmere.js`)
+- [Photo mode](systems/photo-mode.md) (`62-photo-mode.js`, `12-drawing.js`, `50-scene.js`, `54-weather.js`, `29-region-map.js`)
 - [Records, stamps and challenges](systems/records.md) (`35-records.js`)
 - [Region](systems/region.md) (`24-region-places.js`, `30-region-ui.js`, `28-region-weather.js`)
 - [Routes](systems/routes.md) (`31-routes.js`, `03-state.js`)
@@ -55,7 +56,7 @@ The main names, by file group (the joined table below is the complete list, from
 | `51-markings` | Apron, stand and runway markings, and the airfield's lights at night (`rwyMarks`, `grade`) |
 | `52-planes` | Planes on the stands and runway: engines, shadows, airline colours and their lights (`drawPlane`, `miniPlane`) |
 | `53-roofs` | Roofs over the built halls, shown when the player picks the roof floor (`R.floor`, `setFloor`, `roofNow`) |
-| `54-weather` | Rain, puddles, settled snow, fog, cloud shadows and the windsock, read from `R.fx` |
+| `54-weather` | Rain, puddles, settled snow, fog, cloud shadows and the windsock, read from `R.fx` (through `drawnFx()`, for photo mode) |
 | `55-vehicles` | Fuel and catering trucks, baggage tractors and pushback tugs at each turnaround (`vehicleWork`) |
 | `99-start` | The `/*SIM_HOOK*/` marker and the call that starts the game |
 
@@ -122,6 +123,7 @@ The main names, by file group (the joined table below is the complete list, from
 | `53-roofs.js` | ROOFS: the terminal and its piers seen from above, a floor the player steps up to |
 | `54-weather.js` | WEATHER: rain, settled snow, puddles, fog banks, cloud shadows and a windsock |
 | `55-vehicles.js` | VEHICLES: ground vehicles working each stand's turnaround |
+| `62-photo-mode.js` | PHOTO MODE: hide the panels, pick a drawn time and sky, and save a picture |
 | `99-start.js` | the `/*SIM_HOOK*/` marker and the call that starts the game |
 <!-- /joined:files -->
 
@@ -187,6 +189,7 @@ The main names, by file group (the joined table below is the complete list, from
 - `news`: What's new opens once for an older save and not again, never for a new game, and from Settings with every version. It waits for the page's state (R.newsBoot), not set times.
 - `noise`: Less noise (polish audit rows 11, 15, 16, 27): repeated region incidents fold into one Reports line; a full stack of choice toasts still resolves the one the cap evicts, and informational toasts expire on their own; the advisor's tip clears off the airport view and returns on it; a young save's What's new folds older versions away. Row 29 (the update-checker's fetch) is confirmed by reading the source: it's already wrapped in try/catch, so nothing here exercises it.
 - `perf`: How long a level 9 airport, and a fully built sixteen-stand Midfield, take to simulate, against a calibration run so machines compare (fails over its budget), and how close a CPU-throttled phone gets to full speed at 8x with each (reported only).
+- `photo-mode`: Photo mode (src/game/62-photo-mode.js, docs/specs/photo-mode.md): the camera button hides every panel, chip, toast and the phone chrome at every screen size and leaves the map and the photo bar; every drawn time and sky draws, in the airport view and the Region; the shutter makes a PNG the size of the canvas; Done, Esc and a tap leave and bring the panels back; and none of it changes G, R.fx or the random stream.
 - `plans`: "The terminal as a place" (docs/specs/terminal-place.md): each layout's own terminal table, floors on rooms and doorways, the floor chip, each layout's floor plan, and the scene checks the bundle adds (nothing drawn inside a hall under the roof, one floor at a time, and how fast the terminal draws zoomed in). Written before the code: tools/checks/pending.txt lists the checks still waiting for it. The names they read are in lib/place.mjs, plus hallLabel(id) → [x, y], where a hall's name is drawn (tapping it goes to that hall's floor).
 - `rating-day`: A rating that reflects the last day (04-effects.js, docs/systems/effects.md): on by default, it moves over a seeded day with fog and storms in the morning, stays inside its 5–100 floor and cap, and saves from every version still load; window.__rateDay=false (never saved) still plays the old running sum, for comparing.
 - `rebuild`: Rebuilding twice (bug #78, src/game/39-layouts.js): switching layouts back to back with a busy airport never throws or loses anyone. A flight at a stand the new layout drops moves to a free built stand with everyone who belongs to it; with no stand free, the switch waits for those stands to empty, as a rebuild does.
