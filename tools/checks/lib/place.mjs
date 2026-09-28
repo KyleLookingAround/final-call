@@ -62,6 +62,22 @@ export function install(){
     S.LAYER.lit.push(start);S.LAYER.roofs.unshift(stop);
     try{S.draw()}finally{S.LAYER.lit.splice(S.LAYER.lit.indexOf(start),1);S.LAYER.roofs.splice(S.LAYER.roofs.indexOf(stop),1);delete c.arc;delete c.ellipse;delete c.fillRect;delete c.strokeRect;delete c.fillText}
     return seen};
+  // every floor link, the terrace's stairs included ('stairs' is the terrace's third kind), and the terrace's own ('ter' at
+  // one end); the nearest to (x, y) as [distance, kind]
+  TP.anyLink=d=>d[5]==='esc'||d[5]==='lift'||d[5]==='stairs';
+  TP.allLinks=()=>TP.doors().filter(TP.anyLink);
+  TP.terLinks=()=>TP.allLinks().filter(d=>d[0]==='ter'||d[1]==='ter');
+  TP.nearLink=(x,y,links=TP.allLinks())=>{let d=Infinity,k=null;for(const L of links){const e=Math.hypot(L[2]-x,L[3]-y);if(e<d){d=e;k=L[5]}}return [d,k]};
+  // make a passenger a dawdler, with the marks late runners give one (61-late-runners.js dawdle): late, on their flight's
+  // list of dawdlers, and one in the market place sits on (state 'linger') until final call. finalCall keeps only dawdlers
+  // in a shop or lingering, so the terrace part keeps its own (on the terrace) on the list too
+  TP.dawdler=p=>{const G=S.G,R=S.R;p.late=true;if(p.state==='mkt'){p.state='linger';p.sl=-1;p.t=G.clock+40;R.occOut=true}const r=S.runsOf(p.F);if(r)r.daw.push(p)};
+  // bring a flight's final call forward: a plane turning round starts boarding now, and it leaves RUN_AT + 2 minutes from
+  // now, so final call comes in two minutes. Only for a plane at its stand, turning round or boarding (true when it could)
+  TP.hurry=F=>{const G=S.G,R=S.R,pl=F&&F.plane;if(!pl||R.st[F.i].F!==F||!['turnaround','boarding'].includes(pl.state))return false;
+    if(pl.state==='turnaround')pl.t=0;F.std=Math.min(F.std,G.clock+S.RUN_AT+2);return true};
+  // boarded or on the way to the seat
+  TP.boarded=p=>S.taleOf(p)?.run===3||['gate','aisle','sitting','bridge','bus'].includes(p.state);
 }
 // puts the helpers into a page
 export const tp=page=>page.evaluate(`(${install.toString()})()`);
