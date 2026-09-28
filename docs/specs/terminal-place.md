@@ -1,6 +1,6 @@
 # The terminal as a place
 
-Issue: #48, refreshed for #133 · Status: Proposed (refreshed on 28 Sep 2026 for the owner to re-approve; the version approved on 27 Sep 2026 stands until then, and nothing new is built before approval) · PRs: #49 (the first spec), #113 (groundwork), this refresh; the rest added as they open
+Issue: #48, refreshed for #133 · Status: Approved (the owner re-approved the refresh on 28 Sep 2026, #139: all five choices at their defaults, and every suggestion but one; spotters no longer crowd for rare arrivals) · PRs: #49 (the first spec), #113 (groundwork), this refresh; the rest added as they open
 
 Bundle 3 of `docs/ROADMAP.md`, plus each layout's own terminal floor plan (step 3 of `docs/specs/terminal.md`). The owner loved the two-level terminal and the viewing terrace, said yes to windows and local character, and no to placing decor. On 28 Sep 2026 (#133) they asked for the whole thing as a "fully fleshed out feature overhaul": "Roof should also be a floor that's accessible so people can watch planes and celebs go up there and people take photos whilst waiting." This refresh makes the roof terrace a third floor passengers use, folds in what the last month changed, and re-measures the budgets on `main`. The checks still come first (experiment [D]).
 
@@ -12,7 +12,7 @@ Bundle 3 of `docs/ROADMAP.md`, plus each layout's own terminal floor plan (step 
 5. The drawing budget stays 0.55×.
 6. One part draws the other eight layouts' floor plans, split in two only if its brief finds it too big.
 
-**The owner's choices this refresh asks for** (each with the default taken if there's no answer; the `needs-owner` issue linked from #133 lists them): see "Choices for the owner" at the end.
+**The owner's choices this refresh asked for** (#139): approved on 28 Sep 2026, all at their defaults; see "Choices for the owner" at the end.
 
 ## What the player gets
 
@@ -25,7 +25,7 @@ The terminal stops being one flat diagram. Departures are upstairs, arrivals bel
   - **Arrivals (lower):** immigration, reclaim, customs, the arrivals hall, the baggage hall and the hotel walkway.
   - **Between them:** escalators and a lift where the concourse meets both floors. Arriving passengers ride down; families and those who need help (`p.famL`) take the lift. A queue shows at a busy escalator.
   - **Roof:** the roofs, and once built the terrace cut into the roof at the apron edge. Two sides split by a glass screen: the **passengers' side** (airside, from the departures floor) with benches, a café kiosk and people at the rail; the **public side** (landside, by its own lift from the forecourt) with spotters and their cameras. Nothing inside the halls is drawn under the roof.
-- **On the terrace:** waiting passengers lean on the rail, raise phones as a plane lands or pushes back, and drift back down when their gate is called. At night, camera flashes (cosmetic; still with reduced motion). Spotters crowd the public side when something rare arrives: a type not seen here this week, a new route's first arrival, or the biggest type you handle. Fewer at night; in rain, snow or a storm the passengers' side closes and the public side thins to a few die-hards. The crowd is the only sign: no toast, no text event.
+- **On the terrace:** waiting passengers lean on the rail, raise phones as a plane lands or pushes back, and drift back down when their gate is called. At night, camera flashes (cosmetic; still with reduced motion). A steady handful of spotters stand on the public side through the day (the owner declined crowds for rare arrivals, 28 Sep 2026). Fewer at night; in rain, snow or a storm the passengers' side closes and the public side thins to a few die-hards. The crowd is the only sign: no toast, no text event.
 - **Famous faces on the roof** (building on famous faces, #111): if the terrace is built and the celebrity has 40 minutes or more before their gate is called, they go up for a while with their gold ring. Photographers and fans gather on the public side against the glass, a clutch of passengers crowd the celebrity's end of the passengers' side, and the flashes go off. The existing crowd at check-in and security stays as it is.
 - **Late runners on the roof:** a passenger on the terrace can be a dawdler like one in the shops. At final call they run: down the stairs (never the lift queue), then to the gate. The story card says so: "12:40 Up on the roof terrace", "12:52 Ran from the roof for gate 14", and if they miss, "Still on the roof when gate 14 closed".
 - **Windows.** Glass along every airside wall on the departures floor that faces the apron (and the arrivals floor where a hall of it faces the apron), with a sheen by day, lit at night with warm pools on the apron. Waiting passengers drift to the glass when a wide-body taxis or pushes back nearby. Nobody misses a flight to watch.
@@ -41,8 +41,8 @@ The terminal stops being one flat diagram. Departures are upstairs, arrivals bel
 
 - **Floors are a field on rooms** (built by the groundwork). A hall has `fl`: 0 arrivals, 1 departures, and now 2 for the terrace; a room without it (the concourse, the forecourt) is on floors 0 and 1. A **floor link** (`[hall, hall, x, y, half-width, 'esc'|'lift'|'stairs', people a minute]`) is a doorway between floors; passengers queue for it like a door, `p.famL` passengers take the lift, and routing (`route`, `walk`) treats it as a doorway. Bags never use floor links: the belts drop to the baggage hall.
 - **The terrace is a room, not a count.** `ter` (`fl` 2) with a third floor link, stairs and a lift from the departures floor's airside (the market place, or the concourse where a layout has no market place over the apron). Its public side is drawn but not routed: spotters, fans and photographers never enter the terminal's rooms or queues.
-- **Who goes up.** When `nextAct` would send a waiting passenger to a seat in the market place, 1 in 6 goes up instead if the terrace is built, open (not in rain, snow or a storm, from 06:00 to 22:00) and under its capacity (40 on the passengers' side). More go when a wide-body or a rare type is on the apron. They stay 10–30 minutes, and leave when their gate is called, like shoppers: `airside` sends them to the gate. A dawdler (`DAWDLE`, as late runners) lingers until final call and runs: stairs only, 1.8× pace, and the stairs' queue lets runners go first. This choice uses `rnd()` like the rest of `nextAct`, so `PLAY` changes.
-- **Spotters stay a count.** `R.spot` (runtime) is now the public side only: it rises and falls with the hour, the weather and rare arrivals, and a sample of at most 40 is drawn. Passengers on the passengers' side are counted by their room, not in `R.spot`.
+- **Who goes up.** When `nextAct` would send a waiting passenger to a seat in the market place, 1 in 6 goes up instead if the terrace is built, open (not in rain, snow or a storm, from 06:00 to 22:00) and under its capacity (40 on the passengers' side). More go when a wide-body is on the apron. They stay 10–30 minutes, and leave when their gate is called, like shoppers: `airside` sends them to the gate. A dawdler (`DAWDLE`, as late runners) lingers until final call and runs: stairs only, 1.8× pace, and the stairs' queue lets runners go first. This choice uses `rnd()` like the rest of `nextAct`, so `PLAY` changes.
+- **Spotters stay a count.** `R.spot` (runtime) is now the public side only: it follows the hour and the weather only, a steady handful of 2–12 by day (no crowds for rare arrivals: the owner declined them), plus the famous faces' crowd while a celebrity is up; a sample of at most 40 is drawn. Passengers on the passengers' side are counted by their room, not in `R.spot`.
 - **Famous faces.** With the terrace built and 40 minutes or more before their gate is called, the celebrity goes up for 10–20 minutes (`famousPax`'s passenger; one `rnd()` draw). While they're up, `R.spot` gains 6 photographers and 10 fans, and passengers on the terrace move to the celebrity's end. The landside crowd from famous faces is unchanged.
 - **Earnings (within the 2% cap).** Two small sources, together at most 2% of a day's income at level 9: the terrace café kiosk, earned per passenger up through `earn(…,'shops',…,at)` like any café (and eligible for the famous face's busy hour), and a small charge on the public side, per spotter, through `earn(…,'landside',…)` like the hotel. The spec keeps the 2% cap: the terrace is a delight, not an income line, and income changes are on hold (#135, #136).
 - **Its own rating line.** A new cause `terrace` in `REPWHY` and `REPLBL` ("The roof terrace"): each passenger who went up and then boarded on time gives +0.01, up to +0.4 a day; one who missed their flight from the roof takes −0.6 through the runners' existing `runner` cause (not twice). A crowded terrace (at capacity for over an hour) costs −0.1. Watchers and decor still don't touch the rating.
@@ -52,7 +52,7 @@ The terminal stops being one flat diagram. Departures are upstairs, arrivals bel
 - **The view:** `R.floor` (`'roof'`, `'up'`, `'down'`) picks the floor drawn through `setFloor` (`53-roofs.js`). `onFloor(fl)` shows a room or passenger on the floor drawn; the roof stop now draws the terrace's room and its passengers (`fl` 2) as well as the roofs, and nothing else inside a hall. `paxEase`'s catch-up through `p.doors` (the wall fix of #127) includes floor links, so nobody is drawn sliding across a floor they're not on.
 - **Unlocks:** two floors, windows, decor and local names from the start. The terrace is `G.lv.terrace`, from level 3, hidden before (the famous faces start at level 3 too). Each layout's plan comes with the layout.
 - **Managers and recommendations:** nothing to manage. The advisor recommends the terrace once at level 3 when the market place is busy. The advisor's tips and the board's lines fly the camera to the right floor.
-- **Fitting round the rest:** window lights use `LIGHTS` and `lamp()`; everything draws in the existing layers (`LAYER.terminal`, `pax`, `roofs`, `lit`), with no new lines in `draw()`; the terrace's weather follows `drawnFx()` and its lighting `drawnHour()`, so photo mode dresses it. A network you have to keep (#116) spreads flights thinner, so a check that needs an event (a final call, a rare arrival, a pushback) causes it rather than waiting for the traffic.
+- **Fitting round the rest:** window lights use `LIGHTS` and `lamp()`; everything draws in the existing layers (`LAYER.terminal`, `pax`, `roofs`, `lit`), with no new lines in `draw()`; the terrace's weather follows `drawnFx()` and its lighting `drawnHour()`, so photo mode dresses it. A network you have to keep (#116) spreads flights thinner, so a check that needs an event (a final call, a celebrity's flight, a pushback) causes it rather than waiting for the traffic.
 
 ## Saved state
 
@@ -96,11 +96,13 @@ The pending mechanism is in place (`tools/check.mjs`, `tools/checks/pending.txt`
 
 **Guards, on now:** `scene: drawing never changes the game`, `scene: drawing speed` (three scenes), `scene: drawing speed, terminal zoomed in` (three scenes), both `perf` simulation checks, `saves`, `layout` (320 px to 2560 px), `layouts`, `terminal`, `roofs`, `late-runners`, `famous-faces`, `photo-mode`, `news-card`, `phone-bugs`, `movement`, and the groundwork's `plans` checks (every layout from its own table, rooms and doorways have floors, nothing drawn under the roof, the floor chip, the way through, two hours in every layout, old saves). They must stay green.
 
-**Unchanged, still pending:** `scene: one floor at a time`; the seven `floors:` checks; the four `windows:` checks; the five `decor:` checks; `terrace: hidden until it can be built`, `spotters crowd for something rare`, `the crowd is the only sign`, `spotters stay on the roof`, `its card fits a phone`; `plans: halls inside each main building`, `no layout's walk is a trap`, `rebuilding moves people into the new plan`. Their setups and pass marks are as in the first spec (#49) and `tools/checks/*.mjs`.
+**Unchanged, still pending:** `scene: one floor at a time`; the seven `floors:` checks; the four `windows:` checks; the five `decor:` checks; `terrace: hidden until it can be built`, `spotters stay on the roof`, `its card fits a phone`; `plans: halls inside each main building`, `no layout's walk is a trap`, `rebuilding moves people into the new plan`. Their setups and pass marks are as in the first spec (#49) and `tools/checks/*.mjs`.
 
 **Changed** (the checks refresh rewrites them; the old names come out of `pending.txt` and the new ones go in):
 - `terrace: seen at every zoom` becomes **`terrace: on the Roof at every zoom, and only there`**. Setup: bought, Classic, by day, `R.floor='roof'` zoomed out and at 1.6×, then `'up'` and `'down'`. Measure: pixels over the terrace against the roof's colour; passengers drawn whose room is `ter`. Pass: different from the roof at both zooms on the Roof; no terrace passengers drawn on the other two floors.
 - `terrace: fewer at night and in rain` becomes **`terrace: fewer at night and in rain, and closed to passengers in the wet`**. Measure: `R.spot` at 02:00, and at 14:00 with rain on and off; passengers on the terrace after 20 minutes of rain. Pass: `R.spot` at most 2 at 02:00, rain at most half of dry; 0 passengers up in rain.
+- `terrace: spotters crowd for something rare` becomes **`terrace: a steady handful of spotters`** (the owner declined rare crowds). Setup: `v29-L9.json` with the terrace, seed 1, 14:00 on a dry day; a scripted arrival of the biggest type, then an ordinary one. Measure: `R.spot` before and 30 game minutes after each. Pass: between 2 and 12 throughout, and within ±20% of before after each arrival.
+- `terrace: the crowd is the only sign` keeps its name with a new setup: the famous face going up (as in the check below) instead of a rare arrival. Measure: toasts and board lines about the terrace or its crowd. Pass: none.
 - `terrace: small takings` keeps its name. Measure: café and public-side takings together against the day's income. Pass: more than 0 and at most 2%, and both sources above 0.
 
 **New:**
@@ -171,7 +173,7 @@ terrace: hidden until it can be built
 terrace: on the Roof at every zoom, and only there
 terrace: waiting passengers go up and come down
 terrace: runners come down in time, or the story says why
-terrace: spotters crowd for something rare
+terrace: a steady handful of spotters
 terrace: a famous face goes up, and the fans follow
 terrace: fewer at night and in rain, and closed to passengers in the wet
 terrace: the crowd is the only sign
@@ -203,7 +205,7 @@ plans: rebuilding moves people into the new plan
 
 ## Choices for the owner
 
-Each has a default, taken 12 hours after the question opens if there's no answer.
+All five approved at their defaults on 28 Sep 2026 (#139). Of the spec's suggestions, the owner declined only spotters crowding for rare arrivals: spotters are a steady handful instead.
 
 1. **The terrace's two sides** (passengers airside, the public landside by its own lift). Default: yes. Otherwise passengers only, with spotters drawn among them as a count.
 2. **What it earns:** a café for passengers and a small charge on the public side, together at most 2% of a day's income. Default: both, capped at 2%. Otherwise the café only, or a higher cap (up to 4%) with the Balance workflow's word.
