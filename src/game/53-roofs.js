@@ -7,8 +7,12 @@
 if(!R.floor||R.floor==='halls')R.floor='up'; // 'roof', 'up' or 'down'
 const roofA=()=>R.floor==='roof'&&R.view==='airport'?1:0; // 1 on the roof, 0 on the halls
 const floorNow=()=>R.floor==='down'?0:1; // the floor of halls drawn: 0 arrivals, 1 departures (and under the roof)
-const onFloor=fl=>fl==null||fl===floorNow(); // a room or passenger without a floor is on both
-function setFloor(f){if(R.floor===f)return;R.floor=f;renderCam()}
+// a layout's halls are on two floors when it has halls on each (Classic; the others keep one floor for now, and their chip
+// shows Roof and Halls), worked out once per plan (ROOMS is made afresh by applyLayout)
+let FL2=null;
+function twoFloors(){if(!ROOMS)return false;if(FL2&&FL2.rs===ROOMS)return FL2.two;FL2={rs:ROOMS,two:ROOMS.some(r=>r.fl===0)&&ROOMS.some(r=>r.fl===1)};return FL2.two}
+const onFloor=fl=>fl==null||fl===floorNow()||!twoFloors(); // a room or passenger without a floor is on both; with one floor, everything shows
+function setFloor(f){if(f==='down'&&!twoFloors())f='up';if(R.floor===f)return;R.floor=f;renderCam()}
 // is (x, y) under a built roof? P is roofNow()'s plan
 function underRoof(P,x,y){const rs=P.rooms;for(let j=0;j<rs.length;j++){const r=rs[j];if(x>=r.x0&&x<=r.x1&&y>=r.y0&&y<=r.y1&&inPoly(r.poly,x,y))return true}return false}
 let ROOF=null; // the current plan: {key, rooms:[{x0,y0,x1,y1,path,edge,sky:[…],plant:[…]}]}
@@ -56,4 +60,4 @@ function drawRoofs(V){
   ctx.restore();
 }
 LAYER.roofs.push(drawRoofs);
-Object.assign(SIMX,{roofA,floorNow,onFloor,underRoof,setFloor,renderCam,roofNow,drawRoofs,tapAt,shopHit,get ROOF(){return ROOF}});
+Object.assign(SIMX,{roofA,floorNow,onFloor,twoFloors,underRoof,setFloor,renderCam,roofNow,drawRoofs,tapAt,shopHit,get ROOF(){return ROOF}});

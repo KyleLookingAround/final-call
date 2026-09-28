@@ -121,7 +121,7 @@ function bagLive2(){
 TERM_PANEL.bag=[()=>`<div class="sec">Baggage system</div><div data-live="bags">${bagLive2()}</div>`];
 // drawing: the hall's screening machines, search room, sorter, make-up carts and early bag store, carousels and tugs
 const CAR_POS=k=>({x:760+(k%4)*120,y:k<4?630:672});
-TERM_DRAW.push(D=>{
+TERM_DRAW.push(onFl(0,D=>{
   const B=bagRT(),C=bagCaps(),[x0,y0,x1,y1]=BAG_HALL,now=performance.now()/1000;
   // screening machines along the belt in, the search room below them
   for(let k=0;k<6;k++){const on=k<1+G.lv.screen;ctx.fillStyle=on?'#39414A':'#1F242A';ctx.fillRect(x0+8+k*21,692,16,12);if(on){ctx.fillStyle='#5CC8FF';ctx.fillRect(x0+13+k*21,696,6,4)}}
@@ -145,7 +145,7 @@ TERM_DRAW.push(D=>{
     ctx.fillStyle='#D9A066';for(let j=0;j<bags;j++){const t=((j/20+now/9)%1)*2*Math.PI;ctx.fillRect(cx+Math.cos(t)*40-2,cy+Math.sin(t)*10-2,4,4)}
     mono(String(k+1),cx,cy+3,'#909AA4',9,'center');
     if(L.length){const A=L[0],a=A.bg||{};mono(`${A.code}${A.no} ${a.first!=null?hhmm(a.first):'--:--'}–${a.last!=null?hhmm(a.last):'--:--'}`,cx,cy+18,a.stall>2?'#FF7A8A':'#FFC72C',6,'center')}}
-});
+}));
 // tug trains out on the apron, on every floor: out through the tunnel under the concourse to the stand, and back
 LAYER.terminal.push(()=>{const B=bagRT();
   for(const T of B.tugs){if(T.t<0)continue;const b=bagPt(T.i),k=clamp(T.t/T.T,0,1),dir=T.out?k:1-k,tun=(HALL_OUT.y-TUNNEL.y),all=tun+Math.hypot(b.x-TUNNEL.x,b.y-TUNNEL.y),s=dir*all;

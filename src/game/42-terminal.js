@@ -19,11 +19,13 @@ SIMX.FIELDS=FIELDS;SIMX.MIGRATIONS=MIGRATIONS; // saving (03-state.js, 22-save.j
 const RECT=(x0,y0,x1,y1)=>[[x0,y0],[x1,y0],[x1,y1],[x0,y1]];
 const BAG_HALL=[560,SEC_Y,700,LAND_B]; // x0, y0, x1, y1
 // Each layout lists its own terminal, L.term: its halls, and its doorways and floor links. A hall may be on a floor, fl (0 the
-// lower, arrivals; 1 the upper, departures); a room without one (the concourse, the forecourt) is on both. A doorway joins
-// rooms on one floor; a floor link (an escalator or a lift) joins two floors and is a doorway with two more items, [hall, hall,
-// x, y, half-width, 'esc' or 'lift', people a minute]; routing treats it as a doorway. For now every layout has its own copy
-// of the same plan, Classic's, on one floor, so nothing has moved: the floor plans part gives each layout its own.
-const classicTerm=()=>({
+// lower, arrivals; 1 the upper, departures); a room without one (the concourse, the forecourt, the hotel) is on both. A doorway
+// joins rooms on one floor; a floor link (an escalator, a lift or stairs) joins two floors and is a doorway with two more items,
+// [hall, hall, x, y, half-width, 'esc', 'lift' or 'stairs', people a minute]: passengers queue for it and ride it (66-floors.js).
+// plain: [fl, x0, y0, x1, y1] floor inside the building that isn't a hall (no one walks it), drawn on that floor, and void: [x0,
+// y0, x1, y1] an opening in the upper floor looking down (both drawn by 66-floors.js). The other layouts keep one floor, a copy
+// of Classic's plan before it had two (flatTerm), until the floor plans part gives each its own.
+const flatTerm=()=>({
   halls:[
     {id:'mkt',poly:RECT(8,SEC_Y,560,SEC_LINE),col:'#1E2429',name:'MARKET PLACE'},
     {id:'imm',poly:RECT(700,SEC_Y,1240,SEC_LINE),col:'#1B2127',name:'IMMIGRATION',sign:1},
@@ -40,8 +42,21 @@ const classicTerm=()=>({
   // a barrier; arriving passengers leave the concourse by one door, and the arrivals hall has doors to the forecourt and hotel
   doors:[['main','mkt',284,SEC_Y,250],['main','imm',1212,SEC_Y,22],['ci','sec',284,680,262],['ci','out',150,LAND_B,34],
     ['rec','cus',970,700,70],['cus','arh',970,720,70],['arh','out',970,LAND_B,46],['arh','wlk',1240,745,7],['wlk','hot',1262,745,7],['hot','out',1367,LAND_B,26]]});
-for(const L of Object.values(LAYOUTS))L.term=classicTerm();
-const isFloorLink=d=>d[5]==='esc'||d[5]==='lift';
+// Classic on two floors: departures upstairs (check-in, security, the market place and the gate lounges on the concourse),
+// arrivals below (immigration, reclaim, customs, the arrivals hall, the hotel walkway, and the baggage hall under check-in).
+// Every hall stays where it was, so walks barely change: arriving passengers leave the concourse by their old door onto a
+// gallery over immigration (acr) and ride the escalator down, families and those who need help by the lift
+const classicTerm=()=>{const T=flatTerm(),fl={mkt:1,sec:1,ci:1,imm:0,rec:0,cus:0,arh:0,wlk:0};
+  for(const h of T.halls)if(fl[h.id]!=null)h.fl=fl[h.id];
+  T.halls.push({id:'acr',poly:RECT(700,SEC_Y,1240,SEC_LINE),fl:1,col:'#1B2127',name:'TO ARRIVALS'});
+  T.doors[1]=['main','acr',1212,SEC_Y,22];
+  T.doors.push(['acr','imm',1200,550,10,'esc',40],['acr','imm',1228,584,6,'lift',8]);
+  T.plain=[[1,560,SEC_Y,700,SEC_LINE],[1,560,SEC_LINE,1240,LAND_B],[0,8,SEC_Y,560,LAND_B]];T.void=[770,612,1170,690];
+  return T};
+for(const L of Object.values(LAYOUTS))L.term=flatTerm();
+LAYOUTS.classic.term=classicTerm();
+const isFloorLink=d=>d[5]==='esc'||d[5]==='lift'||d[5]==='stairs';
+const onFl=(fl,f)=>(f.fl=fl,f); // a TERM_DRAW entry drawn only on floor fl (0 or 1; every floor without it)
 let ROOM_DOORS=[]; // the layout's doorways and its terminal's (floor links too), as buildRooms saw them
 const roomOn=r=>!(r.ph===2&&!G.pierB)&&!(r.need&&!G.lv[r.need]); // halls that exist yet: second-phase rooms need Pier B, the hotel needs a hotel
 const hallId=id=>ROOM_ID[id];
@@ -62,13 +77,14 @@ function terminalFaults(){
 }
 // the halls' furniture that isn't a counter, desk or lane: the baggage hall, bag belts and each hall's name
 function drawTerminalHalls(D){
-  const [bx0,by0,bx1,by1]=BAG_HALL;ctx.fillStyle='#15191D';ctx.fillRect(bx0,by0,bx1-bx0,by1-by0);
-  ctx.strokeStyle='#4E5964';ctx.lineWidth=3;ctx.strokeRect(bx0,by0,bx1-bx0,by1-by0);
-  ctx.fillStyle='#2A3037';ctx.fillRect(16,684,bx0-16,4); // the belt behind the check-in desks, into the baggage hall
-  for(const y of [630,672]){ctx.fillRect(bx1,y-2,20,4)} // belts out to the carousels
-  ctx.strokeStyle='#39414A';ctx.lineWidth=5;ctx.setLineDash([4,3]);ctx.beginPath();ctx.ellipse((bx0+bx1)/2,640,44,26,0,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
-  mono('BAGGAGE HALL',(bx0+bx1)/2,540,'#56606A',8.5,'center');
-  for(const r of LAY.term.halls)if(r.name&&!r.sign&&roomOn(r)){const [x0,y0]=r.poly[0];mono(r.name,x0+8,y0+10,'#56606A',8.5)}
+  const [bx0,by0,bx1,by1]=BAG_HALL;
+  if(onFloor(0)){ctx.fillStyle='#15191D';ctx.fillRect(bx0,by0,bx1-bx0,by1-by0); // the baggage hall is downstairs
+    ctx.strokeStyle='#4E5964';ctx.lineWidth=3;ctx.strokeRect(bx0,by0,bx1-bx0,by1-by0);
+    ctx.fillStyle='#2A3037';for(const y of [630,672]){ctx.fillRect(bx1,y-2,20,4)} // belts out to the carousels
+    ctx.strokeStyle='#39414A';ctx.lineWidth=5;ctx.setLineDash([4,3]);ctx.beginPath();ctx.ellipse((bx0+bx1)/2,640,44,26,0,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
+    mono('BAGGAGE HALL',(bx0+bx1)/2,540,'#56606A',8.5,'center')}
+  if(onFloor(1)){ctx.fillStyle='#2A3037';ctx.fillRect(16,684,bx0-16,4)} // the belt behind the check-in desks, down to the baggage hall
+  for(const r of LAY.term.halls)if(r.name&&!r.sign&&roomOn(r)&&onFloor(r.fl)){const [x0,y0]=r.poly[0];mono(r.name,x0+8,y0+10,'#56606A',8.5)}
 }
 
 // Under a solid roof (roofA() 1) nothing inside a hall is drawn: the roof covers the built rooms, so only the outline of rooms
@@ -78,19 +94,19 @@ function drawTerminal(D){
   drawRooms();if(roofA()){ctx.fillStyle='#101316';ctx.fillRect(0,LAND_B+2,W,H-LAND_B-2);return}
   drawTerminalHalls(D);
   const ciW=R.ciQ.length*D.checkin/(D.desks+D.kiosks*0.6),seW=R.secQ.length*D.sec/D.lanes,tint=w=>w>15?'rgba(255,122,138,.11)':w>8?'rgba(255,199,44,.07)':null;
-  let tc=tint(ciW);if(tc){ctx.fillStyle=tc;ctx.fillRect(8,680,552,LAND_B-680)}
-  tc=tint(seW);if(tc){ctx.fillStyle=tc;ctx.fillRect(8,SEC_LINE,552,80)}
-  tc=tint(R.arrQ.length*D.passT/(D.officers+D.egates*1.6));if(tc){ctx.fillStyle=tc;ctx.fillRect(700,SEC_Y,540,SEC_LINE-SEC_Y)}
+  let tc=onFloor(1)&&tint(ciW);if(tc){ctx.fillStyle=tc;ctx.fillRect(8,680,552,LAND_B-680)}
+  tc=onFloor(1)&&tint(seW);if(tc){ctx.fillStyle=tc;ctx.fillRect(8,SEC_LINE,552,80)}
+  tc=onFloor(0)&&tint(R.arrQ.length*D.passT/(D.officers+D.egates*1.6));if(tc){ctx.fillStyle=tc;ctx.fillRect(700,SEC_Y,540,SEC_LINE-SEC_Y)}
   ctx.fillStyle='#101316';ctx.fillRect(0,LAND_B+2,W,H-LAND_B-2);
   for(const b of [1,0]){ctx.fillStyle=b?'#252C33':'#1F242A';ctx.beginPath(); // each gate lounge's seats, built stands' and the rest in one path each
     for(const i of SIDX){if(!standOpen(i)||!G.stands[i].built!==!b)continue;for(let j=0;j<80;j++){const s=spotPos(i,j);ctx.rect(s.x-3,s.y-3,6,6)}}ctx.fill()}
   if(G.lv.mover&&G.pierB&&LAY.track){ctx.strokeStyle='#2A3037';ctx.lineWidth=3;ctx.beginPath();LAY.track.forEach(([x,y],k)=>k?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke()} // its cars: drawPax
   // bags on the belt behind the check-in desks (check-in and security draw themselves: 43-departures.js)
-  ctx.fillStyle='#D9A066';for(const b of R.belt)ctx.fillRect(b.x-2,684.5,4,4);
+  if(onFloor(1)){ctx.fillStyle='#D9A066';for(const b of R.belt)ctx.fillRect(b.x-2,684.5,4,4)}
   ctx.fillStyle='#FFC72C';for(const i of SIDX)if(G.stands[i].built){const F=R.st[i].F;
     const bg=busGate(i);if(bg){ctx.fillRect(bg[0]-2.5,bg[1]+bg[2]*4-2.5,5,5)}
     else{faceW(i,-118,FACE_Y-6);ctx.fillRect(WP.x-2.5,WP.y-2.5,5,5);if(F&&F.rear){faceW(i,-150,FACE_Y-6);ctx.fillRect(WP.x-2.5,WP.y-2.5,5,5)}}}
-  for(const f of TERM_DRAW)f(D);
+  for(const f of TERM_DRAW)if(onFloor(f.fl))f(D);
 }
 // FIZZCO banners along the terminal's apron wall while advertising is on (Office › Policies): with the halls, or over the roof
 function drawAds(){if(!pol('ads'))return;ctx.fillStyle='#E5484D';for(let x=60;x<W-100;x+=560){ctx.fillRect(x,TERM_Y-3,220,10);ctx.font='800 9px "Saira Condensed",sans-serif';ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('FIZZCO · FIZZCO · FIZZCO',x+110,TERM_Y+2.5);ctx.fillStyle='#E5484D'}}
@@ -99,8 +115,9 @@ function drawQueueSigns(D){
   const ciWait=R.ciQ.length*D.checkin/(D.desks+D.kiosks*0.6),secWait=R.secQ.length*D.sec/D.lanes;
   sign(190,LAND_B+6,'ENTRANCE ↑');sign(946,LAND_B+6,'EXIT ↓');
   let w=sign(16,LAND_B+6,'CHECK-IN');mono(`${R.ciQ.length} · ~${Math.round(ciWait)} min`,16+w+5,LAND_B+15,ciWait>12?'#FF7A8A':'#909AA4',9);
-  w=sign(16,SEC_LINE+4,'SECURITY');mono(`${R.secQ.length+R.ftQ.length} · ~${Math.round(secWait)} min`,16+w+5,SEC_LINE+13,secWait>12?'#FF7A8A':'#909AA4',9);
-  const arW=R.arrQ.length*D.passT/(D.officers+D.egates*1.6);w=sign(708,SEC_Y+4,'PASSPORTS');mono(`${R.arrQ.length} waiting · ~${Math.round(arW)} min`,708+w+5,SEC_Y+13,arW>12?'#FF7A8A':'#909AA4',9);
+  const rf=roofA(); // the halls' own signs: on their floor, and both over the roof
+  if(rf||onFloor(1)){w=sign(16,SEC_LINE+4,'SECURITY');mono(`${R.secQ.length+R.ftQ.length} · ~${Math.round(secWait)} min`,16+w+5,SEC_LINE+13,secWait>12?'#FF7A8A':'#909AA4',9)}
+  if(rf||onFloor(0)){const arW=R.arrQ.length*D.passT/(D.officers+D.egates*1.6);w=sign(708,SEC_Y+4,'PASSPORTS');mono(`${R.arrQ.length} waiting · ~${Math.round(arW)} min`,708+w+5,SEC_Y+13,arW>12?'#FF7A8A':'#909AA4',9)}
 }
 // the layout's escalator tubes and tent roof (drawn by the roof itself when it's on) and its links: 40-layout-drawing.js. A
 // link's stations are the one thing left under the roof: its track and trains run out across the apron

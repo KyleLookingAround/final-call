@@ -170,7 +170,7 @@ TERM_PANEL.staff=[()=>{
   return `<div class="sec">Bag drop</div><div class="row">${svg('bag')}<div><div class="rt">Bag drop</div><div class="rd">${money(WAGE.drops*(G.wageMul||1))} an hour each${auto?' · set by rostering':''}</div></div><div class="lever"><button data-staff="drops:-1" ${auto||n<=1?'disabled':''} aria-label="Staff one fewer">−</button><output data-live="staff-drops">${n}</output><button data-staff="drops:1" ${auto||n>=own?'disabled':''} aria-label="Staff one more">+</button><span class="live">/ ${own}</span></div></div>`}];
 
 /* ---------- drawing: islands, kiosks and bag drop; gates, lanes, the search tables ---------- */
-TERM_DRAW.push(D=>{
+TERM_DRAW.push(onFl(1,D=>{
   const d=DEP(),own=OWN.desks(),drops=dropsOpen(),dim='#262C32',off='#3A424B',lbl=(t,x,y)=>mono(t,x,y,'#56606A',6.5,'center');
   // islands: a belt down the middle into the one behind the desks, a desk either side, back to back
   for(let k=0;k<4;k++){if(2*k>=own)continue;const x=IX(k);ctx.fillStyle='#2A3037';ctx.fillRect(x-2,688,4,34);
@@ -198,5 +198,5 @@ TERM_DRAW.push(D=>{
     ctx.fillStyle='#FFC72C';ctx.fillRect(s.x+8,s.y-2,4,4);if(busy){ctx.fillStyle='#D9A066';ctx.fillRect(s.x-5,s.y-3,5,6);ctx.fillStyle='#ECE8DF';ctx.fillRect(s.x+1,s.y-2,3,4)}}
   if(nT)lbl('SEARCH',517,607);
   ctx.fillStyle='#8C97A1';for(const p of R.pax)if(p.state==='scan'||p.state==='repack'){const x=p.tx+7;ctx.fillRect(x,p.state==='scan'?p.y-2:604,5,4)}
-});
+}));
 SIMX.depLog=DEP_LOG;Object.assign(SIMX,{tablesOpen,WAGE,qSlot,secSlot,famSlot,ftSlot,srchSlot,deskX,kioskX,dropX,laneX,IX,dropsOpen,searchRate,DEP});

@@ -12,6 +12,7 @@ The project notes (`CLAUDE.md`) hold what every change needs. This file holds ho
 - [Day in a minute](systems/day-in-a-minute.md) (`63-day-in-a-minute.js`)
 - [Effects: the rating and money ledger](systems/effects.md) (`04-effects.js`, `15-panel.js`)
 - [Famous faces](systems/famous-faces.md) (`64-famous-faces.js`, `03-state.js`, `14-board.js`)
+- [Floors](systems/floors.md) (`66-floors.js`, `42-terminal.js`, `61-late-runners.js`, `53-roofs.js`, `13-camera.js`)
 - [Guided start](systems/guided-start.md) (`36-guided-start.js`)
 - [Late runners and passengers' stories](systems/late-runners.md) (`61-late-runners.js`, `46-market.js`, `43-departures.js`, `12-drawing.js`, `14-board.js`, `13-camera.js`)
 - [Level-up card](systems/level-up-card.md) (`49-levelup.js`)
@@ -23,7 +24,7 @@ The project notes (`CLAUDE.md`) hold what every change needs. This file holds ho
 - [Routes](systems/routes.md) (`31-routes.js`, `03-state.js`)
 - [Saves](systems/saves.md) (`22-save.js`, `03-state.js`)
 - [Sound](systems/sound.md) (`06-sound.js`, `48-sound.js`, `23-boot.js`)
-- [The terminal](systems/terminal.md) (`42-terminal.js`, `47-hotel.js`, `05-flights.js`, `07-passengers.js`, `08-stands.js`, `46-market.js`, `43-departures.js`)
+- [The terminal](systems/terminal.md) (`42-terminal.js`, `47-hotel.js`, `66-floors.js`, `05-flights.js`, `07-passengers.js`, `08-stands.js`, `46-market.js`, `43-departures.js`)
 - [Transport manager](systems/transport-manager.md) (`32-managers.js`)
 - [Update check](systems/update-check.md) (`37-update-check.js`)
 - [Usage counts](systems/usage-counts.md) (`65-usage-counts.js`)
@@ -132,6 +133,7 @@ The main names, by file group (the joined table below is the complete list, from
 | `63-day-in-a-minute.js` | DAY IN A MINUTE: a time-lapse of yesterday, played back over the airport view |
 | `64-famous-faces.js` | FAMOUS FACES: now and then a celebrity flies through, with a crowd, a busy café hour and a rating stake |
 | `65-usage-counts.js` | usage counts: anonymous page counts for launch week |
+| `66-floors.js` | FLOORS: halls on two floors, the escalators and lift between them, and going to a hall's floor |
 | `99-start.js` | the `/*SIM_HOOK*/` marker and the call that starts the game |
 <!-- /joined:files -->
 

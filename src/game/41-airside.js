@@ -58,7 +58,9 @@ function buildRooms(L){
   // the middle of one to the middle of the other, worked out once per layout; a ride counts as the walk it saves plus the wait.
   const n=ROOMS.length,mid=ROOMS.map(r=>[r.poly.reduce((a,p)=>a+p[0],0)/r.poly.length,r.poly.reduce((a,p)=>a+p[1],0)/r.poly.length]),d2=(a,b)=>Math.hypot(b[0]-a[0],b[1]-a[1]);
   const ways=[];
-  for(const [a,b,x,y] of L.doors||[])for(const [f,t] of [[a,b],[b,a]])ways.push({fr:ROOM_ID[f],nx:ROOM_ID[t],en:[x,y],ex:[x,y],c:0,m:0});
+  // a floor link (an escalator or lift, 42-terminal.js) is a doorway that costs its ride; its step is 10 + its index in the
+  // layout's doorways, and each passenger picks which of the links between the two rooms to take as they route (pickLink)
+  (L.doors||[]).forEach((d,j)=>{const [a,b,x,y]=d,lk=isFloorLink(d);for(const [f,t] of [[a,b],[b,a]])ways.push({fr:ROOM_ID[f],nx:ROOM_ID[t],en:[x,y],ex:[x,y],c:lk?LINK_C:0,m:lk?10+j:0})});
   for(const [a,b,pa,pb,kind] of L.links||[]){const tr=kind==='train',len=d2(pa,pb),c=tr?len*0.12+TRAIN_EVERY*0.5*90:len*0.5;
     for(const [f,t,e,x] of [[a,b,pa,pb],[b,a,pb,pa]])ways.push({fr:ROOM_ID[f],nx:ROOM_ID[t],en:e,ex:x,c,m:tr?1:2})}
   ROUTE=[...Array(n)].map(()=>new Array(n).fill(null));
@@ -76,9 +78,11 @@ const ROOM_MAIN=()=>ROOMS?ROOM_ID.main??0:null;
 function route(p,room){
   p.way=null;if(!ROOMS||room==null)return;
   if(p.room==null||p.room===room){p.room=room;return}
-  const way=[];let r=p.room; // four numbers a step: where to, the room it leads into, and how (0 walk, 1 train, 2 moving walkway)
-  for(let k=0;k<ROOMS.length&&r!==room;k++){const d=ROUTE[r][room];if(!d)break;if(d.m)way.push(d.en[0],d.en[1],r,0);way.push(d.ex[0],d.ex[1],d.nx,d.m);r=d.nx}
-  if(way.length){p.way=way;p.wi=0}else p.room=room;
+  const way=[];let r=p.room; // four numbers a step: where to, the room it leads into, and how (0 walk, 1 train, 2 moving walkway, 10+ a floor link)
+  for(let k=0;k<ROOMS.length&&r!==room;k++){const d=ROUTE[r][room];if(!d)break;
+    if(d.m>=10){const j=pickLink(p,d.m-10),L=ROOM_DOORS[j];way.push(L[2],L[3],d.nx,10+j)} // queued for and ridden at its spot (walk)
+    else{if(d.m)way.push(d.en[0],d.en[1],r,0);way.push(d.ex[0],d.ex[1],d.nx,d.m)}r=d.nx}
+  p.rideAt=null;if(way.length){p.way=way;p.wi=0}else p.room=room;
 }
 // walks towards the target, through any doorways and along any links first; true on arrival. A train leaves each station
 // every TRAIN_EVERY game minutes; riders are hidden and drawn as the train.
@@ -86,6 +90,7 @@ const TRAIN_EVERY=2,TRAIN_V=900;
 function walk(p,v,dt){
   const w=p.way;
   if(w){const k=p.wi,m=w[k+3];let sp=v;
+    if(m>=10){if(rideLink(p,m-10,w[k+2],v,dt)){(p.doors||(p.doors=[])).push(p.x,p.y);p.room=w[k+2];p.rideAt=null;p.wi+=4;if(p.wi>=w.length)p.way=null}return false}
     if(m===1){if(!p.riding){if(p.rideAt==null)p.rideAt=Math.ceil(G.clock/TRAIN_EVERY+1e-9)*TRAIN_EVERY;if(G.clock<p.rideAt)return false;p.riding=true}sp=TRAIN_V}
     else if(m===2)sp=v*2;
     if(moveTo(p,w[k],w[k+1],sp,dt)){(p.doors||(p.doors=[])).push(w[k],w[k+1]);p.room=w[k+2];p.riding=false;p.rideAt=null;p.wi+=4;if(p.wi>=w.length)p.way=null}

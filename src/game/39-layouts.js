@@ -219,7 +219,7 @@ function switchLayout(id){
   R.pax.forEach((p,k)=>{p.room=rid[k]!=null?ROOM_ID[rid[k]]??ROOM_MAIN():p.room});
   for(const [i,j] of to){const S=R.st[i],F=S.F,fl=G.fleet[F.fleetIdx],re=p=>{if(p&&p.F===F)p.stand=j};
     R.st[i]=R.st[j];R.st[j]=S;F.i=j;F.arr.stand=j;if(fl&&fl.gate===i)fl.gate=j;
-    R.pax.forEach(re);F.manifest.forEach(re);re(F.straggler);F.arr.pax.forEach(re);
+    R.pax.forEach(re);F.manifest.forEach(re);for(const q of [R.platform,R.tramQ,R.busQ])if(q)q.forEach(re); // and those still on their way in by train, tram or busre(F.straggler);F.arr.pax.forEach(re);
     for(const p of R.pax)re(p.xfer); // someone connecting into it who hasn't landed yet
     for(const T of R.st)if(T.F)T.F.arr.pax.forEach(p=>re(p.xfer));
     for(const m of R.rwy.q)if(m.F===F)m.stand=j}
