@@ -23,7 +23,7 @@ KyleLookingAround <KyleMck10@hotmail.com> (the session-start hook sets it; check
 
 ## Who merges and when
 
-<fill: "The session, with Squash and merge once checks are green, then confirms the Pages publish" or, for a part, "The coordinator, one part at a time; the part opens its PR, subscribes to its events and ends its turn">
+<fill: "The session, with Squash and merge once checks are green, then confirms the Pages publish. Subscribe to the PR's events (`subscribe_pr_activity`) once it's open and keep a `send_later` (about 20 minutes) as the fallback" or, for a part, "The coordinator, one part at a time; the part opens its PR, subscribes to its events and ends its turn">
 
 ## What's left for others
 
@@ -39,4 +39,5 @@ KyleLookingAround <KyleMck10@hotmail.com> (the session-start hook sets it; check
 
 - Estimate: about $<fill: dollars> (<fill: why: its size, how many CI rounds>).
 - At each stopping point (a PR opened, CI back, a merge), read `get_session`: `usage.cost_usd` against the estimate (a 0 means not yet known, not free), and `rate_limit_info`. If status is "rejected" or `isUsingOverage` is true, schedule a `send_later` for a minute after `resetsAt` and end the turn.
+- Starting another session (`create_session`)? Keep at most four default-model sessions running at once, the rest on the cheaper model, starts staggered; start nothing new on `allowed_warning` (`coordinator` playbook §5).
 - Past twice the estimate: say why in the PR and in its lesson (`docs/lessons/`), and trim or split what's left.
