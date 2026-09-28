@@ -520,6 +520,7 @@ body.fsstack .toasts{top:calc(var(--hb,42px) + 36px)}
 .lreq.chal.done>span:first-child{color:var(--good)}
 .segs.many{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
 .segs.many .chip{flex:none}
+@media (max-width:440px){.segs.set4{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}} /* Office › Settings' four chips, two by two on phones */
 .stamps{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px 10px;margin:10px 2px 4px}
 .stamp{--c:#FFC72C;border:2px solid var(--c);color:var(--c);border-radius:12px;padding:10px 8px 9px;text-align:center;transform:rotate(var(--r,0deg));background:color-mix(in srgb,var(--c) 7%,transparent);box-shadow:inset 0 0 0 3px var(--surface),inset 0 0 0 4px color-mix(in srgb,var(--c) 55%,transparent);display:grid;gap:4px;align-content:center;min-height:88px}
 .stamp b{font:800 14px/1.05 var(--disp);letter-spacing:.08em;text-transform:uppercase}
