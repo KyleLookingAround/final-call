@@ -32,7 +32,7 @@ function updateBoard(){
     const i=+r.dataset.stand,F=R.st[i].F,q=r._q;if(!q)return;
     if(!F){setFlaps(q('std'),'');setFlaps(q('flt'),'');setFlaps(q('dest'),'');q('city').textContent='';setFlaps(q('gate'),GATES[i]);setFlaps(q('st'),gateStatus(i)==='INBOUND'?'INBOUND':'NO SERVICE');return}
     if(R.bm==='arr'){const A=F.arr,s=arrStatus(F);setFlaps(q('std'),hhmm(A.sta));setFlaps(q('flt'),A.code+A.no);setFlaps(q('dest'),A.from[0]);q('city').textContent=A.from[1];setFlaps(q('gate'),GATES[i]);setFlaps(q('st'),s);q('st').classList.remove('late');return}
-    setFlaps(q('std'),hhmm(F.std));setFlaps(q('flt'),F.code+F.no);setFlaps(q('dest'),F.dest[0]);q('city').textContent=F.dest[1];setFlaps(q('gate'),isCalled(F)?GATES[i]:'');
+    setFlaps(q('std'),hhmm(F.std));setFlaps(q('flt'),F.code+F.no);setFlaps(q('dest'),F.dest[0]);q('city').textContent=(famousStar(F)?'★ ':'')+F.dest[1];setFlaps(q('gate'),isCalled(F)?GATES[i]:'');
     const s=statusText(F);setFlaps(q('st'),s);q('st').classList.toggle('late',s==='DELAYED'||s==='TECH DELAY');
   });
 }

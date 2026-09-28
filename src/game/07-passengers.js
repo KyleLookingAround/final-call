@@ -54,3 +54,24 @@ function updateLandside(dt,D){
   updateCheckin(dt,D);updateSecurity(dt,D);updateBelt(dt);
   for(const p of R.pax){const f=PAX_STEP[p.state];if(f)f(p,dt,D)}
 }
+
+function drawLandside(D){ // outside: the road, station and stops sit LAND_DY lower than they were drawn before the halls
+  ctx.fillStyle='#15191D';ctx.fillRect(0,H,W,Y1-H);
+  ctx.save();ctx.translate(0,LAND_DY);
+  ctx.fillStyle='#0F1215';ctx.fillRect(0,642,W,22);ctx.strokeStyle='rgba(236,232,223,.25)';ctx.lineWidth=1;ctx.setLineDash([10,10]);ctx.beginPath();ctx.moveTo(0,653);ctx.lineTo(W,653);ctx.stroke();ctx.setLineDash([]);
+  if(G.lv.rail){
+    ctx.fillStyle='#262C33';ctx.fillRect(16,696,300,16);ctx.fillStyle='#FFC72C';ctx.fillRect(16,711,300,1.5);
+    ctx.strokeStyle='#4A545E';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(0,722);ctx.lineTo(318,722);ctx.moveTo(0,734);ctx.lineTo(318,734);ctx.stroke();
+    ctx.fillStyle='#2F363E';for(let x=4;x<318;x+=9)ctx.fillRect(x,720,3,16);ctx.fillStyle='#7A3A42';ctx.fillRect(316,718,5,20);
+    const T=R.train;if(T.x!=null){const nc=T.cars||3,cw=Math.min(88,300/nc);for(let c=0;c<nc;c++){ctx.fillStyle=T.col||'#3E6A8C';rrect(T.x+c*cw,720,cw-4,16,T.nose&&c===nc-1?8:3);ctx.fill();ctx.fillStyle='#A9D2F0';for(let w=0;w<Math.floor((cw-12)/12);w++)ctx.fillRect(T.x+c*cw+8+w*12,724,6,4)}}
+    sign(16,676,'RAILWAY STATION');mono(!vehFreq('train')&&T.state==='away'?'no trains running · build a rail line on the Region tab':T.state==='away'?`next train ${Math.ceil(T.t)} min · ${R.platform.length} aboard`:'train in',110,686,'#909AA4',9);
+  } else if(isBuilding('up:rail'))hatch(16,676,302,86,bprog('up:rail'),'BUILDING STATION');
+  else {ctx.strokeStyle='#2B3238';ctx.lineWidth=1.5;ctx.setLineDash([6,6]);ctx.strokeRect(16,676,302,86);ctx.setLineDash([]);mono('RAILWAY STATION · FOR SALE',167,724,'#4A535D',10,'center')}
+  drawStopVehicles();
+  ctx.restore();
+  const cap=carCap();let occ=0;
+  for(let b=0;b<cap;b++){const q=BAY(b);ctx.strokeStyle='#262C32';ctx.lineWidth=1;ctx.strokeRect(q.x-4.5+.5,q.y-7+.5,9,14);
+    if(R.lot[b]>G.clock){occ++;ctx.fillStyle=['#6E7883','#8C97A1','#5C6670','#A7A296','#4F6478'][b%5];rrect(q.x-3.5,q.y-6,7,12,2);ctx.fill()}}
+  sign(334,668+LAND_DY,'CAR PARK');mono(`${occ}/${cap} spaces`,390,678+LAND_DY,occ>=cap?'#FF7A8A':'#909AA4',9);
+}
+LAYER.landside.push(V=>drawLandside(V.D));

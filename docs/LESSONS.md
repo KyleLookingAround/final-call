@@ -8,8 +8,13 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 ## The lessons
 
 <!-- joined:lessons from docs/lessons/ by tools/join.mjs: don't edit between these lines -->
+### Cost
+
+- [The overnight stall, 27–28 Sep 2026](lessons/main-overnight-stall.md)
+
 ### Merge-chasing
 
+- [#114 Playbooks: the usage limit, the watchdog, and fewer wasted rounds · 28 Sep 2026](lessons/114-playbook-limits.md)
 - [#94 Fewer clashes between sessions · 27 Sep 2026](lessons/94-fewer-clashes.md)
 - [#46 Runbook experiment [B], second half: only the touched check groups on drafts · 27 Sep 2026](lessons/79-ci-touched.md)
 
@@ -17,7 +22,11 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 - [Polish audit · 27 Sep 2026](lessons/main-polish-audit.md)
 - [Version 32: ready for what's next · 27 Sep 2026](lessons/main-release-32.md)
+- [The terminal as a place: groundwork, with refactor 9 · 28 Sep 2026](lessons/113-terminal-groundwork.md)
+- [Famous faces (#111) · 28 Sep 2026](lessons/111-famous-faces.md)
+- [The region map, looking better · 27 Sep 2026](lessons/108-region-map-looks.md)
 - [#107 The phone's top bar back on one row · 27 Sep 2026](lessons/107-phone-topbar.md)
+- [Launch polish audit · 27 Sep 2026](lessons/106-launch-audit.md)
 - [Day in a minute (#102) · 28 Sep 2026](lessons/102-day-in-a-minute.md)
 - [#101 A rating that reflects the last day, measured and switched on; a network you have to keep, specced · 27 Sep 2026](lessons/101-balance-rating.md)
 - [Photo mode (#100) · 27 Sep 2026](lessons/100-photo-mode.md)
