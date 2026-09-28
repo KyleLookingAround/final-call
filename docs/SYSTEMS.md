@@ -205,6 +205,7 @@ The main names, by file group (the joined table below is the complete list, from
 - `sound`: Sound (docs/specs/sound.md), with a stub audio context and speech synthesis that count what plays: your flights' boarding, gate calls and final calls each announce once, never a partner's or a freighter's; spoken calls are rare, only final calls and gate changes, and none at 4x; each setting silences its own part and the master switch all of them; nothing happens in the headless sim; nights are quiet; and the board's line fits a 320 px phone.
 - `terminal`: The terminal's halls (docs/specs/terminal.md): every layout's desks, lanes, passport desks, carousels and queues sit in their halls, and passengers really go through them: departing ones from the forecourt through check-in and security into the market place, arriving ones from the concourse through immigration, reclaim and customs, and out.
 - `terrace`: The roof terrace and its spotters (docs/specs/terminal-place.md): a Terminal upgrade from level 3, hidden before; seen on the roof at every zoom; a crowd for something rare and nothing else to say so; fewer at night and in rain; never in the terminal's queues; small takings; its card fits a phone. Written before the code (tools/checks/pending.txt). Reads the names in lib/place.mjs, plus UPG.terrace and G.lv.terrace, R.spot (how many spotters are up there), R.spotDrawn (how many the last frame drew), terraceBox() → [x0, y0, x1, y1], its takings earned as 'terrace' (G.revBy.terrace), and its card, #terrace, under Terminal › Staff.
+- `topbar`: The top bar (help, pause, speeds, the views, full screen, sound) keeps every button on one row, at touch size on phones, in portrait down to 320 px, in landscape, and on tablet and desktop, in the airport view and the Region, with and without full screen.
 - `tour`: A new game starts the guided first hour, and it advances.
 - `transport`: The transport manager: its suggestions are buildable, pay back within a week and come one per line; Not now hides one; extensions and upgrades work (the old line runs until the new one opens, which takes a reserved number); it leaves lines you've taken over alone, reviews the rest, adds services to an overfull line within the hour and runs event extras only while crowds travel.
 - `update`: The update-check toast (docs/specs/update-toast.md, src/game/37-update-check.js): quiet when the running build matches dist/version.json, a toast when it doesn't, Update now saves then reloads, Later holds it back an hour, and none of it runs off GitHub Pages or in the headless sim.
@@ -241,6 +242,11 @@ When the link is shared, chat apps and social sites show `src/public/preview.jpg
   - In full screen, the sheet becomes a drawer opened with the Manage button.
 - **Landscape phones** (height ≤ 500) show the map and panel side by side, with the board hidden.
 - **Camera band:** `--gapsz` is set from the player's choice. It becomes `--topgap` in portrait and `--sidegap` in landscape.
+- **Top bar** (`.hud`): one row at every size (the `topbar` check). On touch screens its buttons are 42 px, and `.stage` is a size container (`stage`) so the bar steps down by the map's width, not the screen's:
+  - under 560 px the four speeds fold into `#spdb`, which shows the speed and cycles 1×/2×/4×/8× (a tap on a paused game resumes it), and the buttons are 40 px;
+  - under 356 px (a 320 px phone, or a phone on its side with the camera band) full screen, sound and photo mode leave the bar, and the help card has them instead (`#hscr`, `syncHscr()`, and its Photo mode link);
+  - under 272 px the buttons narrow to 36 px.
+  - A new top-bar button counts against these widths: move the steps and the check with it.
 
 ## Gating and settings
 

@@ -2,7 +2,7 @@
 const TOUR=[
   {t:'Passengers arrive here, check in, clear security and walk to the gates.',w:()=>[20,SEC_Y-6,LAND_R-40,LAND_B-SEC_Y+34],next:1},
   {t:'Tap gate A1 to see its flight.',w:()=>standBox(0),ok:()=>R.tourTap},
-  {t:'Speed time up whenever you like.',q:'.hud [data-speed="4"]',ok:()=>R.speed>=4},
+  {t:'Speed time up whenever you like.',q:()=>$('#spdb').offsetParent?'#spdb':'.hud [data-speed="4"]',ok:()=>R.speed>=4},
   {t:'Queues growing? Open a second check-in desk.',q:()=>G.tab==='terminal'&&$('[data-buy="desks"]')?'[data-buy="desks"]':'[data-tab="terminal"]',ok:()=>G.lv.desks>=1},
   {t:'Get a flight away on time. The board shows every departure, and punctual ones pay a bonus.',q:'.board',ok:()=>G.ontime>=1},
   {t:'Goals lead the way from here, and tips appear under the map when something needs you.',q:'#goal',av:['.stats','#tabs'],next:1,last:1},
