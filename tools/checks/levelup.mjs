@@ -23,9 +23,9 @@ export default async function({open,ok}){
       const go=g=>{R.lvlCard={from:0,to:1};S.lvlTick();const b=document.querySelector(`#lvlList [data-lvgo="${g}"]`);if(!b)return 'missing';S.setSpeed(2);R.lvlPrev=2;b.click();
         const plan=!document.querySelector('#plan').hidden,res={tab:G.tab,plan,card:!!card(),sub:R.oSub};if(plan)document.querySelector('#plan .close').click();return res};
       const up=[...document.querySelectorAll('x')];R.lvlCard={from:0,to:1};S.lvlTick();const chip=document.querySelector('#lvlList .chip[data-lvgo^="up:"]').dataset.lvgo;S.lvlCardOpen(false);
-      out.plan=go('plan');out.region=go('tab:region');out.world=go('tab:routes');out.up=go(chip);out.upTab=S.UPG[chip.slice(3)].tab;out.gate=go('gate:2');out.records=go('office:records');return out});
+      out.plan=go('plan');out.region=go('tab:region');out.world=go('tab:routes');out.up=go(chip);out.upTab=S.UPG[chip.slice(3)].tab;out.gate=go('gate:2');out.records=go('chal');return out});
     const L=links,shut=['plan','region','world','up','gate','records'].every(k=>L[k]&&L[k].card===false);
-    ok('levelup: each link lands on the right tab and closes the card',shut&&L.plan.plan&&L.region.tab==='region'&&L.world.tab==='routes'&&L.up.tab===L.upTab&&L.gate.tab==='stands'&&L.records.tab==='office'&&L.records.sub==='records',JSON.stringify(L));
+    ok('levelup: each link lands on the right tab and closes the card',shut&&L.plan.plan&&L.region.tab==='region'&&L.world.tab==='routes'&&L.up.tab===L.upTab&&L.gate.tab==='stands'&&L.records.tab==='office'&&L.records.sub==='progress',JSON.stringify(L));
     // Escape and a tap outside close it
     const keys=await page.evaluate(()=>{const S=__sim,R=S.R;R.lvlCard={from:0,to:1};S.lvlTick();document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));const esc=!card();
       R.lvlCard={from:0,to:1};S.lvlTick();document.querySelector('#lvlup').dispatchEvent(new MouseEvent('click',{bubbles:true}));return {esc,outside:!card()}});

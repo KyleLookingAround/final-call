@@ -1,14 +1,14 @@
 {
  "changes": 41,
- "hash": "330feb11",
+ "hash": "54e72140",
  "on": {
-  "rush": 6,
+  "rush": 7,
   "roadworks": 3,
   "snow": 2,
   "line": 3,
   "rain": 3,
   "strike": 2,
-  "sick": 2
+  "sick": 1
  },
  "first": [
   "66418 rush",
@@ -50,6 +50,6 @@
   "67626 line:L9:WIRE FAULT",
   "67648 ",
   "67687 rush",
-  "67818 rush,sick"
+  "67777 "
  ]
 }

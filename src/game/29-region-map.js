@@ -19,51 +19,140 @@ function inSea(x,y){return y>seaY(x)-4}
 function lbl(t,x,y,col,px,align,bold){const k=viewK();ctx.font=`${bold?600:500} ${px/k}px "IBM Plex Mono",monospace`;ctx.fillStyle=col;ctx.textAlign=align||'center';ctx.textBaseline='middle';ctx.fillText(t,x,y)}
 function lblBg(t,x,y,col,px,bg){const k=viewK();ctx.font=`600 ${px/k}px "Saira Condensed","Arial Narrow",sans-serif`;const w=ctx.measureText(t).width+8/k,h=(px+6)/k;ctx.fillStyle=bg||'rgba(10,12,15,.8)';ctx.fillRect(x-w/2,y-h/2,w,h);ctx.fillStyle=col;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(t,x,y+0.5/k)}
 function strokePath(pts,col,w,dash){ctx.strokeStyle=col;ctx.lineWidth=w;ctx.setLineDash(dash||[]);ctx.beginPath();pts.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();ctx.setLineDash([])}
+/* ---------- labels: queued through the frame, then placed by priority so none overlap and all stay in view ---------- */
+let RLQ=[],RLOB=[]; // RLOB: the stations' circles in screen px, which minor labels keep off
+// o: col, px (screen px), font ('mono' or 'cond'), bold, bg (a filled tag), pri (higher first), must (drawn even when
+// crowded), alt (other offsets to try, in screen px: [dx,dy,align]), under (the label it sits under, by text, dy px below)
+function rLabel(t,x,y,o){RLQ.push(Object.assign({t,x,y,px:10,pri:0,alt:null},o))}
+function flushLabels(k){
+  const Q=RLQ.sort((a,b)=>b.pri-a.pri),cam=R.cam,W=R.sw,H=R.sh,put=[],ok=new Map(),pad=1.5,now=performance.now();
+  // the speed and camera buttons float over the map: keep labels out from under them (measured once a second)
+  if(!R.regAvoid||now-R.regAvoid.t>1000){const c=cv.getBoundingClientRect(),bx=[];for(const el of document.querySelectorAll('#stage .hud,#cam')){const r=el.getBoundingClientRect();if(r.width&&r.height)bx.push([r.left-c.left,r.top-c.top,r.right-c.left,r.bottom-c.top])}R.regAvoid={t:now,bx}}
+  const avoid=R.regAvoid.bx;
+  RLQ=[];const obs=RLOB;RLOB=[];ctx.lineJoin='round';
+  for(const L of Q){let up=null;if(L.under){up=ok.get(L.under);if(!up)continue;L.x=cam.x+up.sx/k;L.y=cam.y+(up.sy+L.dy)/k;L.align=up.al;L.alt=up.al==='center'?[[up.w/2+6,-L.dy,'left']]:null}
+    ctx.font=`${L.bold||L.bg?600:500} ${L.px/k}px ${L.font==='cond'||L.bg?'"Saira Condensed","Arial Narrow",sans-serif':'"IBM Plex Mono",monospace'}`;
+    const tw=ctx.measureText(L.t).width*k+(L.bg?8:0),th=L.px+(L.bg?6:2);let done=null;
+    for(const [dx,dy,al] of [[0,0,L.align||'center'],...(L.alt||[])]){
+      let sx=(L.x-cam.x)*k+dx,sy=(L.y-cam.y)*k+dy,x0=al==='right'?sx-tw:al==='left'?sx:sx-tw/2;
+      if(sx-dx<0||sx-dx>W||sy-dy<0||sy-dy>H)continue; // its place is off screen: not drawn
+      const sh=x0<pad?pad-x0:x0+tw>W-pad?W-pad-x0-tw:0;x0+=sh;sx+=sh;const y0=clamp(sy-th/2,pad,H-pad-th);sy=y0+th/2;
+      if(tw>W-2*pad)continue;
+      const b=[x0-pad,y0-pad,x0+tw+pad,y0+th+pad];
+      if(!L.must&&(put.some(p=>b[0]<p[2]&&b[2]>p[0]&&b[1]<p[3]&&b[3]>p[1])||avoid.some(p=>b[0]<p[2]&&b[2]>p[0]&&b[1]<p[3]&&b[3]>p[1])||(L.pri<50&&obs.some(p=>b[0]<p[2]&&b[2]>p[0]&&b[1]<p[3]&&b[3]>p[1]))))continue;
+      done={sx,sy,al,b,w:tw};break}
+    if(!done)continue;put.push(done.b);ok.set(L.t,done);
+    const x=cam.x+done.sx/k,y=cam.y+done.sy/k;ctx.textAlign=done.al;ctx.textBaseline='middle';
+    if(L.bg){const w=tw/k,h=th/k,xl=done.al==='right'?x-w:done.al==='left'?x:x-w/2;ctx.fillStyle=L.bg;ctx.fillRect(xl,y-h/2,w,h);ctx.fillStyle=L.col;ctx.textAlign='center';ctx.fillText(L.t,xl+w/2,y+0.5/k)}
+    else{ctx.strokeStyle='rgba(11,14,17,.82)';ctx.lineWidth=3/k;ctx.strokeText(L.t,x,y);ctx.fillStyle=L.col;ctx.fillText(L.t,x,y)}}
+  ctx.lineJoin='miter';R.regLbl=put; // screen boxes, for the region-looks check
+}
+/* ---------- the land: painted once to an offscreen canvas, again only when the zoom band, season or towns change ---------- */
+const HILLS=[[1150,300,190,115,-0.3],[770,150,150,80,0.2],[1400,250,130,75,0.4],[340,300,110,62,-0.2],[60,430,120,90,0]];
+let RTER=null,RGND=null;
+function townR(pid){const pl=PLACES[pid];return (pl.kind==='city'?110:pl.kind==='town'?45:26)*Math.sqrt(clamp(placePop(pid)/pl.pop,1,2.2))}
+function nearTown(x,y,m){for(const pid in PLACES){const pl=PLACES[pid];if(pl.kind==='air'||pl.kind==='far')continue;if(Math.hypot(x-pl.x,(y-pl.y)/0.8)<townR(pid)+m)return true}return false}
+function inAirfield(x,y){return x>740&&x<1080&&y>560&&y<700}
+function regionTerrain(k){
+  // the cache's scale: the whole-region view's own (so it stamps pixel for pixel), else the next band up; stamped without
+  // smoothing, which is much quicker and hardly shows on soft ground
+  const need=k*R.dpr,cap=R.dpr>1.5?1.5:2,fit=+(R.baseK*zMin()*R.dpr).toFixed(4),sc=Math.abs(need-fit)<0.002?fit:[0.5,0.75,1,1.25,1.5,2].find(v=>v>=need*0.95&&v<=cap)||cap;
+  const B=regionBlocks(),SB=stationBlocks(),n={},c={};
+  for(const pid in B){const pl=PLACES[pid];n[pid]=Math.min(B[pid].length,Math.round(B[pid].length*clamp(placePop(pid)/(pl.pop*2.2),0,1)*(pl.kind==='city'?2:1)))}
+  for(const s in SB)c[s]=Math.round(SB[s].length*clamp((G.tod&&G.tod[s])||0,0,1));
+  const sn=seasonOf(dayOf(G.clock)).name,key=[sc,sn,...Object.values(n),...Object.values(c)].join();
+  if(RTER&&RTER.key===key)return RTER;
+  // while the zoom is moving, keep stamping the old one: only the scale changed, so it's painted once the zoom settles
+  const now=performance.now();if(R.regZ!==need){R.regZ=need;R.regZT=now}
+  if(RTER&&RTER.key.slice(RTER.key.indexOf(','))===key.slice(key.indexOf(','))&&now-R.regZT<250)return RTER;
+  if(!RGND||RGND.sn!==sn)RGND={sn,cv:paintGround(sn)};
+  const cv2=(RTER&&RTER.cv)||document.createElement('canvas');cv2.width=Math.ceil(RW*sc);cv2.height=Math.ceil(RH*sc);
+  const x=cv2.getContext('2d'),lit=[];x.setTransform(sc,0,0,sc,0,0);x.drawImage(RGND.cv,0,0,RW,RH);paintLand(x,B,SB,n,c,lit);
+  return RTER={key,cv:cv2,lit};
+}
+// the soft ground (colour, relief and hills), once a season at a low scale: it's all gradients, and they're slow to paint large
+function paintGround(sn){
+  const cv2=document.createElement('canvas'),sc=0.4;cv2.width=RW*sc;cv2.height=RH*sc;const x=cv2.getContext('2d'),r=seeded(23);x.setTransform(sc,0,0,sc,0,0);
+  x.fillStyle='#161B1B';x.fillRect(0,0,RW,RH);
+  x.fillStyle=sn==='Winter'?'rgba(215,228,245,.06)':sn==='Autumn'?'rgba(190,120,50,.05)':sn==='Summer'?'rgba(120,170,70,.04)':'rgba(100,170,110,.035)';x.fillRect(0,0,RW,RH);
+  // gentle relief: soft light and shade
+  for(let i=0;i<70;i++){const cx=r()*RW,cy=r()*RH*0.85,rad=60+r()*150,lt=r()<0.45,g=x.createRadialGradient(cx,cy,0,cx,cy,rad);g.addColorStop(0,lt?'rgba(160,185,150,.04)':'rgba(0,0,0,.1)');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(cx-rad,cy-rad,rad*2,rad*2)}
+  // hills, lit from the north-west, with faint contours
+  for(const [hx,hy,rx,ry,a] of HILLS){x.save();x.translate(hx,hy);x.rotate(a);x.scale(1,ry/rx);
+    for(const [ox,oy,col] of [[rx*0.12,rx*0.2,'0,0,0,.14'],[-rx*0.2,-rx*0.3,'175,195,165,.07']]){const g=x.createRadialGradient(ox,oy,0,ox*0.5,oy*0.5,rx);g.addColorStop(0,`rgba(${col})`);g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.beginPath();x.arc(0,0,rx*1.05,0,7);x.fill()}
+    x.strokeStyle='rgba(215,225,205,.035)';x.lineWidth=0.8*rx/ry;for(let j=1;j<4;j++){const f=j/4;x.beginPath();x.arc(-rx*0.15*(1-f),-rx*0.2*(1-f),rx*f,0,7);x.stroke()}x.restore()}
+  return cv2;
+}
+// on the ground: fields, woods, the sea and river, and the towns, at the cache's own scale
+function paintLand(x,B,SB,n,c,lit){
+  const r=seeded(29),seaP=()=>{x.beginPath();SEA.forEach(([a,b],i)=>i?x.lineTo(a,b):x.moveTo(a,b));x.closePath()},line=(pts)=>{x.beginPath();pts.forEach(([a,b],i)=>i?x.lineTo(a,b):x.moveTo(a,b))};
+  // fields round the towns, hedged
+  for(let i=0,m=0;i<900&&m<260;i++){const fx=r()*RW,fy=r()*RH,w=14+r()*22,h=10+r()*16,an=-0.25+r()*0.5,tone=r();
+    if(inSea(fx,fy+h)||inAirfield(fx,fy)||nearTown(fx,fy,6)||!nearTown(fx,fy,170))continue;m++;
+    x.save();x.translate(fx,fy);x.rotate(an);x.fillStyle=tone<0.35?'rgba(150,170,95,.045)':tone<0.6?'rgba(170,140,90,.04)':tone<0.8?'rgba(110,150,110,.045)':'rgba(0,0,0,.04)';x.fillRect(-w/2,-h/2,w,h);
+    x.strokeStyle='rgba(8,12,10,.16)';x.lineWidth=0.6;x.strokeRect(-w/2,-h/2,w,h);x.restore()}
+  // woods
+  for(let i=0,m=0;i<200&&m<18;i++){const cx=60+r()*(RW-120),cy=40+r()*(RH-200);if(inSea(cx,cy+40)||inAirfield(cx,cy)||nearTown(cx,cy,40))continue;m++;
+    const tn=24+Math.floor(r()*40),sp=24+r()*30;for(let j=0;j<tn;j++){const a=r()*7,d=Math.sqrt(r())*sp,tx=cx+Math.cos(a)*d*1.3,ty=cy+Math.sin(a)*d*0.8,tr=2.4+r()*3;if(inSea(tx,ty)||nearTown(tx,ty,4))continue;
+      x.fillStyle='rgba(0,0,0,.25)';x.beginPath();x.arc(tx+0.8,ty+1,tr,0,7);x.fill();x.fillStyle=j%3?'#16261C':'#1B2D21';x.beginPath();x.arc(tx,ty,tr,0,7);x.fill()}}
+  // the sea: a sand line, deepening water, shallows along the coast and a few depth lines
+  const coast=SEA.slice(0,14);x.lineJoin='round';x.lineCap='round';
+  line(coast);x.strokeStyle='rgba(190,170,125,.14)';x.lineWidth=7;x.stroke();
+  const sg=x.createLinearGradient(0,690,0,RH);sg.addColorStop(0,'#10202B');sg.addColorStop(1,'#09131B');seaP();x.fillStyle=sg;x.fill();
+  x.save();seaP();x.clip();for(const [w,a] of [[80,.035],[46,.045],[22,.06],[8,.08]]){line(coast);x.strokeStyle=`rgba(70,150,170,${a})`;x.lineWidth=w;x.stroke()}
+  x.setLineDash([2,6]);x.lineWidth=0.8;for(const d of [30,70,120]){line(coast.map(([a,b])=>[a,b+d]));x.strokeStyle='rgba(120,180,200,.07)';x.stroke()}x.setLineDash([]);x.restore();
+  line(coast);x.strokeStyle='rgba(120,175,190,.3)';x.lineWidth=1;x.stroke();
+  // the river, widening to the sea
+  for(let i=1;i<RIVER.length;i++){const f=i/(RIVER.length-1),w=4+f*11;x.beginPath();x.moveTo(...RIVER[i-1]);x.lineTo(...RIVER[i]);x.strokeStyle='rgba(190,170,125,.08)';x.lineWidth=w+3;x.stroke()}
+  for(let i=1;i<RIVER.length;i++){const f=i/(RIVER.length-1),w=4+f*11;x.beginPath();x.moveTo(...RIVER[i-1]);x.lineTo(...RIVER[i]);x.strokeStyle='#10202B';x.lineWidth=w;x.stroke()}
+  line(RIVER);x.strokeStyle='rgba(70,150,170,.12)';x.lineWidth=1.5;x.stroke();
+  // built-up areas: one soft shape per town, growing with its people, with its streets on top
+  for(const pid in B){const pl=PLACES[pid],rr=townR(pid),q=seeded(pl.x*7+pl.y);
+    const blob=(g,col)=>{x.fillStyle=col;x.beginPath();for(let i=0;i<9;i++){const a=i*0.7+q()*0.6,d=i?rr*(0.25+q()*0.3):0,er=rr*(i?0.45+q()*0.25:0.7)*g;x.moveTo(pl.x+Math.cos(a)*d+er,pl.y+Math.sin(a)*d*0.8);x.ellipse(pl.x+Math.cos(a)*d,pl.y+Math.sin(a)*d*0.8,er,er*0.8,0,0,7)}x.fill()};
+    blob(1.18,'rgba(36,42,45,.45)');blob(1,'#1D2326');if(pl.kind==='city'){x.fillStyle='#22282C';x.beginPath();x.ellipse(pl.x,pl.y,50,40,0,0,7);x.fill()}
+    x.strokeStyle='#2A3136';x.lineWidth=1.2;const sp=pl.kind==='city'?10:5;for(let a=0;a<sp;a++){const an=a*Math.PI*2/sp+pl.x*0.01;x.beginPath();x.moveTo(pl.x,pl.y);x.lineTo(pl.x+Math.cos(an)*rr,pl.y+Math.sin(an)*rr*0.8);x.stroke()}
+    if(pl.kind==='city')for(const r2 of [40,80]){x.beginPath();x.ellipse(pl.x,pl.y,r2,r2*0.8,0,0,7);x.stroke()}}
+  x.lineCap='butt';x.lineJoin='miter';
+  // buildings, each with a shadow and a lit roof edge; lit windows are kept to shine over the night
+  const bld=(b,col,lf,ls)=>{x.fillStyle='rgba(0,0,0,.35)';x.fillRect(b.x+0.8,b.y+0.8,b.w,b.h);x.fillStyle=col;x.fillRect(b.x,b.y,b.w,b.h);x.fillStyle='rgba(236,232,223,.08)';x.fillRect(b.x,b.y,b.w,Math.min(1,b.h*0.25));if(b.lit<lf)lit.push(b.x+b.w*0.3,b.y+b.h*0.3,Math.max(1,b.w*ls),Math.max(1,b.h*ls))};
+  for(const pid in B){const pl=PLACES[pid];for(let i=0;i<n[pid];i++){const b=B[pid][i];bld(b,b.r<40&&pl.kind==='city'?'#48515A':b.s<0.3?'#3A424B':'#323940',0.55,0.25)}}
+  for(const s in SB)for(let i=0;i<c[s];i++){const b=SB[s][i];bld(b,b.s<0.4?'#525C66':'#444D56',0.7,0.3)}
+}
 function drawRegion(){
   clampCam();
   const k=viewK(),s=k*R.dpr,cam=R.cam,t=performance.now()/1000,dk=darkness(),minW=1/k;
   ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='#0B1117';ctx.fillRect(0,0,cv.width,cv.height);
-  ctx.setTransform(s,0,0,s,-cam.x*s,-cam.y*s);
-  ctx.fillStyle='#15191C';ctx.fillRect(0,0,RW,RH);
-  {const sn=seasonOf(dayOf(G.clock)).name;ctx.fillStyle=sn==='Winter'?'rgba(215,228,245,.06)':sn==='Autumn'?'rgba(190,120,50,.05)':sn==='Summer'?'rgba(120,170,70,.04)':'rgba(100,170,110,.03)';ctx.fillRect(0,0,RW,RH)}
-  // fields and hills
-  ctx.strokeStyle='#191E22';ctx.lineWidth=Math.max(1,minW);for(let x=0;x<RW;x+=64){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,RH);ctx.stroke()}for(let y=0;y<RH;y+=64){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(RW,y);ctx.stroke()}
-  ctx.strokeStyle='#20262B';for(let r=0;r<5;r++){ctx.beginPath();ctx.ellipse(1150,300,70+r*38,40+r*24,-0.3,0,Math.PI*2);ctx.stroke()}
-  // sea and river
-  ctx.fillStyle='#0E1A24';ctx.beginPath();SEA.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();ctx.fill();
-  strokePath(SEA.slice(0,14),'#1D3444',Math.max(1.5,minW*1.5));
-  ctx.lineCap='round';strokePath(RIVER,'#0E1A24',16);strokePath(RIVER,'#16293A',2);ctx.lineCap='butt';
+  ctx.setTransform(s,0,0,s,-cam.x*s,-cam.y*s);RLQ=[];RLOB=[];
+  const T=regionTerrain(k);ctx.imageSmoothingEnabled=false;ctx.drawImage(T.cv,0,0,RW,RH);ctx.imageSmoothingEnabled=true;
   // motorways and the disused railway
-  for(const m of MOTORWAYS){strokePath(m,'#262C33',Math.max(5,3*minW));strokePath(m,'#323A43',Math.max(1,minW),[6,8])}
+  ctx.lineJoin='round';for(const m of MOTORWAYS)strokePath(m,'#101417',Math.max(5,4*minW));for(const m of MOTORWAYS)strokePath(m,'#353C43',Math.max(2.2,1.8*minW));ctx.lineJoin='miter';
   drawRoads(k);drawTraffic(k);
-  // towns: streets first, then buildings
-  for(const pid in PLACES){const pl=PLACES[pid];if(pl.kind==='air'||pl.kind==='far')continue;const rr=(pl.kind==='city'?110:pl.kind==='town'?45:26)*Math.sqrt(clamp(placePop(pid)/pl.pop,1,2.2));
-    ctx.strokeStyle='#22282E';ctx.lineWidth=Math.max(1.2,minW);for(let a=0;a<(pl.kind==='city'?10:5);a++){const an=a*Math.PI*2/(pl.kind==='city'?10:5)+pl.x*0.01;ctx.beginPath();ctx.moveTo(pl.x,pl.y);ctx.lineTo(pl.x+Math.cos(an)*rr,pl.y+Math.sin(an)*rr*0.8);ctx.stroke()}
-    if(pl.kind==='city'){for(const r2 of [40,80]){ctx.beginPath();ctx.ellipse(pl.x,pl.y,r2,r2*0.8,0,0,Math.PI*2);ctx.stroke()}}}
-  const B=regionBlocks(),lit=[]; // lit windows, kept to draw over the night tint so they shine rather than dim with it
-  for(const pid in B){const pl=PLACES[pid],n=Math.round(B[pid].length*clamp(placePop(pid)/(pl.pop*2.2),0,1)*(pl.kind==='city'?2:1));
-    for(let i=0;i<Math.min(n,B[pid].length);i++){const b=B[pid][i];ctx.fillStyle=b.r<40&&pl.kind==='city'?'#48515A':b.s<0.3?'#3A424B':'#323940';ctx.fillRect(b.x,b.y,b.w,b.h);
-      if(dk>0.1&&b.lit<0.55)lit.push(b.x+b.w*0.3,b.y+b.h*0.3,Math.max(1,b.w*0.25),Math.max(1,b.h*0.25))}}
-  {const SB=stationBlocks();for(const n in SB){const c=Math.round(SB[n].length*clamp((G.tod&&G.tod[n])||0,0,1));for(let i=0;i<c;i++){const b=SB[n][i];ctx.fillStyle=b.s<0.4?'#525C66':'#444D56';ctx.fillRect(b.x,b.y,b.w,b.h);if(dk>0.1&&b.lit<0.7)lit.push(b.x+b.w*0.25,b.y+b.h*0.25,Math.max(1,b.w*0.3),Math.max(1,b.h*0.3))}}}
   // development sites
   for(const P of PLOTS)if(plotOpen(P))drawPlot(P,t,k);
-  // night falls on the land, under the network and labels so they stay readable; windows shine over it
-  if(dk>0){ctx.fillStyle=`rgba(4,8,22,${dk*1.2})`;ctx.fillRect(0,0,RW,RH);
-    ctx.fillStyle=`rgba(255,214,140,${Math.min(1,dk*1.8)})`;for(let i=0;i<lit.length;i+=4)ctx.fillRect(lit[i],lit[i+1],lit[i+2],lit[i+3])}
+  // the time of day's colour, then night on the land, under the network and labels so they stay readable; towns glow
+  // and their windows shine over it
+  {const [gr,gg,gb,ga]=grade(drawnHour()),na=dk*1.2,a=1-(1-ga)*(1-na),m=(v,n)=>Math.round((n*na+v*ga*(1-na))/(a||1)); // the two washes as one fill
+    if(a>0){ctx.fillStyle=`rgba(${m(gr,4)},${m(gg,8)},${m(gb,22)},${a.toFixed(3)})`;ctx.fillRect(0,0,RW,RH)}}
+  if(dk>0){
+    ctx.globalCompositeOperation='lighter';for(const pid in PLACES){const pl=PLACES[pid];if(pl.kind==='air'||pl.kind==='far')continue;const rr=townR(pid)*1.25,g=ctx.createRadialGradient(pl.x,pl.y,0,pl.x,pl.y,rr);g.addColorStop(0,`rgba(255,170,90,${0.3*dk})`);g.addColorStop(1,'rgba(255,170,90,0)');ctx.fillStyle=g;ctx.fillRect(pl.x-rr,pl.y-rr,rr*2,rr*2)}ctx.globalCompositeOperation='source-over';
+    const L=T.lit;ctx.fillStyle=`rgba(255,214,140,${Math.min(1,dk*1.8)})`;for(let i=0;i<L.length;i+=4)ctx.fillRect(L[i],L[i+1],L[i+2],L[i+3])}
   // the network: airport, track, lines
   drawRegionAirport(t,k);drawInfra(k);drawBuilds(t,k);drawNetLines(t,k);
-  // stops, places and labels
+  // places: names grow a little as you zoom in
+  const zs=clamp(1+0.35*Math.log2(k/(R.baseK*zMin())),1,1.4);
   for(const pid in PLACES){const pl=PLACES[pid];if(pid==='air')continue;
     const big=pl.kind==='city'||pl.kind==='town'||pl.kind==='far';if(!big&&k<0.34)continue;
-    const pop=placePop(pid),far=pl.kind==='far',lx=far?pl.x+34:pl.x,ly=pl.y-(pl.kind==='city'?134:pl.kind==='town'?46:28),al=far?'right':'center';lbl(pl.name.toUpperCase(),lx,ly,far?'#909AA4':'#ECE8DF',big?12:10.5,al,true);
-    lbl(far?'1.2M people · 140 km ↗':`${num(pop*1000)} people`,lx,ly+14/k,'#6E7883',9.5,al);
+    const pop=placePop(pid),far=pl.kind==='far',lx=far?pl.x+34:pl.x,ly=pl.y-(pl.kind==='city'?134:pl.kind==='town'?46:28)*(far?1:Math.sqrt(clamp(pop/pl.pop,1,2.2))*0.35+0.65),al=far?'right':'center',px=(pl.kind==='city'?15:big?12.5:11)*zs,nm=pl.name.toUpperCase();
+    const dd=(pl.y-ly)*k,side=far?[]:[[12,dd,'left'],[-12,dd,'right']];
+    rLabel(nm,lx,ly,{col:far?'#909AA4':'#ECE8DF',px,font:'cond',bold:true,align:al,pri:pl.kind==='city'?90:big?80:60,alt:[[0,-12,al],[0,dd*2,al],...side]});
+    rLabel(far?'1.2M people · 140 km ↗':`${num(pop*1000)} people`,lx,ly,{col:'#8A949E',px:9,pri:30,under:nm,dy:px*0.5+11});
   }
   // events on the map
   for(const e of (G.evq||[])){const P=PLOTS.find(p=>p.id===e.plot),dtm=e.at-G.clock;
     if(dtm<240&&dtm>-210){const pulse=(Math.sin(t*3)+1)/2;ctx.strokeStyle=`rgba(255,199,44,${0.4+0.4*pulse})`;ctx.lineWidth=Math.max(2,2*minW);ctx.beginPath();ctx.arc(P.x,P.y,26+pulse*6,0,Math.PI*2);ctx.stroke();
       lblBg(`${EVT[e.type].label.toUpperCase()} · ${hhmm(e.at)} · ${num(e.att)}`,P.x,P.y+40,'#FFC72C',10);
       const n=Math.min(40,Math.round(e.att/1000));for(let i=0;i<n;i++){const a=i*2.4+t*0.3,r=16+(i%5)*3;ctx.fillStyle=i%3?'#ECE8DF':'#FFC72C';ctx.fillRect(P.x+Math.cos(a)*r,P.y+Math.sin(a)*r,1.8,1.8)}}}
-  drawNetVehicles(k);drawStations(t,k);drawDraft(t,k);
+  drawNetVehicles(k);drawStations(t,k);drawDraft(t,k);flushLabels(k);
   drawRegionLive(t,k);drawSky(k);drawLowmere(t,k);drawWeatherCells(k);
   if(pol('ads'))lblBg('FIZZCO',910,562,'#FF7A8A',11);
   // compass and scale
@@ -176,6 +265,9 @@ function drawNetLines(t,k){
   for(const L of Ls){const gl=g.lines[L.id];if(gl&&R.regSel===L.id)strokePath(gl.P.pts,'rgba(255,199,44,.32)',g.sp*2.4)}
   // water buses reach the station from its pier
   for(const L of Ls){if(L.mode!=='water')continue;for(const n of [L.stops[0],L.stops[L.stops.length-1],...L.stops]){const N=NODES[n];if(N.pier)strokePath([[N.x,N.y],N.pier],'rgba(236,232,223,.28)',Math.max(1,1.2/k),[2/k,3/k])}}
+  // a dark casing under every line, so lines side by side read as one band
+  {const byW={};for(const L of Ls){const gl=g.lines[L.id];if(!gl||MODES[L.mode].kind==='water')continue;const w=lineW(L,k,g.sp)+2.4/k;(byW[w]||(byW[w]=[])).push(gl.P.pts)}
+    ctx.strokeStyle='rgba(9,11,14,.85)';for(const w in byW){ctx.lineWidth=+w;ctx.beginPath();for(const pts of byW[w])pts.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke()}}
   for(const L of Ls){const gl=g.lines[L.id];if(!gl)continue;const M=MODES[L.mode],down=lineDown(L),rb=replOn(L.id),col=down?'#56606A':L.col,w=lineW(L,k,g.sp),pts=gl.P.pts;
     if(M.kind==='water')strokePath(pts,col,w,[7/k,5/k]);else if(L.mode==='coach')strokePath(pts,col,w,[10/k,4/k]);else strokePath(pts,col,w);
     if(L.mode==='rail'||L.mode==='hsr')strokePath(pts,'rgba(15,18,22,.55)',Math.max(0.6/k,w*0.24),[2/k,5/k]);
@@ -186,7 +278,7 @@ function drawNetLines(t,k){
   if(r&&r.over&&k>0.3)for(const key in r.over){if(r.over[key]<=1)continue;const e=E_BY[key.split(':')[0]],m=ptOn(e.P,e.len/2);lblBg('TRACK FULL',m[0],m[1]+14/k,'#FF7A8A',9)}
   for(const L of Ls){const gl=g.lines[L.id];if(!gl)continue;const sel=R.regSel===L.id,down=lineDown(L),rb=replOn(L.id);if(!(k>0.62||sel||down||rb))continue;
     const q=ptOn(gl.P,gl.P.len*(0.22+0.56*((L.num*0.618+MODE_ORDER.indexOf(L.mode)*0.29)%1)));const txt=rb?`${lineCode(L)} · BUSES`:down?`${lineCode(L)} · ${weather.why(L.id)||'STOPPED'}`:lineCode(L);
-    lblBg(txt,q[0],q[1]-11/k,down?'#FF7A8A':'#0B0D10',9,down?'rgba(10,12,15,.85)':L.col)}
+    rLabel(txt,q[0],q[1]-11/k,{col:down?'#FF7A8A':'#0B0D10',px:9,bg:down?'rgba(10,12,15,.85)':L.col,pri:sel||down||rb?95:50,must:sel||down||rb,alt:[[0,22,'center']]})}
 }
 function drawStations(t,k){
   const g=netGeom(k),minW=1/k,r=R.reg,D=R.draft,dk=darkness();
@@ -197,13 +289,13 @@ function drawStations(t,k){
     if(stnUp(n,'pr')){const x0=N.x+rad+4,y0=N.y+rad*0.4;ctx.fillStyle='#1E2429';ctx.fillRect(x0,y0,26,15);for(let q=0;q<12;q++){if((q*7+n.length)%5===0)continue;ctx.fillStyle=['#8C97A1','#CDD4DA','#6E7883','#A7A296'][q%4];ctx.fillRect(x0+2+(q%6)*4,y0+2+Math.floor(q/6)*7,2.6,4.4)}if(k>0.55)lbl('P+R',x0+13,y0+21,'#909AA4',8)}
     if(stnUp(n,'hub')){ctx.fillStyle='#3A424B';rrect(N.x-rad-6,N.y-rad-5,rad*2+12,rad*2+10,4);ctx.fill();ctx.strokeStyle='#5CC8FF';ctx.lineWidth=Math.max(1,1.2*minW);ctx.stroke()}
     if(sel){ctx.strokeStyle='rgba(255,199,44,.8)';ctx.lineWidth=Math.max(2,2.5*minW);ctx.beginPath();ctx.arc(N.x,N.y,rad+5/k,0,7);ctx.stroke()}
-    if(Ls.length||inD){ctx.fillStyle='#F4F1EA';ctx.strokeStyle=Ls.length>1?'#0B0D10':Ls.length?Ls[0].col:D.col;ctx.lineWidth=Math.max(1.5,(Ls.length>1?2.6:2.2)*minW);ctx.beginPath();ctx.arc(N.x,N.y,rad,0,7);ctx.fill();ctx.stroke();
+    if(Ls.length||inD){{const sx=(N.x-R.cam.x)*k,sy=(N.y-R.cam.y)*k,sr=rad*k+1;RLOB.push([sx-sr,sy-sr,sx+sr,sy+sr])}ctx.fillStyle='rgba(0,0,0,.4)';ctx.beginPath();ctx.arc(N.x+1/k,N.y+1.4/k,rad+1.2/k,0,7);ctx.fill();ctx.fillStyle='#F4F1EA';ctx.strokeStyle=Ls.length>1?'#0B0D10':Ls.length?Ls[0].col:D.col;ctx.lineWidth=Math.max(1.5,(Ls.length>1?2.6:2.2)*minW);ctx.beginPath();ctx.arc(N.x,N.y,rad,0,7);ctx.fill();ctx.stroke();
       if(Ls.length>1&&k>0.5){ctx.fillStyle='#0B0D10';ctx.beginPath();ctx.arc(N.x,N.y,rad*0.35,0,7);ctx.fill()}}
-    else if(n!=='air'){ctx.fillStyle='rgba(20,23,27,.9)';ctx.strokeStyle='rgba(236,232,223,.35)';ctx.lineWidth=Math.max(1,1.2*minW);ctx.beginPath();ctx.arc(N.x,N.y,3.5/k,0,7);ctx.fill();ctx.stroke()}
+    else if(n!=='air'){{const sx=(N.x-R.cam.x)*k,sy=(N.y-R.cam.y)*k;RLOB.push([sx-4,sy-4,sx+4,sy+4])}ctx.fillStyle='rgba(20,23,27,.9)';ctx.strokeStyle='rgba(236,232,223,.35)';ctx.lineWidth=Math.max(1,1.2*minW);ctx.beginPath();ctx.arc(N.x,N.y,3.5/k,0,7);ctx.fill();ctx.stroke()}
     // people waiting on the platform
     if(r&&r.lines&&Ls.length){let w=0;for(const L of Ls){const l=r.lines[L.id];if(l&&l.f>0&&l.at[n])w+=l.at[n]*(30/l.f)/60}const dots=Math.min(26,Math.round(w/6));ctx.fillStyle='#ECE8DF';for(let i=0;i<dots;i++){const a=i*2.39,rr=rad+3/k+(i%3)*2.2/k;ctx.fillRect(N.x+Math.cos(a)*rr,N.y+Math.sin(a)*rr,1.8/k,1.8/k)}}
     // station name where a town has several, or the stop is its own place
-    const own=N.n!==PLACES[N.pl].name&&n!=='air';if(own&&(Ls.length||inD||k>0.55||(D&&k>0.3)))lbl(N.n,N.x,N.y+rad+9/k,Ls.length?'#ECE8DF':'#909AA4',9.5,'center',Ls.length>0);
+    const own=N.n!==PLACES[N.pl].name&&n!=='air';if(own&&(Ls.length||inD||k>0.55||(D&&k>0.3))){const o=rad*k+8;rLabel(N.n,N.x,N.y+rad+9/k,{col:Ls.length?'#ECE8DF':'#909AA4',px:9.5,bold:Ls.length>0,pri:inD?85:Ls.length?70:25,alt:[[0,-2*(o+1),'center'],[o-2,-o-1,'left'],[-o+2,-o-1,'right']]})}
   }
 }
 function drawDraft(t,k){
@@ -247,24 +339,41 @@ function drawNetVehicles(k){
       ctx.restore()}}
 }
 function drawRegionAirport(t,k){
-  const x0=780,minW=1/k;
-  ctx.fillStyle='#1B2025';rrect(760,576,300,100,8);ctx.fill();
-  ctx.fillStyle='#262C33';ctx.fillRect(x0,592,270,11);if(G.lv.runway2)ctx.fillRect(x0+18,612,240,9);
-  ctx.strokeStyle='rgba(236,232,223,.4)';ctx.lineWidth=Math.max(0.7,minW*0.7);ctx.setLineDash([6,5]);ctx.beginPath();ctx.moveTo(x0+6,597.5);ctx.lineTo(x0+264,597.5);if(G.lv.runway2){ctx.moveTo(x0+24,616.5);ctx.lineTo(x0+252,616.5)}ctx.stroke();ctx.setLineDash([]);
-  ctx.fillStyle='#39414A';ctx.fillRect(840,634,130,14);const nb=builtCount();
+  const x0=780,minW=1/k,dk=darkness(),r2=G.lv.runway2,rwy=(y,h,x1,x2)=>{ // asphalt, piano keys at each end and the centre line
+    ctx.fillStyle='#0D1013';ctx.fillRect(x1,y,x2-x1,h);ctx.fillStyle='rgba(236,232,223,.55)';for(let i=0;i<4;i++){const yy=y+1.5+i*(h-3)/4;ctx.fillRect(x1+2,yy,6,(h-3)/4-0.8);ctx.fillRect(x2-8,yy,6,(h-3)/4-0.8)}
+    ctx.strokeStyle='rgba(236,232,223,.45)';ctx.lineWidth=Math.max(0.7,minW*0.7);ctx.setLineDash([6,5]);ctx.beginPath();ctx.moveTo(x1+12,y+h/2);ctx.lineTo(x2-12,y+h/2);ctx.stroke();ctx.setLineDash([])};
+  // the airfield's grass inside its fence
+  ctx.fillStyle='#17201D';rrect(760,576,300,100,10);ctx.fill();ctx.strokeStyle='rgba(236,232,223,.1)';ctx.lineWidth=Math.max(0.8,minW*0.8);ctx.stroke();
+  // taxiways from the runways to the apron
+  ctx.strokeStyle='#1F252A';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(x0+10,603);ctx.lineTo(x0+10,626);ctx.lineTo(x0+262,626);ctx.lineTo(x0+262,603);for(const tx of [x0+80,x0+180]){ctx.moveTo(tx,603);ctx.lineTo(tx,626)}ctx.stroke();
+  ctx.strokeStyle='rgba(255,199,44,.35)';ctx.lineWidth=Math.max(0.5,minW*0.6);ctx.stroke();
+  rwy(592,11,x0,x0+270);if(r2)rwy(612,9,x0+18,x0+258);
+  // apron, terminal and piers
+  ctx.fillStyle='#252B31';ctx.fillRect(832,620,G.pierB?218:146,30);
+  ctx.fillStyle='rgba(0,0,0,.35)';ctx.fillRect(841,636,130,14);ctx.fillStyle='#3F4852';ctx.fillRect(840,634,130,14);ctx.fillStyle='#56606A';ctx.fillRect(840,634,130,2.5);ctx.fillStyle='rgba(92,200,255,.35)';ctx.fillRect(840,646.5,130,1.2);
+  const nb=builtCount();
   for(let i=0;i<Math.min(4,nb);i++){ctx.fillStyle='#2F363E';ctx.fillRect(850+i*28,626,5,10);ctx.fillStyle='#CDD4DA';ctx.fillRect(846+i*28,622,12,3)}
-  if(G.pierB){ctx.fillStyle='#39414A';ctx.fillRect(972,626,70,10);for(let i=0;i<Math.max(0,nb-4);i++){ctx.fillStyle='#CDD4DA';ctx.fillRect(978+i*16,620,10,3)}}
+  if(G.pierB){ctx.fillStyle='#3F4852';ctx.fillRect(972,626,70,10);ctx.fillStyle='#56606A';ctx.fillRect(972,626,70,2);for(let i=0;i<Math.max(0,nb-4);i++){ctx.fillStyle='#CDD4DA';ctx.fillRect(978+i*16,620,10,3)}}
+  // the car park and forecourt road
+  ctx.fillStyle='#1B2025';ctx.fillRect(840,656,76,14);ctx.fillStyle='#2A3138';ctx.fillRect(832,651,146,3);
+  for(let i=0;i<22;i++){if((i*7)%5===0)continue;ctx.fillStyle=['#8C97A1','#CDD4DA','#6E7883','#A7A296','#4F6478'][i%5];ctx.fillRect(843+(i%11)*6.6,658+Math.floor(i/11)*6,3.6,3.4)}
   if(G.lv.rail){ctx.fillStyle='#C39BFF';ctx.fillRect(880,650,40,4)}
   if(Object.values(G.lines||{}).some(L=>L.mode==='water'&&serves(L,'air'))||(G.builds||[]).some(b=>b.mode==='water'&&b.stops&&b.stops.includes('air'))){strokePath([[905,660],[905,806]],'#39414A',Math.max(3,2*minW));ctx.fillStyle='#39414A';ctx.fillRect(895,800,20,8)}
+  // by night: edge lights along the runways, the apron floodlit
+  if(dk>0){const a=Math.min(1,dk*2);ctx.globalCompositeOperation='lighter';
+    const g=ctx.createRadialGradient(905,636,0,905,636,90);g.addColorStop(0,`rgba(255,200,130,${0.2*a})`);g.addColorStop(1,'rgba(255,200,130,0)');ctx.fillStyle=g;ctx.fillRect(815,546,180,180);
+    const d=Math.max(1.2,1.6*minW);ctx.fillStyle=`rgba(255,236,190,${0.9*a})`;for(const [y,h,x1,x2] of r2?[[592,11,x0,x0+270],[612,9,x0+18,x0+258]]:[[592,11,x0,x0+270]])for(let x=x1+4;x<x2;x+=16){ctx.fillRect(x-d/2,y-d/2,d,d);ctx.fillRect(x-d/2,y+h-d/2,d,d)}
+    ctx.fillStyle=`rgba(80,160,255,${0.8*a})`;for(let x=x0+14;x<x0+260;x+=14)ctx.fillRect(x-d/2,626-d/2,d,d);
+    ctx.globalCompositeOperation='source-over';ctx.fillStyle=`rgba(255,214,140,${0.8*a})`;ctx.fillRect(842,641,126,2)}
   for(let r=0;r<2;r++){const a=R.rwy.act[r];if(!a)continue;const kk=a.t/a.dur,y=r?616:597;let x,alt;
     if(a.type==='arr'){x=x0+320-kk*300;alt=Math.max(0,1-kk/0.4)*30}else{x=x0+260-kk*kk*420;alt=Math.max(0,(kk-0.5)/0.5)*40}
     miniPlane(x,y-alt,Math.PI,0.45+alt/120)}
-  lblBg(`${(G.name||'Northwind').toUpperCase()} AIRPORT`,910,690,'#FFC72C',11);
+  rLabel(`${(G.name||'Northwind').toUpperCase()} AIRPORT`,910,690,{col:'#FFC72C',px:11,bg:'rgba(10,12,15,.85)',pri:100,must:true});
 }
 function drawPlot(P,t,k){
   const id=G.dev&&G.dev[P.id],b=buildOf('dev:'+P.id),x=P.x,y=P.y,minW=1/k,sel=R.regSel==='plot:'+P.id;
   if(sel){ctx.strokeStyle='rgba(255,199,44,.6)';ctx.lineWidth=Math.max(2,2*minW);ctx.beginPath();ctx.arc(x,y,34,0,Math.PI*2);ctx.stroke()}
-  if(!id&&!b){ctx.strokeStyle='rgba(236,232,223,.22)';ctx.lineWidth=Math.max(1,minW);ctx.setLineDash([3,3]);ctx.strokeRect(x-18,y-14,36,28);ctx.setLineDash([]);if(k>0.75||sel)lbl('+ '+P.name.toUpperCase(),x,y+24,'#6E7883',9);return}
+  if(!id&&!b){ctx.strokeStyle='rgba(236,232,223,.22)';ctx.lineWidth=Math.max(1,minW);ctx.setLineDash([3,3]);ctx.strokeRect(x-18,y-14,36,28);ctx.setLineDash([]);if(k>0.75||sel)rLabel('+ '+P.name.toUpperCase(),x,y+24,{col:'#8A949E',px:9,pri:sel?88:20,alt:[[0,-48*k,'center']]});return}
   if(b){ctx.fillStyle='rgba(255,199,44,.12)';ctx.fillRect(x-20,y-16,40,32);ctx.strokeStyle='#FFC72C';ctx.lineWidth=Math.max(1,minW);ctx.setLineDash([4,3]);ctx.strokeRect(x-20,y-16,40,32);ctx.setLineDash([]);ctx.fillStyle='#FFC72C';ctx.fillRect(x-20,y+18,40*bprog(b.id),3);
     ctx.save();ctx.translate(x+14,y-16);ctx.rotate(0.2*Math.sin(t));ctx.fillStyle='#FFC72C';ctx.fillRect(-1,0,2,-24);ctx.fillRect(-12,-24,20,2);ctx.restore();if(k>0.3)lbl(DEV[b.opt].name.toUpperCase(),x,y+30,'#FFC72C',9);return}
   const dk=darkness(),glow=a=>`rgba(255,214,140,${a*(0.3+dk)})`;
@@ -289,6 +398,6 @@ function drawPlot(P,t,k){
     case 'ringroad':ctx.strokeStyle='#4A545E';ctx.lineWidth=Math.max(4,3*minW);ctx.beginPath();ctx.ellipse(400,560,150,120,0,0,Math.PI*2);ctx.stroke();ctx.strokeStyle='rgba(236,232,223,.3)';ctx.lineWidth=Math.max(0.8,0.7*minW);ctx.setLineDash([6,6]);ctx.stroke();ctx.setLineDash([]);break;
     case 'lowtraffic':ctx.fillStyle='rgba(107,227,154,.07)';ctx.beginPath();ctx.ellipse(400,560,90,70,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='rgba(107,227,154,.45)';ctx.lineWidth=Math.max(1.2,minW);ctx.setLineDash([4,4]);ctx.stroke();ctx.setLineDash([]);break;
   }
-  if(k>0.75||sel)lbl(DEV[id].name.toUpperCase(),id==='ringroad'||id==='lowtraffic'?x:x,y+(id==='wind'?30:28),'#909AA4',9);
+  if(k>0.75||sel)rLabel(DEV[id].name.toUpperCase(),x,y+(id==='wind'?30:28),{col:'#A7B0B9',px:9,pri:sel?88:20,alt:[[0,-56*k,'center']]});
 }
 

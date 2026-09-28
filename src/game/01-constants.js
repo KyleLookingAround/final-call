@@ -110,8 +110,8 @@ const UPG={
   assist:{tab:'terminal',sec:'Concourse',icon:'walk',name:'Assistance service',max:3,base:120,mult:2.4,lvl:1,fx:(l,m)=>m?`<b>${l}</b> buggies: passengers who need help ride at full speed`:`<b>${l}</b> → <b>${l+1}</b> buggies. Passengers who need help ride instead of shuffling, and rate you higher.`},
   mover:{tab:'terminal',sec:'Concourse',icon:'train',name:'Pier B people mover',max:1,base:20000,mult:1,lvl:6,req:()=>G.pierB,reqText:'Needs Pier B',fx:(l,m)=>m?'Long walks along the piers are 2.5× faster':'An airside train for long walks along the piers: 2.5× faster'},
   roster:{tab:'terminal',sec:'Staff',icon:'crew',name:'Rostering system',max:1,base:250,mult:1,lvl:3,fx:(l,m)=>m?'Auto rostering is available under Staffing':'Opens counters as queues grow and closes them when quiet.'},
-  scanners:{tab:'ground',sec:'Gates',icon:'scan',name:'Gate scanners',max:12,base:15,mult:1.65,fx:(l,m)=>m?`A boarding pass every <b>${f2(EF.scan(l))}</b> min`:`A boarding pass every <b>${f2(EF.scan(l))}</b> → <b>${f2(EF.scan(l+1))}</b> min`},
-  bins:{tab:'ground',sec:'Gates',icon:'bin',name:'Bigger overhead bins',max:12,base:25,mult:1.7,fx:(l,m)=>m?`Stowing a bag takes <b>${f1(EF.stow(l))}</b> min`:`Stowing a bag <b>${f1(EF.stow(l))}</b> → <b>${f1(EF.stow(l+1))}</b> min`},
+  scanners:{tab:'ground',sec:'Boarding kit',icon:'scan',name:'Gate scanners',max:12,base:15,mult:1.65,fx:(l,m)=>m?`A boarding pass every <b>${f2(EF.scan(l))}</b> min`:`A boarding pass every <b>${f2(EF.scan(l))}</b> → <b>${f2(EF.scan(l+1))}</b> min`},
+  bins:{tab:'ground',sec:'Boarding kit',icon:'bin',name:'Bigger overhead bins',max:12,base:25,mult:1.7,fx:(l,m)=>m?`Stowing a bag takes <b>${f1(EF.stow(l))}</b> min`:`Stowing a bag <b>${f1(EF.stow(l))}</b> → <b>${f1(EF.stow(l+1))}</b> min`},
   handlers:{tab:'ground',sec:'Apron',icon:'cart',name:'Baggage handlers',max:12,base:30,mult:1.7,fx:(l,m)=>m?`<b>${f1(EF.bag(l))}</b> bags a minute per gate`:`<b>${f1(EF.bag(l))}</b> → <b>${f1(EF.bag(l+1))}</b> bags a minute per gate. Big jets load faster.`},
   bagsys:{tab:'ground',sec:'Apron',icon:'box',name:'Automated baggage system',max:3,base:6000,mult:2.5,lvl:4,fx:(l,m)=>m?`Bags move <b>${100+35*l}%</b> as fast`:`Belts and loading <b>${100+35*l}%</b> → <b>${135+35*l}%</b> as fast`},
   crew:{tab:'ground',sec:'Apron',icon:'crew',name:'Turnaround crew',max:10,base:25,mult:1.75,fx:(l,m)=>m?`Cleaning and refuelling take <b>${f1(EF.clean(l))}</b> min`:`Cleaning and refuelling <b>${f1(EF.clean(l))}</b> → <b>${f1(EF.clean(l+1))}</b> min`},
@@ -190,3 +190,7 @@ const ICON={
   globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18"/>',
   pier:'<path d="M3 12h18M3 12v6M21 12v6M7 12V8M12 12V6M17 12V8"/>',
 };
+// the airport view's drawing layers, bottom to top, and its lights (50-scene.js): defined here so any file can register
+const LAYERS=['airfield','apron','stands','bridges','lit','terminal','landside','pax','roofs','signs','weather','top'];
+const LAYER=Object.fromEntries(LAYERS.map(n=>[n,[]]));
+const LIGHTS=[]; // (V) → lamp(…) for each light, drawn additively over the night by the lighting pass
