@@ -157,6 +157,7 @@ The main names, by file group (the joined table below is the complete list, from
 
 - `npm run build` builds `dist/index.html` and `build/test.html` (with `window.__sim`), writes `docs/graph.json`, and rejoins the joined lists (`tools/join.mjs`). It needs no dependencies. It fails, naming the file and line, on a syntax error, a top-level name declared twice, a `</script>` inside the game, duplicate top-level function names, a lost marker, or a top-level `let` that a part adds to `SIMX` without a getter.
 - `node tools/where.mjs <line>` turns a line number from an error in `dist/index.html` or `build/test.html` into `src/game/<file>:<line>`.
+- `npm run pack` (`tools/pack.mjs`) builds `build/runbook-pack.zip`: the project notes, the five playbooks, the brief and spec templates with their example briefs, the decisions, lessons, roadmap, this file, every workflow and template, the commit-msg hook, and the tools that run the checks, the graph and the joined lists, for copying the runbook itself into another workspace. Its own file list, in `tools/pack.mjs`, is also where the pack's README (what's Final Call-specific in each playbook, and what carries over) comes from. Nothing in `src/game/`, so it never touches the Balance workflow.
 
 ## Checks
 
