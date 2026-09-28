@@ -105,23 +105,29 @@ function newsGo(g){
   openNews(false);const i=g.indexOf(':'),a=i<0?g:g.slice(0,i),b=g.slice(i+1);
   if(g==='help')openHelp(true);else if(g==='photo')photoOn();else if(NEWS_SUB[a]){R[NEWS_SUB[a][0]]=b;setTab(a)}else lvlGo(g);
 }
-const newsPts=u=>u.points.filter(p=>typeof p==='string'||!(p.lv>G.level));
+// points above the save's level stay hidden until the player asks to see them (R.newsSpoil, versions revealed this viewing only)
+const newsLocked=p=>typeof p!=='string'&&p.lv>G.level,newsPts=u=>u.points.filter(p=>!newsLocked(p));
+function newsRow(u,open,seen,auto){
+  const all=R.newsSpoil&&R.newsSpoil.includes(u.v),ps=all?u.points:newsPts(u),n=u.points.length-newsPts(u).length,h=`<span class="uv">${u.v<=15?'Up to 15':'Version '+u.v}</span> ${u.title}`;
+  const pt=p=>typeof p==='string'?`<li>${p}</li>`:`<li${newsLocked(p)?' class="ulater"':''}><b>${p.b}.</b> ${p.t}${newsLocked(p)?` <span class="ulv">Level ${p.lv}</span>`:p.go&&newsCan(p.go)?` <button class="ushow" data-newsgo="${p.go}">Show me ›</button>`:''}</li>`;
+  const spoil=n&&!all?`<button class="uspoil" data-newsspoil="${u.v}">${n} more for later level${n>1?'s':''} · Show</button>`:'';
+  return ps.length?`<details class="upd" data-v="${u.v}"${open?' open':''}><summary>${h}${u.v>seen&&auto?' <span class="live">New</span>':''}</summary><ul>${ps.map(pt).join('')}</ul>${spoil}</details>`
+    :`<div class="upd uhid" data-v="${u.v}">${h}${spoil}</div>`;
+}
 function renderNews(auto){
-  const seen=G.seen??0,fresh=UPDATES.filter(u=>u.v>seen);
-  const pt=p=>typeof p==='string'?`<li>${p}</li>`:`<li><b>${p.b}.</b> ${p.t}${p.go&&newsCan(p.go)?` <button class="ushow" data-newsgo="${p.go}">Show me ›</button>`:''}</li>`;
-  const row=(u,open)=>{const ps=newsPts(u),h=`<span class="uv">${u.v<=15?'Up to 15':'Version '+u.v}</span> ${u.title}`;
-    return ps.length?`<details class="upd"${open?' open':''}><summary>${h}${u.v>seen&&auto?' <span class="live">New</span>':''}</summary><ul>${ps.map(pt).join('')}</ul></details>`:`<div class="upd uhid">${h}</div>`};
-  // versions whose points the save hasn't reached fold away, and so does most of the older history for a young save
-  // (Airfield or Local Airport), which describes systems it hasn't reached
-  const shown=UPDATES.filter(u=>newsPts(u).length),n=G.level<=1?Math.max(shown.filter(u=>u.v>seen).length,3):shown.length,head=shown.slice(0,n),rest=UPDATES.filter(u=>!head.includes(u));
-  $('#newsList').innerHTML=head.map((u,k)=>row(u,auto?u.v>seen:k===0)).join('')+(rest.length?`<details class="upd"><summary>${rest.length} earlier version${rest.length>1?'s':''}</summary>${rest.map(u=>row(u,false)).join('')}</details>`:'');
+  const seen=G.seen??0,fresh=UPDATES.filter(u=>u.v>seen);R.newsSpoil=[];R.newsAuto=auto;
+  // a young save (Airfield or Local Airport) hasn't reached most of what's in the older history, so fold it away
+  const n=G.level<=1?Math.max(fresh.length,3):UPDATES.length,head=UPDATES.slice(0,n),rest=UPDATES.slice(n);
+  $('#newsList').innerHTML=head.map((u,k)=>newsRow(u,auto?u.v>seen:k===0,seen,auto)).join('')+(rest.length?`<details class="upd"><summary>${rest.length} earlier version${rest.length>1?'s':''}</summary>${rest.map(u=>newsRow(u,false,seen,auto)).join('')}</details>`:'');
   $('#newsT').textContent=auto&&fresh.length?`What's new`:`What's new · all versions`;$('#newsBody').scrollTop=0;
 }
+// reveal one version's later-level points in place, open
+function newsSpoil(v){const u=UPDATES.find(x=>x.v===v),el=u&&$(`#newsList [data-v="${v}"]`);if(!el)return;R.newsSpoil.push(v);el.outerHTML=newsRow(u,true,G.seen??0,R.newsAuto)}
 function openNews(on,auto){
   const el=$('#news');if(!on){if(el.hidden)return;el.hidden=true;G.seen=UPDATES[0].v;save();if(R.newsPrev)setSpeed(R.newsPrev);return}
   renderNews(auto);el.hidden=false;R.newsPrev=R.speed;setSpeed(0);$('#news .close').focus();
 }
-$('#news').addEventListener('click',e=>{const g=e.target.closest('[data-newsgo]');if(g){newsGo(g.dataset.newsgo);return}if(e.target.id==='news'||e.target.closest('[data-newsclose]'))openNews(false)});
+$('#news').addEventListener('click',e=>{const g=e.target.closest('[data-newsgo]');if(g){newsGo(g.dataset.newsgo);return}const sp=e.target.closest('[data-newsspoil]');if(sp){newsSpoil(+sp.dataset.newsspoil);return}if(e.target.id==='news'||e.target.closest('[data-newsclose]'))openNews(false)});
 $('#newsAgain').addEventListener('click',()=>{openHelp(false);openNews(true,false)});
 document.addEventListener('keydown',e=>{if(!$('#news').hidden&&e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();openNews(false)}},true);
 // after loading: only when there's something the player hasn't seen, and never over the guided start

@@ -1,5 +1,6 @@
 // The What's new card (docs/specs/whats-new.md, #128): every point, in UPDATES and the waiting fragments, is a short bold lead and one sentence, every "Show me"
-// target is real and every level is a real level; a young save sees no point above its level and a grown one sees them all;
+// target is real and every level is a real level; a young save sees no point above its level until it taps that version's
+// Show (for this viewing only), and a grown one sees them all;
 // a real tap on each "Show me" button closes the card and lands on its target; and at 320×568 and 568×320 the newest
 // version and Play are both in view without scrolling, with screenshots at phone, tablet and desktop sizes.
 const SIZES=[[320,568,true,'320'],[390,844,true,'phone'],[568,320,true,'568-landscape'],[844,390,true,'landscape'],[1440,900,false,'desktop']];
@@ -26,15 +27,25 @@ export default async function({open,ok,saveText,root}){
         fake:['tab:nowhere','office:nope','up:nothing','gate:99','shop'].filter(g=>S.newsOk(g)),frags:frags.length}},frags);
     ok('news-card: every point, released or waiting, has a short lead and one sentence, a real target and a real level',!d.bad.length&&!d.fake.length&&d.targets>10&&d.frags>0,JSON.stringify(d));
     // hiding: count what each level shows, with every version opened
+    const S_N=await page.evaluate(()=>__sim.UPDATES.length);
     const shown=await page.evaluate(()=>{const S=__sim,G=S.G,out={};
       for(const lv of [1,9]){G.level=lv;S.openNews(true,false);document.querySelectorAll('#newsList details').forEach(e=>e.open=true);
         const leads=[...document.querySelectorAll('#newsList li b')].map(b=>b.textContent.replace(/\.$/,''));
         const want=S.UPDATES.flatMap(u=>u.points).filter(p=>!(p.lv>lv)).length,above=S.UPDATES.flatMap(u=>u.points).filter(p=>p.lv>lv).map(p=>p.b);
         out[lv]={leads:leads.length,want,above:above.filter(b=>leads.includes(b)&&!S.UPDATES.flatMap(u=>u.points).some(p=>p.b===b&&!(p.lv>lv))),
-          folded:document.querySelectorAll('#newsList .uhid').length,versions:document.querySelectorAll('#newsList > details').length};S.openNews(false)}
+          spoil:document.querySelectorAll('#newsList [data-newsspoil]').length,locked:S.UPDATES.filter(u=>u.points.some(p=>p.lv>lv)).length,titles:document.querySelectorAll('#newsList [data-v]').length,versions:document.querySelectorAll('#newsList > details').length};S.openNews(false)}
       G.level=9;return out});
-    ok('news-card: a young save sees no point above its level, a grown one sees them all',
-      shown[1].leads===shown[1].want&&!shown[1].above.length&&shown[1].folded>0&&shown[9].leads===shown[9].want&&!shown[9].folded,JSON.stringify(shown));
+    ok('news-card: a young save sees no point above its level, with one Show per version that has them; a grown one sees them all',
+      shown[1].leads===shown[1].want&&!shown[1].above.length&&shown[1].spoil===shown[1].locked&&shown[1].titles===S_N&&shown[9].leads===shown[9].want&&!shown[9].spoil,JSON.stringify(shown));
+    // a real tap on Show reveals that version's later points in place, marked with their level and with no Show me; the next viewing hides them again
+    const spoilV=await page.evaluate(()=>{const S=__sim;S.G.level=1;S.openNews(true,false);document.querySelectorAll('#newsList details').forEach(e=>e.open=true);
+      return S.UPDATES.find(u=>u.points.every(p=>p.lv>1)).v});
+    await page.click(`#newsList [data-newsspoil="${spoilV}"]`);
+    const sp=await page.evaluate(v=>{const S=__sim,el=document.querySelector(`#newsList [data-v="${v}"]`),u=S.UPDATES.find(x=>x.v===v);
+      const r={open:el.tagName==='DETAILS'&&el.open,leads:el.querySelectorAll('li b').length,want:u.points.length,tags:[...el.querySelectorAll('.ulv')].map(t=>t.textContent),showMe:el.querySelectorAll('[data-newsgo]').length,control:!!el.querySelector('[data-newsspoil]'),card:!document.querySelector('#news').hidden};
+      S.openNews(false);S.openNews(true,false);r.again=document.querySelectorAll(`#newsList [data-v="${v}"] li`).length;S.openNews(false);S.G.level=9;return r},spoilV);
+    ok('news-card: Show reveals a version\'s later-level points in place, marked, for this viewing only',
+      sp.open&&sp.leads===sp.want&&sp.tags.length===sp.want&&sp.tags.every(t=>/^Level \d$/.test(t))&&!sp.showMe&&!sp.control&&sp.card&&sp.again===0,JSON.stringify(sp));
     // a real tap on each Show me button lands on its target and closes the card
     const gos=await page.evaluate(()=>{const S=__sim;S.openNews(true,false);const g=[...new Set([...document.querySelectorAll('#newsList [data-newsgo]')].map(b=>b.dataset.newsgo))];S.openNews(false);return g});
     const land={};
