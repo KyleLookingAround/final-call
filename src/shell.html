@@ -459,11 +459,25 @@ table.rtab th{font:600 10px/1 var(--mono);color:var(--muted);text-align:right;pa
 .recrow .btns .chip{padding:5px 7px 4px;font-size:11px}
 .recrow .linkb{font-size:12px}
 .mlog{border-left:2px solid var(--sign);padding:2px 0 2px 8px;margin:4px 0 6px}
+/* What's new (38-updates.js): a header, a list that scrolls and a footer that always holds Play */
+.newscard{display:flex;flex-direction:column;overflow:hidden;padding:0}
+.newscard .ptop{flex:none;padding:18px 20px 6px}
+.newsbody{flex:1 1 auto;min-height:0;overflow:auto;overscroll-behavior:contain;padding:0 20px 16px}
+.newscard .newsgo{flex:none;margin:0;max-width:none;padding:10px 20px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--line);text-align:right}
+.newscard .newsgo .buy{min-width:96px;padding:11px 16px 10px;font-size:14px}
 .upd{border-top:1px solid var(--line);padding:10px 0}
 .upd summary{cursor:pointer;font:700 15px/1.3 var(--body);list-style-position:inside}
 .upd .uv{font:600 11px var(--mono);color:var(--muted);margin-right:6px}
+.upd.uhid{font:700 15px/1.3 var(--body);color:var(--muted)}
 .upd ul{margin:8px 0 0;padding-left:20px;color:var(--muted);font-size:14px;line-height:1.45}
-.newsgo{margin:14px 0 0;text-align:right}
+.upd li+li{margin-top:4px}
+.upd li b{color:var(--text);font-weight:700}
+.ushow{border:1px solid var(--line);background:var(--surface2);color:var(--sign);border-radius:999px;padding:3px 9px 2px;margin-left:2px;font:600 11.5px/1.3 var(--mono);white-space:nowrap;vertical-align:1px;cursor:pointer}
+.ushow:hover,.ushow:focus-visible{border-color:var(--sign)}
+@media (max-width:420px),(max-height:520px){.newscard .ptop{padding:14px 16px 4px}.newscard h2{font-size:20px}.newsbody{padding:0 16px 12px}.newscard .newsgo{padding:8px 16px calc(8px + env(safe-area-inset-bottom))}
+  .upd{padding:8px 0}.upd summary{font-size:14px}.upd ul{margin-top:6px;padding-left:16px;font-size:13px;line-height:1.4}.upd li+li{margin-top:3px}}
+@media (max-width:420px){.newscard .newsgo .buy{width:100%}}
+@media (max-height:520px){.newscard .newsgo .buy{padding-block:9px 8px}}
 /* the level-up card (49-levelup.js) */
 .lvcard{width:min(600px,100%);max-height:100%;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.55)}
 .lvhero{position:relative;flex:none;background:radial-gradient(120% 140% at 0% 0%,rgba(255,199,44,.16),transparent 55%),var(--board);border-bottom:1px solid #22272D;padding:18px 20px 16px;overflow:hidden}
@@ -743,11 +757,11 @@ body.photo .board,body.photo .side,body.photo .topgap,body.photo .spot,body.phot
   </div>
 </div>
 <div class="help" id="news" hidden role="dialog" aria-modal="true" aria-labelledby="newsT">
-  <div class="hcard">
+  <div class="hcard newscard">
     <div class="ptop"><h2 id="newsT">What's new</h2><button class="close" data-newsclose aria-label="Close">×</button></div>
-    <div id="newsList"></div>
+    <div class="newsbody" id="newsBody"><div id="newsList"></div>
+    <p class="kofifoot"><a class="kofi" href="https://ko-fi.com/kylemck" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h11v6a5 5 0 01-5 5h-1a5 5 0 01-5-5zM16 10h2a2 2 0 010 4h-2M8 3v2M11 3v2"/></svg>Buy me a Ko-fi</a></p></div>
     <p class="newsgo"><button class="buy" data-newsclose>Play</button></p>
-    <p class="kofifoot"><a class="kofi" href="https://ko-fi.com/kylemck" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h11v6a5 5 0 01-5 5h-1a5 5 0 01-5-5zM16 10h2a2 2 0 010 4h-2M8 3v2M11 3v2"/></svg>Buy me a Ko-fi</a></p>
   </div>
 </div>
 <div class="help" id="help" hidden role="dialog" aria-modal="true" aria-labelledby="helpT">

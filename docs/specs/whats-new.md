@@ -1,6 +1,6 @@
 # What's new
 
-Issue: #8, #128 · Status: Built (#8); Proposed (#128) · PRs: #9
+Issue: #8, #128 · Status: Built (#8); Proposed (#128) · PRs: #9, #129
 
 Part of the same release as airport layouts (version 22).
 
@@ -87,6 +87,10 @@ None: presentation only. `PLAY` and `STATE` stay identical on seeds 1–3.
 
 - **New `news-card` group:** every point's target is valid and every level is a real level (0–9); every point has a lead and a short sentence; a level 1 save hides points above level 1 and a level 9 save shows them all; a real tap on each "Show me" button at level 9 lands on its target (tab, sub-tab, Masterplan, help or photo mode) and closes the card; at 320×568 and 568×320 the newest version's title and Play are both on screen without scrolling.
 - **`noise`** and **`kofi`** keep their checks as the markup moves.
+
+### Files
+
+`src/game/38-updates.js` (the entries, `newsOk`, `newsCan`, `newsGo`, the card), the card's CSS and markup in `src/shell.html`, `src/updates.d/` (its README and the waiting fragments, reworded), `tools/checks/news-card.mjs`, and the notes.
 
 ### Left out
 
