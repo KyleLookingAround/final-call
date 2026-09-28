@@ -74,6 +74,9 @@ canvas.drag{cursor:grabbing}
 .hud button,.cam button{border:0;background:transparent;color:var(--muted);font:600 11px/1 var(--mono);min-width:28px;height:26px;padding:0 6px;border-radius:4px;display:grid;place-items:center}
 .hud button.on,.cam button.on{background:var(--sign);color:var(--signInk)}
 .hud svg{width:14px;height:14px}
+.stage{container:stage/inline-size}
+.hud #spdb{display:none}
+.hscr{margin:10px 0 2px}
 .toasts{position:absolute;top:var(--hb,42px);left:8px;right:8px;max-width:380px;display:grid;gap:6px;pointer-events:none}
 .toast{pointer-events:auto;background:rgba(10,12,15,.94);border:1px solid #2A3139;border-left:3px solid var(--sign);border-radius:6px;padding:9px 11px 10px;font-size:13.5px;line-height:1.35}
 .toast.goal{border-left-color:var(--good)}
@@ -235,6 +238,15 @@ body.fs .tabs .drawclose{display:grid}
 .tip .tt b{font-weight:600}
 .tip .buy{min-width:0;padding:7px 9px 6px;font-size:12.5px}
 .tip .snooze{border:0;background:none;color:var(--muted);font:600 14px/1 var(--mono);padding:4px;flex:none}
+.dim{position:absolute;inset:0;z-index:15;cursor:pointer;touch-action:none}
+.dimbar{position:absolute;top:8px;left:8px;right:8px;display:flex;flex-wrap:wrap;justify-content:center;align-items:baseline;gap:3px 12px;background:rgba(10,12,15,.86);padding:7px 10px 9px;border-radius:6px;font:500 12.5px/1.25 var(--mono);font-variant-numeric:tabular-nums;color:var(--muted);overflow:hidden;pointer-events:none}
+.dimbar b{color:#ECE8DF;font-weight:600} .dimbar b.neg{color:var(--bad)}
+#dimClock{color:var(--sign);font-size:17px;font-weight:700}
+.dimk{font:700 11px/1.4 var(--disp);letter-spacing:.14em;text-transform:uppercase}
+#dimProg{position:absolute;left:0;bottom:0;height:3px;width:0;background:var(--sign)}
+.dimgo{margin-top:8px}
+.stage.dimming>:not(canvas):not(.dim):not(.toasts){visibility:hidden}
+@media (max-width:420px){.dimbar{gap:2px 9px;font-size:11.5px}}
 .ptag{position:absolute;top:8px;left:50%;transform:translateX(-50%);background:var(--sign);color:var(--signInk);font:700 11px/1 var(--disp);letter-spacing:.14em;text-transform:uppercase;padding:6px 9px 5px;border-radius:4px;white-space:nowrap;pointer-events:none}
 .help{position:fixed;inset:0;z-index:50;background:rgba(5,6,8,.72);display:grid;place-items:center;padding:16px}
 .hcard{background:var(--surface);border:1px solid var(--line);border-radius:12px;width:min(640px,100%);max-height:100%;overflow:auto;padding:18px 20px 20px}
@@ -520,6 +532,7 @@ body.fsstack .toasts{top:calc(var(--hb,42px) + 36px)}
 .lreq.chal.done>span:first-child{color:var(--good)}
 .segs.many{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
 .segs.many .chip{flex:none}
+@media (max-width:440px){.segs.set4{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}} /* Office › Settings' four chips, two by two on phones */
 .stamps{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px 10px;margin:10px 2px 4px}
 .stamp{--c:#FFC72C;border:2px solid var(--c);color:var(--c);border-radius:12px;padding:10px 8px 9px;text-align:center;transform:rotate(var(--r,0deg));background:color-mix(in srgb,var(--c) 7%,transparent);box-shadow:inset 0 0 0 3px var(--surface),inset 0 0 0 4px color-mix(in srgb,var(--c) 55%,transparent);display:grid;gap:4px;align-content:center;min-height:88px}
 .stamp b{font:800 14px/1.05 var(--disp);letter-spacing:.08em;text-transform:uppercase}
@@ -566,6 +579,17 @@ body.fs .cam{max-width:calc(100% - 172px)}
 @media (pointer:coarse){
   .bmode button{padding:15px 8px 14px}
   .hud button,.cam button{min-width:42px;height:42px}
+  /* the top bar stays on one row (tools/checks/topbar.mjs). Twelve 42px buttons need a map 560px wide; below that the
+     speeds fold into one button that cycles them (eight 40px buttons need 356px), below that full screen and sound
+     (and photo mode) move into the help card (six need 272px), and below that the buttons narrow to 36px */
+  @container stage (width < 560px){
+    .hud{gap:2px}
+    .hud button{min-width:40px;padding:0 4px}
+    .hud [data-speed]:not([data-speed="0"]){display:none}
+    .hud #spdb{display:grid}
+  }
+  @container stage (width < 356px){.hud #fsb,.hud #snd,.hud #photob{display:none}}
+  @container stage (width < 272px){.hud button{min-width:36px;padding:0 3px}}
   .chip{padding:14px 10px 13px}
   .recrow .btns .chip{padding-block:14px 13px}
   .segs .chip{padding-block:14px 13px}
@@ -578,7 +602,7 @@ body.fs .cam{max-width:calc(100% - 172px)}
 @media (max-width:340px){
   .tabs button{font-size:8.5px}
   .stats{grid-template-columns:1.1fr 1.4fr .8fr .8fr}
-  #sRep{font-size:13px}
+  #sRep{font-size:13px} .stat[role=button]{cursor:pointer}
   .stars{letter-spacing:.5px}
 }
 @media (max-width:440px){
@@ -586,6 +610,23 @@ body.fs .cam{max-width:calc(100% - 172px)}
   .goal .gt{white-space:normal;overflow:visible;text-overflow:clip}
   .goal .gr{grid-column:1/-1;justify-self:end}
 }
+/* photo mode (62-photo-mode.js): the map alone, full screen, with the photo bar at its foot */
+.hud #photob svg{width:15px;height:15px}
+@media (max-width:600px){.hud #photob{display:none}} /* on a phone the top bar keeps its room: photo mode is in How to play */
+.photobar{position:absolute;left:50%;bottom:calc(10px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:2;display:flex;align-items:center;gap:4px;background:rgba(10,12,15,.8);padding:4px;border-radius:26px;max-width:calc(100% - 16px)}
+.photobar[hidden]{display:none}
+.photobar button{border:0;background:transparent;color:var(--text);font:600 12px/1 var(--mono);height:40px;min-width:40px;padding:0 10px;border-radius:20px;display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
+.photobar button[hidden]{display:none}
+.photobar button b{font-weight:600;color:var(--sign)}
+.photobar svg{width:16px;height:16px;flex:none}
+.photobar button.on{background:var(--sign);color:var(--signInk)}
+.photobar .shutter{width:44px;height:44px;min-width:44px;padding:0;margin:0 4px;border-radius:50%;background:var(--text);box-shadow:inset 0 0 0 3px rgba(10,12,15,.85)}
+.photobar .shutter:active{transform:scale(.92)}
+@media (max-width:360px){.photobar{gap:1px}.photobar button{padding:0 7px;gap:4px;font-size:11px}.photobar .shutter{margin:0 2px}}
+body.photo .stage{position:fixed;inset:0;z-index:48;border-radius:0}
+body.photo .board,body.photo .side,body.photo .topgap,body.photo .spot,body.photo .coach,body.photo .stage>:not(canvas):not(.photobar){display:none!important}
+.stage.phflash::after{content:"";position:absolute;inset:0;background:#fff;pointer-events:none;animation:phflash .35s ease-out forwards}
+@keyframes phflash{from{opacity:.75}to{opacity:0}}
 </style>
 
 <div class="topgap" id="topgap" aria-hidden="true" hidden></div>
@@ -609,6 +650,7 @@ body.fs .cam{max-width:calc(100% - 172px)}
     <div class="hud" role="group" aria-label="Game speed">
       <button id="helpb" aria-label="How to play" title="How to play (H)" style="font-size:13px">?</button>
       <button data-speed="0" aria-label="Pause" title="Pause (Space)"><svg viewBox="0 0 14 14" fill="currentColor"><rect x="3" y="2" width="3" height="10"/><rect x="8" y="2" width="3" height="10"/></svg></button>
+      <button id="spdb" class="on" aria-label="Game speed 1×, tap to change" title="Game speed">1×</button>
       <button data-speed="1" class="on">1×</button>
       <button data-speed="2">2×</button>
       <button data-speed="4">4×</button>
@@ -617,14 +659,23 @@ body.fs .cam{max-width:calc(100% - 172px)}
       <button id="worldb" aria-label="Show the world routes" title="Routes map (W)" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18"/></svg></button>
       <button id="planb" aria-label="Masterplan" title="Masterplan (P)" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="6" height="5" rx="1"/><rect x="15" y="9.5" width="6" height="5" rx="1"/><rect x="3" y="16" width="6" height="5" rx="1"/><path d="M9 5.5h3v13H9M12 12h3"/></svg><span class="pb" hidden>0</span></button>
       <button id="fsb" aria-label="Full screen" title="Full screen (F)"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path id="fsi" d="M2 5V2h3M9 2h3v3M12 9v3H9M5 12H2V9"/></svg></button>
+      <button id="photob" aria-label="Photo mode" title="Photo mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 8h4l2-3h6l2 3h4v11H3z"/><circle cx="12" cy="13" r="3.5"/></svg></button>
       <button id="snd" aria-label="Sound"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 5h2.5L8 2v10L4.5 9H2z" fill="currentColor"/><path id="sndw" d="M10 4.5a3.5 3.5 0 010 5M11.5 3a5.5 5.5 0 010 8"/></svg></button>
     </div>
     <div class="toasts" id="toasts" aria-live="polite"></div>
     <div class="cam" id="cam" role="group" aria-label="Camera"></div>
     <div class="tip" id="tip" hidden></div>
+    <div class="dim" id="dim" hidden role="button" aria-label="Stop the time-lapse"><div class="dimbar"><span class="dimk">Yesterday · <span id="dimDay"></span></span><b id="dimClock">00:00</b><span><b id="dimFl">0</b> flights</span><span><b id="dimPax">0</b> passengers</span><span><b id="dimOt">–</b> on time</span><span><b id="dimMoney">$0</b></span><span class="dimk dimstop">Tap to stop</span><i id="dimProg"></i></div></div>
     <div class="ptag" id="ptag" hidden>Paused<span class="pk"> · Space to resume</span></div>
     <div class="fsbar" aria-live="off"><span class="c" id="fsCash">$0</span><span id="fsClock">06:00</span><span class="k rt2" id="fsOn"></span></div>
     <button class="fsmanage" id="fsManage">Manage<span class="dot" id="fsDot" hidden></span></button>
+    <div class="photobar" id="photobar" role="group" aria-label="Photo mode" hidden>
+      <button data-ph="time" aria-label="Time of day"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg><b>Now</b></button>
+      <button data-ph="sky" aria-label="Weather"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M7 18h10.5a4 4 0 00.4-8A6 6 0 006.3 9.2 4.4 4.4 0 007 18z"/></svg><b>Now</b></button>
+      <button data-ph="pause" aria-label="Pause" aria-pressed="false"><svg viewBox="0 0 14 14" fill="currentColor"><rect x="3" y="2" width="3" height="10"/><rect x="8" y="2" width="3" height="10"/></svg></button>
+      <button data-ph="shoot" class="shutter" aria-label="Save a picture" title="Save a picture"></button>
+      <button data-ph="done" aria-label="Leave photo mode">Done</button>
+    </div>
   </main>
 
   <aside class="side" id="side">
@@ -666,7 +717,8 @@ body.fs .cam{max-width:calc(100% - 172px)}
   <div class="hcard">
     <button class="close" data-helpclose aria-label="Close">×</button>
     <h2 id="helpT">How to play</h2>
-    <p><button class="linkb" id="tourAgain">Replay the guided start</button> · <button class="linkb" id="newsAgain">What's new</button> · <a class="linkb" id="feedbackLink" href="#" target="_blank" rel="noopener" hidden>Send feedback</a></p>
+    <div class="chips hscr" id="hscr" hidden><button class="chip" id="hfs">Full screen</button><button class="chip" id="hsnd">Sound</button></div>
+    <p><button class="linkb" id="tourAgain">Replay the guided start</button> · <button class="linkb" id="newsAgain">What's new</button> · <button class="linkb" id="photoHelp">Photo mode</button> · <a class="linkb" id="feedbackLink" href="#" target="_blank" rel="noopener" hidden>Send feedback</a></p>
     <p>Planes land full. Clear the arrivals, clean the cabin, and board the next flight on time. Short queues and punctual flights raise your rating, which fills more seats.</p>
     <h3>Moving around</h3>
     <div class="hgrid">
@@ -708,7 +760,7 @@ body.fs .cam{max-width:calc(100% - 172px)}
       <div class="hk"><i class="sq" style="background:#CDD4DA;width:12px"></i>Assistance buggy</div>
     </div>
     <h3>Growing</h3>
-    <p><b>Levels:</b> hit the targets in Office › Plan to climb ten levels. Each level brings plan points.</p>
+    <p><b>Levels:</b> hit the targets in Office › Progress to climb ten levels. Each level brings plan points.</p>
     <p><b>Masterplan:</b> press <kbd>P</kbd>. Spend plan points to approve plans that unlock aircraft, routes, upgrades, shops and transport. You can’t have everything at once, so choose what your airport needs.</p>
     <p><b>Routes:</b> press <kbd>W</kbd> for the world map. Each city has a market: open new routes when your flights start leaving emptier. Planes fly the best route within their range. Business cities pay more, holiday cities fill up in their season, and some attract groups.</p>
     <p><b>Fleet:</b> bigger jets reach further. More planes keep gates busy; partner airlines fill the gaps for a cut.</p>
