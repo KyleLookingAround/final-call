@@ -1,6 +1,6 @@
 # Something new that earns, built with the runbook
 
-Brief: `docs/briefs/runbook-income.md` · Status: Proposed, waiting for the owner's choice · PR: (added as it opens)
+Brief: `docs/briefs/runbook-income.md` · Status: Proposed, waiting for the owner's choice · PR: #136
 
 The runbook is the way this repo runs sessions: project notes, playbooks, checked briefs, check groups that fail on purpose, a coordinator, one file per lesson, cost budgets. The owner asked what else it could build that earns an income quickly with little input from them. The honest answer first: nothing below earns a real income quickly. What the runbook can do is get a small thing listed for sale within a week at a cost of a few dollars, with the owner's part kept to accounts, one post and a monthly look. The takings then depend on whether anyone finds it, which no runbook automates.
 
