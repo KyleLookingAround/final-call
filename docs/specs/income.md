@@ -1,6 +1,6 @@
 # Income from Final Call
 
-Issue: none (the owner's ask of 28 Sep 2026, `docs/briefs/income-game.md`) · Status: Proposed · PRs: (added as they open)
+Issue: none (the owner's ask of 28 Sep 2026, `docs/briefs/income-game.md`) · Status: Proposed · PRs: #135
 
 The owner's rules, tested against every option below: no ads, nothing between the player and the game, and nothing that lets a player pay to win. The game is one page on GitHub Pages with saves kept on the device: no server, no accounts, so nothing here needs one.
 
