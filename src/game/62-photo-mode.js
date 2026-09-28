@@ -62,6 +62,7 @@ function photoShot(){
 }
 // the shutter: a flash, then the share sheet on a phone that can share files, else a download
 function photoSave(){
+  usageEvent('photo');
   const st=$('#stage');if(!REDUCED){st.classList.remove('phflash');void st.offsetWidth;st.classList.add('phflash')}
   const b=photoShot(),name=`final-call-${(G.name||'airport').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}-day-${dayOf(G.clock)}.png`;
   const f=typeof File==='function'?new File([b],name,{type:'image/png'}):null,down=()=>{const a=document.createElement('a'),u=URL.createObjectURL(b);
