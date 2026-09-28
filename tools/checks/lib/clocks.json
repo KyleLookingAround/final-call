@@ -1,7 +1,7 @@
 {
- "calls": 11388,
+ "calls": 11688,
  "minutes": 1500,
- "hash": "423a576d",
+ "hash": "ab04c89",
  "cadence": {
   "updateBuilds": "1500× every 1 at 0",
   "layoutTick": "1500× every 1 at 0",
@@ -15,6 +15,7 @@
   "crewTick": "50× every 30 at 0",
   "recordsHour": "25× every 60 at 0",
   "ads": "25× every 60 at 0",
+  "dayRec": "300× every 5 at 0",
   "nightChecks": "1× every 1440 at 180",
   "managersTick": "4× every 360 at 0",
   "dayReport": "1× every 1440 at 0",
@@ -27,12 +28,14 @@
   "season": "1× every 1440 at 0"
  },
  "patterns": {
-  "updateBuilds layoutTick dayTick checkLevel fleetTick mgrStep TERM_MINUTE": 750,
-  "autoStaff updateBuilds layoutTick dayTick checkLevel fleetTick mgrStep TERM_MINUTE mgrHour crewTick recordsHour ads": 20,
-  "autoStaff updateBuilds layoutTick dayTick checkLevel fleetTick mgrStep TERM_MINUTE": 700,
-  "autoStaff updateBuilds layoutTick dayTick checkLevel fleetTick mgrStep TERM_MINUTE crewTick": 25,
-  "autoStaff updateBuilds layoutTick dayTick checkLevel fleetTick mgrStep TERM_MINUTE mgrHour crewTick recordsHour nightChecks ads": 1,
-  "autoStaff updateBuilds layoutTick dayTick checkLevel fleetTick managersTick mgrStep TERM_MINUTE mgrHour crewTick recordsHour ads": 3,
-  "autoStaff updateBuilds layoutTick dayTick dayReport recordsDay newDay regionDay rivalDay chalDay TERM_DAY season checkLevel fleetTick managersTick mgrStep TERM_MINUTE mgrHour crewTick recordsHour ads": 1
+  "updateBuilds layoutTick dayTick checkLevel fleetTick mgrStep TERM_MINUTE": 600,
+  "autoStaff updateBuilds layoutTick dayTick checkLevel fleetTick mgrStep TERM_MINUTE mgrHour crewTick recordsHour ads dayRec": 20,
+  "autoStaff updateBuilds layoutTick dayTick checkLevel fleetTick mgrStep TERM_MINUTE": 600,
+  "updateBuilds layoutTick dayTick checkLevel fleetTick mgrStep TERM_MINUTE dayRec": 150,
+  "autoStaff updateBuilds layoutTick dayTick checkLevel fleetTick mgrStep TERM_MINUTE dayRec": 100,
+  "autoStaff updateBuilds layoutTick dayTick checkLevel fleetTick mgrStep TERM_MINUTE crewTick dayRec": 25,
+  "autoStaff updateBuilds layoutTick dayTick checkLevel fleetTick mgrStep TERM_MINUTE mgrHour crewTick recordsHour nightChecks ads dayRec": 1,
+  "autoStaff updateBuilds layoutTick dayTick checkLevel fleetTick managersTick mgrStep TERM_MINUTE mgrHour crewTick recordsHour ads dayRec": 3,
+  "autoStaff updateBuilds layoutTick dayTick dayReport recordsDay newDay regionDay rivalDay chalDay TERM_DAY season checkLevel fleetTick managersTick mgrStep TERM_MINUTE mgrHour crewTick recordsHour ads dayRec": 1
  }
 }
