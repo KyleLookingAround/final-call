@@ -111,10 +111,10 @@ The pending mechanism is in place (`tools/check.mjs`, `tools/checks/pending.txt`
 - `floors: runners take the stairs or escalator`. Setup: `v29-L5.json`, seed 1, a dawdler caused on a flight whose gate is upstairs from where they wait. Measure: floor links used by runners. Pass: no runner queues for a lift.
 - `floors: nobody is drawn through a floor`. Setup: as `floors: people change floor only on escalators and lifts`, drawing at 4× and 8×. Measure: `paxEase`'s drawn position for passengers changing floor. Pass: every drawn point between two floors lies within 12 units of a floor link (the wall fix of #127, extended to floors).
 
-**CI's time limit (#132).** `checks.yml` and `pages.yml` both allow 15 minutes, and a full run takes about 14 on the publish runner. Measured locally today (each includes a sub-second build): the pending groups cost `floors` 2 s (43 s with `TP_ALL`), `windows` 2 s (5 s), `decor` 2 s (3 s), `terrace` 4 s (9 s), and `plans` 82 s either way. Switching everything on adds about 55 s locally before the new checks, which would push the publish over. So:
-1. Each group plays one seeded page for all its checks, as `news-card` now does: `floors` must come down from 43 s to at most 20 s (one three-hour play for its five play checks, not one each), and `terrace` stays at most 15 s with its new checks. Each part's PR says its group's run time locally and on CI.
-2. The PR that brings the parts together must leave the full run no longer than `main`'s plus 60 s on CI. `plans` (82 s) is the biggest terminal group: the floor plans part plays the nine layouts in one page, not nine.
-3. Before any part switches its checks on, the limit needs room. The default (an owner choice below): the checks refresh raises `timeout-minutes` to 20 in `checks.yml` and `pages.yml`. The alternative is to split the full run into two parallel jobs.
+**CI's time limit (#132, #134).** A full run took about 14 minutes on the publish runner against a 15-minute limit; #134 raised `checks.yml` and `pages.yml` to 25 minutes, so there is room again, but not for careless groups. Measured locally today (each includes a sub-second build): the pending groups cost `floors` 2 s (43 s with `TP_ALL`), `windows` 2 s (5 s), `decor` 2 s (3 s), `terrace` 4 s (9 s), and `plans` 82 s either way. Switching everything on adds about 55 s locally before the new checks. So:
+1. Each group plays one seeded page for all its checks, as `news-card` now does: `floors` must come down from 43 s to at most 20 s (one three-hour play for its play checks, not one each), and `terrace` stays at most 15 s with its new checks. Each part's PR says its group's run time locally and on CI.
+2. The PR that brings the parts together must leave the full run no longer than `main`'s plus 90 s on CI, well inside 25 minutes. `plans` (82 s) is the biggest terminal group: the floor plans part plays the nine layouts in one page, not nine.
+3. No workflow change is needed. If a full run on CI passes 20 minutes, the next part stops and the coordinator splits the run into two parallel jobs before it goes on.
 
 **Screenshots:** `layouts` adds each layout's three stops at desktop size; each part adds its own at phone (390×844, 320×568), tablet and desktop, by day and night, zoomed out and at 1.6×.
 
@@ -126,13 +126,13 @@ Each step opens one PR from `main`, in this order; a step starts once the one be
 
 1. **This spec** (#133 step 1). Owner approval.
 2. **Checks refresh and refactor 7, side by side,** before any part:
-   - **Checks refresh** (no game code): the changed and new checks above in `terrace.mjs` and `floors.mjs`; `floors` down to one play; `pending.txt` updated (see below); the CI time limit as the owner chooses. It shows each new check failing on `main` for the right reason.
+   - **Checks refresh** (no game code): the changed and new checks above in `terrace.mjs` and `floors.mjs`; `floors` down to one play; `pending.txt` updated (see below). It shows each new check failing on `main` for the right reason.
    - **Refactor 7, one pass over passengers** (`docs/specs/systems-review.md`, step 7), two PRs each with `PLAY` identical: the per-state index and its readers, then the merged pass. **Why before the parts:** the throttled phone is now the tightest budget (3.0 of 8 game minutes a second), and the refactor is the one change expected to win it back; watchers and terrace visitors need "who is waiting" per floor, which the index gives cheaply instead of each part scanning `R.pax`; and the parts register into the three loops it merges, so running it while four parts are open is a merge risk for nothing. It touches no file the checks refresh does, so both run at once. It costs about a day before step 3.
 3. **Two floors in Classic** (#133 step 2): halls stacked, escalators and the lift with queues, runners on the stairs, `paxEase` across floors, tapping a hall's name, old saves. Alone, since every later part stands on its floor links.
 4. **Windows and watchers, and decor and local character** (#133 step 3), two parts side by side.
 5. **The roof terrace floor** (#133 step 4): the terrace room and its link, who goes up, the public side and `R.spot`, famous faces on the roof, runners from the roof and their story lines, the café, the charge, the rating line, the card and the upgrade.
 6. **Each layout's own floor plan** (#133 step 5), terrace included, for all eight other layouts; split into the pier layouts and the rest only if its brief finds it too big. May go to the cheaper model if its brief is routine.
-7. **Bring it together** (#133 step 6): balance on seeds 1–3 keeping Classic and rebuilding, the speed of every part together, `pending.txt` left with comments only, CI within its limit, screenshots of every layout's three stops by day and night, save fixtures, link previews, `docs/SYSTEMS.md`. Then the [D] look back.
+7. **Bring it together** (#133 step 6): balance on seeds 1–3 keeping Classic and rebuilding, the speed of every part together, `pending.txt` left with comments only, the full run within `main`'s plus 90 s, screenshots of every layout's three stops by day and night, save fixtures, link previews, `docs/SYSTEMS.md`. Then the [D] look back.
 
 One release a day, so the parts can ship one by one; each writes its own What's new fragment.
 
@@ -188,7 +188,7 @@ plans: rebuilding moves people into the new plan
 
 ## Files
 
-- **Checks refresh:** `tools/checks/terrace.mjs`, `tools/checks/floors.mjs`, `tools/checks/pending.txt`, and `.github/workflows/checks.yml` and `pages.yml` (the time limit) if the owner chooses that.
+- **Checks refresh:** `tools/checks/terrace.mjs`, `tools/checks/floors.mjs` and `tools/checks/pending.txt`.
 - **Refactor 7:** `07-passengers.js`, `08-stands.js`, `11-main-update.js`, `46-market.js`, as its own spec says.
 - **Parts:** each in its own new file after the last one on `main`: floors, windows, decor, terrace and plans. They edit only the tables and hooks their briefs name; the terrace part adds one hook each to `46-market.js` (`nextAct`), `61-late-runners.js` (the stairs and story lines) and `64-famous-faces.js` (the celebrity going up).
 - **Notes:** `docs/systems/terminal.md` and `airport-scene.md`, and a new file per part in `docs/systems/`.
@@ -210,4 +210,3 @@ Each has a default, taken 12 hours after the question opens if there's no answer
 3. **Its rating line:** a small lift for passengers who went up and made their flight (at most +0.4 a day), a small cost when it's crowded. Default: yes. Otherwise no rating effect, like decor.
 4. **Closed to passengers in rain, snow and storms.** Default: yes.
 5. **Refactor 7 before the parts.** Default: yes, side by side with the checks refresh. Otherwise alongside the first parts.
-6. **CI's time limit:** Default: raise both to 20 minutes in the checks refresh. Otherwise split the full run into two parallel jobs.
