@@ -1,6 +1,6 @@
 # A network you have to keep
 
-Issue: #96 · Status: Built · PRs: #101 (spec), the build PR (added when it opens)
+Issue: #96 · Status: Built · PRs: #101 (spec), #116 (build)
 
 From `docs/specs/systems-review.md`, Part 2, proposal 1. Not built: the owner approves this first.
 
