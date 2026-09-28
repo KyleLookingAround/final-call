@@ -15,7 +15,7 @@ export default async function({open,ok,saveText,saves,newest,HIST_TOP}){
   if(a.open){await page.click('#news [data-newsclose]');await shown(page,false)}
   await page.reload();await booted(page);
   const b=await page.evaluate(()=>!document.querySelector('#news').hidden||__sim.R.newsBoot==='shown');
-  await page.evaluate(()=>{__sim.R.oSub='settings';__sim.setTab('office')});await page.click('[data-news]');await shown(page,true);
+  await page.evaluate(()=>{__sim.R.oSub='settings';__sim.R.setSub='alerts';__sim.setTab('office')});await page.click('[data-news]');await shown(page,true);
   const c=await page.evaluate(()=>({open:!document.querySelector('#news').hidden,all:document.querySelectorAll('#newsList details').length}));
   ok('news: opens once after an update, and from Settings with every version',a.open&&a.fresh===a.want&&!b&&c.open&&c.all===a.all&&!errs.length,JSON.stringify({first:a,again:b,settings:c})+(errs.length?' '+errs[0]:''));
   await ctx.close();
