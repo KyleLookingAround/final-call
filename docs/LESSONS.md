@@ -16,6 +16,8 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 ### Checks
 
+- [#145 Systems refactor 7, part 1: passengers by state · 28 Sep 2026](lessons/145-refactor-passes-index.md)
+- [The terminal as a place: the checks refresh · 28 Sep 2026](lessons/144-terminal-place-checks-refresh.md)
 - [A page size budget check (#140) · 28 Sep 2026](lessons/140-page-size.md)
 - [#116 A network you have to keep · 28 Sep 2026](lessons/116-network-to-keep.md)
 - [Famous faces (#111) · 28 Sep 2026](lessons/111-famous-faces.md)
