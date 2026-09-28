@@ -18,7 +18,7 @@ Reaching a level is the game's big moment, but today it's a toast that fades. A 
 
 ## How it works
 
-- `checkLevel` records the level-up; the card opens from the frame loop at its next UI tick, so levels reached together share one card. It never opens with `R.sim`, during the guided start, or with the setting off; then the level-up works as today (the toast).
+- `checkLevel` records the level-up; the card opens from the frame loop at its next UI tick, so levels reached together share one card. It never opens with `R.sim` or with the setting off; then the level-up works as today (the toast). A level-up reached during the guided start still queues the card (never the toast); it opens the moment the tour ends or is skipped, rather than waiting under the tour.
 - The unlocks come from the same data the game gates on: `STAND[i].lvl`, `PIER.lvl`, `CAPFRAC` through `capAt`, `TECH` tiers and `itemName`, `tabOpen`, `RIV_LV`, `RIV_BUY_LV`. Only what is new between the old level and the new one is listed; things still locked (a plan's contents before it's approved) show only as that plan's line.
 - Opening pauses the game (`R.lvlPrev`, `setSpeed(0)`); closing with Escape, the close button, Play, a link or a tap outside puts the previous speed back, the same way What's new does.
 - From the start; no plan unlocks it.
@@ -37,9 +37,11 @@ None: UI only. The bot's play is unchanged on seeds 1–3 (its `STATE`, less the
 A new group, `levelup` (`tools/checks/levelup.mjs`):
 - it opens once on a level-up, pauses the game and puts the previous speed back;
 - it lists only newly unlocked things (a Local Airport card names gate A3, the Region and the level-1 plans, and nothing from later levels);
+- at most 5 plans plus "and N more in the Masterplan", and one upgrade chip a tab rather than one a upgrade;
 - each link lands on the right tab (Masterplan, Region, World, an upgrade's tab, Gates);
 - two levels at once make one card;
-- the setting turns it off, and it never shows in the guided start or the headless sim;
+- the setting turns it off, and it never shows in the headless sim;
+- the guided start queues it, with no fallback toast, and opens it once the tour ends;
 - screenshots at phone, tablet and desktop sizes, looked at.
 
 ## Files
