@@ -28,4 +28,5 @@ The list is joined from the files here by `node tools/join.mjs` (`npm run build`
 | [ADR-2026-09-27-reviewer-step](ADR-2026-09-27-reviewer-step.md) | A fresh review before each PR opens (an experiment) |
 | [ADR-2026-09-27-roof-is-a-floor](ADR-2026-09-27-roof-is-a-floor.md) | The roof is a floor the player picks, not a zoom |
 | [ADR-2026-09-27-session-briefs](ADR-2026-09-27-session-briefs.md) | Sessions start from a checked brief, ask the owner through issues, keep to a cost budget, and parts are tested together (an experiment) |
+| [ADR-2026-09-28-early-first-level](ADR-2026-09-28-early-first-level.md) | The first level-up comes in the first morning, and level 1's baseline moves with it |
 <!-- /joined:decisions -->
