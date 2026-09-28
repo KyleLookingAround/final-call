@@ -190,3 +190,7 @@ const ICON={
   globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18"/>',
   pier:'<path d="M3 12h18M3 12v6M21 12v6M7 12V8M12 12V6M17 12V8"/>',
 };
+// the airport view's drawing layers, bottom to top, and its lights (50-scene.js): defined here so any file can register
+const LAYERS=['airfield','apron','stands','bridges','lit','terminal','landside','pax','roofs','signs','weather','top'];
+const LAYER=Object.fromEntries(LAYERS.map(n=>[n,[]]));
+const LIGHTS=[]; // (V) → lamp(…) for each light, drawn additively over the night by the lighting pass

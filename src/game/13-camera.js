@@ -48,12 +48,14 @@ function selectStand(i,openTab){R.sel=i;renderCam();$$('.brow').forEach(r=>r.cla
 function renderCam(){
   if(R.view==='world'){$('#cam').innerHTML=`<button data-cam="all">World</button><button data-wcam="near">Near</button><button data-zoom="-1" aria-label="Zoom out">−</button><button data-zoom="1" aria-label="Zoom in">+</button>`;return}
   if(R.view==='region'){$('#cam').innerHTML=`<button data-cam="all">All</button><button data-rcam="air">Airport</button><button data-rcam="city">City</button><button data-rcam="east">East</button><button data-zoom="-1" aria-label="Zoom out">−</button><button data-zoom="1" aria-label="Zoom in">+</button>`;return}
-  $('#cam').innerHTML=`<button data-floor class="${R.floor==='roof'?'on':''}" aria-pressed="${R.floor==='roof'}" title="Show the roof or the halls">Roof</button><button data-cam="all">All</button>`+G.stands.map((s,i)=>s.built?`<button data-cam="${i}" class="${R.sel===i?'on':''}">${GATES[i]}</button>`:'').join('')+`<button data-zoom="-1" aria-label="Zoom out">−</button><button data-zoom="1" aria-label="Zoom in">+</button>`;
+  const sh=R.sw<560,fl=[['roof','Roof','Roof','The roof'],['up','Departures','Dep','Departures, the upper floor'],['down','Arrivals','Arr','Arrivals, the lower floor']] // short on a phone, as the board is
+    .map(([f,n,s,t])=>`<button data-floor="${f}" class="${R.floor===f?'on':''}" aria-pressed="${R.floor===f}" title="${t}" aria-label="${t}">${sh?s:n}</button>`).join('');
+  $('#cam').innerHTML=fl+`<button data-cam="all">All</button>`+G.stands.map((s,i)=>s.built?`<button data-cam="${i}" class="${R.sel===i?'on':''}">${GATES[i]}</button>`:'').join('')+`<button data-zoom="-1" aria-label="Zoom out">−</button><button data-zoom="1" aria-label="Zoom in">+</button>`;
 }
 $('#cam').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
   if(b.dataset.rcam){regionFocus(b.dataset.rcam);return}
   if(b.dataset.wcam){worldFocus(b.dataset.wcam);return}
-  if(b.dataset.floor!=null){setFloor(R.floor==='roof'?'halls':'roof');return}
+  if(b.dataset.floor){setFloor(b.dataset.floor);return}
   if(b.dataset.cam==='all')focus('all');else if(b.dataset.cam!=null){selectStand(+b.dataset.cam,false);focus(+b.dataset.cam)}
   else if(b.dataset.zoom)zoomAt(R.sw/2,R.sh/2,b.dataset.zoom==='1'?1.25:0.8)});
 
