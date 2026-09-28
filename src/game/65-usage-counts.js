@@ -2,9 +2,10 @@
    docs/systems/usage-counts.md. GoatCounter (no cookies, no personal data, no consent banner needed): one script tag,
    loaded only on the published site (feedbackRepo(), the same test the Help feedback link and the update check use),
    never in R.sim, never in build/test.html or from a local file, and only once USAGE_SITE names a real site code and
-   the player hasn't turned it off (G.set.usage, on by default). With USAGE_SITE empty (the default until the owner
-   has a code) nothing loads and nothing is sent, ever. A handful of named events mark the funnel; each fires once per
-   save and does nothing when the script never loaded, so the check costs nothing when counting is off or absent. */
+   the player hasn't turned it off (G.set.usage, on by default). With USAGE_SITE emptied nothing loads and nothing is
+   sent, ever: that was the state this shipped in until the owner had a GoatCounter site. A handful of named events
+   mark the funnel; each fires once per save and does nothing when the script never loaded, so the check costs
+   nothing when counting is off or absent. */
 let USAGE_SITE='final-call'; // the GoatCounter site code. A let, not a const, so the checks can override it
 // (window.__sim.USAGE_SITE) without a fake code ever shipping; empty would mean nothing loads and nothing is sent.
 let usageLoaded=false;
