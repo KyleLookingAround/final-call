@@ -1,6 +1,6 @@
-# Brief: Watchdog
+# Brief: Watchdog (retired)
 
-This brief is also the prompt of the "Final Call: watchdog" Routine (its id is in the `coordinator` playbook). It fires hourly and starts a fresh session each time, so it is never stuck in the queue of a session that hit the account's usage limit. Its whole job takes a few minutes and changes no files.
+Retired: this organisation can't attach connectors to a Routine made from a session, so a Routine that started a fresh session each hour could never have reached GitHub or the session tools to re-wake anything. It's replaced by an hourly heartbeat bound to the coordinator's own session (`coordinator` playbook, §11), which needs no connectors of its own. This brief is kept for the record and is no longer anyone's prompt.
 
 ## Goal and what it may touch
 

@@ -1,6 +1,6 @@
 # Brief: Tidy the lessons
 
-This brief is also the prompt of the lessons tidy Routine (its id is in the `coordinator` playbook). Each firing starts a fresh session with it. A session fires it when a look back leaves 8 or more lessons new since the last tidy (the `steward` playbook's last step); nobody runs it by hand or on a schedule.
+This brief is the coordinator's first message when it starts the tidy (`coordinator` playbook, §10): a Routine can't do this, since this organisation can't attach connectors to a Routine made from a session, so it can't reach GitHub or the repo. The coordinator starts a session with this brief when a look back leaves 8 or more lessons new since the last tidy (the `steward` playbook); nobody runs it on a schedule.
 
 ## Goal and what it may touch
 
