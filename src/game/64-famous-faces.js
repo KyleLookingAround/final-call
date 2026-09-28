@@ -1,4 +1,4 @@
-/* ================= famous faces ================= */
+/* ================= FAMOUS FACES: now and then a celebrity flies through, with a crowd, a busy café hour and a rating stake ================= */
 // Now and then someone famous flies from the airport (docs/systems/famous-faces.md). From level 3 a visit is booked a day
 // ahead (G.famous.v: day, hour, who, kind), shown on the board and in the region news. On the day the earliest passenger
 // flight leaving 40–300 minutes after their hour carries them: photographers wait outside the check-in doors until 10 minutes
