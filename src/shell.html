@@ -74,6 +74,9 @@ canvas.drag{cursor:grabbing}
 .hud button,.cam button{border:0;background:transparent;color:var(--muted);font:600 11px/1 var(--mono);min-width:28px;height:26px;padding:0 6px;border-radius:4px;display:grid;place-items:center}
 .hud button.on,.cam button.on{background:var(--sign);color:var(--signInk)}
 .hud svg{width:14px;height:14px}
+.stage{container:stage/inline-size}
+.hud #spdb{display:none}
+.hscr{margin:10px 0 2px}
 .toasts{position:absolute;top:var(--hb,42px);left:8px;right:8px;max-width:380px;display:grid;gap:6px;pointer-events:none}
 .toast{pointer-events:auto;background:rgba(10,12,15,.94);border:1px solid #2A3139;border-left:3px solid var(--sign);border-radius:6px;padding:9px 11px 10px;font-size:13.5px;line-height:1.35}
 .toast.goal{border-left-color:var(--good)}
@@ -567,6 +570,17 @@ body.fs .cam{max-width:calc(100% - 172px)}
 @media (pointer:coarse){
   .bmode button{padding:15px 8px 14px}
   .hud button,.cam button{min-width:42px;height:42px}
+  /* the top bar stays on one row (tools/checks/topbar.mjs). Twelve 42px buttons need a map 560px wide; below that the
+     speeds fold into one button that cycles them (eight 40px buttons need 356px), below that full screen and sound
+     (and photo mode) move into the help card (six need 272px), and below that the buttons narrow to 36px */
+  @container stage (width < 560px){
+    .hud{gap:2px}
+    .hud button{min-width:40px;padding:0 4px}
+    .hud [data-speed]:not([data-speed="0"]){display:none}
+    .hud #spdb{display:grid}
+  }
+  @container stage (width < 356px){.hud #fsb,.hud #snd,.hud #photob{display:none}}
+  @container stage (width < 272px){.hud button{min-width:36px;padding:0 3px}}
   .chip{padding:14px 10px 13px}
   .recrow .btns .chip{padding-block:14px 13px}
   .segs .chip{padding-block:14px 13px}
@@ -579,7 +593,7 @@ body.fs .cam{max-width:calc(100% - 172px)}
 @media (max-width:340px){
   .tabs button{font-size:8.5px}
   .stats{grid-template-columns:1.1fr 1.4fr .8fr .8fr}
-  #sRep{font-size:13px}
+  #sRep{font-size:13px} .stat[role=button]{cursor:pointer}
   .stars{letter-spacing:.5px}
 }
 @media (max-width:440px){
@@ -627,6 +641,7 @@ body.photo .board,body.photo .side,body.photo .topgap,body.photo .spot,body.phot
     <div class="hud" role="group" aria-label="Game speed">
       <button id="helpb" aria-label="How to play" title="How to play (H)" style="font-size:13px">?</button>
       <button data-speed="0" aria-label="Pause" title="Pause (Space)"><svg viewBox="0 0 14 14" fill="currentColor"><rect x="3" y="2" width="3" height="10"/><rect x="8" y="2" width="3" height="10"/></svg></button>
+      <button id="spdb" class="on" aria-label="Game speed 1×, tap to change" title="Game speed">1×</button>
       <button data-speed="1" class="on">1×</button>
       <button data-speed="2">2×</button>
       <button data-speed="4">4×</button>
@@ -692,6 +707,7 @@ body.photo .board,body.photo .side,body.photo .topgap,body.photo .spot,body.phot
   <div class="hcard">
     <button class="close" data-helpclose aria-label="Close">×</button>
     <h2 id="helpT">How to play</h2>
+    <div class="chips hscr" id="hscr" hidden><button class="chip" id="hfs">Full screen</button><button class="chip" id="hsnd">Sound</button></div>
     <p><button class="linkb" id="tourAgain">Replay the guided start</button> · <button class="linkb" id="newsAgain">What's new</button> · <button class="linkb" id="photoHelp">Photo mode</button> · <a class="linkb" id="feedbackLink" href="#" target="_blank" rel="noopener" hidden>Send feedback</a></p>
     <p>Planes land full. Clear the arrivals, clean the cabin, and board the next flight on time. Short queues and punctual flights raise your rating, which fills more seats.</p>
     <h3>Moving around</h3>
