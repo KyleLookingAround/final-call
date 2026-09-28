@@ -1,3 +1,4 @@
+Theme: merge-chasing
 # Systems refactor 2: routes and demand in one file · 27 Sep 2026
 
 - **Numbers:** session `session_01U6zjCj6cE9cFXj96wryQte`, estimate $6: about $1.71 and 128k of 1M context by the final merge commit. Started 17:21 UTC, PR #81 opened 17:32; Checks, Balance and Description green by 17:40; four `main` merge-ins (#84 and the polish audit; #87 and #90 while CI ran; another session's look back; then #80, each of the last three conflicting here).

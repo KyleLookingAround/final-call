@@ -1,3 +1,4 @@
+Theme: review
 # Polish audit · 27 Sep 2026
 
 - **Numbers:** session `session_017bfAy4YrGKprBcimixNCgp`, estimate $6: $8.74 and 196k of 1M context by the time the PR opened, a little over the estimate but not past twice it. Started 16:49 UTC. Docs only, no code, no bot run.

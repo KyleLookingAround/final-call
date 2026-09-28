@@ -1,3 +1,4 @@
+Theme: review
 # Polish: overlay cards that match · 27 Sep 2026
 
 - **Numbers:** estimate $5: $6.18 by the merge, a little over. Started 17:20, PR #87 opened 17:44, merged 18:16 (56 minutes end to end). Three commits: the four fixes, a follow-up from the fresh review, and this look-back. `npm run check`: 186/186, twice (once before the review's follow-up commit, once after). No bot run: nothing in `update()` changed.

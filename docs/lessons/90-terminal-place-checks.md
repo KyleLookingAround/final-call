@@ -1,3 +1,4 @@
+Theme: checks
 # The terminal as a place: checks first · 27 Sep 2026
 
 - **Numbers:** estimate $10. Started 17:00, PR #90 opened 18:00. Two commits before opening and one from the review. `npm run check`: 190 passed, 35 pending. The new groups add about 20 s. Balance was dispatched by hand, since it doesn't run for `tools/` changes: green, and seed 1's `PLAY` and `STATE` match `main`.

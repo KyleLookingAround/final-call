@@ -1,3 +1,4 @@
+Theme: checks
 # #30 Level-up card · 27 Sep 2026
 
 - **Numbers:** the same session as #28. It was built while #28's CI ran, opened at 06:45 and merged at about 06:58. No pushes after it opened, and CI was green first time. The session's cost is in the entry above.

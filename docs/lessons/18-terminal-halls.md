@@ -1,3 +1,4 @@
+Theme: parts
 # #18 Terminal halls, and running five parts at once · 26 Sep 2026
 
 - **Numbers:** the coordinating session had cost $134 over 11 hours by then, against $8–22 for a whole part. Five parts plus the coordinator ran past the five-hour usage limit within the hour.

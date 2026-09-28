@@ -1,3 +1,4 @@
+Theme: checks
 # #95 Systems refactors 4 and 6: clock tables and day stats · 27 Sep 2026
 
 - **Numbers:** session `session_01TxDZih6YQ5sJKzRDGFo7bX`, estimate $10; its cost wasn't reported yet (`get_session` gave no usage) when this was written. Started 19:56 UTC, PR opened 20:14. `main` moved three times before the PR opened (#94 and #93 among them), so it needed one merge by hand at once: `CLAUDE.md`, `docs/SYSTEMS.md` and `tools/build.mjs` had all been restructured. Seed 1 of the bot, run locally against a build of `main`, gave identical `STATE`, `PLAY` and `LVLAT`, and `perf` was within noise.

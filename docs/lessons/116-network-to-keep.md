@@ -1,3 +1,4 @@
+Theme: checks
 # #116 A network you have to keep · 28 Sep 2026
 
 - **Numbers:** the same session as #101, so the cost is shared: $7.71 when #101 merged, against that brief's $14 estimate. The coordinator's wake-up said the cost was already past the estimate; `get_session` showed it wasn't. Branch started at 04:20 UTC, PR opened at 05:00, inside the owner's 06:30 limit. Three bot runs of 1,350 hours and two full `npm run check`s. The "before" came from #101's runs of the same code, so no runs on `main` were needed.

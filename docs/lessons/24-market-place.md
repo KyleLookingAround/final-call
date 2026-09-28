@@ -1,3 +1,4 @@
+Theme: parts
 # #24 Market place · 26–27 Sep 2026
 
 - **Numbers:** $18.30, 383k of 1M context. Started 20:37, PR opened about 21:55, merged 23:45. Three pushes after it opened; CI red twice before that (perf and one market rule).

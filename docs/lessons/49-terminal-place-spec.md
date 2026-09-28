@@ -1,3 +1,4 @@
+Theme: specs
 # #49 The terminal as a place: the spec, checks planned first · 27 Sep 2026
 
 - **Numbers:** session `session_01Dvkimw2SjgEvPiF7DhWQKb`, estimate $8: $3.96 and 219k of 1M context at the merge ($3.24 at the first check-in; `get_session` gave no cost when the PR opened). Started 11:51, PR opened 11:57, approved by the owner through the coordinator at about 13:20 (under 1½ hours after the question opened, so no default was taken), merged about 13:35. CI green on every push (Checks about 6 minutes). Three merges of `main`, each with a LESSONS conflict from entries added at the top by both sides, the last one found only when the squash-merge was refused. → Merge `main` in straight before merging, not only when CI goes green.

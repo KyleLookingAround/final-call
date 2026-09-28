@@ -1,3 +1,4 @@
+Theme: checks
 # #33 Level-up redesign · 27 Sep 2026
 
 - **Numbers:** asked for by the owner at about 07:00; opened 07:07, merged 07:15. One push after it opened, which removed the stray `docs/graph.json`; CI green both times.

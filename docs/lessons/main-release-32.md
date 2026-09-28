@@ -1,3 +1,4 @@
+Theme: releases
 # Version 32: ready for what's next · 27 Sep 2026
 
 - **Numbers:** estimate $4: about $5.25 by the PR's first stopping point, a little over the estimate, entirely from the fixture bug below rather than the release notes themselves. Started 16:10; the docs and What's new entry were written and pushed within the first six minutes, well before the bot run.
