@@ -49,7 +49,7 @@ function gateCallText(F){
 TERM_MINUTE.push(()=>{
   const D=derived(),n=R.standN||(R.standN=[]);
   for(const i of SIDX){n[i]=0;const F=R.st[i].F;if(!F||F.freighter||F.called!=null)continue;const lead=callLead(i,D);if(F.boardStart!=null?G.clock-F.boardStart>=-lead:boardEta(F,D)<=lead)F.called=G.clock}
-  for(const p of R.pax)if(p.state==='gate'&&p.spot<0)n[p.stand]++;
+  for(const p of byState().gate)if(p.state==='gate'&&p.spot<0)n[p.stand]++;
   for(const i of SIDX)if(n[i]>=15)repAdj(-0.0005*Math.min(n[i],60)/15,'lounge',i);
   if(R.lastMin%60===0){R.awayH=R.away||[];R.away=[]}
 });
