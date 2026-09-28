@@ -39,3 +39,15 @@ function spend(v,kind,at){effect('spend',kind||'costs',v,at)}
 function floater(text,x,y,col,big){if(R.sim)return;{const p=SET().pops;if(p==='off'||(p==='big'&&!big))return}if(R.floaters.length>90)R.floaters.shift();R.floaters.push({text,x,y,t:0,col,big})}
 // the checks read the cause tables through R (window.__sim.R): this file loads before SIMX (42-terminal.js) exists
 R.effects={REPWHY,REPLBL};
+// the floaters: money and words rising from where they happened, fading as they go
+LAYER.top.push(V=>{
+  for(const f of R.floaters){
+    if(f.x<V.x0-60||f.x>V.x1+60)continue;
+    const life=f.big?2.2:1,a=1-f.t/life;
+    ctx.globalAlpha=clamp(a*1.4,0,1);ctx.textAlign='center';ctx.textBaseline='alphabetic';
+    ctx.font=f.big?'700 15px "Saira Condensed",sans-serif':'600 9px "IBM Plex Mono",monospace';
+    const y=f.y-f.t*(f.big?10:14);
+    if(f.big){const w=ctx.measureText(f.text).width+14;ctx.fillStyle='rgba(10,12,15,.85)';rrect(f.x-w/2,y-14,w,20,3);ctx.fill()}
+    ctx.fillStyle=f.col;ctx.fillText(f.text,f.x,y);ctx.globalAlpha=1;
+  }
+});

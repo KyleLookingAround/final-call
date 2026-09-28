@@ -1,12 +1,16 @@
 /* ================= ROOFS: the terminal and its piers seen from above, a floor the player steps up to ================= */
-// The halls are never covered on their own: the roof is a floor (R.floor, runtime), picked with the Roof button on the map's
-// camera bar at any zoom (the owner's choice, 27 Sep 2026). On the roof, every hall and pier that's built has a roof in its
-// room's own shape, with plant and skylights. Rooms not built yet (a second phase before Pier B, the hotel before it's
-// bought) have no roof. Drawing only: the roofs follow ROOMS and roomOn() and change nothing; taps go through them as
-// before (tapAt).
-if(!R.floor)R.floor='halls'; // 'halls' or 'roof'; the terminal's two floors will split 'halls'
+// The halls are never covered on their own: the roof is a floor (R.floor, runtime), picked on the map's camera bar at any
+// zoom (the owner's choice, 27 Sep 2026): Roof, Departures (the upper floor, shown first) or Arrivals (the lower). On the roof,
+// every hall and pier that's built has a roof in its room's own shape, with plant and skylights, and nothing inside them is
+// drawn. Rooms not built yet (a second phase before Pier B, the hotel before it's bought) have no roof. Drawing only: the
+// roofs follow ROOMS and roomOn() and change nothing; taps go through them as before (tapAt).
+if(!R.floor||R.floor==='halls')R.floor='up'; // 'roof', 'up' or 'down'
 const roofA=()=>R.floor==='roof'&&R.view==='airport'?1:0; // 1 on the roof, 0 on the halls
+const floorNow=()=>R.floor==='down'?0:1; // the floor of halls drawn: 0 arrivals, 1 departures (and under the roof)
+const onFloor=fl=>fl==null||fl===floorNow(); // a room or passenger without a floor is on both
 function setFloor(f){if(R.floor===f)return;R.floor=f;renderCam()}
+// is (x, y) under a built roof? P is roofNow()'s plan
+function underRoof(P,x,y){const rs=P.rooms;for(let j=0;j<rs.length;j++){const r=rs[j];if(x>=r.x0&&x<=r.x1&&y>=r.y0&&y<=r.y1&&inPoly(r.poly,x,y))return true}return false}
 let ROOF=null; // the current plan: {key, rooms:[{x0,y0,x1,y1,path,edge,sky:[…],plant:[…]}]}
 // a roof's parts in the room's own frame, along its longest wall: skylight strips down the middle and plant along one side,
 // each kept only if it sits wholly on the roof
@@ -21,7 +25,7 @@ function roofPlan(poly){
     for(let u=u0+40;u<=u1-40;u+=70){if(fits(u,v,24,4,3))sky.push(quad(u,v,24,4))}}
   if(span>=30)for(let u=u0+60;u<=u1-40;u+=230){const v=v0+Math.min(18,span*0.3),Q=quad(u,v,16,10);if(fits(u,v,16,10,4))plant.push({Q,fan:[at(u-7,v),at(u+7,v)]})}
   const path=new Path2D();poly.forEach(([x,y],k)=>k?path.lineTo(x,y):path.moveTo(x,y));path.closePath();
-  return {x0:Math.min(...xs),y0:Math.min(...ys),x1:Math.max(...xs),y1:Math.max(...ys),path,sky,plant};
+  return {x0:Math.min(...xs),y0:Math.min(...ys),x1:Math.max(...xs),y1:Math.max(...ys),poly,path,sky,plant};
 }
 // the plan follows the layout and what's built, and is worked out again only when either changes
 function roofNow(){
@@ -52,4 +56,4 @@ function drawRoofs(V){
   ctx.restore();
 }
 LAYER.roofs.push(drawRoofs);
-Object.assign(SIMX,{roofA,setFloor,renderCam,roofNow,drawRoofs,tapAt,shopHit,get ROOF(){return ROOF}});
+Object.assign(SIMX,{roofA,floorNow,onFloor,underRoof,setFloor,renderCam,roofNow,drawRoofs,tapAt,shopHit,get ROOF(){return ROOF}});

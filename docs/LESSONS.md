@@ -23,6 +23,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 - [Polish audit · 27 Sep 2026](lessons/main-polish-audit.md)
 - [Version 32: ready for what's next · 27 Sep 2026](lessons/main-release-32.md)
 - [#118 Cut release 33: a rating that keeps you on your toes · 28 Sep 2026](lessons/118-release-33.md)
+- [The terminal as a place: groundwork, with refactor 9 · 28 Sep 2026](lessons/113-terminal-groundwork.md)
 - [Famous faces (#111) · 28 Sep 2026](lessons/111-famous-faces.md)
 - [The region map, looking better · 27 Sep 2026](lessons/108-region-map-looks.md)
 - [#107 The phone's top bar back on one row · 27 Sep 2026](lessons/107-phone-topbar.md)
