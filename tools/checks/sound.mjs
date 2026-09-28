@@ -2,6 +2,10 @@
 // boarding, gate calls and final calls each announce once, never a partner's or a freighter's; spoken calls are rare,
 // only final calls and gate changes, and none at 4x; each setting silences its own part and the master switch all of
 // them; nothing happens in the headless sim; nights are quiet; and the board's line fits a 320 px phone.
+// Also (release audit #151, row 22-24): several kaching triggers within a moment (goals completing together) ring
+// once, not a volley; a stamp and a weekly challenge each play their own chime; Effects off silences the choice
+// toast's alert tone and the build-finished fanfare too; and records and stamps show as an on-screen toast, not a
+// floater fixed to a map spot, so they're seen on a phone and in landscape.
 const STUB=()=>{
   window.__snd={osc:[],speak:[]};
   class P{constructor(v=0){this.value=v}setValueAtTime(v){this.value=v}linearRampToValueAtTime(v){this.value=v}exponentialRampToValueAtTime(v){this.value=v}setTargetAtTime(v){this.value=v}}
@@ -51,7 +55,7 @@ export default async function({open,ok,saveText}){
   // each setting silences its own part and nothing else; the master switch silences everything
   const sets=await page.evaluate(()=>{const S=__sim,G=S.G,SND=S.SND,out={};toHour(10);
     const one=(name,change)=>{Object.assign(G.set,{sndAnn:'on',sndVoice:true,sndAmb:true,sndFx:true});G.sound=true;change();SND.lastVoice=-1e9;
-      const a=snap(),p0=SND.played.length;let hum=0;for(let m=0;m<90;m++){drive(1,1);hum=Math.max(hum,SND.lvl.hum)}S.tick();S.kaching();S.R.speed=0;SND.lastVoice=-1e9;SND.q.length=0;{const F=S.SIDX.map(i=>S.R.st[i].F).find(F=>F&&!F.partner&&!F.freighter);__t+=9e3;S.annAdd('final',F,'A1',__t);S.R.speed=1;S.soundTick(__t);S.R.speed=0}
+      const a=snap(),p0=SND.played.length;let hum=0;for(let m=0;m<90;m++){drive(1,1);hum=Math.max(hum,SND.lvl.hum)}S.lastKaching=-1e9;S.tick();S.kaching();S.R.speed=0;SND.lastVoice=-1e9;SND.q.length=0;{const F=S.SIDX.map(i=>S.R.st[i].F).find(F=>F&&!F.partner&&!F.freighter);__t+=9e3;S.annAdd('final',F,'A1',__t);S.R.speed=1;S.soundTick(__t);S.R.speed=0}
       const P=SND.played.slice(p0),b=snap(),osc=__snd.osc.slice(a.osc),fx=osc.filter(o=>o.type==='square'||(o.type==='triangle'&&o.f>1200)).length;
       out[name]={calls:P.length,words:P.filter(p=>p.words).length,voiced:P.filter(p=>p.voice).length,chimes:osc.filter(o=>o.type==='sine').length,hum:+hum.toFixed(4),fx}};
     one('all',()=>{});one('chime',()=>{G.set.sndAnn='chime'});one('annOff',()=>{G.set.sndAnn='off'});one('voiceOff',()=>{G.set.sndVoice=false});
@@ -66,6 +70,32 @@ export default async function({open,ok,saveText}){
       s.fxOff.calls>0&&s.fxOff.chimes>0&&s.fxOff.hum>0&&!s.fxOff.fx&&
       !s.master.chimes&&!s.master.voiced&&!s.master.hum&&!s.master.fx;
     ok('sound: each setting silences its own part and nothing else, and the master switch silences everything',pass,JSON.stringify(s))}
+  // several kaching triggers within a moment (three goals completing together at the tour's end) ring once, not a volley;
+  // a later, unrelated one still rings
+  const batch=await page.evaluate(()=>{const S=__sim,G=S.G;S.ensureAudio();Object.assign(G.set,{sndFx:true});G.sound=true;S.lastKaching=-1e9;
+    const before=__snd.osc.length;S.kaching();S.kaching();S.kaching();const burst=__snd.osc.length-before;
+    S.lastKaching=performance.now()-700;S.kaching();const later=__snd.osc.length-before;
+    return {burst,later}});
+  ok('sound: several kaching triggers within a moment ring once, and a later one still rings',batch.burst===2&&batch.later===4,JSON.stringify(batch));
+  // a stamp and a weekly challenge each play their own chime and show as a toast, once, with Effects off silencing both
+  const award=await page.evaluate(()=>{const S=__sim,G=S.G,R=S.R;S.ensureAudio();Object.assign(G.set,{sndFx:true});G.sound=true;
+    R.toasts.length=0;G.stamps={};G.flights=Math.max(G.flights,1);S.lastKaching=-1e9;
+    const o0=__snd.osc.length;S.checkStamps();
+    const stamp={osc:__snd.osc.length-o0,toast:R.toasts.length>0&&R.toasts.at(-1).kind==='goal'};
+    R.toasts.length=0;G.chal={wk:0,list:[{id:'pax',goal:1,base:0,done:0}],snap:{},sets:0,pay:100,all:0};G.flown=Math.max(G.flown,1);
+    const o1=__snd.osc.length;S.checkChal();
+    const chal={osc:__snd.osc.length-o1,toast:R.toasts.length>0&&R.toasts.at(-1).kind==='goal'};
+    G.set.sndFx=false;G.stamps={};const o2=__snd.osc.length;S.checkStamps();const stampOff=__snd.osc.length-o2;
+    G.chal={wk:0,list:[{id:'pax',goal:1,base:0,done:0}],snap:{},sets:0,pay:100,all:0};const o3=__snd.osc.length;S.checkChal();const chalOff=__snd.osc.length-o3;
+    G.set.sndFx=true;return {stamp,chal,stampOff,chalOff}});
+  ok('sound: a stamp and a challenge each play once, and Effects off silences both',
+    award.stamp.osc>0&&award.stamp.toast&&award.chal.osc>0&&award.chal.toast&&!award.stampOff&&!award.chalOff,JSON.stringify(award));
+  // Effects off also silences the choice toast's alert tone and the build-finished fanfare
+  // (the late-departure tone stays as it is: its call is in 08-stands.js, batch B1's file, #147)
+  const fxGate=await page.evaluate(()=>{const S=__sim,G=S.G;S.ensureAudio();G.sound=true;
+    const run=on=>{G.set.sndFx=on;const o0=__snd.osc.length;S.alertTone();S.fanfare();return __snd.osc.length-o0};
+    return {off:run(false),on:run(true)}});
+  ok('sound: Effects off silences the choice toast’s alert tone and the build-finished fanfare',fxGate.off===0&&fxGate.on>0,JSON.stringify(fxGate));
   // a gate change: switching layout moves your called flights to new gate names, and the announcer calls them
   const gate=await page.evaluate(()=>{const S=__sim,G=S.G,R=S.R,SND=S.SND;drive(20,1);const l0=SND.log.length;
     R.sim=true;S.switchLayout('mid');R.sim=false;__t+=1000;S.soundTick(__t);const L=SND.log.slice(l0).filter(x=>x.k==='gate');R.sim=true;S.switchLayout('classic');R.sim=false;__t+=1000;S.soundTick(__t);
@@ -90,6 +120,17 @@ export default async function({open,ok,saveText}){
       return {shown:!el.hidden,left:b.left,right:b.right,bl:bd.left,br:bd.right,run:el.classList.contains('run'),fits:el.scrollWidth<=el.clientWidth+1,page:document.documentElement.scrollWidth}});
     await page.waitForTimeout(1500);await page.screenshot({path:`build/shots/sound-${name}.png`,clip:{x:0,y:0,width:w,height:Math.min(h,320)}});
     ok(`sound: the board's line fits a ${name} screen`,r.shown&&r.left>=r.bl-2&&r.right<=r.br+2&&r.page<=w&&(r.run||r.fits)&&!errs.length,JSON.stringify(r)+(errs.length?' '+errs[0]:''));
+    await ctx.close();
+  }
+  // a record shows as an on-screen toast, not a floater fixed to a map spot, so it's seen on a phone and a wide desktop alike
+  for(const [w,h,name] of [[390,844,'p390'],[1440,900,'d1440']]){
+    const {ctx,page,errs}=await open({width:w,height:h},saveText('v28-L9.json'),w<700,{still:true});
+    const r=await page.evaluate(()=>{const S=__sim,G=S.G;G.rec={};S.setRec('dayPax',100,false);S.setRec('dayPax',9999,true);
+      const t=S.R.toasts.at(-1),el=document.querySelector('#toasts .toast:last-child'),stage=document.querySelector('.stage').getBoundingClientRect();
+      const b=el?el.getBoundingClientRect():null;
+      return {kind:t&&t.kind,text:t&&t.text,within:!!b&&b.top>=stage.top-1&&b.bottom<=stage.bottom+1&&b.left>=0&&b.right<=innerWidth}});
+    await page.waitForTimeout(300);await page.screenshot({path:`build/shots/record-${name}.png`,clip:{x:0,y:0,width:w,height:Math.min(h,420)}});
+    ok(`sound: a record shows as an on-screen toast at ${name}`,r.kind==='goal'&&/Record/.test(r.text||'')&&r.within&&!errs.length,JSON.stringify(r)+(errs.length?' '+errs[0]:''));
     await ctx.close();
   }
 }
