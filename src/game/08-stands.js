@@ -78,10 +78,11 @@ function updateStand(i,dt,D){
     S.aisle[L]=al.filter(p=>p.phase!=='done');
   }
 }
-// passengers waiting at each stand's gate, in their order in R.pax, gathered once per step for the scanners.
-// Only updateLandside puts passengers at a gate, after the stands have run, so the lists hold for the whole stand loop.
+// passengers waiting at each stand's gate, in their order in R.pax, gathered once per step for the scanners from byState().
+// Only updateLandside puts passengers at a gate, after the stands have run, so the lists hold for the whole stand loop
+// (a passenger boarded meanwhile is still listed: the scanners check each one is at the gate).
 function gateQueue(i){
-  if(R.gateStep!==R.step){R.gateStep=R.step;R.gateBy=[];for(const p of R.pax)if(p.state==='gate')(R.gateBy[p.stand]||(R.gateBy[p.stand]=[])).push(p)}
+  if(R.gateStep!==R.step){R.gateStep=R.step;R.gateBy=[];for(const p of byState().gate)if(p.state==='gate')(R.gateBy[p.stand]||(R.gateBy[p.stand]=[])).push(p)}
   return R.gateBy[i]||[];
 }
 function deplane(i,S,F,dt,D){
