@@ -1,11 +1,11 @@
 {
- "changes": 33,
- "hash": "ad38f5a5",
+ "changes": 34,
+ "hash": "d47c4372",
  "on": {
-  "sick": 2,
+  "sick": 4,
   "rush": 6,
   "snow": 2,
-  "line": 5,
+  "line": 4,
   "roadworks": 2
  },
  "first": [
@@ -40,7 +40,8 @@
   "67672 roadworks:mil-hbc",
   "67731 ",
   "67747 snow",
-  "67777 line:L9:WIRE FAULT,snow",
-  "67800 snow"
+  "67777 sick,snow",
+  "67817 snow",
+  "67843 sick,snow"
  ]
 }
