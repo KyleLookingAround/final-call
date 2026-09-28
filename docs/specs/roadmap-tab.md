@@ -1,6 +1,6 @@
 # A Roadmap tab on What's new
 
-Issue: #137 · Status: Proposed · PRs: (added when it opens)
+Issue: #137 · Status: Approved (by the owner, 28 Sep 2026, all three defaults in #143) · PRs: #142
 
 ## What the player gets
 
