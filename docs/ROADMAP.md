@@ -116,7 +116,6 @@ How sessions work, not the game. Each one is small, measured and recorded in the
 - **Speed on throttled phones.** Every passenger now has one object shape, which halved the simulation's time, but a fully built Midfield still reaches only about two thirds of 8× on a phone with its CPU slowed four times. One pass over passengers per step instead of three, or indexing them by state, would help.
 - **More than one airport.** Run a second airport. The odd real sites would suit it: Gibraltar's road across the runway, Barra's beach runway that follows the tide, and Madeira's runway on pillars.
 - **Speed on older phones.** A check that fails if a level 9 airport draws too slowly on a throttled phone profile.
-- **Page size budget.** A check on the size of `dist/index.html`, which grows with every feature.
 - **Accessibility.** Route and line colours that work for colour-blind players, and a larger-text option.
 - **Game logic ideas** (`docs/ideas/game-logic.md`): twelve ideas from the bot on seeds 1–3, ranked, rated on the September board (the liked ones are in the list above; the rest are parked or rejected below). The top three:
   - **A rating that reflects the last day.** The rating is full from the first day, so nothing that costs rating costs anything.
@@ -128,6 +127,7 @@ How sessions work, not the game. Each one is small, measured and recorded in the
 <!-- joined:done from docs/roadmap.d/ (Section: done) by tools/join.mjs: don't edit between these lines -->
 - **Version 34: famous faces and a real-looking region.** Invented celebrities flying through from level 3 with photographers, fans and a busy café hour; the region map redrawn with real-looking land, towns and an airport; a Fleet tab beside Gates for planes, crews and servicing, brought together with one What's new entry.
 - **Version 33: a rating that keeps you on your toes.** A rating that follows the last day of flights instead of adding up for ever, Day in a minute (a time-lapse of yesterday over the airport), Photo mode, and settings, weekly challenges, staff pay and boarding upgrades moved to where players look, brought together with one What's new entry.
+- **A page size budget check** (`docs/decisions/ADR-2026-09-28-page-size-budget.md`): `dist/index.html` stays under 861 KB (today's 749 KB plus about 15% headroom); the `page-size` check group prints the size, the budget and a CSS/script/inline-data breakdown on failure.
 - **The first level-up in the first morning** (#105, spec `docs/specs/early-first-level.md`): Local Airport asks for 80 passengers flown at the gate you start with, so a newcomer at 1× reaches it in about five minutes instead of 31–41.
 <!-- /joined:done -->
 
