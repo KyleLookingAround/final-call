@@ -12,6 +12,7 @@ function fitHud(){
   const hr=h.getBoundingClientRect(),hb=Math.round(8+hr.height+8)+'px',st=$('#stage');if(st.style.getPropertyValue('--hb')!==hb)st.style.setProperty('--hb',hb);
   if(f){const fr=f.getBoundingClientRect();b.classList.toggle('fsstack',fr.width>0&&fr.right>hr.left-6)}
   const sr=$('#stage').getBoundingClientRect(),sw=sr.width;p.classList.toggle('low',sw/2+110>sw-8-hr.width-6);$('#stage').classList.toggle('short',sr.height<230);
+  if(!$('#help').hidden)syncHscr();
 }
 new ResizeObserver(resize).observe($('#stage'));
 
