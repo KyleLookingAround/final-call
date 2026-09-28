@@ -61,6 +61,7 @@ function missRun(p,i){
 // When a gate is called, a few of its passengers in the shops lose track of time and browse on until final call, when
 // the shop sends them out (46-market.js, p.late): they're the runners. A look over the passengers once per call.
 function dawdle(F){
+  if(G.level<1)return; // not on the first morning: a new airport's first departures go on time
   const d=runsOf(F).daw,lead=new Set(),stay=p=>{const x=Math.max(0,Math.min(F.std-G.clock,p.t+LINGER)-p.t);p.late=true;p.t+=x;p.t0+=x;d.push(p)}; // a longer visit, and a full spend for it
   // or sits on in the market place, holding no seat or shop spot, until final call (state linger)
   const sit=p=>{p.state='linger';p.late=true;p.sl=-1;p.t=G.clock+LINGER_MKT;R.occOut=true;d.push(p);note(p,'linger',p.act,0.3)},on=p=>p.state==='shop'?stay(p):sit(p);
