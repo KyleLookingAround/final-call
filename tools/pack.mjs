@@ -180,6 +180,15 @@ groups are all "one file per entry, never a shared list": a small script joins t
 human-readable index each time the project builds. Two sessions adding a lesson, or a roadmap item,
 never touch the same lines, so they never conflict with each other.
 
+**A knowledge graph, so sessions don't read everything.** One script (\`tools/graph.mjs\` here) walks
+the source and the docs fresh each time and answers "what touches X?" for a system, a file, a
+function, a hook, a saved field or a check group - the files, functions, docs and lessons around it.
+A brief tells a session to read only what a named query lists, instead of the whole runbook end to
+end, which is most of what keeps a session's cost and context down on a codebase this size. The same
+script has a \`--write\` mode that regenerates a JSON index the project's own build keeps current, and
+a \`--check\` mode that fails on a broken doc link or a system's notes that don't name any of its
+files - so the map and the docs it points at can't quietly drift apart.
+
 **Cost and rate limits are budgeted, not discovered.** Every brief carries a dollar estimate and a
 rule for what to do past twice it (say why, trim, keep going). Sessions check their own usage and
 the account's rate-limit status at each stopping point, and a coordinator caps how many full-price
