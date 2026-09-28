@@ -74,16 +74,54 @@ function paxEase(p){
   p.ex+=dx/d*s;p.ey+=dy/d*s;p.ev=s/dt;
 }
 const unEase=p=>{p.et=NaN}; // out of sight: snap back on reappearing
-// the people mover's cars: one on the track beside each group of riders, or one shuttling when nobody rides
-const MV_AT=[];
+// the people mover's cars: one on the track beside each group of riders, drawn where it eases towards a car the frame
+// before rather than snapping to it, or one shuttling on its own pace when nobody rides. Persistent (MV_CARS) so a car
+// keeps its identity from frame to frame, and the empty shuttle carries on from wherever the last car doing the job was,
+// instead of jumping to a spot from its own clock. Drawing only: nothing here reads or changes G, R.pax or rnd().
+const MV_AT=[],MV_CARS=[],MV_GROUP=70,MV_MATCH=220,MV_EASE_T=0.25,MV_SPEED=0.12;
 function trackNear(P,x,y){let bx=0,by=0,bd=Infinity,vert=false;for(const g of P.segs){const [x1,y1]=g.a,[x2,y2]=g.b,ux=x2-x1,uy=y2-y1,t=clamp(((x-x1)*ux+(y-y1)*uy)/(g.len*g.len||1),0,1),qx=x1+ux*t,qy=y1+uy*t,d=Math.hypot(qx-x,qy-y);
   if(d<bd){bd=d;bx=qx;by=qy;vert=Math.abs(uy)>Math.abs(ux)}}return [bx,by,vert]}
-function drawMover(){
-  if(!(G.lv.mover&&G.pierB&&LAY.track)||roofA()){MV_AT.length=0;return} // its track runs inside the halls
+function sNear(P,x,y){let bs=0,bd=Infinity;for(const g of P.segs){const [x1,y1]=g.a,[x2,y2]=g.b,ux=x2-x1,uy=y2-y1,t=clamp(((x-x1)*ux+(y-y1)*uy)/(g.len*g.len||1),0,1),qx=x1+ux*t,qy=y1+uy*t,d=Math.hypot(qx-x,qy-y);if(d<bd){bd=d;bs=g.start+t*g.len}}return bs}
+// nearby projected rider points become one car's target, the average of the group (a handful of points, not a new pass)
+function mvGroups(pts){
+  const gs=[];
+  for(let k=0;k<pts.length;k+=3){
+    const x=pts[k],y=pts[k+1],vert=pts[k+2],g=gs.find(g=>Math.hypot(g.x-x,g.y-y)<MV_GROUP);
+    if(g){g.x=(g.x*g.n+x)/(g.n+1);g.y=(g.y*g.n+y)/(g.n+1);g.n++}else gs.push({x,y,vert,n:1});
+  }
+  return gs;
+}
+function drawMover(V){
+  if(!(G.lv.mover&&G.pierB&&LAY.track)||roofA()){MV_AT.length=0;MV_CARS.length=0;return} // its track runs inside the halls
   const P=LAY.trackP||(LAY.trackP=mkPath(LAY.track)),car=(x,y,vert)=>{ctx.fillStyle='#5CC8FF';vert?rrect(x-5,y-12,10,24,3):rrect(x-12,y-5,24,10,3);ctx.fill()};
-  if(!MV_AT.length){const t=(performance.now()/1000*0.12)%2,q=ptAt(P,(t<1?t:2-t)*P.len),s=(t<1?t:2-t)*P.len;car(q[0],q[1],s>P.segs[0].len);return} // cosmetic
-  const done=new Set();for(let k=0;k<MV_AT.length;k+=2){const [x,y,vert]=trackNear(P,MV_AT[k],MV_AT[k+1]),key=Math.round(x/90)+','+Math.round(y/90);if(done.has(key))continue;done.add(key);car(x,y,vert)}
+  const dt=MV_CARS.t==null?0:clamp(V.t-MV_CARS.t,0,0.25);MV_CARS.t=V.t;
+  const pts=[];for(let k=0;k<MV_AT.length;k+=2){const [x,y,vert]=trackNear(P,MV_AT[k],MV_AT[k+1]);pts.push(x,y,vert)}
   MV_AT.length=0;
+  const used=new Set();
+  for(const g of mvGroups(pts)){
+    let best=null,bd=MV_MATCH;
+    MV_CARS.forEach((c,k)=>{if(used.has(k))return;const d=Math.hypot(c.x-g.x,c.y-g.y);if(d<bd){bd=d;best=k}}); // matched by where it's drawn now, so the target it picks up is never more than MV_MATCH from there
+    if(best!=null){const c=MV_CARS[best];c.tx=g.x;c.ty=g.y;c.vert=g.vert;c.shuttle=false;used.add(best)}
+    else{MV_CARS.push({x:g.x,y:g.y,tx:g.x,ty:g.y,vert:g.vert,shuttle:false});used.add(MV_CARS.length-1)}
+  }
+  // a car nobody's riding any more becomes the shuttle, carrying on from where it already was; only one shuttle at a time
+  let shuttled=false;
+  for(let k=MV_CARS.length-1;k>=0;k--){
+    if(used.has(k))continue;
+    const c=MV_CARS[k];
+    if(!shuttled){c.shuttle=true;if(c.s==null){c.s=sNear(P,c.x,c.y);c.dir=1}shuttled=true}
+    else MV_CARS.splice(k,1);
+  }
+  if(!MV_CARS.length)MV_CARS.push({x:P.pts[0][0],y:P.pts[0][1],tx:P.pts[0][0],ty:P.pts[0][1],vert:false,shuttle:true,s:0,dir:1});
+  for(const c of MV_CARS){
+    if(c.shuttle){
+      c.s=clamp(c.s+c.dir*MV_SPEED*P.len*dt,0,P.len);if(c.s<=0)c.dir=1;else if(c.s>=P.len)c.dir=-1;
+      const q=ptAt(P,c.s),seg=P.segs.find(g=>c.s<=g.start+g.len+1e-6)||P.segs[P.segs.length-1];
+      c.tx=q[0];c.ty=q[1];c.vert=Math.abs(seg.b[1]-seg.a[1])>Math.abs(seg.b[0]-seg.a[0]);
+    }
+    const k=dt>0?Math.pow(0.01,dt/MV_EASE_T):0;c.x=c.tx+(c.x-c.tx)*k;c.y=c.ty+(c.y-c.ty)*k;
+    car(c.x,c.y,c.vert);
+  }
 }
 // Only the floor shown: on the roof, nobody under it; on a floor of halls, nobody whose room is on the other one (53-roofs.js).
 // The dots are drawn in batches by look (PAX_B), zoomed out as one path each, with what goes under them (buggies) before and the marks
@@ -120,12 +158,22 @@ function drawPax(V){
       else if(p.phase==='shuffle'){ctx.strokeStyle='#FF7A8A';ctx.lineWidth=1.3;ctx.beginPath();ctx.arc(x,y,r+2.2,0,Math.PI*2);ctx.stroke()}
     }
   }
-  PAX_V.length=0;drawMover();
+  PAX_V.length=0;drawMover(V);
 }
 function statusCol(s){if(s==='DEPLANING'||s==='LANDED'||s==='AT GATE')return '#5CC8FF';if(s==='ARRIVED')return '#6BE39A';if(s==='EXPECTED'||s==='COMPLETE')return '#909AA4';return s==='CARGO'||s==='LOADING'?'#D9A066':s==='BOARDING'||s==='GO TO GATE'?'#6BE39A':s==='FINAL CALL'||s==='BAGGAGE'?'#FFC72C':s==='DELAYED'||s==='TECH DELAY'||s==='CREW DELAY'?'#FF7A8A':s==='CLOSED'?'#5CC8FF':'#909AA4'}
-function gateBadge(i){
+// a stand's card at its natural spot (badgeAt), for placing it clear of its neighbours before any of them draw
+function badgeRect(i){const F=R.st[i].F,w=96,h=F?60:30;badgeAt(i);return [WP.x-w/2,WP.y-h/2,w,h]}
+const rectsOverlap=(a,b)=>a[0]<b[0]+b[2]&&a[0]+a[2]>b[0]&&a[1]<b[1]+b[3]&&a[1]+a[3]>b[1];
+// a card that would still overlap another after nudging shows only its stand number, so it never hides one it can't clear
+function gateTag(i){
+  const sel=i===R.sel,[tx,ty]=tagRect(badgeRect(i)),cx=tx+13,cy=ty+9.5;
+  ctx.fillStyle='rgba(10,12,15,.84)';rrect(tx,ty,26,19,4);ctx.fill();
+  ctx.fillStyle=sel?'#FFC72C':'#3A424B';ctx.fillRect(cx-10,cy-6.5,20,13);
+  ctx.font='800 10px "Saira Condensed","Arial Narrow",sans-serif';ctx.fillStyle=sel?'#17181A':'#ECE8DF';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(GATES[i],cx,cy);
+}
+function gateBadge(i,dy){
   const F=R.st[i].F,w=96,h=F?60:30,sel=i===R.sel;let x,y;
-  badgeAt(i);x=WP.x-w/2;y=WP.y-h/2;
+  badgeAt(i);x=WP.x-w/2;y=WP.y-h/2+(dy||0);
   ctx.fillStyle='rgba(10,12,15,.84)';rrect(x,y,w,h,4);ctx.fill();
   if(sel){ctx.strokeStyle='#FFC72C';ctx.lineWidth=1.2;rrect(x+.5,y+.5,w-1,h-1,4);ctx.stroke()}
   ctx.fillStyle=sel?'#FFC72C':'#3A424B';ctx.fillRect(x+6,y+6,20,13);
@@ -192,4 +240,25 @@ LAYER.apron.push(()=>{
 LAYER.stands.push(V=>{for(const i of SIDX){const b=standBox(i);if(b[0]+b[2]<V.x0||b[0]>V.x1)continue;drawStandApron(i)}});
 LAYER.bridges.push(()=>{for(const i of SIDX)drawBridge(i)});
 LAYER.pax.push(drawPax);
-LAYER.signs.push(()=>{for(const i of SIDX){if(G.stands[i].built)gateBadge(i)}}); // each queue's sign follows: 42-terminal.js
+const tagRect=r=>[r[0]+r[2]/2-13,r[1]+r[3]/2-9.5,26,19];
+// Cards never cover each other or their own text: closest to the camera keeps its full card and picks a place clear of
+// every card and tag already placed (dropped, then raised, then dropped twice as far); one that still can't clear shows
+// only its stand number, which also reserves its own small space. A handful of rectangle tests per frame, on the stands
+// already drawn. Returns [i, dy or null for a tag] per built stand, nearest the camera first; checks read it too.
+function placeGateCards(built,cx,cy){
+  const order=built.map(i=>{const r=badgeRect(i);return {i,r,d:Math.hypot(r[0]+r[2]/2-cx,r[1]+r[3]/2-cy)}}).sort((a,b)=>a.d-b.d);
+  const kept=[],out=[];
+  for(const e of order){
+    const step=e.r[3]+4;let dy=0,placed=false;
+    for(const off of [0,step,-step,2*step,-2*step]){
+      const r=[e.r[0],e.r[1]+off,e.r[2],e.r[3]];
+      if(!kept.some(k=>rectsOverlap(k,r))){dy=off;placed=true;kept.push(r);break}
+    }
+    if(placed)out.push([e.i,dy]);else{kept.push(tagRect(e.r));out.push([e.i,null])}
+  }
+  return out;
+}
+LAYER.signs.push(V=>{
+  const built=SIDX.filter(i=>G.stands[i].built);
+  for(const [i,dy] of placeGateCards(built,(V.x0+V.x1)/2,(V.y0+V.y1)/2))dy==null?gateTag(i):gateBadge(i,dy);
+}); // each queue's sign follows: 42-terminal.js
