@@ -119,6 +119,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 ### Ui
 
+- [What's new, easier to read and act on · 28 Sep 2026](lessons/129-whats-new-card.md)
 - [#124 Polish the first minute on a phone · 28 Sep 2026](lessons/124-polish-first-minute.md)
 - [Polish: put things where players look (#112) · 28 Sep 2026](lessons/112-polish-where-to-look.md)
 - [#107 The phone's top bar back on one row · 27 Sep 2026](lessons/107-phone-topbar.md)
