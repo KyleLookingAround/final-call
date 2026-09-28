@@ -241,7 +241,7 @@ When the link is shared, chat apps and social sites show `src/public/preview.jpg
 - Office › Settings has its own chips (`R.setSub`, `SET_SUBS`): Managers (the default), Alerts (notifications, What's new and weekly challenges), Screen and sound, and Save (airline name, livery, save code, reset).
 - Terminal › Staff also shows the Staff pay policy card, the same `pol('pay')` as Office › Policies (`polRow`).
 - Office › Reports' route table shows profit below $100 in whole dollars, and folds routes with no flights in the last 24 hours behind a Show/Hide link (`R.idleRoutes`, runtime only).
-- Tab ids are `stands` (Gates), `routes`, `terminal`, `ground` (Airfield), `sales`, `region` and `office`.
+- Tab ids are `stands` (Gates), `fleet`, `routes`, `terminal`, `ground` (Airfield), `sales`, `region` and `office`. Fleet (planes, crews, servicing, selling) shows from the goal to buy a second plane, or from level 1 (`fleetOpen`); `goTo` sends links to Gates that name planes or crews to Fleet. The eight tabs share the strip by the width of their labels (`.tabs button`, `flex:1 1 auto`).
 
 ## Views and phone layout
 
