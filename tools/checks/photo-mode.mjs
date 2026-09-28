@@ -14,8 +14,9 @@ export default async function({open,ok,saveText,newest}){
     const r=await page.evaluate(CHROME=>{const S=__sim,R=S.R;S.toast('A toast to hide');S.setSpeed(0);S.setSpeed(1);
       const shown=q=>{const e=document.querySelector(q);if(!e)return false;const b=e.getBoundingClientRect();return b.width>0&&b.height>0&&getComputedStyle(e).visibility!=='hidden'},
         seen=()=>Object.fromEntries(CHROME.map(q=>[q,shown(q)])),inside=q=>{const b=document.querySelector(q).getBoundingClientRect();return b.width>0&&b.left>=0&&b.top>=0&&b.right<=innerWidth+0.5&&b.bottom<=innerHeight+0.5};
-      // the camera button sits in the top bar, except on a phone (up to 600 px wide), where How to play has it instead
-      const before=seen(),narrow=innerWidth<=600,button=narrow?!shown('#photob'):inside('#photob');
+      // the camera button sits in the top bar, except on a phone (up to 600 px wide), where How to play has it instead;
+      // wider, it also moves there when the map is too narrow for the bar (tools/checks/topbar.mjs)
+      const before=seen(),narrow=innerWidth<=600||!shown('#photob'),button=innerWidth<=600?!shown('#photob'):narrow||inside('#photob');
       if(narrow){document.querySelector('#helpb').click();document.querySelector('#photoHelp').click()}else document.querySelector('#photob').click();
       const help=document.querySelector('#help').hidden;
       const cv=document.querySelector('#cv').getBoundingClientRect(),during=seen(),bar=inside('#photobar'),
