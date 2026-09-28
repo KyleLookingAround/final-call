@@ -62,15 +62,18 @@ function missRun(p,i){
 // the shop sends them out (46-market.js, p.late): they're the runners. A look over the passengers once per call.
 function dawdle(F){
   const d=runsOf(F).daw,lead=new Set(),stay=p=>{const x=Math.max(0,Math.min(F.std-G.clock,p.t+LINGER)-p.t);p.late=true;p.t+=x;p.t0+=x;d.push(p)}; // a longer visit, and a full spend for it
-  for(const p of R.pax)if(p.F===F&&p.state==='shop'&&!p.late&&!p.inbound&&!p.leader&&!p.kid&&rnd()<DAWDLE){stay(p);lead.add(p)}
-  if(lead.size)for(const p of R.pax)if(p.leader&&lead.has(p.leader)&&p.state==='shop'&&!p.late)stay(p); // a party browses on together
+  // or sits on in the market place, holding no seat or shop spot, until final call (state linger)
+  const sit=p=>{p.state='linger';p.late=true;p.sl=-1;R.occOut=true;d.push(p);note(p,'linger',p.act,0.3)},on=p=>p.state==='shop'?stay(p):sit(p);
+  for(const p of R.pax)if(p.F===F&&(p.state==='shop'||p.state==='mkt')&&!p.late&&!p.inbound&&!p.leader&&!p.kid&&rnd()<DAWDLE){on(p);lead.add(p)}
+  if(lead.size)for(const p of R.pax)if(p.leader&&lead.has(p.leader)&&(p.state==='shop'||p.state==='mkt')&&!p.late)on(p); // a party dawdles together
 }
+PAX_STEP.linger=p=>{const F=p.F;if(G.clock>=F.std-RUN_AT&&F.plane.state==='boarding'||F.plane.state==='closing')toGate(p)}; // an early final call sends them too
 // Final call: 12 minutes before departure, or sooner once all but a few are aboard, so dawdlers never hold a plane that
 // would otherwise leave early. Then the dawdlers leave their shops and run.
 function finalCall(F,r){
-  if(r.fc||F.plane.state!=='boarding')return;if(r.daw.length)r.daw=r.daw.filter(p=>p.state==='shop'&&p.F===F);
+  if(r.fc||F.plane.state!=='boarding')return;if(r.daw.length)r.daw=r.daw.filter(p=>(p.state==='shop'||p.state==='linger')&&p.F===F);
   if(G.clock<F.std-RUN_AT&&!(r.daw.length&&F.seated>=F.booked-r.daw.length-FC_LEFT))return;
-  r.fc=true;for(const p of r.daw)if(p.state==='shop'&&p.F===F)leaveShop(p);r.daw.length=0;
+  r.fc=true;for(const p of r.daw)if(p.F===F){if(p.state==='shop')leaveShop(p);else if(p.state==='linger')toGate(p)}r.daw.length=0;
 }
 // every game minute: the gates just called, then, once everyone else is seated after the departure time, hold the gate
 // and close it on the runners
@@ -121,7 +124,7 @@ function taleLines(p){
   for(const [c,k,a,m,w] of t.ev){
     const s=k==='came'?TALE_HOW[a]:k==='ci'?(a==='online'?'Checked in online':`Checked in at ${a==='kiosk'?'a kiosk':a==='drop'?'bag drop':'a desk'}`+(w>1?`, ${w} min queue`:'')):
       k==='sec'?`Through security`+(a>1?`, ${a} min queue`:''):k==='srch'?'Bag searched at security':k==='shop'?TALE_SHOP[a][0].toUpperCase()+TALE_SHOP[a].slice(1):
-      k==='mkt'?TALE_ACT[a][0].toUpperCase()+TALE_ACT[a].slice(1):k==='run'?`Final call: ran for gate ${GATES[a]}`:k==='gate'?`At gate ${GATES[a]}`+(t.run===3?', just in time':''):
+      k==='mkt'?TALE_ACT[a][0].toUpperCase()+TALE_ACT[a].slice(1):k==='linger'?'Lost track of time as the gate was called':k==='run'?`Final call: ran for gate ${GATES[a]}`:k==='gate'?`At gate ${GATES[a]}`+(t.run===3?', just in time':''):
       k==='miss'?`Gate ${GATES[a]} closed. Missed the flight`:k==='board'?'On board':null;
     if(s)out.push([c,s]);
   }
