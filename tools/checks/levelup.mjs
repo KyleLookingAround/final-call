@@ -47,6 +47,13 @@ export default async function({open,ok}){
     ok('levelup: the setting and the headless sim keep it closed',off.level===6&&!off.setting.card&&off.setting.toast&&!off.sim,JSON.stringify(off));
     ok('levelup: the guided start queues the card, with no toast, and opens it once the tour ends',
       !off.tour.shown&&off.tour.queued&&!off.tour.toast&&off.tourEnd.shown&&/^Now a Gateway Airport$/.test(off.tourEnd.title),JSON.stringify(off));
+    // Skip tour is the other way the tour ends: it opens a queued card too, not only tourNext's own natural end
+    const skip=await page.evaluate(()=>{const S=__sim,G=S.G,R=S.R;G.tour={s:0};S.tourStep();
+      easy(7);S.checkLevel();const queued={shown:!!card(),queued:!!R.lvlCard};
+      document.querySelector('#coach [data-tskip]').click();
+      return {queued,after:{shown:!!card(),title:card()&&card().title},done:!!G.tour.done}});
+    ok('levelup: Skip tour also opens the card it was holding back',
+      !skip.queued.shown&&skip.queued.queued&&skip.done&&skip.after.shown&&/^Now a Global Hub$/.test(skip.after.title),JSON.stringify(skip));
     // row 39: a level with lots to list still fits — at most 5 plan rows plus "and N more", one chip a tab not one a upgrade
     const big=await page.evaluate(()=>{const S=__sim,R=S.R;R.lvlCard={from:0,to:9};S.lvlCardOpen(true);
       const U=S.lvlUnlocks(0,9),tabs=new Set(U.more.map(x=>x.tab));

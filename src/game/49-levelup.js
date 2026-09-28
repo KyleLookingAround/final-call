@@ -1,6 +1,7 @@
 /* ================= the level-up card: what a new level has just unlocked, with links straight there ================= */
 // checkLevel hands a level-up to lvlUp; the card opens at the frame loop's next UI tick (lvlTick), so levels reached together
-// share one card. Never in the headless sim or the guided start, and not with G.set.lvlCard off: then the toast, as before.
+// share one card. Never in the headless sim, and not with G.set.lvlCard off: then the toast, as before. During the guided
+// start it still queues (never the toast) but stays shut until tourNext ends or skips the tour (36-guided-start.js).
 // It pauses the game and puts the previous speed back when it closes, as What's new does. R.lvlCard is runtime only.
 const lvlCities=t=>{const c=CITIES.filter(x=>x[2]===t).map(x=>x[1]);return c.length>4?c.slice(0,4).join(', ')+` and ${c.length-4} more`:c.join(', ')};
 // what's new between level `from` and level `to`, from the same data the game gates on
