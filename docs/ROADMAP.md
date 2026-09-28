@@ -61,6 +61,7 @@ How sessions work, not the game. Each one is small, measured and recorded in the
 
 <!-- joined:next from docs/roadmap.d/ (Section: next) by tools/join.mjs: don't edit between these lines -->
 - **Draw the moving walkways** (from #89's look back, `docs/lessons/89-pax-movement.md`; PR #89): the moving walkways upgrade still speeds concourse walks up to 2.6× with nothing drawn for it. #89 fixed the same problem for the people mover (riders hidden, drawn on its cars, every change of pace eased) but left the walkways as pure numbers, calling drawing them a follow-up for the owner to decide. For the owner to order.
+- **Merge queue, proposed** (a GitHub ruleset on `main`, the owner's to set up): replaces the Catch up workflow's merge-and-dispatch dance, and the race it can't close — two PRs, each green on its own head and merged minutes apart, can still combine into a broken game. A merge queue tests each PR's merge commit against the combined queue head before it lands, one at a time, so nothing merges that doesn't pass together with what's ahead of it. For sessions, the change is small: instead of merging their own green PR, they add it to the queue and it merges once its turn comes and it passes; everything else (branch protection, review requirements) stays as it is. Do this after launch week, once `pages.yml`'s new check-before-deploy job (`docs/briefs/launch-safety.md`) has had a week to prove itself; the two aren't a conflict, just two ways of catching the same race, and the queue is the sturdier one to keep long-term.
 <!-- /joined:next -->
 
 ## Ideas (not agreed)
@@ -124,6 +125,7 @@ How sessions work, not the game. Each one is small, measured and recorded in the
 ## Done
 
 <!-- joined:done from docs/roadmap.d/ (Section: done) by tools/join.mjs: don't edit between these lines -->
+- **Version 33: a rating that keeps you on your toes.** A rating that follows the last day of flights instead of adding up for ever, Day in a minute (a time-lapse of yesterday over the airport), Photo mode, and settings, weekly challenges, staff pay and boarding upgrades moved to where players look, brought together with one What's new entry.
 - **The first level-up in the first morning** (#105, spec `docs/specs/early-first-level.md`): Local Airport asks for 80 passengers flown at the gate you start with, so a newcomer at 1× reaches it in about five minutes instead of 31–41.
 <!-- /joined:done -->
 

@@ -70,3 +70,7 @@ description: Run the other Final Call sessions building a feature's parts - the 
 - A Routine fires hourly at :50 into a fresh session and re-wakes sessions the account's usage limit stopped mid-turn: the limit kills a session's turn before it can book its own `send_later`, so nothing wakes it after the reset. Its brief, which is also its prompt, is `docs/briefs/watchdog.md`.
 - Routine id: `trig_01BTgHU2LFEezyrUWk9QLL3M` ("Final Call: watchdog"). It was created with no connectors, so if a firing can't call `list_sessions` or `create_trigger`, recreate it from the Routines page with Claude Code Remote attached, and put the new id here.
 - The owner pauses it from the Routines page on a quiet day.
+
+## 12. Launch-day triage
+
+During launch week, the coordinator also creates the "Final Call: launch-day triage" Routine from the committed `docs/briefs/launch-triage.md` (a fresh session every two hours, on the cheaper model), retires it once launch week is over, and puts its id here in a follow-up.
