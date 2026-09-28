@@ -13,6 +13,7 @@ The project notes (`CLAUDE.md`) hold what every change needs. This file holds ho
 - [Effects: the rating and money ledger](systems/effects.md) (`04-effects.js`, `15-panel.js`)
 - [Famous faces](systems/famous-faces.md) (`64-famous-faces.js`, `03-state.js`, `14-board.js`)
 - [Guided start](systems/guided-start.md) (`36-guided-start.js`)
+- [Late runners and passengers' stories](systems/late-runners.md) (`61-late-runners.js`, `46-market.js`, `43-departures.js`, `12-drawing.js`, `14-board.js`, `13-camera.js`)
 - [Level-up card](systems/level-up-card.md) (`49-levelup.js`)
 - [Levels and Masterplan](systems/levels-and-masterplan.md) (`02-masterplan.js`, `09-construction-levels-days.js`, `18-masterplan-ui.js`)
 - [Lowmere](systems/lowmere.md) (`33-lowmere.js`)
@@ -126,6 +127,7 @@ The main names, by file group (the joined table below is the complete list, from
 | `53-roofs.js` | ROOFS: the terminal and its piers seen from above, a floor the player steps up to |
 | `54-weather.js` | WEATHER: rain, settled snow, puddles, fog banks, cloud shadows and a windsock |
 | `55-vehicles.js` | VEHICLES: ground vehicles working each stand's turnaround |
+| `61-late-runners.js` | late runners, and a passenger's story |
 | `62-photo-mode.js` | PHOTO MODE: hide the panels, pick a drawn time and sky, and save a picture |
 | `63-day-in-a-minute.js` | DAY IN A MINUTE: a time-lapse of yesterday, played back over the airport view |
 | `64-famous-faces.js` | FAMOUS FACES: now and then a celebrity flies through, with a crowd, a busy café hour and a rating stake |
@@ -188,6 +190,7 @@ The main names, by file group (the joined table below is the complete list, from
 - `graph`: The map in tools/graph.mjs: every link in the docs resolves, every system in docs/systems/ names its files, and the joined lists (tools/join.mjs) are sound; a system's file changed without its notes is a warning, and so are notes naming three or more functions that live in one file outside the system's own (a file its first line mentions only after a ";" isn't its own).
 - `hotel`: The airport hotel (docs/specs/terminal.md): it's never overbooked, crews resting there are ready sooner, stranded passengers get rooms, late arrivals walk through to the lobby, early guests come down from it, and with no hotel nothing changes.
 - `kofi`: The Ko-fi link (docs/specs/kofi-link.md): a quiet link to https://ko-fi.com/kylemck in What's new, Settings and the level-up card, nowhere else (not the airport view, the board or the goal bar), and it doesn't stop the level-up card fitting a 320 px phone.
+- `late-runners`: Late runners and passengers' stories (61-late-runners.js, docs/systems/late-runners.md): at final call anyone still walking to the gate runs, faster than they walk, and either boards or misses; a flight with runners shows GATE CLOSING; a runner the gate closes on costs a little rating at its stand and leaves the flight; tapping a passenger opens their story with a timeline; a day headless throws nothing.
 - `layout`: No sideways overflow and no page scroll, from 320 px phones to 2560 px screens, portrait and landscape.
 - `layouts`: Every airport layout plays two hours fully built without errors, its Layout tab fits a 320 px phone, and a desktop screenshot of each goes in build/shots/.
 - `levelup`: The level-up card (docs/specs/level-up.md): it opens once on a level-up, pauses the game and puts the speed back; it lists only what has just unlocked; each link lands on the right tab; two levels at once make one card; the setting, the guided start and the headless sim keep it closed; and it fits phones, tablets and desktops.
