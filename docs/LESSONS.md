@@ -24,6 +24,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 - [Version 32: ready for what's next · 27 Sep 2026](lessons/main-release-32.md)
 - [#126 Cut release 34: famous faces and a real-looking region · 28 Sep 2026](lessons/126-release-34.md)
 - [#124 Polish the first minute on a phone · 28 Sep 2026](lessons/124-polish-first-minute.md)
+- [#122 Anonymous usage counts for launch week · 28 Sep 2026](lessons/122-usage-counts.md)
 - [#118 Cut release 33: a rating that keeps you on your toes · 28 Sep 2026](lessons/118-release-33.md)
 - [The first level-up in the first morning (#117) · 28 Sep 2026](lessons/117-early-first-level.md)
 - [#116 A network you have to keep · 28 Sep 2026](lessons/116-network-to-keep.md)
