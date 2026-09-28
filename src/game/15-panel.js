@@ -235,6 +235,7 @@ function settingsHTML(){
     h+=row('sndVoice','Spoken calls','Now and then a voice reads a final call or a gate change, at 1× or 2×.',[[true,'On'],[false,'Off']]);
     h+=row('sndAmb','Ambience','The terminal’s hum, jets on the runway and rain, following the camera.',[[true,'On'],[false,'Off']]);
     h+=row('sndFx','Effects','Cash tills, and ticks as passengers pay.',[[true,'On'],[false,'Off']]);
+    h+=`<div class="sec">Privacy</div>`+row('usage','Send anonymous usage counts','Page visits and moments like your first flight or second day, so we know whether anyone’s playing. No cookies, nothing about you.',[[true,'On'],[false,'Off']]);
   }else{
     h+=`<div class="sec">Airline</div><div class="namefield"><input id="nameIn" maxlength="16" value="${G.name.replace(/"/g,'')}" aria-label="Airline name"></div>
         <div class="swatches">${LIVERIES.map(([n,c],k)=>`<button class="swatch${G.livery===k?' on':''}" style="background:${c}" data-liv="${k}" aria-label="${n} livery"></button>`).join('')}</div>
@@ -386,7 +387,7 @@ $('#panel').addEventListener('click',e=>{
   else if(b.id==='copySave'){
     let code='';try{code=btoa(unescape(encodeURIComponent(JSON.stringify({...G,savedAt:Date.now()}))))}catch(e){}
     const inp=$('#saveIn');const fallback=()=>{inp.value=code;inp.select();toast('Select and copy the code in the box below.',null,null,'',6)};
-    try{navigator.clipboard.writeText(code).then(()=>toast('Save code copied. Paste it into the other copy of the game.',null,null,'goal',6),fallback)}catch(e){fallback()}
+    try{navigator.clipboard.writeText(code).then(()=>{usageEvent('share');toast('Save code copied. Paste it into the other copy of the game.',null,null,'goal',6)},fallback)}catch(e){fallback()}
     return;
   }
   else if(b.id==='loadSave'){

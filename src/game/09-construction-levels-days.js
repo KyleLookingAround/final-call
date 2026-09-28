@@ -42,6 +42,7 @@ function checkLevel(){
   const n=G.level+1;if(!LEVELS[n])return;
   if(levelChecks(n).every(([_,v,t])=>v>=t)){
     G.level=n;earn(LEVELS[n].reward,'bonus');G.pts=(G.pts||0)+LVL_PTS(n);
+    if(n===1)usageEvent('level-1');if(n===3)usageEvent('level-3');
     {const nt=new Set(G.newTabs||[]);nt.add('office');if(STAND.some(x=>x.lvl===n)||PIER.lvl===n)nt.add('stands');if(n===1)nt.add('region');G.newTabs=[...nt]}
     if(!R.sim){if(!lvlUp(n))toast(`Now ${aL(n,1)}! +${money(LEVELS[n].reward)} and <b>${LVL_PTS(n)} plan points</b> to spend.`,[{label:'Open the Masterplan',fn:()=>openPlan()},{label:'Later',fn:()=>{}}],null,'goal',14);fanfare();
       renderTabs();renderPanel();$('#lvlName').textContent=LEVELS[n].name;renderPlanBtn()}
@@ -58,7 +59,7 @@ clock(DAY,'dayReport',1,0,s=>{
   }
   if(s&&s.flights>=3)G.otp=G.otp==null?s.ontime/s.flights:G.otp*0.6+0.4*s.ontime/s.flights;
 });
-clock(DAY,'newDay',1,0,()=>{G.day=dayOf(G.clock);G.dstat=dayStats()});
+clock(DAY,'newDay',1,0,()=>{G.day=dayOf(G.clock);G.dstat=dayStats();if(G.day===2)usageEvent('day-2')});
 clock(DAY,'season',1,0,()=>{
   const d=G.day,sea=seasonOf(d),prev=seasonOf(d-1);
   if(sea!==prev)toast(sea.name==='Winter'?'Winter: ski and winter-sun routes are busiest. Expect snow; de-icing pads keep turnarounds moving.':sea.name==='Summer'?'Summer holidays: beach cities and families fill flights. Ski routes go quiet.':`${sea.name} is here.`,null,null,'',9);

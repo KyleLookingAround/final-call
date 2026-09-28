@@ -4,14 +4,14 @@
 // G's top-level keys is not game state (nothing walks them) while the order inside each field is.
 // A new fixture fails until its line is added to GOLD: the check prints the hash to add.
 import {createHash} from 'node:crypto';
-const GOLD={ // recorded on main before save migration became a table
-  'v14-L0.json':'67c207d62aa51481','v14-L2.json':'cecde1ac09669661','v14-L4.json':'2608ebd96ffd4eff','v18-L1.json':'bd410367929bcc36',
-  'v18-L3.json':'4bfc436b70c862fa','v18-L5.json':'445dfdb7bdcd33ef','v18-L8.json':'c880ddfe86091122','v20-L5.json':'250bac0aed639aee',
-  'v20-L8.json':'6a2089081603da30','v21-L1.json':'51aee1b2e833d45c','v21-L3.json':'bf4f4f271e09a44d','v21-L5.json':'536c07f715d9b3bd',
-  'v21-L9.json':'84de46b5a7e1b8e0','v26-L5.json':'2393aa1d1f634195','v26-L9.json':'74199fd3ef48ea35','v27-L9.json':'57d182e074838415',
-  'v28-L3.json':'36e42374552180bc','v28-L5.json':'dcfce7c0386ff3ee','v28-L9.json':'69f52c24848b924c','v29-L1.json':'b0631c34f5e26052',
-  'v29-L3.json':'4a8bb1848d459dc5','v29-L5.json':'c423b103de609f14','v29-L9.json':'8434f6ffb54930c3','v32-L1.json':'3001757033878320',
-  'v32-L3.json':'6025665f69921d71','v32-L5.json':'7a8f5cdb8b02f564','v32-L9.json':'e4542b2808e2bfa6',
+const GOLD={ // recorded on main, and again for every save fixture after 65-usage-counts.js added G.usageSent and G.set.usage
+  'v14-L0.json':'b82d72ab3d95a1bf','v14-L2.json':'8ec9c9c47498fd15','v14-L4.json':'aed84b77b606b187','v18-L1.json':'3c38484244407876',
+  'v18-L3.json':'0156f069c5ac8657','v18-L5.json':'ac878b5b766383fa','v18-L8.json':'1104ee94f0c6124a','v20-L5.json':'46feefff4a0f335b',
+  'v20-L8.json':'85d49b56feca9b29','v21-L1.json':'f4239cce48dff1d7','v21-L3.json':'25fe0235a031b294','v21-L5.json':'c62aeb053cb829c9',
+  'v21-L9.json':'ef82f4bc523722b3','v26-L5.json':'8a81bdf86f764609','v26-L9.json':'1c6f28e60b86e4f0','v27-L9.json':'6519f5b74d87acd2',
+  'v28-L3.json':'4855692106241f8e','v28-L5.json':'81784467e362aa56','v28-L9.json':'7daf76978102c1da','v29-L1.json':'141a006d5d75d13c',
+  'v29-L3.json':'95a0a82ddc44c4b4','v29-L5.json':'edf5cfb6001348f8','v29-L9.json':'105d8d38d8e94718','v32-L1.json':'b6b19b6cd98e3566',
+  'v32-L3.json':'01fd53c62f63ae54','v32-L5.json':'02f08e7c2515cd7d','v32-L9.json':'840ce9a3af7e2a33',
 };
 const hash=s=>createHash('sha256').update(s).digest('hex').slice(0,16);
 

@@ -14,7 +14,8 @@ const FIELDS={
   hours:()=>[],arrReports:()=>Array(NG).fill(null),savedAt:()=>0,rate:()=>0,lastDest:()=>'',tech:()=>({}),pts:()=>0,ptBought:()=>0,pv:()=>2,
   gdone:()=>({}),routes:()=>({DUB:{f:1},EDI:{f:1},AMS:{f:1}}),rs:()=>({}),crews:()=>[{free:0,back:0,duty:0,res:0},{free:0,back:0,duty:0,res:0}],
   tour:()=>({s:0}),nv3:()=>1,
-  set:()=>({tips:true,msgs:'all',pops:'all',goal:true,badges:true,recs:true,autoLines:true,autoFares:true,autoCrews:true,autoDuty:true,chal:true,sndAnn:'on',sndVoice:true,sndAmb:true,sndFx:true,lvlCard:true}),
+  set:()=>({tips:true,msgs:'all',pops:'all',goal:true,badges:true,recs:true,autoLines:true,autoFares:true,autoCrews:true,autoDuty:true,chal:true,sndAnn:'on',sndVoice:true,sndAmb:true,sndFx:true,lvlCard:true,usage:true}),
+  usageSent:()=>({}),
 };
 const DEFAULT=()=>{const s={};for(const k in FIELDS)s[k]=FIELDS[k]();return s};
 const SET=()=>G.set||{};

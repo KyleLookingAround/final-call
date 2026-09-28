@@ -24,6 +24,7 @@ The project notes (`CLAUDE.md`) hold what every change needs. This file holds ho
 - [The terminal](systems/terminal.md) (`42-terminal.js`, `47-hotel.js`, `05-flights.js`, `43-departures.js`)
 - [Transport manager](systems/transport-manager.md) (`32-managers.js`)
 - [Update check](systems/update-check.md) (`37-update-check.js`)
+- [Usage counts](systems/usage-counts.md) (`65-usage-counts.js`)
 - [Weather and events](systems/weather.md) (`28-region-weather.js`, `10-events-toasts.js`, `54-weather.js`, `41-airside.js`, `07-passengers.js`, `12-drawing.js`, `39-layouts.js`, `43-departures.js`, `47-hotel.js`, `04-geometry.js`)
 - [What's new](systems/whats-new.md) (`38-updates.js`)
 <!-- /joined:systems -->
@@ -126,6 +127,7 @@ The main names, by file group (the joined table below is the complete list, from
 | `55-vehicles.js` | VEHICLES: ground vehicles working each stand's turnaround |
 | `62-photo-mode.js` | PHOTO MODE: hide the panels, pick a drawn time and sky, and save a picture |
 | `63-day-in-a-minute.js` | DAY IN A MINUTE: a time-lapse of yesterday, played back over the airport view |
+| `65-usage-counts.js` | usage counts: anonymous page counts for launch week |
 | `99-start.js` | the `/*SIM_HOOK*/` marker and the call that starts the game |
 <!-- /joined:files -->
 
@@ -212,6 +214,7 @@ The main names, by file group (the joined table below is the complete list, from
 - `tour`: A new game starts the guided first hour, and it advances.
 - `transport`: The transport manager: its suggestions are buildable, pay back within a week and come one per line; Not now hides one; extensions and upgrades work (the old line runs until the new one opens, which takes a reserved number); it leaves lines you've taken over alone, reviews the rest, adds services to an overfull line within the hour and runs event extras only while crowds travel.
 - `update`: The update-check toast (docs/specs/update-toast.md, src/game/37-update-check.js): quiet when the running build matches dist/version.json, a toast when it doesn't, Update now saves then reloads, Later holds it back an hour, and none of it runs off GitHub Pages or in the headless sim.
+- `usage`: Usage counts (docs/systems/usage-counts.md, 65-usage-counts.js): the GoatCounter script tag loads only on the published site, with a site code set, not R.sim, and the player hasn't turned it off; with the code emptied, or off the published site, nothing loads and no request is ever made. Named events fire once per save through the loaded script and cost nothing when it hasn't loaded.
 - `vehicles`: Vehicles working each stand's turnaround (src/game/55-vehicles.js, docs/specs/real-airport.md): vehicleWork(i) reads only the stand's own state, so it's a turnaround (docked, or easing back off the stand) exactly when the stand says so, and never at an empty stand or one whose plane is still on its way in.
 - `weather-fx`: Weather and events in one place (28-region-weather.js, docs/systems/weather.md): over a seeded day and a bit on the level 9 save, the weather and event flags in R.fx (fog, snow, rain, storm, rush, sick, strike, fuel, the lines' faults, replacement buses, roadworks and leaves) come on and go off at the same minutes as they did on main before weather.set and weather.on (tools/checks/lib/weather-fx.json, recorded from main; WEATHER_FX_RECORD=1 writes it again).
 - `weather`: Weather you can see (src/game/54-weather.js, docs/specs/real-airport.md): rain, settled snow, puddles, fog and cloud shadows draw only while R.fx says they're on (fading out after, never a new saved field), settled snow is cleared from every built stand, and the windsock is always up.
