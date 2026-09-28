@@ -16,6 +16,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 ### Checks
 
+- [#156 Systems refactor 7, part 2: arrivals, movement and the index in one pass · 28 Sep 2026](lessons/156-refactor-passes-merge.md)
 - [#150 Release P1: the first level-up and the guided start · 28 Sep 2026](lessons/150-first-level-up-card.md)
 - [#145 Systems refactor 7, part 1: passengers by state · 28 Sep 2026](lessons/145-refactor-passes-index.md)
 - [The terminal as a place: the checks refresh · 28 Sep 2026](lessons/144-terminal-place-checks-refresh.md)
@@ -111,6 +112,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 ### Specs
 
+- [#142 A Roadmap tab on What's new: the spec · 28 Sep 2026](lessons/142-roadmap-tab-spec.md)
 - [#138 Multiple floors: the terminal-place spec refreshed · 28 Sep 2026](lessons/138-terminal-place-spec-refresh.md)
 - [#49 The terminal as a place: the spec, checks planned first · 27 Sep 2026](lessons/49-terminal-place-spec.md)
 - [Real airport groundwork, spec and parts' briefs · 27 Sep 2026](lessons/38-real-airport-groundwork.md)
