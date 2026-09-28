@@ -1,6 +1,6 @@
 // The clocks (02-clocks.js, docs/SYSTEMS.md "Time"): over a seeded day and a bit, the hooks run in the same order and at the
 // same cadence as they did on main before the tables (tools/checks/lib/clocks.json, recorded from main with a log call at
-// each hook), and every hook the order lists is registered once, from its system's own file.
+// each hook, and re-recorded with the hooks added since, such as dayRec), and every hook the order lists is registered once, from its system's own file.
 import {readFileSync} from 'node:fs';
 import {join,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
