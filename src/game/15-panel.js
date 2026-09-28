@@ -23,8 +23,9 @@ function upSection(tab,only,skip){
   if(done.length)h+=`<div class="sec">Fully upgraded<span>${done.length}</span></div>`+done.map(upRow).join('');
   return h;
 }
-// Fleet opens with the goal to buy a second plane (after a boarding method), or once there is more than one plane
-const fleetOpen=()=>G.level>=1||G.tab==='fleet'||!!(G.gdone&&(G.gdone.method||G.gdone.plane2))||G.fleet.filter(f=>!f.sold).length>1;
+// Fleet opens with the goal to buy a second plane (after a boarding method), once there is more than one plane, or when a
+// tip links there (R.fleetLink, for the rest of the visit)
+const fleetOpen=()=>G.level>=1||G.tab==='fleet'||R.fleetLink||!!(G.gdone&&(G.gdone.method||G.gdone.plane2))||G.fleet.filter(f=>!f.sold).length>1;
 const tabOpen=id=>id==='fleet'?fleetOpen():id==='region'?G.level>=1||Object.keys(G.lines||{}).length>0:id==='routes'?G.level>=1||Object.keys(G.routes||{}).length>3:true;
 function renderTabs(){
   $('#tabs').innerHTML=`<button class="drawclose" id="drawClose" aria-label="Close panel">×</button>`+TABS.filter(([id])=>tabOpen(id)).map(([id,n,ic])=>`<button data-tab="${id}" role="tab" aria-selected="${G.tab===id}" class="${G.tab===id?'on':''}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON[ic]}</svg>${n}<span class="cnt" hidden></span>${SET().badges!==false&&(G.newTabs||[]).includes(id)&&G.tab!==id?'<span class="newb">NEW</span>':''}</button>`).join('');
@@ -311,7 +312,7 @@ function refreshUI(){
 function checkGoals(){
   const g=curGoal();if(!g)return;const [v,t]=g.p();
   if(v>=t){(G.gdone||(G.gdone={}))[g.id]=1;if(g.r)earn(g.r,'bonus');if(g.pts)G.pts=(G.pts||0)+g.pts;
-    if(!R.sim){toast(`Goal complete: ${g.t}.${g.r?` +${money(g.r)}`:''}${g.pts?` <b>+${g.pts} plan point</b>`:''}`,null,null,'goal',5);kaching();if(G.tab==='office')renderPanel();renderPlanBtn();save()}}
+    if(!R.sim){if(g.id==='method'&&!(G.newTabs||[]).includes('fleet'))G.newTabs=[...(G.newTabs||[]),'fleet'];renderTabs();toast(`Goal complete: ${g.t}.${g.r?` +${money(g.r)}`:''}${g.pts?` <b>+${g.pts} plan point</b>`:''}`,null,null,'goal',5);kaching();if(G.tab==='office')renderPanel();renderPlanBtn();save()}}
 }
 
 document.addEventListener('pointerdown',()=>{ensureAudio();R.lastInput=performance.now()},{passive:true});
@@ -407,7 +408,7 @@ $('#panel').addEventListener('click',e=>{
 });
 function subFor(tab,sel){sel=sel||'';if(tab==='terminal'){const k=(sel.match(/data-buy="(\w+)"/)||[])[1];const u=k&&UPG[k];R.tSub=u?(u.sec==='Arrivals'?'arr':u.sec==='Concourse'||u.sec==='Staff'?'staff':'dep'):/staff/.test(sel)?'staff':R.tSub}if(tab==='ground'){const k=(sel.match(/data-buy="(\w+)"/)||[])[1];R.aSub=/^#layout-/.test(sel)?'layout':k&&UPG[k]&&UPG[k].sec==='Landmark projects'?'build':'ops'}if(tab==='office')R.oSub=/loan/.test(sel)?'money':'progress';if(tab==='sales')R.sSub=/shop/.test(sel)?'shops':/carpark|hotel/.test(sel)?'landside':'prices';if(tab==='region')R.regSub=sel.includes('dbuild')?'sites':'lines';if(tab==='stands')R.gSub=/mbuy/.test(sel)?'methods':'gates';if(tab==='routes')R.rSub=/ropen/.test(sel)?'new':'mine'}
 // planes, crews and servicing moved from Gates to their own tab: links still naming Gates land on Fleet
-function goTo(tab,sel){if(tab==='stands'&&/acbuy|servicet|sellt|crewhire/.test(sel||''))tab='fleet';subFor(tab,sel);setTab(tab);if(sel)requestAnimationFrame(()=>highlight(sel,'pulse'))}
+function goTo(tab,sel){if(tab==='stands'&&/acbuy|servicet|sellt|crewhire/.test(sel||'')){tab='fleet';R.fleetLink=true}subFor(tab,sel);setTab(tab);if(sel)requestAnimationFrame(()=>highlight(sel,'pulse'))}
 $('#goal').addEventListener('click',()=>{const g=curGoal();if(!g||!g.go)return;if(g.go[0]==='plan'){openPlan();return}goTo(g.go[0],g.go[1])});
 $('#goal').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('#goal').click()}});
 $$('.hud [data-speed]').forEach(b=>b.addEventListener('click',()=>setSpeed(+b.dataset.speed)));
