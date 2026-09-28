@@ -54,6 +54,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--sign);outline-o
 .brows .brow:nth-child(n+3){display:none}
 .hrow{font:400 11.5px/1.2 var(--mono);color:#B9A15A;display:none}
 .hrow .dep{white-space:nowrap}
+.ffline{font:500 11.5px/1.3 var(--mono);color:#FFC72C;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:3px 2px 0}
+.ffline[hidden]{display:none}
 .late{color:var(--bad)} .ok{color:var(--good)}
 .bempty{font:500 12px var(--mono);color:var(--muted)}
 /* an announcement's words along the foot of the board (48-sound.js); too long for the board, it scrolls */
@@ -652,6 +654,7 @@ body.photo .board,body.photo .side,body.photo .topgap,body.photo .spot,body.phot
     <div class="bcols"><span>Time</span><span>Flight</span><span class="dl" id="bDestH">Destination</span><span>Gate</span><span>Status</span></div>
     <div class="brows" id="brows"></div>
     <div id="hist"></div>
+    <div class="ffline" id="ffLine" hidden></div>
     <div class="bann" id="bann" hidden aria-live="polite"><span></span></div>
   </header>
 
