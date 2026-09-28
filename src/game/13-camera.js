@@ -26,6 +26,7 @@ cv.addEventListener('pointermove',e=>{
 function endPtr(e){if(!ptrs.has(e.pointerId))return;const single=ptrs.size===1;ptrs.delete(e.pointerId);if(!ptrs.size)cv.classList.remove('drag');if(single&&moved<8&&e.type==='pointerup')tapAt(e.offsetX,e.offsetY)}
 cv.addEventListener('pointerup',endPtr);cv.addEventListener('pointercancel',endPtr);
 cv.addEventListener('wheel',e=>{e.preventDefault();zoomAt(e.offsetX,e.offsetY,Math.exp(-e.deltaY*0.0015))},{passive:false});
+const PAX_TAP=[]; // (world x, y, zoom) → true if a tap on the airport view picked a passenger (61-late-runners.js)
 function tapAt(px,py){
   const now=performance.now();
   if(now-(R.lastTap||0)<320&&Math.hypot(px-R.ltx,py-R.lty)<30){R.lastTap=0;zoomAt(px,py,1.7);return}
@@ -33,6 +34,7 @@ function tapAt(px,py){
   const k=viewK(),wx=R.cam.x+px/k,wy=R.cam.y+py/k;
   if(R.view==='region'){regionTap(wx,wy);return}
   if(R.view==='world'){worldTap(wx,wy);return}
+  if(PAX_TAP.some(f=>f(wx,wy,k)))return;
   if(wy<AF_Y){setTab('ground');return}
   if(wy>764+LAND_DY&&wx<340&&(airKind('tram')||R.tram.x!=null)){setTab('region');return}
   if(wy>LAND_B+2){R.sSub='landside';setTab('sales');return}

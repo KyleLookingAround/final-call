@@ -30,11 +30,11 @@ TERM_DAY.push(()=>{
   if(!S.next)S.next=G.day+1+Math.floor(rnd()*3);
   if(!S.v&&G.day>=S.next){famousBook(G.day+1);S.next=G.day+1+famousGap()}
 });
-// the flight that carries them: the earliest passenger flight at a stand leaving 40–300 minutes from now, one with
-// passengers still to come to the airport first
+// the flight that carries them: the earliest passenger flight at a stand leaving 40–300 minutes from now and not boarding
+// yet (a celebrity already aboard would never be seen), one with passengers still to come to the airport first
 function famousFlight(){
   let best=null,bk=0;
-  for(const S of R.st){const F=S.F;if(!F||F.freighter||!F.booked||F.plane.state==='closing')continue;const m=F.std-G.clock,k=F.manifest.length?2:1;
+  for(const S of R.st){const F=S.F;if(!F||F.freighter||!F.booked||F.plane.state==='closing'||F.plane.state==='boarding')continue;const m=F.std-G.clock,k=F.manifest.length?2:1;
     if(m>=40&&m<=300&&(k>bk||k===bk&&F.std<best.std)){best=F;bk=k}}
   return best;
 }

@@ -27,12 +27,12 @@ export default async function({open,ok,saveText}){
   const sim=await page.evaluate(()=>{const S=__sim,R=S.R;S.ensureAudio();R.sim=true;for(let k=0;k<600;k++){S.update(0.1);S.soundTick(1e6+k*100)}R.sim=false;
     return {log:S.SND.log.length,q:S.SND.q.length,osc:__snd.osc.length,amb:!!S.SND.amb}});
   ok('sound: nothing is watched, queued or played in the headless sim',!sim.log&&!sim.q&&!sim.osc&&!sim.amb,JSON.stringify(sim));
-  // a morning at 1x: your own flights' boarding, gate calls and final calls, each once. Whether a flight is still boarding
-  // 10 minutes before it leaves depends on how full the day's flights are, so the first of yours to start boarding
-  // has its departure brought forward, to be sure of one final call
-  const day=await page.evaluate(()=>{const S=__sim,R=S.R,G=S.G;toHour(8);let partners=0,freighters=0,late=null;
-    for(let m=0;m<300;m++){drive(1,1);for(const i of S.SIDX){const F=R.st[i].F;if(F&&F.partner)partners++;if(F&&F.freighter)freighters++;
-      if(!late&&F&&!F.partner&&!F.freighter&&F.plane&&F.plane.state==='boarding'&&S.isCalled(F)&&F.seated<F.booked-5){late=F;F.std=Math.min(F.std,G.clock+9)}}}
+  // a morning at 1x: your own flights' boarding, gate calls and final calls, each once
+  const day=await page.evaluate(()=>{const S=__sim,R=S.R,G=S.G;(G.pol||(G.pol={})).late='wait';toHour(8);let partners=0,freighters=0;
+    // one of your flights boarding with many still to sit is brought forward, so a final call is certain whatever else the morning holds
+    let late=false;const lateOne=()=>{const F=S.SIDX.map(i=>R.st[i].F).find(F=>F&&!F.partner&&!F.freighter&&F.plane.state==='boarding'&&S.isCalled(F)&&F.seated<F.booked-40&&F.std-G.clock>20);
+      if(F){F.std=Math.ceil((G.clock+20)/5)*5;late=true}};
+    for(let m=0;m<300;m++){if(!late&&m<180)lateOne();drive(1,1);for(const i of S.SIDX){const F=R.st[i].F;if(F&&F.partner)partners++;if(F&&F.freighter)freighters++}}
     const L=S.SND.log,dup=new Set(),twice=L.filter(x=>{const k=x.k+x.f;if(dup.has(k))return true;dup.add(k);return false}).map(x=>x.k+' '+x.f);
     return {kinds:kinds(L),notOwn:L.filter(x=>!x.own).length,twice,partners,freighters,played:S.SND.played.length,words:S.SND.played.filter(p=>p.words).length,line:document.querySelector('#bann').hidden?null:document.querySelector('#bann').textContent}});
   ok('sound: your flights’ boarding, gate calls and final calls each announce once, never a partner’s or freighter’s',
@@ -72,8 +72,12 @@ export default async function({open,ok,saveText}){
     return {gates:L.length,text:SND.q.concat(SND.cur||[]).filter(x=>x.k==='gate').map(x=>x.text)[0]||''}});
   ok('sound: a gate change is announced',gate.gates>0&&/^Gate change: flight \w+ to .+ now leaves from gate \w+, not \w+$/.test(gate.text),JSON.stringify(gate));
   // a quiet night: from 23:00 to 05:00 only final calls, and never spoken
-  const night=await page.evaluate(()=>{const S=__sim,G=S.G,SND=S.SND;(G.pol||(G.pol={})).curfew=false;toHour(23);SND.q.length=0;const p0=SND.played.length,l0=SND.log.length;let hum=0,day=0;
-    for(let m=0;m<355;m++){drive(1,1);hum=Math.max(hum,SND.lvl.hum)}const P=SND.played.slice(p0),Lg=SND.log.slice(l0);
+  const night=await page.evaluate(()=>{const S=__sim,G=S.G,SND=S.SND;(G.pol||(G.pol={})).curfew=false;G.pol.late='wait';toHour(23);SND.q.length=0;
+    // the night's first new flight of your own has a late passenger, so it's still boarding at its final call whatever else the night holds
+    let late=false;const lateOne=()=>{const R=S.R,F=S.SIDX.map(i=>R.st[i].F).find(F=>F&&!F.partner&&!F.freighter&&!F.straggler&&F.std-G.clock>30&&F.manifest.some(q=>!q.leader&&q.type!=='fam'&&q.type!=='grp'&&q.type!=='prm'));
+      if(F){const k=F.manifest.findIndex(q=>!q.leader&&q.type!=='fam'&&q.type!=='grp'&&q.type!=='prm');F.straggler=F.manifest.splice(k,1)[0];F.stragglerAt=F.std+3;late=true}};
+    const p0=SND.played.length,l0=SND.log.length;let hum=0,day=0;
+    for(let m=0;m<355;m++){if(!late&&m<240)lateOne();drive(1,1);hum=Math.max(hum,SND.lvl.hum)}const P=SND.played.slice(p0),Lg=SND.log.slice(l0);
     toHour(12);for(let m=0;m<30;m++){drive(1,1);day=Math.max(day,SND.lvl.hum)}
     return {kinds:kinds(P),logged:kinds(Lg),voiced:P.filter(p=>p.voice).length,hum:+hum.toFixed(4),day:+day.toFixed(4)}});
   ok('sound: from 23:00 to 05:00 only final calls chime, unspoken, and the hum drops',Object.keys(night.kinds).join()==='final'&&Object.keys(night.logged).join()==='final'&&!night.voiced&&night.hum>0&&night.hum<night.day*0.5,JSON.stringify(night));
