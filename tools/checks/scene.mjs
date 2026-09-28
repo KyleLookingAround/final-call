@@ -1,5 +1,5 @@
 // The airport view's drawing layers and lighting pass (src/game/50-scene.js, docs/specs/real-airport.md): every layer
-// draws once a frame, in order, and only in the airport view; the lighting pass darkens the apron at night and adds its
+// draws once a frame, in order, and only in the airport view; draw() calls nothing but the layers; the lighting pass darkens the apron at night and adds its
 // lights; drawing never changes the game; and how long a frame takes to draw, against a calibration run (so machines
 // compare) and the speed budget the real airport's parts share.
 const DRAW_BUDGET=0.55; // draw ms a frame over calibration ms, in each scene. Main before the real airport: 0.30-0.36x;
@@ -23,6 +23,15 @@ export default async function({open,ok,saveText,newest}){
   const want=r.names.slice(),wantN=want.slice();wantN.splice(want.indexOf('lit'),0,'(lights)');
   ok('scene: every layer draws once a frame, in order, and only in the airport view',r.night.join()===wantN.join()&&r.day.join()===want.join()&&!r.away.length&&r.one&&Object.values(r.view).every(Boolean)&&!errs.length,
     JSON.stringify({night:r.night,away:r.away,view:r.view})+(errs.length?' '+errs[0]:''));
+  // draw() is the frame's view and the layers, nothing else (docs/specs/systems-review.md, step 9): every canvas call a
+  // frame makes comes from a layer's entry, but the clear of the whole canvas before them
+  const out=await page.evaluate(()=>{const S=__sim,G=S.G,c=document.querySelector('#cv').getContext('2d'),seen=[];let depth=0;
+    const wrap=[];for(const n of S.LAYERS){const L=S.LAYER[n];for(let j=0;j<L.length;j++){const f=L[j];wrap.push([L,j,f]);L[j]=V=>{depth++;try{f(V)}finally{depth--}}}}
+    const M=['fill','stroke','fillRect','strokeRect','fillText','strokeText','drawImage','clearRect','putImageData'];
+    for(const m of M){const k=c[m];c[m]=function(...a){if(!depth){const t=c.getTransform(),clear=m==='fillRect'&&t.isIdentity&&a[0]===0&&a[1]===0&&a[2]>=c.canvas.width&&a[3]>=c.canvas.height;if(!clear)seen.push(m)}return k.apply(this,a)}}
+    try{for(const h of [23,12]){G.clock=Math.floor(G.clock/1440)*1440+h*60;S.draw()}}finally{for(const m of M)delete c[m];for(const [L,j,f] of wrap)L[j]=f}
+    const n={};for(const m of seen)n[m]=(n[m]||0)+1;return {n:seen.length,by:n}});
+  ok('scene: draw() calls nothing but the layers',out.n===0&&!errs.length,out.n?`${out.n} canvas calls outside a layer (${JSON.stringify(out.by)})`:'every canvas call comes from a layer'+(errs.length?' '+errs[0]:''));
   // the lighting pass: nothing at noon; at night the apron is darker (with the stands' own lights set aside) and a lamp
   // lights its own spot
   const L=await page.evaluate(()=>{const S=__sim,G=S.G,R=S.R,c=document.querySelector('#cv').getContext('2d');

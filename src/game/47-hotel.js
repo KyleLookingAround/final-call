@@ -99,15 +99,18 @@ TERM_MINUTE.push(hotelMinute,hotelStranded);
 // the building: two floors of 20 rooms per block, windows lit as rooms are taken, and a lobby with a reception desk
 const HOTEL_LIT=[1,2,3,4,5].map(l=>{const n=HOTEL_BLOCK*l,o=[...Array(n).keys()];let s=7;for(let i=n-1;i>0;i--){s=(s*16807)%2147483647;const j=s%(i+1);[o[i],o[j]]=[o[j],o[i]]}const r=[];o.forEach((w,k)=>r[w]=k);return r}); // the order windows light in
 function drawHotel(){
-  if(!G.lv.hotel)return;const x0=1262,w=210,rows=2*G.lv.hotel,top=684-rows*8,occ=hotelOcc(),lit=HOTEL_LIT[G.lv.hotel-1];
-  ctx.fillStyle='#232A31';ctx.fillRect(x0,top-6,w,690-top+6);ctx.fillStyle='#2F363E';ctx.fillRect(x0,top-6,w,4);
-  for(let r=0;r<rows;r++)for(let c=0;c<20;c++){const k=r*20+c;ctx.fillStyle=lit[k]<occ?'rgba(255,214,150,.8)':'#1A1F24';ctx.fillRect(x0+8+c*10,680-r*8-4,6,4)}
-  sign(x0,top-20,'AIRPORT HOTEL');
+  if(!G.lv.hotel)return;
   ctx.fillStyle='#3A424B';ctx.fillRect(1284,702,56,6);ctx.fillStyle='#FFC72C';ctx.fillRect(1296,698,4,4);ctx.fillRect(1322,698,4,4); // reception
   ctx.fillStyle='#2F363E';for(const [x,y] of [[1380,736],[1410,736],[1380,752],[1410,752]])ctx.fillRect(x,y,18,8); // sofas
   ctx.fillStyle='#39414A';ctx.fillRect(1440,694,24,4);mono('LIFTS',1452,712,'#56606A',6.5,'center');
 }
 TERM_DRAW.push(drawHotel);
+// the tower, outside the lobby's walls, on every floor
+LAYER.terminal.push(()=>{
+  if(!G.lv.hotel)return;const x0=1262,w=210,rows=2*G.lv.hotel,top=684-rows*8,occ=hotelOcc(),lit=HOTEL_LIT[G.lv.hotel-1];
+  ctx.fillStyle='#232A31';ctx.fillRect(x0,top-6,w,690-top+6);ctx.fillStyle='#2F363E';ctx.fillRect(x0,top-6,w,4);
+  for(let r=0;r<rows;r++)for(let c=0;c<20;c++){const k=r*20+c;ctx.fillStyle=lit[k]<occ?'rgba(255,214,150,.8)':'#1A1F24';ctx.fillRect(x0+8+c*10,680-r*8-4,6,4)}
+  sign(x0,top-20,'AIRPORT HOTEL')});
 // Sales › Landside: tonight's rooms, who's in them, the price and the takings
 function hotelCard(){
   if(!G.lv.hotel)return '';const B=G.hotelBook,rooms=hotelRooms(),occ=hotelOcc(),auto=SET().autoDuty!==false,L=B.last;

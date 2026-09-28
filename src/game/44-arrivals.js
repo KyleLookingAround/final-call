@@ -132,13 +132,14 @@ function drawArrivals(D){
   HIRE_X.forEach(x=>{ctx.fillStyle='#3A424B';ctx.fillRect(x-9,757,18,5);ctx.fillStyle='#8C97A1';ctx.beginPath();ctx.arc(x,764.5,2.2,0,Math.PI*2);ctx.fill()});
   mono('CAR HIRE',746,752,'#909AA4',6.5,'center');
   if(G.lv.hotel){ctx.fillStyle='#3A424B';ctx.fillRect(1206,736,14,5);mono('HOTEL',1213,733,'#909AA4',6.5,'center')}
-  // the taxi rank on the kerb outside
-  ctx.fillStyle='#1A1F24';ctx.fillRect(TAXI.x-40,LAND_B+10,80,16);
-  for(let k=0;k<3;k++){ctx.fillStyle='#FFC72C';rrect(TAXI.x-36+k*25,LAND_B+13,19,10,2);ctx.fill();ctx.fillStyle='#17181A';ctx.fillRect(TAXI.x-31+k*25,LAND_B+15,5,6)}
-  mono('TAXIS',TAXI.x+44,LAND_B+21,'#FFC72C',7);
   drawMeeters();
 }
 TERM_DRAW.push(drawArrivals);
+// the taxi rank on the kerb outside, on every floor
+LAYER.terminal.push(()=>{
+  ctx.fillStyle='#1A1F24';ctx.fillRect(TAXI.x-40,LAND_B+10,80,16);
+  for(let k=0;k<3;k++){ctx.fillStyle='#FFC72C';rrect(TAXI.x-36+k*25,LAND_B+13,19,10,2);ctx.fill();ctx.fillStyle='#17181A';ctx.fillRect(TAXI.x-31+k*25,LAND_B+15,5,6)}
+  mono('TAXIS',TAXI.x+44,LAND_B+21,'#FFC72C',7)});
 TERM_DAY.push(()=>{R.arrSt=null});
 // the Terminal › Arrivals sub-tab: how immigration and customs are doing today
 (TERM_PANEL.arr||(TERM_PANEL.arr=[])).push(()=>{
