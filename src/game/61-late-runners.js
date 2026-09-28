@@ -94,7 +94,7 @@ LAYER.pax.push(()=>{
   for(const i of SIDX){const F=R.st[i].F,r=F&&RUNS.get(F);if(!r||!r.list.length)continue;
     for(const p of r.list){if(p.ex==null||paxHidden(p))continue;const dx=p.x-p.ex,dy=p.y-p.ey,d=Math.hypot(dx,dy);if(d<0.3)continue;const ux=dx/d,uy=dy/d;
       ctx.beginPath();for(const o of [-2,2]){const sx=p.ex-ux*5-uy*o,sy=p.ey-uy*5+ux*o;ctx.moveTo(sx,sy);ctx.lineTo(sx-ux*6,sy-uy*6)}ctx.stroke()}}
-  const s=R.story;if(s&&!s.p.dead&&s.p.ex!=null&&!paxHidden(s.p)){ctx.strokeStyle='#FFC72C';ctx.lineWidth=1.4;ctx.beginPath();ctx.arc(s.p.ex,s.p.ey,6.5,0,Math.PI*2);ctx.stroke()}
+  const s=R.story;if(s&&!R.photo&&!s.p.dead&&s.p.ex!=null&&!paxHidden(s.p)){ctx.strokeStyle='#FFC72C';ctx.lineWidth=1.4;ctx.beginPath();ctx.arc(s.p.ex,s.p.ey,6.5,0,Math.PI*2);ctx.stroke()}
 });
 
 /* ---------- the story card ---------- */

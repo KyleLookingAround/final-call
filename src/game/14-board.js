@@ -28,7 +28,7 @@ function updateBoard(){
   if(R.bm==='trn'){const kc={};$$('.brow[data-line]').forEach(r=>{const c=r.dataset.line,L=G.lines[c],q=r._q;if(!L||!q)return;const st=R.reg&&R.reg.lines[c],nd=nextDep(L),M=MODES[L.mode],far=L.stops[0]==='air'?L.stops[L.stops.length-1]:L.stops[L.stops.length-1]==='air'?L.stops[0]:L.stops[L.stops.length-1];
       setFlaps(q('std'),nd!=null?hhmm(nd):'--:--');setFlaps(q('flt'),replOn(c)?'BUS':lineCode(L));setFlaps(q('dest'),NODES[far].c);q('city').textContent=NODES[far].n;
       const pk=M.kind==='rail'?'P':M.kind==='track'?'T':M.kind==='water'?'W':'B';kc[pk]=(kc[pk]||0)+1;setFlaps(q('gate'),pk+kc[pk]);
-      const s=replOn(c)?'BUS SERVICE':lineDown(L)?'SUSPENDED':!lineFreq(L)?'NO SERVICE':st&&st.load>1?'FULL':st&&st.load>0.85?'BUSY':L.sync?'MEETS FLTS':(R.fx.leaves>G.clock&&L.mode==='rail')||(M.kind==='road'&&(routeEdges(L.mode,L.stops)||[]).some(({e})=>rwOn(e.id)))?'DELAYED':'ON TIME';
+      const s=replOn(c)?'BUS SERVICE':lineDown(L)?'SUSPENDED':!lineFreq(L)?'NO SERVICE':st&&st.load>1?'FULL':st&&st.load>0.85?'BUSY':L.sync?'MEETS FLTS':(weather.on('leaves')&&L.mode==='rail')||(M.kind==='road'&&(routeEdges(L.mode,L.stops)||[]).some(({e})=>rwOn(e.id)))?'DELAYED':'ON TIME';
       setFlaps(q('st'),s);q('st').classList.toggle('late',s==='SUSPENDED'||s==='FULL'||s==='DELAYED')});return}
   $$('.brow').forEach(r=>{
     const i=+r.dataset.stand,F=R.st[i].F,q=r._q;if(!q)return;
