@@ -9,6 +9,7 @@ The project notes (`CLAUDE.md`) hold what every change needs. This file holds ho
 - [Airport layouts](systems/airport-layouts.md) (`39-layouts.js`, `12-drawing.js`)
 - [The airport scene](systems/airport-scene.md) (`50-scene.js`, `51-markings.js`, `55-vehicles.js`, `12-drawing.js`, `62-photo-mode.js`, `54-weather.js`, `52-planes.js`, `53-roofs.js`, `13-camera.js`, `08-stands.js`, `04-geometry.js`, `29-region-map.js`)
 - [Clocks and day stats](systems/clocks.md) (`02-clocks.js`, `08-stands.js`, `34-airline-operations.js`, `45-baggage.js`)
+- [Day in a minute](systems/day-in-a-minute.md) (`63-day-in-a-minute.js`)
 - [Effects: the rating and money ledger](systems/effects.md) (`04-effects.js`, `15-panel.js`)
 - [Guided start](systems/guided-start.md) (`36-guided-start.js`)
 - [Level-up card](systems/level-up-card.md) (`49-levelup.js`)
@@ -124,6 +125,7 @@ The main names, by file group (the joined table below is the complete list, from
 | `54-weather.js` | WEATHER: rain, settled snow, puddles, fog banks, cloud shadows and a windsock |
 | `55-vehicles.js` | VEHICLES: ground vehicles working each stand's turnaround |
 | `62-photo-mode.js` | PHOTO MODE: hide the panels, pick a drawn time and sky, and save a picture |
+| `63-day-in-a-minute.js` | DAY IN A MINUTE: a time-lapse of yesterday, played back over the airport view |
 | `99-start.js` | the `/*SIM_HOOK*/` marker and the call that starts the game |
 <!-- /joined:files -->
 
@@ -168,7 +170,8 @@ The main names, by file group (the joined table below is the complete list, from
 - `arrivals`: Arrivals (docs/specs/terminal.md): passengers off domestic flights walk straight past immigration and everyone else goes through it; e-gates take only e-gate passports; about 1 in 40 is checked at customs; everyone who lands ends up out, at a stop or the station, or at the hotel; and nobody arriving walks into a departures hall.
 - `baggage`: The baggage system (src/game/45-baggage.js): every checked bag ends in a hold or is left behind and counted, every arriving bag reaches its carousel, an overloaded sorter backs up, a tight transfer can miss, and early bags wait in the store.
 - `brief`: docs/briefs/TEMPLATE.md and every session brief in docs/briefs/ have all their sections, filled in (tools/brief.mjs).
-- `clocks`: The clocks (02-clocks.js, docs/SYSTEMS.md "Time"): over a seeded day and a bit, the hooks run in the same order and at the same cadence as they did on main before the tables (tools/checks/lib/clocks.json, recorded from main with a log call at each hook), and every hook the order lists is registered once, from its system's own file.
+- `clocks`: The clocks (02-clocks.js, docs/SYSTEMS.md "Time"): over a seeded day and a bit, the hooks run in the same order and at the same cadence as they did on main before the tables (tools/checks/lib/clocks.json, recorded from main with a log call at each hook, and re-recorded with the hooks added since, such as dayRec), and every hook the order lists is registered once, from its system's own file.
+- `day-in-a-minute`: Day in a minute (src/game/63-day-in-a-minute.js, docs/systems/day-in-a-minute.md): after a seeded day the recording holds samples across the whole of it, within its caps and 2 MB, and nothing is recorded headless (R.sim); recording costs at most 0.01x of the perf budget; the Office's button plays it back, every frame draws without throwing on a desktop and a phone, and a tap stops it and puts the speed back; G and the random stream are the same with and without it.
 - `daystats`: A day's stats (DAY_STATS in 09-construction-levels-days.js, docs/SYSTEMS.md "Time"): over two seeded days at a level 9 airport, the day report (G.lastDay) has the fields it had on main (tools/checks/lib/daystats.json, recorded there; DAYSTATS_RECORD=1 writes it again after a change that moves the dice on purpose, such as #101's rating), every field G.dstat gets is in DAY_STATS, and a new day starts with the fields DAY_STATS resets.
 - `decor`: Decor and local character (docs/specs/terminal-place.md): decor comes with the building, more with each level, is never placed or saved, never stands in anyone's way, and local signs take the region's place names and fit their halls. Written before the code (tools/checks/pending.txt). Reads the names in lib/place.mjs, plus decor() → [{hall, kind, x0, y0, x1, y1}…], the items for the layout as built and the level, and localNames() → [{text, place, hall, w}…], the local signs (place: a key of PLACES; w: the text's width in world units). "Never in the way" also reads where the counters are: deskX, kioskX, laneX, qSlot, secSlot, ftSlot, egSlot, and boothPos, egatePos, carX, carY and arrSlot, which the decor part adds to SIMX.
 - `departures`: Departures (docs/specs/terminal.md): check-in islands with their own queues, bag drop for kiosk and online passengers with bags, and security: the search rate, family and assistance lanes, and no way into the market place but a lane.
@@ -206,6 +209,7 @@ The main names, by file group (the joined table below is the complete list, from
 - `sound`: Sound (docs/specs/sound.md), with a stub audio context and speech synthesis that count what plays: your flights' boarding, gate calls and final calls each announce once, never a partner's or a freighter's; spoken calls are rare, only final calls and gate changes, and none at 4x; each setting silences its own part and the master switch all of them; nothing happens in the headless sim; nights are quiet; and the board's line fits a 320 px phone.
 - `terminal`: The terminal's halls (docs/specs/terminal.md): every layout's desks, lanes, passport desks, carousels and queues sit in their halls, and passengers really go through them: departing ones from the forecourt through check-in and security into the market place, arriving ones from the concourse through immigration, reclaim and customs, and out.
 - `terrace`: The roof terrace and its spotters (docs/specs/terminal-place.md): a Terminal upgrade from level 3, hidden before; seen on the roof at every zoom; a crowd for something rare and nothing else to say so; fewer at night and in rain; never in the terminal's queues; small takings; its card fits a phone. Written before the code (tools/checks/pending.txt). Reads the names in lib/place.mjs, plus UPG.terrace and G.lv.terrace, R.spot (how many spotters are up there), R.spotDrawn (how many the last frame drew), terraceBox() → [x0, y0, x1, y1], its takings earned as 'terrace' (G.revBy.terrace), and its card, #terrace, under Terminal › Staff.
+- `topbar`: The top bar (help, pause, speeds, the views, full screen, sound) keeps every button on one row, at touch size on phones, in portrait down to 320 px, in landscape, and on tablet and desktop, in the airport view and the Region, with and without full screen.
 - `tour`: A new game starts the guided first hour, and it advances.
 - `transport`: The transport manager: its suggestions are buildable, pay back within a week and come one per line; Not now hides one; extensions and upgrades work (the old line runs until the new one opens, which takes a reserved number); it leaves lines you've taken over alone, reviews the rest, adds services to an overfull line within the hour and runs event extras only while crowds travel.
 - `update`: The update-check toast (docs/specs/update-toast.md, src/game/37-update-check.js): quiet when the running build matches dist/version.json, a toast when it doesn't, Update now saves then reloads, Later holds it back an hour, and none of it runs off GitHub Pages or in the headless sim.
@@ -229,7 +233,9 @@ When the link is shared, chat apps and social sites show `src/public/preview.jpg
 ## UI
 
 - Panels are HTML strings built by `renderPanel()`. Clicks are handled in one delegated listener through `data-*` attributes (also `recsClick`, `routesClick` and the region click).
-- Sub-tabs use `segs()`. The Office has Plan, Money, Reports, Records, Policies and Settings.
+- Sub-tabs use `segs()`. The Office has Progress (`progress`: level, plan, rating, goals and this week's challenges), Money, Reports, Records (records and stamps), Policies and Settings.
+- Office › Settings has its own chips (`R.setSub`, `SET_SUBS`): Managers (the default), Alerts (notifications, What's new and weekly challenges), Screen and sound, and Save (airline name, livery, save code, reset).
+- Terminal › Staff also shows the Staff pay policy card, the same `pol('pay')` as Office › Policies (`polRow`).
 - Office › Reports' route table shows profit below $100 in whole dollars, and folds routes with no flights in the last 24 hours behind a Show/Hide link (`R.idleRoutes`, runtime only).
 - Tab ids are `stands` (Gates), `routes`, `terminal`, `ground` (Airfield), `sales`, `region` and `office`.
 
@@ -242,6 +248,11 @@ When the link is shared, chat apps and social sites show `src/public/preview.jpg
   - In full screen, the sheet becomes a drawer opened with the Manage button.
 - **Landscape phones** (height ≤ 500) show the map and panel side by side, with the board hidden.
 - **Camera band:** `--gapsz` is set from the player's choice. It becomes `--topgap` in portrait and `--sidegap` in landscape.
+- **Top bar** (`.hud`): one row at every size (the `topbar` check). On touch screens its buttons are 42 px, and `.stage` is a size container (`stage`) so the bar steps down by the map's width, not the screen's:
+  - under 560 px the four speeds fold into `#spdb`, which shows the speed and cycles 1×/2×/4×/8× (a tap on a paused game resumes it), and the buttons are 40 px;
+  - under 356 px (a 320 px phone, or a phone on its side with the camera band) full screen, sound and photo mode leave the bar, and the help card has them instead (`#hscr`, `syncHscr()`, and its Photo mode link);
+  - under 272 px the buttons narrow to 36 px.
+  - A new top-bar button counts against these widths: move the steps and the check with it.
 
 ## Gating and settings
 
