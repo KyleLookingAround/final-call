@@ -63,3 +63,5 @@ description: Run the other Final Call sessions building a feature's parts - the 
 - Routine id: `trig_01WWjSqun7aAX15iLCb4PQdc` ("Final Call: tidy the lessons"). It was created with no connectors and no repository attached, so its session clones the repo itself; if a firing can't push or open its PR, recreate it from the Routines page with this repo and GitHub attached, and put the new id here.
 - It fires when a look back leaves 8 or more lessons new since the last tidy (`node tools/join.mjs` counts them): the session that added the lesson fires it (`fire_trigger`) and says so, as the `steward` playbook's last step says. Nobody starts it by hand or on a schedule.
 - At a sweep, if a tidy PR (`feature/lessons-tidy-…`) is open, let it finish before firing again. To change what it does, edit the brief and `update_trigger` its prompt to match.
+
+During launch week, the coordinator also creates the "Final Call: launch-day triage" Routine from the committed `docs/briefs/launch-triage.md` (a fresh session every two hours, on the cheaper model), retires it once launch week is over, and puts its id here in a follow-up.
