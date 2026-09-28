@@ -28,8 +28,11 @@ export default async function({open,ok,saveText}){
     return {log:S.SND.log.length,q:S.SND.q.length,osc:__snd.osc.length,amb:!!S.SND.amb}});
   ok('sound: nothing is watched, queued or played in the headless sim',!sim.log&&!sim.q&&!sim.osc&&!sim.amb,JSON.stringify(sim));
   // a morning at 1x: your own flights' boarding, gate calls and final calls, each once
-  const day=await page.evaluate(()=>{const S=__sim,R=S.R,G=S.G;toHour(8);let partners=0,freighters=0;
-    for(let m=0;m<300;m++){drive(1,1);for(const i of S.SIDX){const F=R.st[i].F;if(F&&F.partner)partners++;if(F&&F.freighter)freighters++}}
+  const day=await page.evaluate(()=>{const S=__sim,R=S.R,G=S.G;(G.pol||(G.pol={})).late='wait';toHour(8);let partners=0,freighters=0;
+    // one of your flights boarding with many still to sit is brought forward, so a final call is certain whatever else the morning holds
+    let late=false;const lateOne=()=>{const F=S.SIDX.map(i=>R.st[i].F).find(F=>F&&!F.partner&&!F.freighter&&F.plane.state==='boarding'&&S.isCalled(F)&&F.seated<F.booked-40&&F.std-G.clock>20);
+      if(F){F.std=Math.ceil((G.clock+20)/5)*5;late=true}};
+    for(let m=0;m<300;m++){if(!late&&m<180)lateOne();drive(1,1);for(const i of S.SIDX){const F=R.st[i].F;if(F&&F.partner)partners++;if(F&&F.freighter)freighters++}}
     const L=S.SND.log,dup=new Set(),twice=L.filter(x=>{const k=x.k+x.f;if(dup.has(k))return true;dup.add(k);return false}).map(x=>x.k+' '+x.f);
     return {kinds:kinds(L),notOwn:L.filter(x=>!x.own).length,twice,partners,freighters,played:S.SND.played.length,words:S.SND.played.filter(p=>p.words).length,line:document.querySelector('#bann').hidden?null:document.querySelector('#bann').textContent}});
   ok('sound: your flights’ boarding, gate calls and final calls each announce once, never a partner’s or freighter’s',
@@ -71,8 +74,8 @@ export default async function({open,ok,saveText}){
   // a quiet night: from 23:00 to 05:00 only final calls, and never spoken
   const night=await page.evaluate(()=>{const S=__sim,G=S.G,SND=S.SND;(G.pol||(G.pol={})).curfew=false;G.pol.late='wait';toHour(23);SND.q.length=0;
     // the night's first new flight of your own has a late passenger, so it's still boarding at its final call whatever else the night holds
-    let late=false;const lateOne=()=>{const R=S.R,F=S.SIDX.map(i=>R.st[i].F).find(F=>F&&!F.partner&&!F.freighter&&!F.straggler&&F.std-G.clock>30&&F.manifest.some(q=>!q.leader&&q.type==='work'));
-      if(F){const k=F.manifest.findIndex(q=>!q.leader&&q.type==='work');F.straggler=F.manifest.splice(k,1)[0];F.stragglerAt=F.std+3;late=true}};
+    let late=false;const lateOne=()=>{const R=S.R,F=S.SIDX.map(i=>R.st[i].F).find(F=>F&&!F.partner&&!F.freighter&&!F.straggler&&F.std-G.clock>30&&F.manifest.some(q=>!q.leader&&q.type!=='fam'&&q.type!=='grp'&&q.type!=='prm'));
+      if(F){const k=F.manifest.findIndex(q=>!q.leader&&q.type!=='fam'&&q.type!=='grp'&&q.type!=='prm');F.straggler=F.manifest.splice(k,1)[0];F.stragglerAt=F.std+3;late=true}};
     const p0=SND.played.length,l0=SND.log.length;let hum=0,day=0;
     for(let m=0;m<355;m++){if(!late&&m<240)lateOne();drive(1,1);hum=Math.max(hum,SND.lvl.hum)}const P=SND.played.slice(p0),Lg=SND.log.slice(l0);
     toHour(12);for(let m=0;m<30;m++){drive(1,1);day=Math.max(day,SND.lvl.hum)}
