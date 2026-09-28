@@ -17,6 +17,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 - [Polish audit · 27 Sep 2026](lessons/main-polish-audit.md)
 - [Version 32: ready for what's next · 27 Sep 2026](lessons/main-release-32.md)
+- [Polish: put things where players look (#112) · 28 Sep 2026](lessons/112-polish-where-to-look.md)
 - [#107 The phone's top bar back on one row · 27 Sep 2026](lessons/107-phone-topbar.md)
 - [#101 A rating that reflects the last day, measured and switched on; a network you have to keep, specced · 27 Sep 2026](lessons/101-balance-rating.md)
 - [Photo mode (#100) · 27 Sep 2026](lessons/100-photo-mode.md)
