@@ -5,6 +5,12 @@ function advise(){
   const cheapest=keys=>{let b=null;for(const k of keys){if(!upBuyable(k)||UPG[k].build)continue;const c=upCost(k);if(!b||c<b.c)b={k,c}}return b};
   const up=(text,keys)=>{const b=cheapest(keys);return b?{text:`${text} <b>${UPG[b.k].name}</b> would help.`,k:b.k,c:b.c}:null};
   let a=null;
+  // once the first flight is away, one nudge to try 4x if the newcomer hasn't yet (issue #105's default A). Never in the
+  // headless sim, which never touches R.speed and so could never resolve it, permanently crowding out every other tip
+  if(!R.sim&&!G.tip4x){
+    if(R.speed>=4)G.tip4x=1; // reaching 4x by any control resolves it, not just its own button
+    else if(G.flights>=1)a={text:'You can run the airport faster whenever you like. Try 4× to get through the quiet spells sooner.',sp:4,label:'Try 4×'};
+  }
   const auto=G.lv.roster&&G.auto,arW0=R.arrQ.length*D.passT/(D.officers+D.egates*1.6);
   if(!auto){for(const [t,w,name] of [['lanes',secW,'security lanes'],['desks',ciW,'check-in desks'],['officers',arW0,'passport desks']]){if(!a&&w>7&&staffed(t)<OWN[t]())a={text:`Queues are about ${Math.round(w)} min, but only ${staffed(t)} of ${OWN[t]()} ${name} are staffed.`,go:['terminal',`[data-staff="${t}:1"]`],label:'Staff up'}}}
   if(!a){const rr=repRecent(),worst=Object.entries(rr).filter(e=>e[1]<-5&&REPWHY[e[0]]).sort((x,y)=>x[1]-y[1])[0];
@@ -48,17 +54,19 @@ function hotelTip(up){
 }
 function renderTip(){
   if(SET().recs!==false&&tabOpen('region')&&!R.trJob&&(!R.trRecs||G.clock-R.trRecs.at>180||R.trRecs.sig!==recSig())&&performance.now()-(R.trRecT||0)>20000){R.trRecT=performance.now();recStart()}
-  // the tip is about the airport, so clear it over the region and world maps
-  const a=R.view==='airport'&&SET().tips!==false?advise():null,el=$('#tip'),sig=a?a.text+(a.k||a.label)+(a.c||''):'';
+  // the tip is about the airport, so clear it over the region and world maps; it also holds back while two toasts are
+  // up, so the tip and the toast stack never read as one jumble (issue #103)
+  const a=R.view==='airport'&&SET().tips!==false&&R.toasts.length<2?advise():null,el=$('#tip'),sig=a?a.text+(a.k||a.label)+(a.c||''):'';
   if(sig===R.tipSig){const b=el.querySelector('[data-cost]');if(b)b.disabled=G.cash<+b.dataset.cost;return}
   R.tipSig=sig;el.hidden=!a;if(!a)return;
-  el.innerHTML=`<span class="lab">Tip</span><span class="tt">${a.text}</span>${a.k?`<button class="buy" data-tipbuy="${a.k}" data-cost="${a.c}" ${G.cash<a.c?'disabled':''}>${money(a.c)}</button>`:`<button class="buy ghost" data-tipgo="1">${a.label}</button>`}<button class="snooze" aria-label="Hide tips for a while">×</button>`;
+  el.innerHTML=`<span class="lab">Tip</span><span class="tt">${a.text}</span>${a.k?`<button class="buy" data-tipbuy="${a.k}" data-cost="${a.c}" ${G.cash<a.c?'disabled':''}>${money(a.c)}</button>`:a.sp?`<button class="buy" data-tipspeed="${a.sp}">${a.label}</button>`:`<button class="buy ghost" data-tipgo="1">${a.label}</button>`}<button class="snooze" aria-label="Hide tips for a while">×</button>`;
   el._a=a;
 }
 $('#tip').addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;const a=$('#tip')._a;
-  if(b.classList.contains('snooze')){R.tipSnooze=G.clock+90;R.tipSig=null;renderTip();return}
+  if(b.classList.contains('snooze')){if(a&&a.sp)G.tip4x=1;R.tipSnooze=G.clock+90;R.tipSig=null;renderTip();return}
   if(b.dataset.tipbuy){if(buyUpgrade(b.dataset.tipbuy)){if(G.tab===UPG[b.dataset.tipbuy].tab)renderPanel();else refreshUI();save();R.tipSig=null;renderTip()}}
+  else if(b.dataset.tipspeed){setSpeed(+b.dataset.tipspeed);G.tip4x=1;save();R.tipSig=null;renderTip()}
   else if(a&&a.go){if(a.go[0]==='plan')openPlan();else goTo(a.go[0],a.go[1])}
 });
 
