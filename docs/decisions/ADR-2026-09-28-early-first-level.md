@@ -15,7 +15,7 @@ Local Airport asked for 600 passengers flown, a rating of 50 and two gates open.
 
 **Pros:**
 - One line. Level 1 comes at game hour 3.7–4.9 on seeds 1–3 (the first-level check keeps it by hour 6), after the guided start has ended at the first on-time departure.
-- Levels 3–9 stay `ok` or `near`: the 500 and the points come a day earlier, which brings level 3 forward by 2–7 hours (still inside 95–117) and levels 5 and 7 by 0–30 hours.
+- Levels 3–9 stay `ok` or `near`: the 500 and the points come a day earlier, which brings level 3 forward by 0–7 hours (still inside 95–117), levels 5 and 7 by 0–30 hours, and level 9 by 3–50 hours.
 
 **Cons:**
 - The ramp has a long first step: level 2 stays at 78–84, because it binds on the third gate (3,000), not on passengers.
@@ -47,12 +47,12 @@ Option 1. The level 1 baseline (`tools/baseline.json`, the `balance` playbook) m
 | --- | --- | --- | --- | --- |
 | 1 Local Airport | 31–41 | 3–6 | 32.9–37.6 | 3.7–4.9 |
 | 2 Regional Airport | — | — | 80.6–82.6 | 78.4–83.9 |
-| 3 City Airport | 95–117 | 95–117 | 105.8–111 | 98.8–109.7 |
-| 5 Gateway Airport | 325–360 | 325–360 | 330.5–351.5 | 300.8–352.5 |
-| 7 Global Hub | 630–770 | 630–770 | 642.8–667.6 | 618–684 |
-| 9 Airport of the Year | 1,100–1,160 | 1,100–1,160 | 1,116.5–1,141 (seed 3 not reached in 1,150 hours) | 1,107–1,143.3 (seed 3 not reached) |
+| 3 City Airport | 95–117 | 95–117 | 105.9–109.5 | 99–109.7 |
+| 5 Gateway Airport | 325–360 | 325–360 | 336.2–353.5 | 310.9–343.6 |
+| 7 Global Hub | 630–770 | 630–770 | 636.1–666 | 619.7–698.9 |
+| 9 Airport of the Year | 1,100–1,160 | 1,100–1,160 | 1,099.9–1,146.9 | 1,079–1,143 |
 
-The "before" column is `main` at #102 (28 Sep 2026); seed 3 no longer reaches level 9 inside the run there either, which is drift from the merges since the last baselines, not this change.
+The "before" column is `main` at #111 (28 Sep 2026, the head this PR was measured against last); the after column is that `main` with this change. Level 9 reads `near` on seeds 1 and 3 (1,079–1,098, against 1,100), which is the earlier reward and points carried through; on `main` at #102 seed 3 didn't reach level 9 inside the run at all, and #111's change to the dice brought it back.
 
 ## Consequences
 

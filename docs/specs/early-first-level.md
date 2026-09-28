@@ -16,7 +16,7 @@ A newcomer at 1× reaches Local Airport, the game's first real moment, in about 
 
 - `LEVELS[1].req` in `01-constants.js` changes from `{pax:600, rep:50, gates:2}` to `{pax:80, rep:50, gates:1}`. 80 passengers is two or three R-48 departures; the gate you start with counts. Nothing else changes: the reward (500) and plan points (6), the first schedule, the starting cash, the tips and every later level.
 - Why this lever: on `main` the bot flies 600 passengers late on day 2 and only then affords the second gate (400), because it spends its first day's takings on upgrades; a player does the same. Both requirements had to move for a first-morning level, and moving them changes fewer rules than a cheaper gate or more starting cash, which would change the game for everyone.
-- Why level 2 stays: it binds on the third gate (3,000), which the player works towards for two days after the second gate; passengers (2,000 in total, 1,500 a day) are met a day earlier. Bringing it forward means dropping that gate or making it cheaper, and either pulls levels 3 and 5 towards the edge of their tolerance (the decision record has the numbers). The ramp is 4–5, 78–84, 99–110, 200–234 game hours on seeds 1–3.
+- Why level 2 stays: it binds on the third gate (3,000), which the player works towards for two days after the second gate; passengers (2,000 in total, 1,500 a day) are met a day earlier. Bringing it forward means dropping that gate or making it cheaper, and either pulls levels 3 and 5 towards the edge of their tolerance (the decision record has the numbers). The ramp is 4–5, 78–84, 99–110, 209–236 game hours on seeds 1–3.
 - From the start; no plan unlocks it. Managers and recommendations: none needed.
 
 ## Saved state
@@ -26,7 +26,7 @@ A newcomer at 1× reaches Local Airport, the game's first real moment, in about 
 
 ## Balance
 
-- Level 1 moves from 31–41 to 3–6 game hours; the baseline becomes 3–6 (`tools/baseline.json`, the `balance` playbook). The 500 reward and 6 points a day earlier bring level 3 forward by 2–7 hours (99–110, still inside 95–117) and levels 5 and 7 by 0–30 hours (300–353 and 618–684, `ok` or `near`); level 9 is unchanged within the runs' noise. The owner asked for this change (#105, the brief).
+- Level 1 moves from 31–41 to 3–6 game hours; the baseline becomes 3–6 (`tools/baseline.json`, the `balance` playbook). The 500 reward and 6 points a day earlier bring level 3 forward by 0–7 hours (99–110, still inside 95–117), levels 5 and 7 by 0–30 hours (311–344 and 620–699, `ok` or `near`) and level 9 by 3–50 hours (1,079–1,143, `near` on two seeds). The owner asked for this change (#105, the brief).
 
 ## Checks
 
