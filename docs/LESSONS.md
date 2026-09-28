@@ -106,6 +106,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 ### Saves
 
+- [Release R1: never freeze or lose a save (#158) · 28 Sep 2026](lessons/158-release-r1-saves.md)
 - [Refactor 5: save migration as a table · 27 Sep 2026](lessons/86-save-fields.md)
 
 ### Specs
