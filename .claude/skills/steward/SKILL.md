@@ -20,6 +20,10 @@ description: Drive a Final Call pull request to green and merged - reading CI fa
 - It runs the bot on seeds 1-3 once, when a PR that touches `src/game/` or the bot opens or leaves draft, and again whenever the `balance` label is added (remove it first if it's there). Before merging, if the game code changed after its last run, add the label to confirm the final code. It fails only on errors; levels outside the baselines show as warnings.
 - An `off` level needs a reason in the PR, or the owner's agreement and an updated `tools/baseline.json`. See the `balance` playbook.
 
+## Check-ins, not polling
+
+- CI takes about 8 minutes; polling every 20–30 (the coordinator's sweep, every 30–45) wastes most of a PR's wall time waiting for the next check-in. Subscribe to your own PR's events (`subscribe_pr_activity`) once it's open, and keep a `send_later` (about 20 minutes) as the fallback in case an event is missed. The coordinator subscribes to nothing; it relies on the sweep and each session's own subscription.
+
 ## Review comments
 
 - Small, clear asks (a rename, a nit, a missing check): fix, push, and reply briefly.
@@ -28,7 +32,7 @@ description: Drive a Final Call pull request to green and merged - reading CI fa
 ## Catching up with `main`
 
 - The Catch up workflow (`.github/workflows/catch-up.yml`) runs whenever `main` moves. It merges `main` into every open PR from this repo, rejoins the joined lists, and pushes if the merge was clean or the only conflicts were inside the joined lists. It never rebases or force-pushes. When a real conflict stops it, it comments once on the PR, naming the files, and leaves the branch alone.
-- Its pushes use the repo's token, which doesn't start `pull_request` workflows, so it starts Checks itself (never Balance: add the `balance` label before merging if the game code changed since Balance last ran). The Description check runs again at your next push or description edit. If the owner adds a `CATCH_UP_TOKEN` secret, its pushes start every workflow as usual.
+- Its pushes use the repo's token, which doesn't start `pull_request` workflows, so it starts Checks itself. Without a `CATCH_UP_TOKEN` secret, that dispatched run sits next to a `pull_request` run needing approval which cancels it, so dispatch Checks by hand again after each merge to `main` until you see it green (never Balance: add the `balance` label before merging if the game code changed since Balance last ran). With `CATCH_UP_TOKEN` set, its pushes start every workflow on their own. The Description check runs again at your next push or description edit.
 - So the branch on GitHub may be ahead of yours: `git pull --no-rebase origin <branch>` before you commit more, and never force-push over it.
 - After its comment, merge by hand: `git fetch origin main && git merge origin/main`, resolve what it named, and push. A conflict inside a joined list (between `<!-- joined:… -->` and `<!-- /joined:… -->`) needs nothing by hand: `node tools/join.mjs --write` rebuilds the list and clears it.
 - Count the merges from `main` your PR needed, by you and by the workflow, for the look back.
