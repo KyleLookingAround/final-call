@@ -1,0 +1,10 @@
+# Launch polish audit · 27 Sep 2026
+
+- **Numbers:** session `session_01VmVwCaK7VTSBqrTBbGBHDn`, estimate $10: $16.73 and 135k of 1M context when the PR opened, over the estimate but under twice it. Started 21:04 UTC, PR #106 opened 21:47. Docs only; four review agents on the cheaper model, about 280 screenshots between them.
+- **Went well:** a short primer written once in `build/` (how to open a page, fast-forward, switch tabs and sub-tabs and open overlays, what to skip, the exact row format), handed to all four agents, meant none of them had to rediscover the game's driving hooks, which the last audit's look back flagged. Splitting by what a newcomer meets (a new game; the menus; phones; the shared link, speed and big screens) rather than by level put the two findings that matter most, the guided start's step 2 failing on a phone and the tab bar at 320 px, in front of the agent best placed to see them.
+- **Lessons:**
+  - The rule "no two batches share a file" collapses almost every look fix into one batch, because nearly all of them live in `src/shell.html`. That gave two batches, not the four or five the brief pictured. → Worth saying in the next audit's brief that `src/shell.html` fixes form one batch, so the table is sized to five rows of looks rather than cut down afterwards.
+  - One agent reported nothing wrong in its whole beat (link preview, speed, big screens), and its "checked and fine" list is still what lets the owner share the link with confidence. The primer asked for that list, and it's worth keeping.
+  - The brief named `docs/briefs/terminal-place-groundwork.md` for the groundwork's files, but that file isn't on `main`; the spec's Files section had the list. → Briefs that point at another session's brief should point at the spec, which is merged.
+  - A full `npm run check` took over six and a half minutes in this container (the notes say 1–2), so a docs-only PR leaned on CI for the full run.
+  - `create_pull_request` again appended a session footer; reading the description back and replacing it, as the brief says, is still needed.
