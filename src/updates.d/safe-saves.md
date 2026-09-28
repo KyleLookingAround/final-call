@@ -1,6 +1,6 @@
 # Saves you can trust
 
-- **A steady welcome back.** Time away pays a share of a typical hour’s profit, the same however often you reload.
+- **A steady welcome back.** Time away pays from a typical hour’s profit, the same however often you reload.
 - **No more lost airports.** Another tab or an old copy of the game can’t save over it.
 - **Never frozen.** If something goes wrong, the game pauses and says so.
 

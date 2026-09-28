@@ -39,8 +39,8 @@ function start(data){
   R.newsBoot=newsDue()?'due':'none';if(R.newsBoot==='due')setTimeout(()=>{openNews(true,true);R.newsBoot='shown'},400); // the checks wait on R.newsBoot
   requestAnimationFrame(frame);
 }
-// the welcome-back bonus: about a third of a typical hour's profit (the median of the last day's finished hours) for each
-// hour away, up to three. It goes to cash, not to the hour's or the day's takings or the minute's rate (earn()), so it never
-// feeds the next one.
+// the welcome-back bonus: for each second away (up to three hours), 0.35 of a typical game minute's profit (the median of
+// the last day's finished hours), the scale G.rate gave it before. It goes to cash, not to the hour's or the day's takings
+// or the minute's rate (earn()), so it never feeds the next one.
 function welcomeBack(away){const hs=G.hours.slice(0,-1).map(h=>h.rev-h.cost).sort((a,b)=>a-b);if(!hs.length)return 0;
   return Math.round(Math.max(0,hs[hs.length>>1])/60*Math.min(away,10800)*0.35)}
