@@ -13,7 +13,7 @@ const fragPoints=root=>readdirSync(join(root,'src/updates.d')).filter(f=>f.endsW
     return {f,b:m[1],t:m[2],go:o.go,lv:o.level===undefined?undefined:+o.level}}));
 export default async function({open,ok,saveText,root}){
   const frags=fragPoints(root);
-  const young=saveText('v32-L1.json'),grown=saveText('v32-L9.json');
+  const grown=saveText('v32-L9.json');
   {const {ctx,page,errs}=await open(undefined,grown,false,{still:true});
     // the data: leads, sentences, targets and levels
     const d=await page.evaluate(frags=>{const S=__sim,bad=[];
@@ -62,13 +62,16 @@ export default async function({open,ok,saveText,root}){
     ok('news-card: a tap on each Show me button closes the card and lands on its target',gos.length>=8&&!wrong.length&&!errs.length,JSON.stringify(wrong.length?wrong:gos)+(errs.length?' '+errs[0]:''));
     await ctx.close()}
   // fit: the newest version's title and first point, and Play, in view without scrolling
-  for(const [w,h,touch,name] of SIZES)for(const [save,who] of [[young,'young'],[grown,'L9']]){
-    const {ctx,page,errs}=await open({width:w,height:h},save,touch,{still:true});
+  // one page per size: the level 9 save, then the same save shown as a young one (the card reads only G.level and G.seen)
+  for(const [w,h,touch,name] of SIZES){
+    const {ctx,page,errs}=await open({width:w,height:h},grown,touch,{still:true});
     await page.evaluate(()=>{try{localStorage.setItem('final-call-topgap','medium')}catch(e){};if(typeof applyGap==='function')applyGap()});
-    const r=await page.evaluate(()=>{const S=__sim;S.G.seen=S.UPDATES[1].v;S.openNews(true,true);
-      const q=s=>document.querySelector(s).getBoundingClientRect(),body=q('#newsBody'),top=q('#newsList > details summary'),pt=q('#newsList > details li'),play=q('#news .newsgo .buy'),c=q('#news .hcard');
-      return {inBody:top.top>=body.top-1&&pt.bottom<=body.bottom+1,play:play.top>=0&&play.bottom<=innerHeight+1&&play.bottom<=c.bottom+1,l:c.left,r:c.right,page:document.documentElement.scrollWidth}});
-    await page.waitForTimeout(300);await page.screenshot({path:`build/shots/news-${name}-${who}.png`});
-    if(name==='320'||name==='568-landscape'||who==='L9')ok(`news-card: the newest version and Play in view at ${name} (${who})`,r.inBody&&r.play&&r.l>=0&&r.r<=w&&r.page<=w&&!errs.length,JSON.stringify(r)+(errs.length?' '+errs[0]:''));
+    for(const [lv,who] of [[1,'young'],[9,'L9']]){
+      const r=await page.evaluate(lv=>{const S=__sim;S.openNews(false);S.G.level=lv;S.G.seen=S.UPDATES[1].v;S.openNews(true,true);
+        const q=s=>document.querySelector(s).getBoundingClientRect(),body=q('#newsBody'),top=q('#newsList > details summary'),pt=q('#newsList > details li'),play=q('#news .newsgo .buy'),c=q('#news .hcard');
+        return {inBody:top.top>=body.top-1&&pt.bottom<=body.bottom+1,play:play.top>=0&&play.bottom<=innerHeight+1&&play.bottom<=c.bottom+1,l:c.left,r:c.right,page:document.documentElement.scrollWidth}},lv);
+      await page.waitForTimeout(300);await page.screenshot({path:`build/shots/news-${name}-${who}.png`});
+      if(name==='320'||name==='568-landscape'||who==='L9')ok(`news-card: the newest version and Play in view at ${name} (${who})`,r.inBody&&r.play&&r.l>=0&&r.r<=w&&r.page<=w&&!errs.length,JSON.stringify(r)+(errs.length?' '+errs[0]:''));
+    }
     await ctx.close()}
 }
