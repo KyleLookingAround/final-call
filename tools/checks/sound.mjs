@@ -2,10 +2,10 @@
 // boarding, gate calls and final calls each announce once, never a partner's or a freighter's; spoken calls are rare,
 // only final calls and gate changes, and none at 4x; each setting silences its own part and the master switch all of
 // them; nothing happens in the headless sim; nights are quiet; and the board's line fits a 320 px phone.
-// Also (release audit #151, row 22-24): several kaching triggers within a moment (goals completing together) ring
-// once, not a volley; a stamp and a weekly challenge each play their own chime; Effects off silences the choice
-// toast's alert tone and the build-finished fanfare too; and records and stamps show as an on-screen toast, not a
-// floater fixed to a map spot, so they're seen on a phone and in landscape.
+// Also (release audit #151, rows 22-24): a stamp and a weekly challenge each play their own chime, once for
+// whatever a check completes together, not once per item; Effects off silences the choice toast's alert tone and
+// the build-finished fanfare too; and records and stamps show as an on-screen toast, not a floater fixed to a map
+// spot, so they're seen on a phone and in landscape.
 const STUB=()=>{
   window.__snd={osc:[],speak:[]};
   class P{constructor(v=0){this.value=v}setValueAtTime(v){this.value=v}linearRampToValueAtTime(v){this.value=v}exponentialRampToValueAtTime(v){this.value=v}setTargetAtTime(v){this.value=v}}
@@ -55,7 +55,7 @@ export default async function({open,ok,saveText}){
   // each setting silences its own part and nothing else; the master switch silences everything
   const sets=await page.evaluate(()=>{const S=__sim,G=S.G,SND=S.SND,out={};toHour(10);
     const one=(name,change)=>{Object.assign(G.set,{sndAnn:'on',sndVoice:true,sndAmb:true,sndFx:true});G.sound=true;change();SND.lastVoice=-1e9;
-      const a=snap(),p0=SND.played.length;let hum=0;for(let m=0;m<90;m++){drive(1,1);hum=Math.max(hum,SND.lvl.hum)}S.lastKaching=-1e9;S.tick();S.kaching();S.R.speed=0;SND.lastVoice=-1e9;SND.q.length=0;{const F=S.SIDX.map(i=>S.R.st[i].F).find(F=>F&&!F.partner&&!F.freighter);__t+=9e3;S.annAdd('final',F,'A1',__t);S.R.speed=1;S.soundTick(__t);S.R.speed=0}
+      const a=snap(),p0=SND.played.length;let hum=0;for(let m=0;m<90;m++){drive(1,1);hum=Math.max(hum,SND.lvl.hum)}S.tick();S.kaching();S.R.speed=0;SND.lastVoice=-1e9;SND.q.length=0;{const F=S.SIDX.map(i=>S.R.st[i].F).find(F=>F&&!F.partner&&!F.freighter);__t+=9e3;S.annAdd('final',F,'A1',__t);S.R.speed=1;S.soundTick(__t);S.R.speed=0}
       const P=SND.played.slice(p0),b=snap(),osc=__snd.osc.slice(a.osc),fx=osc.filter(o=>o.type==='square'||(o.type==='triangle'&&o.f>1200)).length;
       out[name]={calls:P.length,words:P.filter(p=>p.words).length,voiced:P.filter(p=>p.voice).length,chimes:osc.filter(o=>o.type==='sine').length,hum:+hum.toFixed(4),fx}};
     one('all',()=>{});one('chime',()=>{G.set.sndAnn='chime'});one('annOff',()=>{G.set.sndAnn='off'});one('voiceOff',()=>{G.set.sndVoice=false});
@@ -70,26 +70,21 @@ export default async function({open,ok,saveText}){
       s.fxOff.calls>0&&s.fxOff.chimes>0&&s.fxOff.hum>0&&!s.fxOff.fx&&
       !s.master.chimes&&!s.master.voiced&&!s.master.hum&&!s.master.fx;
     ok('sound: each setting silences its own part and nothing else, and the master switch silences everything',pass,JSON.stringify(s))}
-  // several kaching triggers within a moment (three goals completing together at the tour's end) ring once, not a volley;
-  // a later, unrelated one still rings
-  const batch=await page.evaluate(()=>{const S=__sim,G=S.G;S.ensureAudio();Object.assign(G.set,{sndFx:true});G.sound=true;S.lastKaching=-1e9;
-    const before=__snd.osc.length;S.kaching();S.kaching();S.kaching();const burst=__snd.osc.length-before;
-    S.lastKaching=performance.now()-700;S.kaching();const later=__snd.osc.length-before;
-    return {burst,later}});
-  ok('sound: several kaching triggers within a moment ring once, and a later one still rings',batch.burst===2&&batch.later===4,JSON.stringify(batch));
-  // a stamp and a weekly challenge each play their own chime and show as a toast, once, with Effects off silencing both
+  // two stamps qualifying in the same check ring the award chime once, not once each (and once is exactly two tones);
+  // same for two challenges finishing together; each also shows its own toast; Effects off silences both
   const award=await page.evaluate(()=>{const S=__sim,G=S.G,R=S.R;S.ensureAudio();Object.assign(G.set,{sndFx:true});G.sound=true;
-    R.toasts.length=0;G.stamps={};G.flights=Math.max(G.flights,1);S.lastKaching=-1e9;
+    R.toasts.length=0;G.stamps={};G.flights=Math.max(G.flights,1);G.rep=Math.max(G.rep,90); // 'first' and 'stars' both qualify together
     const o0=__snd.osc.length;S.checkStamps();
-    const stamp={osc:__snd.osc.length-o0,toast:R.toasts.length>0&&R.toasts.at(-1).kind==='goal'};
-    R.toasts.length=0;G.chal={wk:0,list:[{id:'pax',goal:1,base:0,done:0}],snap:{},sets:0,pay:100,all:0};G.flown=Math.max(G.flown,1);
+    const stamp={osc:__snd.osc.length-o0,toasts:R.toasts.length};
+    R.toasts.length=0;G.chal={wk:0,list:[{id:'pax',goal:1,base:0,done:0},{id:'ontime',goal:1,base:0,done:0}],snap:{},sets:0,pay:100,all:0};
+    G.flown=Math.max(G.flown,1);G.ontime=Math.max(G.ontime,1); // both challenges qualify together
     const o1=__snd.osc.length;S.checkChal();
-    const chal={osc:__snd.osc.length-o1,toast:R.toasts.length>0&&R.toasts.at(-1).kind==='goal'};
+    const chal={osc:__snd.osc.length-o1,toasts:R.toasts.length};
     G.set.sndFx=false;G.stamps={};const o2=__snd.osc.length;S.checkStamps();const stampOff=__snd.osc.length-o2;
     G.chal={wk:0,list:[{id:'pax',goal:1,base:0,done:0}],snap:{},sets:0,pay:100,all:0};const o3=__snd.osc.length;S.checkChal();const chalOff=__snd.osc.length-o3;
     G.set.sndFx=true;return {stamp,chal,stampOff,chalOff}});
-  ok('sound: a stamp and a challenge each play once, and Effects off silences both',
-    award.stamp.osc>0&&award.stamp.toast&&award.chal.osc>0&&award.chal.toast&&!award.stampOff&&!award.chalOff,JSON.stringify(award));
+  ok('sound: two stamps or two challenges completing together each ring the award chime once, not once per item',
+    award.stamp.osc===2&&award.stamp.toasts>=2&&award.chal.osc===2&&award.chal.toasts===2&&!award.stampOff&&!award.chalOff,JSON.stringify(award));
   // Effects off also silences the choice toast's alert tone and the build-finished fanfare
   // (the late-departure tone stays as it is: its call is in 08-stands.js, batch B1's file, #147)
   const fxGate=await page.evaluate(()=>{const S=__sim,G=S.G;S.ensureAudio();G.sound=true;
