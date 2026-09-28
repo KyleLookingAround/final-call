@@ -96,7 +96,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 ### Review
 
 - [Polish audit · 27 Sep 2026](lessons/main-polish-audit.md)
-- [Release audit · 28 Sep 2026](lessons/release-audit.md)
+- [Release audit (#155) · 28 Sep 2026](lessons/155-release-audit.md)
 - [Launch polish audit · 27 Sep 2026](lessons/106-launch-audit.md)
 - [Photo mode (#100) · 27 Sep 2026](lessons/100-photo-mode.md)
 - [Polish: overlay cards that match · 27 Sep 2026](lessons/87-overlay-cards.md)

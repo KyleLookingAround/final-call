@@ -1,5 +1,5 @@
 Theme: review
-# Release audit · 28 Sep 2026
+# Release audit (#155) · 28 Sep 2026
 
 - **Numbers:** estimate $15; $19.14 by the time the PR opened (over the estimate, under twice it), 190k of 1M context. Started 18:50 UTC. Docs only. Five helper agents: the brain itch, bugs, polish, balance and refactors. The bot ran on seeds 1–3 plus about fifteen variant and bisect runs.
 - **Went well:**
