@@ -3,14 +3,16 @@
 # its line comes out, so each part takes out its own lines in its PR. Only the checks-first PR and the coordinator add
 # lines, and the PR that brings the parts together leaves this file with comments only.
 
-# needs halls on two floors: the groundwork left it for the two floors part
+# needs halls on two floors: the two floors part
 scene: one floor at a time
 
 # two floors in Classic
 floors: departures upstairs, arrivals below
 floors: people change floor only on escalators and lifts
 floors: families take the lift
+floors: runners take the stairs or escalator
 floors: nobody is stuck between floors
+floors: nobody is drawn through a floor
 floors: walks stay about the same
 floors: tapping a hall goes to its floor
 floors: old saves land on the right floor
@@ -28,18 +30,21 @@ decor: never in the way
 decor: local names from the region
 decor: signs fit their halls
 
-# the roof terrace and spotters
+# the roof terrace floor
 terrace: hidden until it can be built
-terrace: seen at every zoom
-terrace: spotters crowd for something rare
-terrace: fewer at night and in rain
+terrace: on the Roof at every zoom, and only there
+terrace: waiting passengers go up and come down
+terrace: runners come down in time, or the story says why
+terrace: a steady handful of spotters
+terrace: a famous face goes up, and the fans follow
+terrace: fewer at night and in rain, and closed to passengers in the wet
 terrace: the crowd is the only sign
 terrace: spotters stay on the roof
 terrace: small takings
+terrace: its own line in the rating
 terrace: its card fits a phone
 
-# each layout's own floor plan (the way through, two hours in every layout and old saves already pass with Classic's plan in
-# each layout, so the groundwork switched them on as guards)
+# each layout's own floor plan
 plans: halls inside each main building
 plans: no layout's walk is a trap
 plans: rebuilding moves people into the new plan
