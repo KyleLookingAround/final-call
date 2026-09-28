@@ -69,15 +69,15 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--sign);outline-o
 canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
 canvas.drag{cursor:grabbing}
 .hud,.cam{position:absolute;display:flex;gap:3px;background:rgba(10,12,15,.78);padding:3px;border-radius:6px}
-.hud{top:8px;right:8px}
+.hud{top:8px;right:8px;pointer-events:none} /* its background never blocks a tap on the map beneath it (issue #103) */
 .cam{left:8px;bottom:8px;flex-wrap:wrap;max-width:calc(100% - 16px)}
-.hud button,.cam button{border:0;background:transparent;color:var(--muted);font:600 11px/1 var(--mono);min-width:28px;height:26px;padding:0 6px;border-radius:4px;display:grid;place-items:center}
+.hud button,.cam button{border:0;background:transparent;color:var(--muted);font:600 11px/1 var(--mono);min-width:28px;height:26px;padding:0 6px;border-radius:4px;display:grid;place-items:center;pointer-events:auto}
 .hud button.on,.cam button.on{background:var(--sign);color:var(--signInk)}
 .hud svg{width:14px;height:14px}
 .stage{container:stage/inline-size}
 .hud #spdb{display:none}
 .hscr{margin:10px 0 2px}
-.toasts{position:absolute;top:var(--hb,42px);left:8px;right:8px;max-width:380px;display:grid;gap:6px;pointer-events:none}
+.toasts{position:absolute;top:var(--hb,42px);left:8px;right:8px;max-width:380px;max-height:calc(100% - 120px);overflow:hidden;display:grid;gap:6px;pointer-events:none} /* stays clear of the camera row on a short map (issue #103) */
 .toast{pointer-events:auto;background:rgba(10,12,15,.94);border:1px solid #2A3139;border-left:3px solid var(--sign);border-radius:6px;padding:9px 11px 10px;font-size:13.5px;line-height:1.35}
 .toast.goal{border-left-color:var(--good)}
 .toast.warn{border-left-color:var(--bad)}
@@ -87,7 +87,7 @@ canvas.drag{cursor:grabbing}
 .toast .x{float:right;border:0;background:none;color:var(--muted);font:600 14px/1 var(--mono);padding:0 0 4px 8px}
 
 /* side panel */
-.side{flex:0 0 42%;min-height:0;display:flex;flex-direction:column;background:var(--surface);border-radius:12px 12px 0 0;border:1px solid var(--line);border-bottom:0}
+.side{flex:0 0 42%;min-height:0;display:flex;flex-direction:column;background:var(--surface);border-radius:12px 12px 0 0;border:1px solid var(--line);border-bottom:0;container:side/inline-size}
 .side.collapsed{flex-basis:auto}
 .side.collapsed .panel,.side.collapsed .goal{display:none}
 .stats{display:grid;grid-template-columns:1.25fr 1.3fr .9fr .9fr;gap:10px;padding:10px 14px 8px;border-bottom:1px solid var(--line)}
@@ -232,9 +232,9 @@ body.fs .tabs .drawclose{display:grid}
 .toast .x{position:absolute;top:6px;right:6px;float:none}
 .toast .tx{padding-right:14px}
 @keyframes tin{from{opacity:0;transform:translateY(-6px)}}
-.tip{position:absolute;left:8px;bottom:44px;max-width:min(430px,calc(100% - 16px));display:flex;align-items:center;gap:10px;background:rgba(10,12,15,.92);border:1px solid #2A3139;border-left:3px solid var(--sign);border-radius:6px;padding:7px 8px 7px 10px;font-size:13px;line-height:1.3;animation:tin .22s ease}
+.tip{position:absolute;left:8px;bottom:44px;max-width:min(430px,calc(100% - 16px));display:flex;flex-wrap:wrap;align-items:center;gap:10px;background:rgba(10,12,15,.92);border:1px solid #2A3139;border-left:3px solid var(--sign);border-radius:6px;padding:7px 8px 7px 10px;font-size:13px;line-height:1.3;animation:tin .22s ease}
 .tip .lab{font:700 10px/1 var(--disp);letter-spacing:.14em;color:var(--sign);text-transform:uppercase;flex:none}
-.tip .tt{min-width:0}
+.tip .tt{min-width:110px} /* a floor so a narrow map wraps the button below the text instead of one word per line (issue #103) */
 .tip .tt b{font-weight:600}
 .tip .buy{min-width:0;padding:7px 9px 6px;font-size:12.5px}
 .tip .snooze{border:0;background:none;color:var(--muted);font:600 14px/1 var(--mono);padding:4px;flex:none}
@@ -547,6 +547,8 @@ html,body{margin:0;overscroll-behavior:none}
 body.fs .app{padding-top:var(--topgap);padding-inline:var(--sidegap)}
 body.fs .cam{max-width:calc(100% - 172px)}
 .stage.short .tip{display:none}
+.stage.short .toast{padding:5px 8px 5px 7px;font-size:11.5px;line-height:1.25} /* less height to clear the camera row (issue #103) */
+.stage.short .toast .tx{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 @media (max-width:899px){body:not(.fs) .side{position:relative;z-index:30}.side.dragging{box-shadow:0 -14px 30px rgba(0,0,0,.4)}}
 /* phones on their side: the map and the panel side by side, the board folded into the map's corner */
 @media (orientation:landscape) and (max-height:500px) and (min-width:560px){
@@ -565,7 +567,7 @@ body.fs .cam{max-width:calc(100% - 172px)}
 .help{padding-top:calc(16px + var(--topgap))}
 @media (max-width:899px){.pcard{padding-top:calc(14px + var(--topgap))!important}.plan{padding-top:0}}
 
-/* ---- polish: chrome and touch targets (issues #69-72) ---- */
+/* ---- polish: chrome and touch targets (issues #69-72, #103) ---- */
 @media (pointer:coarse){
   .bmode button{padding:15px 8px 14px}
   .hud button,.cam button{min-width:42px;height:42px}
@@ -584,7 +586,14 @@ body.fs .cam{max-width:calc(100% - 172px)}
   .recrow .btns .chip{padding-block:14px 13px}
   .segs .chip{padding-block:14px 13px}
   .lever button{width:44px;height:42px}
-  .note .linkb{padding-block:9px;display:inline-block}
+  .note .linkb{padding-block:10px;display:inline-block}
+  /* another touch-target pass (issue #103): buy buttons, dismiss buttons, inline links and the colour swatches */
+  .buy{padding:14px 10px 13px}
+  .tip .buy{padding:14px 9px 13px}
+  .toast .x{top:0;right:0;width:40px;height:40px;display:grid;place-items:center}
+  .tip .snooze{min-width:40px;min-height:40px;display:grid;place-items:center}
+  .linkb{padding-block:10px;display:inline-block}
+  .swatch{width:40px;height:40px}
 }
 @media (max-height:500px) and (orientation:landscape){
   .segs .chip{flex:1 1 auto;white-space:nowrap}
@@ -599,6 +608,21 @@ body.fs .cam{max-width:calc(100% - 172px)}
   .goal{grid-template-columns:auto minmax(0,1fr)}
   .goal .gt{white-space:normal;overflow:visible;text-overflow:clip}
   .goal .gr{grid-column:1/-1;justify-self:end}
+}
+/* the side panel's own width, not the screen's: the same squeeze happens side-by-side in landscape (issue #103) */
+@container side (width < 380px){.tabs button{font-size:0}} /* icon only: no room for "Terminal"/"Airfield" without colliding */
+@container side (width < 340px){
+  .stats{grid-template-columns:1fr 1.6fr .7fr .8fr;gap:4px;padding-inline:8px}
+  .stat output{font-size:13px;font-family:var(--disp)} /* condensed numerals fit more before the ellipsis would start */
+  .stat.cash output{font-size:15px}
+  #sRep{font-size:12px}
+  .goal{grid-template-columns:auto minmax(0,1fr)}
+  .goal .gt{white-space:normal;overflow:visible;text-overflow:clip}
+  .goal .gr{grid-column:1/-1;justify-self:end}
+}
+@media (max-width:380px){
+  .brand .tag{font-size:0}
+  .brand .tag::before{content:"FC";font-size:10px}
 }
 /* photo mode (62-photo-mode.js): the map alone, full screen, with the photo bar at its foot */
 .hud #photob svg{width:15px;height:15px}
