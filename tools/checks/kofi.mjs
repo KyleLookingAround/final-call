@@ -16,7 +16,7 @@ export default async function({open,ok}){
       S.openNews(false);return r});
     ok("kofi: in What's new",isKofi(news),JSON.stringify(news));
 
-    const settings=await page.evaluate(()=>{const S=__sim;S.R.oSub='settings';S.setTab('office');
+    const settings=await page.evaluate(()=>{const S=__sim;S.R.oSub='settings';S.R.setSub='save';S.setTab('office');
       const el=document.querySelector('#panel .kofi'),reset=document.querySelector('#panel #reset'),r=el&&{href:el.getAttribute('href'),target:el.target,rel:el.getAttribute('rel'),visible:el.offsetWidth>0&&el.offsetHeight>0,
         afterReset:!!(reset&&el.compareDocumentPosition(reset)&Node.DOCUMENT_POSITION_PRECEDING)};
       S.setTab('stands');return r});
