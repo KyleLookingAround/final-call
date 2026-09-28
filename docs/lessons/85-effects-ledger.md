@@ -1,3 +1,4 @@
+Theme: merge-chasing
 # Systems refactor 3: one effects ledger · 27 Sep 2026
 
 - **Numbers:** session `session_01BVVbyCbysZqXQHNzgErWpQ`, estimate $10: $3.69 and 183k of 1M context at the CI check-in, well under. Started 17:21 UTC, PR (#85) opened 17:37; checks and Balance green on the first push. `main` moved five times (#84; then #80, #87 and #90; then #91 and #89; then #81; then #86), so it took five merge-ins, three past the brief's two, each needed because GitHub won't squash-merge over a conflict: #89 added a check group to the same line of `docs/SYSTEMS.md`, and GitHub refused the squash merge on the conflict, so stopping at two would have left the PR unmergeable. Each extra merge conflicted only in docs lists of check groups.

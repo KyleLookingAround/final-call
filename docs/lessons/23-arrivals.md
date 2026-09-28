@@ -1,3 +1,4 @@
+Theme: parts
 # #23 Arrivals · 27 Sep 2026
 
 - **Numbers:** $11.10, 245k of 1M context. Started 20:36, PR opened about 21:50, merged 05:55 the next morning. Four pushes after it opened, all by the finishing session; CI green after each.

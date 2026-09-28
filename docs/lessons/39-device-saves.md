@@ -1,3 +1,4 @@
+Theme: docs
 # #39 Saves on the device only · 27 Sep 2026
 
 - **Numbers:** done by the terminal's finishing session, at the owner's request, between features. PR opened 11:25, merged 11:32. One push after it opened (a docs wording fix); CI green first time. Bot STATE identical to main on seeds 1–3.

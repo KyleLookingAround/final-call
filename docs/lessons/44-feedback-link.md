@@ -1,3 +1,4 @@
+Theme: tools
 # A feedback link in Help · 27 Sep 2026
 
 - **Numbers:** session `session_01RcMyepPjoZed4Nu662QwAW`, estimate $6. Started from a checked brief with no questions for the owner; every check passed first time, including the new `feedback` group.

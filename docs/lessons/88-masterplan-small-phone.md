@@ -1,3 +1,4 @@
+Theme: merge-chasing
 # #88 Masterplan on a small phone · 27 Sep 2026
 
 - **Numbers:** estimate $5: well over by the merge (multiple rounds of `main` chasing), started 17:20, PR opened 17:46 (26 minutes, both commits already in when it opened). Six or more merges from `main` by hand before the Catch up workflow and `tools/join.mjs` landed partway through and took over the shared-doc conflicts.

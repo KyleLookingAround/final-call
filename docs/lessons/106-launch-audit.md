@@ -1,3 +1,4 @@
+Theme: review
 # Launch polish audit · 27 Sep 2026
 
 - **Numbers:** session `session_01VmVwCaK7VTSBqrTBbGBHDn`, estimate $10: $16.73 and 135k of 1M context when the PR opened, over the estimate but under twice it. Started 21:04 UTC, PR #106 opened 21:47. Docs only; four review agents on the cheaper model, about 280 screenshots between them.

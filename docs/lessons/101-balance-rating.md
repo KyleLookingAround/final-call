@@ -1,3 +1,4 @@
+Theme: balance
 # #101 A rating that reflects the last day, measured and switched on; a network you have to keep, specced · 27 Sep 2026
 
 - **Numbers:** estimate $14. `get_session` hadn't reported the cost when this was written. Started 21:04 UTC, PR opened 21:38. There were 23 bot runs of 1,150 hours, four at a time on four cores (about 8 minutes a wave): three for `main` keeping Classic, three for `main` rebuilding, three with the switch off, three on with the first guess, six for two tunings, three for B rebuilding, and one of seed 3 to 1,350 hours. There was one full `npm run check`, with no bots beside it.

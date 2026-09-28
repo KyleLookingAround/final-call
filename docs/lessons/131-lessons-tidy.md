@@ -1,0 +1,9 @@
+Theme: tidy
+# #131 Tidy the lessons · 28 Sep 2026
+
+- **Numbers:** 26 lessons new since the last tidy (43 files listed in `.last-tidy`, 69 in the folder), well past the 8-lesson trigger. The tidy Routine (`trig_01WWjSqun7aAX15iLCb4PQdc`) fired at 10:01 but had no repository or GitHub attached, so its session pushed nothing; this session ran the brief by hand instead. 68 lesson files left after the tidy (69 minus one merge). One PR, no bot run: no game code.
+- **What changed:** every remaining file got a `Theme:` line (15 themes, reusing merge-chasing and cost plus the brief's examples and a handful more the lessons needed); one file (`25-waiting-to-merge.md`) merged into an existing bullet in `main-overnight-stall.md` that already said the same thing; two lessons' already-claimed → (#101, #126) turned real by adding the missing line to the `steward` playbook, since the change they pointed at had never actually been written in.
+- **Went well:** with everything already sorted by PR and dated, reading all 69 files end to end (rather than sampling) was what surfaced the phantom arrows — a lesson that says "→ (fix)" without the fix existing anywhere is easy to miss without reading the destination it names.
+- **Lessons:**
+  - A → doesn't always mean the change landed: two different lessons (#101, #126) independently claimed the same steward-playbook fix that neither the `steward` nor `coordinator` playbook actually had. → No further change: this tidy is the fix, and the next tidy should spot-check a sample of arrows against their named destination, not just count them as done.
+  - Almost none of the 68 remaining files were genuine whole-file duplicates of each other, even where many shared a root cause (the busy-`main` merge-chasing story appears in over a dozen files): each carries its own PR's numbers and a distinct secondary lesson, so grouping by theme did more of the "fewer, clearer" work here than merging did.

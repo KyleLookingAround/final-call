@@ -1,3 +1,4 @@
+Theme: coordinator
 # Coordinator playbook: limits by plan, helper agents · 27 Sep 2026
 
 - **Numbers:** session `session_01BthEySpo492BqNkhzGTLff`, estimate $3: cost and context read 0 early on, the usual early reading. One PR, no questions for the owner.
