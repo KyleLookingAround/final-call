@@ -1,6 +1,6 @@
 # Brief: Launch-day triage
 
-This brief is also the prompt of the "Final Call: launch-day triage" Routine (its id goes in the `coordinator` playbook once the coordinator creates it from this committed text). It fires every two hours during launch week and starts a fresh session each time, on the cheaper model, so it's never stuck behind a session that hit the account's usage limit.
+This brief is the coordinator's first message when it starts launch-day triage by hand (`coordinator` playbook, §12): a Routine can't do this, since this organisation can't attach connectors to a Routine made from a session, so it can't reach GitHub or the session tools. During launch week the coordinator starts a fresh session with this brief every two hours, on the cheaper model, until launch week is over.
 
 ## Goal and what it may touch
 

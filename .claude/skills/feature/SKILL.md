@@ -55,12 +55,12 @@ Every list a session adds to is one file per entry, so two sessions never edit t
 
 - Commit with a short imperative subject in plain words; add a body when the reason isn't obvious. No attribution lines; the project notes list what messages must leave out.
 - `git push -u origin feature/<short-name>`, then open a PR with a plain title, filling in `.github/pull_request_template.md`. Open it as a draft while iterating, so Checks only runs the groups the change touches, and mark it ready for review before merging. Check the description afterwards and remove anything added that the template doesn't have.
-- Follow the `steward` playbook until the PR is green, then merge it yourself with Squash and merge; `main` publishes to GitHub Pages.
+- Follow the `steward` playbook until the PR is green: write the look back into the PR, mark it ready for review, turn on auto-merge with the squash method, book one `send_later` to confirm the merge and the Pages publish, then stop.
 
 ## 8. Learn
 
 - If a bug got through to players, add the check that would have caught it, in the same PR as the fix.
-- After the merge, look back at the session that built it (the `steward` playbook's last step) in its own file in `docs/lessons/`.
+- Before marking the PR ready, look back at the session that built it (the `steward` playbook) and commit it into the PR as its own file in `docs/lessons/`.
 
 ## Working while the owner is away
 
