@@ -63,15 +63,28 @@ const paxHidden=p=>p.riding||onMover(p)||(p.state==='bridge'||p.state==='dBridge
 // a fraction of a second rather than one frame. It never runs ahead,
 // and snaps to them when they appear, after time out of sight, or when they jump further than EASE_SNAP. Drawing only:
 // the game moves p.x and p.y as before, and a drawn passenger is never more than a step or two behind.
+// If they crossed into another room since the last drawn frame, catching up follows the doorways they actually used
+// (p.doors, left by walk() in 41-airside.js) rather than a straight line from wherever it was lagging to where they
+// are now, which would otherwise cut across a room they've already left, through its wall (#121). At 4× and 8×, more
+// than one game tick — and so more than one doorway — can land between two drawn frames (23-boot.js), so every
+// doorway crossed is kept, not just the last.
 const EASE_K=1.45,EASE_STEP=0.034,EASE_V0=40,EASE_SNAP=80;
 function paxEase(p){
   const dt=G.clock-p.et;p.et=G.clock;
-  if(!(dt>=0&&dt<=0.5)||Math.hypot(p.x-p.ex,p.y-p.ey)>EASE_SNAP){p.ex=p.esx=p.x;p.ey=p.esy=p.y;p.ev=0;p.snap=true;return}
+  if(!(dt>=0&&dt<=0.5)||Math.hypot(p.x-p.ex,p.y-p.ey)>EASE_SNAP){p.ex=p.esx=p.x;p.ey=p.esy=p.y;p.ev=0;p.snap=true;p.doors=null;return}
   p.snap=false;if(!dt)return;
-  const dx=p.x-p.ex,dy=p.y-p.ey,d=Math.hypot(dx,dy),vs=Math.hypot(p.x-p.esx,p.y-p.esy)/dt;p.esx=p.x;p.esy=p.y;
+  const path=p.doors&&p.doors.length?[p.ex,p.ey,...p.doors,p.x,p.y]:[p.ex,p.ey,p.x,p.y];p.doors=null;
+  let d=0;for(let i=0;i+2<path.length;i+=2)d+=Math.hypot(path[i+2]-path[i],path[i+3]-path[i+1]);
+  const vs=Math.hypot(p.x-p.esx,p.y-p.esy)/dt;p.esx=p.x;p.esy=p.y;
   if(d<1e-3){p.ex=p.x;p.ey=p.y;p.ev=0;return}
-  const k=Math.pow(p.way&&p.way[p.wi+3]===2?EASE_K*EASE_K:EASE_K,dt/EASE_STEP),v=clamp(vs+Math.min(d/0.5,0.12*vs+8),p.ev/k,Math.max(p.ev,EASE_V0)*k),s=Math.min(v*dt,d); // catching up a little faster than they walk
-  p.ex+=dx/d*s;p.ey+=dy/d*s;p.ev=s/dt;
+  const k=Math.pow(p.way&&p.way[p.wi+3]===2?EASE_K*EASE_K:EASE_K,dt/EASE_STEP),v=clamp(vs+Math.min(d/0.5,0.12*vs+8),p.ev/k,Math.max(p.ev,EASE_V0)*k); // catching up a little faster than they walk
+  let left=Math.min(v*dt,d);
+  for(let i=0;i+2<path.length;i+=2){
+    const segd=Math.hypot(path[i+2]-path[i],path[i+3]-path[i+1]);
+    if(left<=segd||i+4>=path.length){const t=segd?left/segd:0;p.ex=path[i]+(path[i+2]-path[i])*t;p.ey=path[i+1]+(path[i+3]-path[i+1])*t;break}
+    left-=segd;
+  }
+  p.ev=Math.min(v*dt,d)/dt;
 }
 const unEase=p=>{p.et=NaN}; // out of sight: snap back on reappearing
 // the people mover's cars: one on the track beside each group of riders, drawn where it eases towards a car the frame
@@ -101,7 +114,7 @@ function drawMover(V){
   for(const g of mvGroups(pts)){
     let best=null,bd=MV_MATCH;
     MV_CARS.forEach((c,k)=>{if(used.has(k))return;const d=Math.hypot(c.x-g.x,c.y-g.y);if(d<bd){bd=d;best=k}}); // matched by where it's drawn now, so the target it picks up is never more than MV_MATCH from there
-    if(best!=null){const c=MV_CARS[best];c.tx=g.x;c.ty=g.y;c.vert=g.vert;c.shuttle=false;used.add(best)}
+    if(best!=null){const c=MV_CARS[best];c.tx=g.x;c.ty=g.y;c.vert=g.vert;c.shuttle=false;c.s=null;used.add(best)} // s is stale once it's carrying riders again; the next time it's idle, place it fresh from where it's drawn
     else{MV_CARS.push({x:g.x,y:g.y,tx:g.x,ty:g.y,vert:g.vert,shuttle:false});used.add(MV_CARS.length-1)}
   }
   // a car nobody's riding any more becomes the shuttle, carrying on from where it already was; only one shuttle at a time

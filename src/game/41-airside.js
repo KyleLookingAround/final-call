@@ -88,7 +88,7 @@ function walk(p,v,dt){
   if(w){const k=p.wi,m=w[k+3];let sp=v;
     if(m===1){if(!p.riding){if(p.rideAt==null)p.rideAt=Math.ceil(G.clock/TRAIN_EVERY+1e-9)*TRAIN_EVERY;if(G.clock<p.rideAt)return false;p.riding=true}sp=TRAIN_V}
     else if(m===2)sp=v*2;
-    if(moveTo(p,w[k],w[k+1],sp,dt)){p.room=w[k+2];p.riding=false;p.rideAt=null;p.wi+=4;if(p.wi>=w.length)p.way=null}
+    if(moveTo(p,w[k],w[k+1],sp,dt)){(p.doors||(p.doors=[])).push(w[k],w[k+1]);p.room=w[k+2];p.riding=false;p.rideAt=null;p.wi+=4;if(p.wi>=w.length)p.way=null}
     return false}
   return moveTo(p,p.tx,p.ty,v,dt);
 }
