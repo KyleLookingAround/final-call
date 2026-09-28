@@ -74,16 +74,18 @@ When several branches were built side by side (the `feature` playbook's "Splitti
 - The commit message is a plain imperative subject with no attribution lines; the commit hook enforces this.
 - The PR title and description are plain and follow the template. The Description check (`.github/workflows/description.yml`) enforces this; the tools may add a footer when a PR opens, so read the description back once it's up.
 
+## The look back, before the PR is ready
+
+Every PR gets a short look back at the session that built it, so the next one costs less. It goes into the PR itself, as a commit, before the PR is marked ready: auto-merge (below) can complete the merge well after this session's turn has ended, so the look back can't wait until after that. Keep it to a few minutes.
+
+1. **Numbers.** From the session's record (`get_session`): what it cost against its brief's estimate, how much of its context it used, and when it started. Any hours spent waiting on the owner (a `needs-owner` issue's open time, or a question in the conversation). From the PR: when it opened, how many pushes it took, any red CI runs, and how many merges from `main` it needed (by hand, and by the Catch up workflow).
+2. **Friction.** What slowed it or needed someone else. Look at what it got stuck on, what the PR says it left undone or saw fail once, and what building it needed: conflicts, scope fixes, a rebalance.
+3. **Record it** in its own file, `docs/lessons/<pr>-<short-name>.md`, in the shape the others have: `# Title · date`, then **Numbers**, **Went well** and **Lessons**, a line per lesson. Never add it to `docs/LESSONS.md` itself: that list is joined from the folder.
+4. **Act on it** when a lesson would have saved real time or credits, or it comes up a second time. Change the playbook, brief, check or tool that would have prevented it, in the same PR as the entry, and mark the lesson with → and where. Otherwise the entry is enough.
+5. **The tidy.** Run `node tools/join.mjs`: its first line counts the lessons added since the last tidy. At 8 or more, say so in the PR and ask the coordinator to start the tidy (the `coordinator` playbook, §10) rather than tidying by hand. If a tidy PR is already open (`feature/lessons-tidy-…`), leave it be.
+
 ## Done
 
-Green checks, no conflicts, and every review thread answered. Then merge it yourself with Squash and merge: sessions have the owner's standing permission, and waiting costs hours when they're away. Confirm the Pages run afterwards. Only a PR that needs the owner's judgement waits for them: a balance change beyond the baselines' tolerance, or a spec question the brief doesn't settle. Say so in the PR, open a `needs-owner` issue with the default you'll take after 12 hours (the `feature` playbook), and carry on with other work.
+Green checks, no conflicts, every review thread answered, and the look back committed. Mark the PR ready for review if it's still a draft, turn on auto-merge with the squash method (`enable_pr_auto_merge`), book one `send_later` to confirm the merge and the Pages publish, then stop: a ruleset on `main` requires the `check` status check with no bypass, and "Allow auto-merge" does the waiting, not the session. If `enable_pr_auto_merge` fails, merge by hand once `check` is green and say so in the PR.
 
-## After merging: look back at the session
-
-Every merged PR gets a short look back at the session that built it, so the next one costs less. Keep it to a few minutes.
-
-1. **Numbers.** From the session's record (`get_session`): what it cost against its brief's estimate, how much of its context it used, and when it started. Any hours spent waiting on the owner (a `needs-owner` issue's open time, or a question in the conversation). From the PR: when it opened and merged, how many pushes came after it opened, any red CI runs, and how many merges from `main` it needed (by hand, and by the Catch up workflow).
-2. **Friction.** What slowed it or needed someone else. Look at what it got stuck on, what the PR says it left undone or saw fail once, and what the merge needed: conflicts, scope fixes, a rebalance.
-3. **Record it** in its own file, `docs/lessons/<pr>-<short-name>.md` (`main-<short-name>.md` for a change pushed straight to `main`), in the shape the others have: `# Title · date`, then **Numbers**, **Went well** and **Lessons**, a line per lesson. Never add it to `docs/LESSONS.md` itself: that list is joined from the folder.
-4. **Act on it** when a lesson would have saved real time or credits, or it comes up a second time. Change the playbook, brief, check or tool that would have prevented it, in the same PR as the entry, and mark the lesson with → and where. Otherwise the entry is enough.
-5. **The tidy.** Run `node tools/join.mjs`: its first line counts the lessons added since the last tidy. At 8 or more, fire the tidy Routine (`fire_trigger` with the id in the `coordinator` playbook), say so in the PR or commit that adds the lesson, and don't tidy by hand. Only one session fires it: if a tidy PR is already open (`feature/lessons-tidy-…`), leave it be.
+Skip auto-merge for a PR that needs the owner's judgement instead: a balance change beyond the baselines' tolerance (Balance isn't a required check, so auto-merge wouldn't wait for it), or a spec question the brief doesn't settle. Say so in the PR, open a `needs-owner` issue with the default you'll take after 12 hours (the `feature` playbook), and carry on with other work.

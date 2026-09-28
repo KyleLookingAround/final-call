@@ -37,6 +37,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 ### Coordinator
 
+- [#134 Playbooks without Routines, auto-merge, CI time limit · 28 Sep 2026](lessons/134-playbooks-no-routines.md)
 - [Coordinator playbook: limits by plan, helper agents · 27 Sep 2026](lessons/59-coordinator-limits.md)
 - [Coordinator playbook · 27 Sep 2026](lessons/42-coordinator-playbook.md)
 - [One session for four PRs (#28, #30, #32, #33) · 27 Sep 2026](lessons/34-one-session-four-prs.md)

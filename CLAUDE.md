@@ -30,10 +30,11 @@ Keep them true: a PR that changes how something works updates that topic's file 
 
 ## Publishing
 
-1. Push to `main`. The "Publish to GitHub Pages" workflow runs `node tools/build.mjs` and deploys `dist/`, skipping pushes that only change docs, tools or playbooks. CI needs no npm install.
-2. If this session can't push to `main`, push a branch and open a PR with a plain title and description. The "Checks" workflow runs on PRs that aren't drafts, and a newer push cancels the older run: run `npm run check` locally first rather than using CI to find failures. Sessions have the owner's standing permission to merge their own PRs with **Squash and merge** once checks are green, without waiting. Only a PR that needs the owner's judgement waits for them: a balance change beyond the baselines' tolerance, or a spec question the brief doesn't settle.
-3. After pushing, confirm the run finished. The site is at `https://<owner>.github.io/<repo>/`.
-4. **Link previews.** After a change to how the game looks, run `npm run preview`, look at the image and icon it makes, and commit them (`docs/SYSTEMS.md`, "Link previews").
+1. Nothing reaches `main` directly: a ruleset requires the `check` status check with no bypass, and "Allow auto-merge" is on. Everything ships as a PR.
+2. Push a branch and open a PR with a plain title and description. The "Checks" workflow runs on PRs that aren't drafts, and a newer push cancels the older run: run `npm run check` locally first rather than using CI to find failures.
+3. Write the look back into the PR, mark it ready for review, then turn on auto-merge with the squash method and book one `send_later` to confirm the merge (the `steward` playbook has the detail). Skip auto-merge for a PR that needs the owner's judgement instead: a balance change beyond the baselines' tolerance, or a spec question the brief doesn't settle.
+4. Once merged, confirm the "Publish to GitHub Pages" run finished; it skips pushes that only change docs, tools or playbooks. The site is at `https://<owner>.github.io/<repo>/`.
+5. **Link previews.** After a change to how the game looks, run `npm run preview`, look at the image and icon it makes, and commit them (`docs/SYSTEMS.md`, "Link previews").
 
 ## How we work
 
