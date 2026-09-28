@@ -69,8 +69,12 @@ export default async function({open,ok,saveText}){
     return {gates:L.length,text:SND.q.concat(SND.cur||[]).filter(x=>x.k==='gate').map(x=>x.text)[0]||''}});
   ok('sound: a gate change is announced',gate.gates>0&&/^Gate change: flight \w+ to .+ now leaves from gate \w+, not \w+$/.test(gate.text),JSON.stringify(gate));
   // a quiet night: from 23:00 to 05:00 only final calls, and never spoken
-  const night=await page.evaluate(()=>{const S=__sim,G=S.G,SND=S.SND;(G.pol||(G.pol={})).curfew=false;toHour(23);SND.q.length=0;const p0=SND.played.length,l0=SND.log.length;let hum=0,day=0;
-    for(let m=0;m<355;m++){drive(1,1);hum=Math.max(hum,SND.lvl.hum)}const P=SND.played.slice(p0),Lg=SND.log.slice(l0);
+  const night=await page.evaluate(()=>{const S=__sim,G=S.G,SND=S.SND;(G.pol||(G.pol={})).curfew=false;G.pol.late='wait';toHour(23);SND.q.length=0;
+    // the night's first new flight of your own has a late passenger, so it's still boarding at its final call whatever else the night holds
+    let late=false;const lateOne=()=>{const R=S.R,F=S.SIDX.map(i=>R.st[i].F).find(F=>F&&!F.partner&&!F.freighter&&!F.straggler&&F.std-G.clock>30&&F.manifest.some(q=>!q.leader&&q.type==='work'));
+      if(F){const k=F.manifest.findIndex(q=>!q.leader&&q.type==='work');F.straggler=F.manifest.splice(k,1)[0];F.stragglerAt=F.std+3;late=true}};
+    const p0=SND.played.length,l0=SND.log.length;let hum=0,day=0;
+    for(let m=0;m<355;m++){if(!late&&m<240)lateOne();drive(1,1);hum=Math.max(hum,SND.lvl.hum)}const P=SND.played.slice(p0),Lg=SND.log.slice(l0);
     toHour(12);for(let m=0;m<30;m++){drive(1,1);day=Math.max(day,SND.lvl.hum)}
     return {kinds:kinds(P),logged:kinds(Lg),voiced:P.filter(p=>p.voice).length,hum:+hum.toFixed(4),day:+day.toFixed(4)}});
   ok('sound: from 23:00 to 05:00 only final calls chime, unspoken, and the hum drops',Object.keys(night.kinds).join()==='final'&&Object.keys(night.logged).join()==='final'&&!night.voiced&&night.hum>0&&night.hum<night.day*0.5,JSON.stringify(night));
