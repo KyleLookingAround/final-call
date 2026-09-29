@@ -1,14 +1,16 @@
 // The game's rules: the same seed plays the same game; cheaper fares fill more seats and keep more travellers from
 // Lowmere; costs rise with level; planes lose value with wear; levels ask for more each time; every layout is sound;
-// plan and goal ids are sound; the newest What's new version matches docs/HISTORY.md; the sim hook reads live
-// values; loading a save twice changes nothing; and each passenger goes through the same states as on main over a seeded
-// hour (tools/checks/lib/pax-states.json, recorded from main before refactor 7; RULES_PAX_RECORD=1 writes it again).
-import {readFileSync,writeFileSync} from 'node:fs';
+// plan and goal ids are sound; a level goal follows its least-met requirement and a curfew scales it to the hours
+// open; the Lowmere goal leads only from Gateway on; has() knows every real unlocked-from-the-start item and hides
+// a typo; the newest What's new version matches docs/HISTORY.md; the sim hook reads live values; loading a save
+// twice changes nothing; and each passenger goes through the same states as on main over a seeded hour
+// (tools/checks/lib/pax-states.json, recorded from main before refactor 7; RULES_PAX_RECORD=1 writes it again).
+import {readFileSync,writeFileSync,readdirSync} from 'node:fs';
 import {join,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 const PAX_REC=join(dirname(fileURLToPath(import.meta.url)),'lib/pax-states.json');
 
-export default async function({open,ok,saveText,newest,out,HIST_TOP}){
+export default async function({open,ok,saveText,newest,out,HIST_TOP,root}){
   const run=async seed=>{const {ctx,page}=await open(undefined,null,false,{seed,still:true});
     const r=await page.evaluate(()=>{const S=__sim;S.R.sim=true;for(let i=0;i<24*60*4;i++)S.update(0.25);const G=S.G;return JSON.stringify([Math.round(G.cash*100),G.flights,G.flown,G.rep,G.clock])});
     await ctx.close();return r};
@@ -41,6 +43,21 @@ export default async function({open,ok,saveText,newest,out,HIST_TOP}){
     t('rules: there are enough crews for the fleet',S.crewTarget()>=G.fleet.filter(f=>!f.sold).length,`${S.crewTarget()} for ${G.fleet.filter(f=>!f.sold).length} planes`);
     bad=[];for(let n=2;n<S.LEVELS.length;n++){const p=S.LEVELS[n-1].req,q=S.LEVELS[n].req;if(!(q.pax>=p.pax&&q.gates>=p.gates))bad.push(n)}
     t('rules: each level asks for at least as much as the one before',!bad.length,few(bad));
+    {bad=[];for(let n=1;n<S.LEVELS.length;n++){const g=S.GOALS.find(x=>x.id==='l'+n),[v,tg]=g.p();
+        if(G.level>=n){if(v!==1||tg!==1)bad.push('l'+n+' (reached, should read as met)')}
+        else{const min=S.levelChecks(n).reduce((a,c)=>c[1]/c[2]<a[1]/a[2]?c:a);if(v!==min[1]||tg!==min[2])bad.push('l'+n)}}
+      t('rules: a level goal\'s bar and text follow its least-met requirement, and reads as met once the level is reached',!bad.length,few(bad))}
+    {const gids=S.GOALS.map(g=>g.id);
+      t('rules: the Lowmere market-share goal leads only from Gateway on, where slot agreements are within reach',gids.indexOf('low1')>gids.indexOf('l5'),`low1 at ${gids.indexOf('low1')}, l5 at ${gids.indexOf('l5')}`)}
+    {const before={level:G.level,flown:G.flown,rep:G.rep,hours:G.hours,pol:G.pol,cash:G.cash,pts:G.pts,newTabs:G.newTabs,built:G.stands.map(s=>s.built)},
+      restore=()=>{G.level=before.level;G.flown=before.flown;G.rep=before.rep;G.hours=before.hours;G.pol=before.pol;G.cash=before.cash;G.pts=before.pts;G.newTabs=before.newTabs;G.stands.forEach((s,i)=>s.built=before.built[i])},
+      full=S.LEVELS[4].req.daily,scaled=Math.round(full*18/24),setUp=()=>{G.level=3;G.flown=S.LEVELS[4].req.pax;G.rep=S.LEVELS[4].req.rep;G.stands.forEach((s,i)=>s.built=i<4);G.hours=[{pax:scaled}]};
+      setUp();G.pol={curfew:true};S.checkLevel();const withCurfew=G.level;restore();
+      setUp();G.pol={curfew:false};S.checkLevel();const withoutCurfew=G.level;restore();
+      t('rules: a curfew scales the next level\'s daily target to the hours open, so a level-3 airport with 4 gates can still reach level 4',withCurfew===4&&withoutCurfew===3,`curfew on → level ${withCurfew}; off → level ${withoutCurfew} (target ${full}, scaled ${scaled})`)}
+    {bad=['mode:bus','up:desks','ac:0','meth:random','shop:coffee','rt:0'].filter(k=>{const [a,v]=k.split(':');return !S.keyExists(a,v)});
+      if(S.keyExists('mode','notarealmode'))bad.push('mode:notarealmode (should not exist)');
+      t('rules: has() knows every real, unlocked-from-the-start item, and hides a typo rather than showing it early',!bad.length,few(bad))}
     {const ids=new Set(S.TECH.map(T=>T.id));bad=S.TECH.filter(T=>(T.r||[]).some(r=>!ids.has(r))).map(T=>T.id);
       const gids=new Set(S.GOALS.map(g=>g.id));
       t('rules: plan and goal ids are unique and prerequisites exist',ids.size===S.TECH.length&&gids.size===S.GOALS.length&&!bad.length,few(bad))}
@@ -74,6 +91,15 @@ export default async function({open,ok,saveText,newest,out,HIST_TOP}){
     return out},HIST_TOP);
   for(const [name,pass,info] of res)ok(name,pass&&!errs.length,info+(errs.length?' '+errs[0]:''));
   await ctx.close();
+  { // row 40: every literal has('…') call site names a real item, caught here rather than by playing into a typo
+    const lits=new Set();
+    for(const f of readdirSync(join(root,'src/game')).filter(f=>f.endsWith('.js')))
+      for(const m of readFileSync(join(root,'src/game',f),'utf8').matchAll(/\bhas\('([\w:]+)'\)/g))lits.add(m[1]);
+    const {ctx,page,errs}=await open(undefined,null,false,{still:true});
+    const bad=await page.evaluate(keys=>keys.filter(k=>{const [a,v]=k.split(':');return !__sim.keyExists(a,v)}),[...lits]);
+    ok('rules: every literal has(\'…\') key names a real item',!bad.length&&!errs.length,(bad.length?`unknown: ${bad.join(', ')}`:'')+(errs.length?' '+errs[0]:''));
+    await ctx.close();
+  }
   // the passes over passengers (refactor 7): over a seeded hour on the level 9 save, each passenger, numbered in the order
   // they're first seen, goes through the same states, read after every step, as on main
   {const {ctx,page,errs}=await open(undefined,saveText('v32-L9.json'),false,{still:true});
