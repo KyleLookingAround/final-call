@@ -16,6 +16,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 ### Checks
 
+- [Windows and watchers · 29 Sep 2026](lessons/183-windows.md)
 - [The roof terrace floor · 29 Sep 2026](lessons/181-terrace.md)
 - [Release fix batches: #149 F2 goals, #150 P1 first level-up, #158 R1 saves, #159 P2 moments · 28 Sep 2026](lessons/159-release-fix-batches.md)
 - [#156 Systems refactor 7, part 2: arrivals, movement and the index in one pass · 28 Sep 2026](lessons/156-refactor-passes-merge.md)
