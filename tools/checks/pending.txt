@@ -3,12 +3,6 @@
 # its line comes out, so each part takes out its own lines in its PR. Only the checks-first PR and the coordinator add
 # lines, and the PR that brings the parts together leaves this file with comments only.
 
-# windows and watchers
-windows: glass on every airside wall facing the apron
-windows: passengers watch a big jet go by
-windows: nobody watches after their gate is called
-windows: lit at night
-
 # decor and local character
 decor: nothing to place
 decor: it comes with the building
