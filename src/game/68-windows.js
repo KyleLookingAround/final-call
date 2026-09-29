@@ -41,26 +41,26 @@ LAYER.terminal.push(V=>{
         for(let s=0;s<m;s++){const x=g[0]+(g[2]-g[0])*s/m,y=g[1]+(g[3]-g[1])*s/m;if(!inView(x,y,4))continue;ctx.moveTo(x-g[5]*3,y-g[6]*3);ctx.lineTo(x,y)}}ctx.stroke()}}}
   ctx.restore();
 });
-// warm pools on the apron outside each pane at night, stamped from one cached glow (the lighting pass draws LIGHTS additively)
-let WIN_GLOW=null;
+// warm pools on the apron outside each pane at night (the lighting pass draws LIGHTS additively): a lamp() every 40 units
+// close up; zoomed out, where they'd be too small to tell apart, one warm band along the glass
 function glassLights(V){
   if(V.d<=0)return;const P=glass();if(!P.length)return;
-  const s=WIN_GLOW||(WIN_GLOW=(()=>{const c=document.createElement('canvas');c.width=c.height=32;const g=c.getContext('2d'),r=g.createRadialGradient(16,16,0,16,16,16);
-    r.addColorStop(0,'rgba(255,206,140,1)');r.addColorStop(0.5,'rgba(255,196,120,.45)');r.addColorStop(1,'rgba(255,196,120,0)');g.fillStyle=r;g.fillRect(0,0,32,32);return c})());
-  ctx.globalAlpha=Math.min(1,0.9*V.d);
-  for(const g of P){if(!winShown(g))continue;const l=Math.hypot(g[2]-g[0],g[3]-g[1]),m=Math.max(1,Math.round(l/40)),r=26;
-    for(let j=0;j<m;j++){const u=(j+0.5)/m,x=g[0]+(g[2]-g[0])*u+g[5]*14,y=g[1]+(g[3]-g[1])*u+g[6]*14;if(inView(x,y,r))ctx.drawImage(s,x-r,y-r,r*2,r*2)}}
-  ctx.globalAlpha=1;
+  if(V.k<0.3){ctx.save();ctx.lineCap='butt';ctx.beginPath();
+    for(const g of P){if(!winShown(g))continue;ctx.moveTo(g[0]+g[5]*14,g[1]+g[6]*14);ctx.lineTo(g[2]+g[5]*14,g[3]+g[6]*14)}
+    ctx.strokeStyle=`rgba(255,196,120,${(0.22*V.d).toFixed(3)})`;ctx.lineWidth=30;ctx.stroke();ctx.strokeStyle=`rgba(255,206,140,${(0.3*V.d).toFixed(3)})`;ctx.lineWidth=12;ctx.stroke();ctx.restore();return}
+  for(const g of P){if(!winShown(g))continue;const l=Math.hypot(g[2]-g[0],g[3]-g[1]),m=Math.max(1,Math.round(l/40));
+    for(let j=0;j<m;j++){const u=(j+0.5)/m;lamp(g[0]+(g[2]-g[0])*u+g[5]*14,g[1]+(g[3]-g[1])*u+g[6]*14,26,'255,206,140',0.55*V.d)}}
 }
 LIGHTS.push(glassLights);
 
 /* ---------- watchers ---------- */
 const winWide=F=>!!F&&!F.freighter&&F.ac.blocks.length>2;
 // the minute's look: {pax, G, ev: until when each stand's plane is worth watching, list: who is watching}
-function winList(){const L=R.winL;if(L&&L.pax===R.pax&&L.G===G)return L;return R.winL={pax:R.pax,G,ev:[],list:[]}}
+function winList(){const L=R.winL;if(L&&L.pax===R.pax&&L.G===G&&L.lay===LAY)return L;return R.winL={pax:R.pax,G,lay:LAY,ev:[],list:[]}}
 // free to watch: waiting with time before the call, and their plane not boarding
 function winFree(p,D){const F=p.F;return !!F&&F.called==null&&F.plane.state!=='boarding'&&F.plane.state!=='closing'&&callAt(F)-G.clock>=WIN_SAFE&&boardEta(F,D)>=WIN_SAFE}
 const winFl=k=>{const r=ROOMS[k];return r?r.fl:undefined};
+const winNext=(a,b)=>{const d=a!=null&&ROUTE&&ROUTE[a]&&ROUTE[a][b];return !!d&&d.nx===b&&!d.m}; // b through one doorway from a
 // back to their place: a seat at the gate lounge is kept for them (boarding takes them from there once called); the
 // market place finds them a seat again, or sends them to the gate once it's called
 function winBack(p){const w=p.watch;p.watch=null;
@@ -68,10 +68,16 @@ function winBack(p){const w=p.watch;p.watch=null;
   if(isCalled(p.F))toGate(p);else goAct(p,w.act||'seats');
 }
 PAX_STEP.watch=(p,dt,D)=>{
-  const w=p.watch,F=p.F;if(!w||!F||isCalled(F)||F.plane.state==='boarding'){if(w)winBack(p);else nextAct(p,false);return}
+  const w=p.watch,F=p.F;if(w&&w.lay!==LAY){winMoved(p);return}if(!w||!F||isCalled(F)||F.plane.state==='boarding'){if(w)winBack(p);else nextAct(p,false);return}
   if(p.way||p.x!==p.tx||p.y!==p.ty){walk(p,D.cwalk*p.spd*walkMul(p)*0.7,dt);return}
   if(!(winList().ev[w.i]>G.clock))winBack(p);
 };
+// the layout was rebuilt under a watcher (switchLayout moves those at gates and in shops, not here): into their lounge
+// seat, or the new market place's middle to find a seat again, as switchLayout does for the others
+function winMoved(p){const w=p.watch;p.watch=null;p.way=null;
+  if(w.st==='gate'&&p.stand<SIDX.length){p.state='gate';if(p.spot>=0){const s=spotPos(p.stand,p.spot);p.tx=s.x;p.ty=s.y}else{toGate(p);p.way=null}p.x=p.tx;p.y=p.ty;p.room=STAND_ROOM[p.stand];return}
+  const k=ROOMS?hallId('mkt'):null;if(k!=null){const [x0,y0,x1,y1]=mktBox();p.x=(x0+x1)/2;p.y=(y0+y1)/2;p.room=k}nextAct(p,false);
+}
 function glassMinute(){
   const L=winList(),P=glass();if(!P.length)return;
   // the planes worth watching: a wide-body pushed back or towed in, until WIN_STAY minutes after it has gone
@@ -82,14 +88,14 @@ function glassMinute(){
   if(!any)return;const D=derived(),by=byState(),f=R.famous&&R.famous.p;
   for(const i of SIDX){if(!(L.ev[i]>G.clock))continue;const X=XF[i],side=P.filter(g=>Math.hypot((g[0]+g[2])/2-X.ox,(g[1]+g[3])/2-X.oy)<WIN_NEAR);if(!side.length)continue;
     const C=[];for(const st of ['gate','mkt'])for(const p of by[st]||[]){
-      if(p.state!==st||p.watch||p.dead||p.inbound||p.kid||p.late||p===f||p.act==='play'||p.way||!winFree(p,D))continue;
-      // the nearest point on a pane on their own floor (in their own room from a gate lounge), toward the plane
+      if(p.state!==st||p.watch||p.dead||p.inbound||p.kid||p.late||p===f||p.type==='prm'||p.act==='play'||p.act==='playB'||st==='gate'&&p.spot<0||p.way||!winFree(p,D))continue;
+      // the nearest point on a pane on their own floor, in their own room (or, from the market place, one next to it), toward the plane
       const fl=winFl(p.room);let best=null,bd=WIN_REACH;
-      for(const g of side){const gf=winFl(g[4]);if(gf!=null&&fl!=null&&gf!==fl||st==='gate'&&g[4]!==p.room)continue;const dx=g[2]-g[0],dy=g[3]-g[1],t=clamp(((p.x-g[0])*dx+(p.y-g[1])*dy)/(dx*dx+dy*dy||1),0.1,0.9),d=Math.hypot(g[0]+dx*t-p.x,g[1]+dy*t-p.y);if(d<bd){bd=d;best=[g,t]}}
+      for(const g of side){const gf=winFl(g[4]);if(gf!=null&&fl!=null&&gf!==fl||g[4]!==p.room&&(st==='gate'||!winNext(p.room,g[4])))continue;const dx=g[2]-g[0],dy=g[3]-g[1],t=clamp(((p.x-g[0])*dx+(p.y-g[1])*dy)/(dx*dx+dy*dy||1),0.1,0.9),d=Math.hypot(g[0]+dx*t-p.x,g[1]+dy*t-p.y);if(d<bd){bd=d;best=[g,t]}}
       if(best)C.push([bd,p,st,best])}
     C.sort((a,b)=>a[0]-b[0]); // the nearest first, up to WIN_MAX watching in all
-    for(const [,p,st,[g,t]] of C){if(n>=WIN_MAX)return;const u=clamp(t+(p.rand-0.5)*0.4,0.04,0.96),depth=3+(p.rand*7919%1)*3;
-      p.watch={i,st,act:p.act,bx:p.tx,by:p.ty};if(st==='mkt'){p.sl=-1;R.occOut=true}
+    for(const [,p,st,[g,t]] of C){if(n>=WIN_MAX)return;if(p.state!==st||p.watch)continue;const u=clamp(t+(p.rand-0.5)*0.4,0.04,0.96),depth=3+(p.rand*7919%1)*3;
+      p.watch={i,st,lay:LAY,act:p.act,bx:p.tx,by:p.ty};if(st==='mkt'){p.sl=-1;R.occOut=true}
       p.state='watch';W.push(p);p.tx=g[0]+(g[2]-g[0])*u-g[5]*depth;p.ty=g[1]+(g[3]-g[1])*u-g[6]*depth;route(p,g[4]);n++}}
 }
 TERM_MINUTE.push(glassMinute);

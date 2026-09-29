@@ -41,7 +41,7 @@ export default async function({open,ok,saveText,newest}){
   const r=!play?{glass:0}:await page.evaluate(all=>{const S=__sim,G=S.G,R=S.R,TP=window.TP,glass=S.glass?S.glass():[];if(!glass.length&&!all)return {glass:0};
     TP.sim(30,0.1);const [mx,my]=TP.mid(TP.room('mkt').poly),face=i=>{const X=S.XF[i];return [X.ox,X.oy]};
     const i=S.SIDX.filter(i=>G.stands[i].built).sort((a,b)=>Math.hypot(face(a)[0]-mx,face(a)[1]-my)-Math.hypot(face(b)[0]-mx,face(b)[1]-my))[0],[fx,fy]=face(i);
-    const side=glass.filter(([a,b,c,d])=>Math.hypot((a+c)/2-fx,(b+d)/2-fy)<300),waiting=p=>!p.inbound&&(['gate','mkt','shop','toGate','toShop','outShop'].includes(p.state)||!!p.watch); // a watcher is still waiting, in the windows' own state
+    const side=glass.filter(([a,b,c,d])=>Math.hypot((a+c)/2-fx,(b+d)/2-fy)<300),waiting=p=>!p.inbound&&(['gate','mkt','shop','toGate','toShop','outShop'].includes(p.state)||p.state==='watch'&&!!p.watch); // a watcher is still waiting, in the windows' own state
     const near=p=>side.some(([a,b,c,d])=>{const dx=c-a,dy=d-b,t=Math.max(0,Math.min(1,((p.x-a)*dx+(p.y-b)*dy)/(dx*dx+dy*dy||1)));return Math.hypot(a+dx*t-p.x,b+dy*t-p.y)<=8});
     const count=()=>R.pax.filter(p=>waiting(p)&&near(p)).length,before=count(),at0=new Set(R.pax.filter(p=>waiting(p)&&near(p)));
     const any=Object.values(R.st).map(s=>s.F).find(F=>F),wide=S.AIRCRAFT.reduce((a,b)=>b.rows*b.blocks.reduce((x,y)=>x+y,0)>a.rows*a.blocks.reduce((x,y)=>x+y,0)?b:a);
