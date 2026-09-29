@@ -105,4 +105,8 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 - [Phone and touch polish: #84 phone chrome, #87 overlay cards, #88 Masterplan on a small phone (scroll), #107 the top bar, #112 where players look, #124 the first minute · 27–28 Sep 2026](lessons/124-phone-polish.md)
 - [Modes that take over the stage: #100 photo mode, #102 day in a minute · 27–28 Sep 2026](lessons/102-stage-modes.md)
 - [#51 Clear roofs at the starting zoom · 27 Sep 2026](lessons/63-roofs-clear.md)
+
+### Not sorted yet
+
+- [Release loose ends · 29 Sep 2026](lessons/release-loose-ends.md)
 <!-- /joined:lessons -->

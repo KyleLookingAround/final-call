@@ -75,7 +75,7 @@ function routesPanel(){
     const ord=open.slice().sort((a,b)=>CITY[a].tier-CITY[b].tier||cityMarket(b)-cityMarket(a));let tr=-1;
     for(const k of ord){if(CITY[k].tier!==tr){tr=CITY[k].tier;h+=`<div class="sec">${RT_NAMES[tr]}<span>${Math.round(TRIP[tr]/6)/10} h return</span></div>`}h+=routeCard(k)}
   }else{
-    h+=`<p class="note">A new route adds a new market for your planes to fill. Bigger cities want more seats; business cities pay more but fill less off-peak.</p>`;
+    h+=`<p class="note">A new route is a new market. Bigger cities want more seats; business cities pay more but fill less off-peak.</p>`;
     for(const t of unl){const cs=CITIES.filter(c=>c[2]===t&&!routeOpen(c[0]));if(!cs.length)continue;
       h+=`<div class="sec">${RT_NAMES[t]}<span>${money(ROUTE_FEE[t])} to open · ${Math.round(TRIP[t]/6)/10} h</span></div>`;
       h+=cs.sort((a,b)=>cityMarket(b[0])-cityMarket(a[0])).map(([cc])=>{const C=CITY[cc];return `<div class="row${R.wSel===cc?' sel':''}" id="route-${cc}">${svg('globe')}<div><div class="rt">${C.name} <span class="live">${cc}</span></div><div class="rd">${profileOf(C)} · market ${num(cityMarket(cc))} seats a day</div></div><button class="buy" data-ropen="${cc}" data-cost="${ROUTE_FEE[t]}">${money(ROUTE_FEE[t])}</button></div>`}).join('')}

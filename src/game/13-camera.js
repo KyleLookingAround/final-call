@@ -1,7 +1,9 @@
 /* ================= camera ================= */
 function viewK(){return R.baseK*R.cam.z}
-function camBounds(){return R.view==='region'?{x0:0,y0:0,x1:RW,y1:RH}:R.view==='world'?{x0:0,y0:0,x1:WW,y1:WH}:{x0:0,y0:Y0,x1:W,y1:Y1}}
-function zMin(){const b=camBounds();return Math.min(1,Math.min(R.sw/(b.x1-b.x0),R.sh/(b.y1-b.y0))/R.baseK)}
+// On a phone the camera bar overlays the foot of the map, so the airport view scrolls past Y1 by the bar's height (R.camH, px, set in resize/renderCam; 0 elsewhere)
+function camPad(){return R.view==='airport'&&R.camH?R.camH/viewK():0}
+function camBounds(){return R.view==='region'?{x0:0,y0:0,x1:RW,y1:RH}:R.view==='world'?{x0:0,y0:0,x1:WW,y1:WH}:{x0:0,y0:Y0,x1:W,y1:Y1+camPad()}}
+function zMin(){const b=camBounds(),ph=R.view==='airport'?R.camH||0:0,bh=R.view==='airport'?Y1-Y0:b.y1-b.y0;return Math.min(1,Math.min(R.sw/(b.x1-b.x0),(R.sh-ph)/bh)/R.baseK)}
 function clampCam(){
   const c=R.cam,k=viewK(),vw=R.sw/k,vh=R.sh/k;
   c.z=clamp(c.z,zMin(),2.6);
@@ -13,7 +15,7 @@ function focus(i,z){
   if(R.view==='world'){worldFocus('all');return}
   const c=R.cam;if(z!=null)c.z=z;const k=viewK();
   if(i==='all'){c.z=zMin();c.tx=0;c.ty=Y0}else{const b=standBox(i);c.tx=b[0]+b[2]/2-R.sw/k/2;c.ty=b[1]+b[3]/2-R.sh/k/2}
-  const k2=viewK(),vw=R.sw/k2,vh=R.sh/k2;c.tx=vw>=W?(W-vw)/2:clamp(c.tx,0,W-vw);c.ty=vh>=Y1-Y0?Y0+(Y1-Y0-vh)/2:clamp(c.ty,Y0,Y1-vh);
+  const k2=viewK(),vw=R.sw/k2,vh=R.sh/k2;c.tx=vw>=W?(W-vw)/2:clamp(c.tx,0,W-vw);{const b=camBounds();c.ty=vh>=b.y1-Y0?Y0+(b.y1-Y0-vh)/2:clamp(c.ty,Y0,b.y1-vh)}
 }
 function camStep(dt){const c=R.cam;if(c.tx==null)return;const a=1-Math.pow(0.001,dt);c.x+=(c.tx-c.x)*a;c.y+=(c.ty-c.y)*a;clampCam();if(Math.abs(c.x-c.tx)<0.5&&Math.abs(c.y-c.ty)<0.5)c.tx=null}
 const ptrs=new Map();let moved=0,pinchD=0;
@@ -45,7 +47,10 @@ function tapAt(px,py){
   } else if(wx<LAND_R)setTab('terminal');else{R.sSub='landside';setTab('sales')}
 }
 function selectStand(i,openTab){R.sel=i;renderCam();$$('.brow').forEach(r=>r.classList.toggle('sel',+r.dataset.stand===i));if(openTab)setTab('stands');else if(G.tab==='stands')renderPanel();const el=document.getElementById('stand-'+i);if(el&&G.tab==='stands')el.scrollIntoView({block:'nearest',behavior:REDUCED?'auto':'smooth'})}
-function renderCam(){
+function measureCam(){if(R.sim)return;const el=$('#cam'),h=$('#stage').clientWidth<=600&&R.view==='airport'?Math.round(el.offsetHeight+8):0;if(h!==R.camH){R.camH=h;clampCam()}}
+if(!R.sim){const ro=new ResizeObserver(()=>{measureCam();if(R.baseK)clampCam()});ro.observe($('#stage'));ro.observe($('#cam'))} // the bar's height follows the map's width and its own wrapping
+function renderCam(){drawCam();measureCam()}
+function drawCam(){
   if(R.view==='world'){$('#cam').innerHTML=`<button data-cam="all">World</button><button data-wcam="near">Near</button><button data-zoom="-1" aria-label="Zoom out">−</button><button data-zoom="1" aria-label="Zoom in">+</button>`;return}
   if(R.view==='region'){$('#cam').innerHTML=`<button data-cam="all">All</button><button data-rcam="air">Airport</button><button data-rcam="city">City</button><button data-rcam="east">East</button><button data-zoom="-1" aria-label="Zoom out">−</button><button data-zoom="1" aria-label="Zoom in">+</button>`;return}
   const sh=R.sw<560,two=twoFloors(),at=!two&&R.floor==='down'?'up':R.floor; // a layout on one floor shows Roof and Halls
