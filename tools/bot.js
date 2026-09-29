@@ -56,9 +56,10 @@ window.BOT=function(opts){
     g.shops.forEach((sh,j)=>{if(!S.shopOpen(j)||S.builtCount()<=Math.floor(j*S.SIDX.length/S.SHOP_X.length))return;
       if(!sh){if(goal&&goal<g.cash*0.5)return;let pick=-1;S.SHOPS.forEach((t,k)=>{if(S.has('shop:'+t.id)&&g.cash>=t.cost*2+reserve)pick=k});if(pick>=0&&S.buy(S.SHOPS[pick].cost))g.shops[j]={type:pick,lvl:0,earned:0,spent:S.SHOPS[pick].cost}}
       else if(sh.lvl<4){const c=S.shopUpCost(sh);if(g.cash>=c*2.5+reserve&&S.buy(c)){sh.spent+=c;sh.lvl++}}});
-    // fares: raise when rating sags, drift back when it's healthy
+    // fares: raise when rating sags, but no further than the advisor's tips go (FARE_TIP, 16-advisor.js: a raise only
+    // below it, so at most 120%), as a player following them would; drift back when it's healthy
     if(opts.fare!==false&&g.clock>=(window._fareT||0)){window._fareT=g.clock+120;
-      if(g.rep<70&&g.fare<2.5)g.fare=Math.round((g.fare+0.1)*10)/10;else if(g.rep>=92&&g.fare>1)g.fare=Math.round((g.fare-0.1)*10)/10}
+      if(g.rep<70&&g.fare<(S.FARE_TIP??1.15))g.fare=Math.round((g.fare+0.1)*10)/10;else if(g.rep>=92&&g.fare>1)g.fare=Math.round((g.fare-0.1)*10)/10}
     // region: transport and development
     if(opts.region!==false&&S.NODES){
       const plan=opts.plan||[['bus',['air','mil','hbc']],['bus',['air','hbs','doc']],['coach',['air','cas']],['coach',['air','low']],['bus',['air','brk','eas']],['bus',['hbc','old']],
