@@ -87,12 +87,16 @@ function glassMinute(){
   let n=W.length;
   if(!any)return;const D=derived(),by=byState(),f=R.famous&&R.famous.p;
   for(const i of SIDX){if(!(L.ev[i]>G.clock))continue;const X=XF[i],side=P.filter(g=>Math.hypot((g[0]+g[2])/2-X.ox,(g[1]+g[3])/2-X.oy)<WIN_NEAR);if(!side.length)continue;
+    // who could reach them: a box round the panes, and the rooms they're in (the market place may be one doorway away)
+    let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;const rs=new Set();for(const g of side){x0=Math.min(x0,g[0],g[2]);y0=Math.min(y0,g[1],g[3]);x1=Math.max(x1,g[0],g[2]);y1=Math.max(y1,g[1],g[3]);rs.add(g[4])}
+    const mk=ROOMS?hallId('mkt'):null,mktOk=mk!=null&&[...rs].some(r=>r===mk||winNext(mk,r));
     const C=[];for(const st of ['gate','mkt'])for(const p of by[st]||[]){
-      if(p.state!==st||p.watch||p.dead||p.inbound||p.kid||p.late||p===f||p.type==='prm'||p.act==='play'||p.act==='playB'||st==='gate'&&p.spot<0||p.way||!winFree(p,D))continue;
+      if(st==='mkt'&&!mktOk)break;if(st==='gate'&&!rs.has(p.room))continue;
+      if(p.x<x0-WIN_REACH||p.x>x1+WIN_REACH||p.y<y0-WIN_REACH||p.y>y1+WIN_REACH||p.state!==st||p.watch||p.dead||p.inbound||p.kid||p.late||p===f||p.type==='prm'||p.act==='play'||p.act==='playB'||st==='gate'&&p.spot<0||p.way)continue;
       // the nearest point on a pane on their own floor, in their own room (or, from the market place, one next to it), toward the plane
       const fl=winFl(p.room);let best=null,bd=WIN_REACH;
       for(const g of side){const gf=winFl(g[4]);if(gf!=null&&fl!=null&&gf!==fl||g[4]!==p.room&&(st==='gate'||!winNext(p.room,g[4])))continue;const dx=g[2]-g[0],dy=g[3]-g[1],t=clamp(((p.x-g[0])*dx+(p.y-g[1])*dy)/(dx*dx+dy*dy||1),0.1,0.9),d=Math.hypot(g[0]+dx*t-p.x,g[1]+dy*t-p.y);if(d<bd){bd=d;best=[g,t]}}
-      if(best)C.push([bd,p,st,best])}
+      if(best&&winFree(p,D))C.push([bd,p,st,best])} // the gate call's estimate last: it's the dearest test
     C.sort((a,b)=>a[0]-b[0]); // the nearest first, up to WIN_MAX watching in all
     for(const [,p,st,[g,t]] of C){if(n>=WIN_MAX)return;if(p.state!==st||p.watch)continue;const u=clamp(t+(p.rand-0.5)*0.4,0.04,0.96),depth=3+(p.rand*7919%1)*3;
       p.watch={i,st,lay:LAY,act:p.act,bx:p.tx,by:p.ty};if(st==='mkt'){p.sl=-1;R.occOut=true}
