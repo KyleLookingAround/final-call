@@ -466,6 +466,28 @@ table.rtab th{font:600 10px/1 var(--mono);color:var(--muted);text-align:right;pa
 .newsbody{flex:1 1 auto;min-height:0;overflow:auto;overscroll-behavior:contain;padding:0 20px 16px}
 .newscard .newsgo{flex:none;margin:0;max-width:none;padding:10px 20px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--line);text-align:right}
 .newscard .newsgo .buy{min-width:96px;padding:11px 16px 10px;font-size:14px}
+.newstabs{flex:none;padding-inline:14px}.newscard .newstabs button{flex:0 0 auto;flex-direction:row;padding:9px 12px 8px;font-size:12.5px;letter-spacing:.1em}
+#newsBody[data-tab=road] #newsList,#newsBody[data-tab=road] .kofifoot,#newsBody:not([data-tab=road]) #roadmapList{display:none}
+.rchips{display:flex;gap:6px;padding:8px 0 10px;overflow-x:auto;scrollbar-width:none}.rchips::-webkit-scrollbar{display:none}
+.rchip{flex:none;white-space:nowrap;font:700 12.5px/1 var(--disp);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--surface2);border:1px solid var(--line);border-radius:999px;padding:8px 11px;min-height:34px}
+.rchip span{font:500 11px var(--mono);letter-spacing:0;margin-left:5px;opacity:.75}
+.rchip[aria-pressed=true]{background:var(--text);color:var(--signInk);border-color:var(--text)}
+.rboard{background:var(--board);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.rgroup{padding:12px 12px 6px;border-top:1px solid var(--line);font:700 12.5px/1 var(--disp);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.rgroup:first-child{border-top:0}.rgroup small{display:block;margin-top:4px;font:400 12.5px/1.3 var(--body);letter-spacing:0;text-transform:none}
+.rrow{border-top:1px solid var(--line)}
+.rrow summary{display:grid;grid-template-columns:3.2rem 1fr auto;gap:10px;align-items:center;padding:10px 12px;cursor:pointer;list-style:none}
+.rrow summary::-webkit-details-marker{display:none}
+.rcode{font:600 13px/1 var(--mono);color:var(--sign);letter-spacing:.04em}
+.rwhat{min-width:0}.rwhat b{display:block;font:700 clamp(16px,2.4vw,19px)/1.15 var(--disp);letter-spacing:.03em;text-transform:uppercase}
+.rwhat span{display:block;margin-top:3px;color:var(--muted);font-size:13.5px;line-height:1.3}
+.rflaps{display:flex;gap:2px}.rflaps i{font:600 12px/1 var(--mono);font-style:normal;display:grid;place-items:center;min-width:1em;height:1.5em;background:var(--flap);border-radius:2px;position:relative}
+.rflaps i::after{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:#000;opacity:.7}
+.st-next .rflaps i{color:var(--good)}.st-boarding .rflaps i{color:var(--sign)}.st-scheduled .rflaps i{color:var(--text)}.st-radar .rflaps i{color:#7CC4FF}.st-landed .rflaps i{color:var(--muted)}
+.rdet{padding:0 12px 12px calc(12px + 3.2rem + 10px);color:var(--muted);font-size:14px;line-height:1.45}
+.rdet ul{margin:0;padding-left:16px}.rdet li+li{margin-top:4px}.rdet li::marker{color:var(--sign)}.rdet p{margin:8px 0 0}
+.rfoot{margin:14px 0 4px;color:var(--muted);font-size:13px;text-align:center}
+@media (max-width:420px){.rrow summary{grid-template-columns:2.6rem 1fr}.rflaps{display:none}.rdet{padding-left:12px}}
 .upd{border-top:1px solid var(--line);padding:10px 0}
 .upd summary{cursor:pointer;font:700 15px/1.3 var(--body);list-style-position:inside}
 .upd .uv{font:600 11px var(--mono);color:var(--muted);margin-right:6px}
@@ -771,7 +793,8 @@ body.photo .board,body.photo .side,body.photo .topgap,body.photo .spot,body.phot
 <div class="help" id="news" hidden role="dialog" aria-modal="true" aria-labelledby="newsT">
   <div class="hcard newscard">
     <div class="ptop"><h2 id="newsT">What's new</h2><button class="close" data-newsclose aria-label="Close">×</button></div>
-    <div class="newsbody" id="newsBody"><div id="newsList"></div>
+    <div class="tabs newstabs" role="tablist"><button type="button" role="tab" class="on" data-newstab="news" aria-selected="true">What's new</button><button type="button" role="tab" data-newstab="road" aria-selected="false">Roadmap</button></div>
+    <div class="newsbody" id="newsBody" data-tab="news"><div id="newsList"></div><div id="roadmapList"></div>
     <p class="kofifoot"><a class="kofi" href="https://ko-fi.com/kylemck" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h11v6a5 5 0 01-5 5h-1a5 5 0 01-5-5zM16 10h2a2 2 0 010 4h-2M8 3v2M11 3v2"/></svg>Buy me a Ko-fi</a></p></div>
     <p class="newsgo"><button class="buy" data-newsclose>Play</button></p>
   </div>

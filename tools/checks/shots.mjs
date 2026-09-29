@@ -13,6 +13,9 @@ export default async function({open,ok,saveText,newest,root}){
       await page.evaluate(([tab,view])=>{__sim.setView(view);__sim.setTab(tab)},[tab,view]);await page.waitForTimeout(400);
       await page.screenshot({path:join(dir,`${name}-${view}.png`)});
     }
+    // the What's new card's Roadmap tab, on the same page
+    await page.evaluate(()=>{__sim.openNews(true,false);document.querySelector('#news [data-newstab="road"]').click();document.querySelector('#roadmapList .rrow summary').click()});await page.waitForTimeout(300);
+    await page.screenshot({path:join(dir,`${name}-roadmap.png`)});await page.evaluate(()=>__sim.openNews(false));
     ok(`shots: ${name}`,!errs.length,errs[0]||'build/shots/'+name+'-*.png');
     await ctx.close();
   }

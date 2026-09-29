@@ -119,20 +119,41 @@ function newsRow(u,open,seen,auto){
   return ps.length?`<details class="upd" data-v="${u.v}"${open?' open':''}><summary>${h}${u.v>seen&&auto?' <span class="live">New</span>':''}</summary><ul>${ps.map(pt).join('')}</ul>${spoil}</details>`
     :`<div class="upd uhid" data-v="${u.v}">${h}${spoil}</div>`;
 }
+// ---- the Roadmap tab (docs/specs/roadmap-tab.md): src/roadmap.d/ joined by the build, drawn only while the tab is showing ----
+const ROADMAP=/*ROADMAP*/[];
+const RSTATUS=[['next','Next update','Being built now.'],['boarding','Boarding','Being planned now.'],['scheduled','Scheduled','In the queue, in this order.'],['radar','On the radar','Ideas we like. Not promised.'],['landed','Landed','Recently arrived in the game.']];
+const RSHORT={landed:'LANDED',next:'NEXT',boarding:'BOARDING',scheduled:'LATER',radar:'IDEA'};
+function renderRoadmap(){
+  const f=R.roadFilter||'all',cnt=k=>k==='all'?ROADMAP.length:ROADMAP.filter(r=>r.st===k).length,out=[];
+  const chips=[['all','All'],...RSTATUS.map(g=>[g[0],g[1]])].filter(c=>cnt(c[0])).map(([k,l])=>`<button type="button" class="rchip" data-rfilter="${k}" aria-pressed="${k===f}">${l}<span>${cnt(k)}</span></button>`).join('');
+  for(const [k,label,sub] of RSTATUS){
+    const rows=ROADMAP.filter(r=>r.st===k);if(!rows.length||f!=='all'&&f!==k)continue;
+    out.push(`<div class="rgroup">${label}<small>${sub}</small></div>`,...rows.map(r=>`<details class="rrow st-${k}"><summary><span class="rcode">${esc(r.code)}</span><span class="rwhat"><b>${esc(r.t)}</b><span>${esc(r.s)}</span></span><span class="rflaps" aria-label="${label}">${[...RSHORT[k]].map(c=>`<i>${c}</i>`).join('')}</span></summary><div class="rdet"><ul>${r.d.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>${r.n?`<p>${esc(r.n)}</p>`:''}</div></details>`));
+  }
+  $('#roadmapList').innerHTML=`<div class="rchips">${chips}</div><div class="rboard">${out.join('')}</div><p class="rfoot">Plans change; older saves always load.</p>`;
+}
+// the two tabs share the card, so Play and Close stay where they are
+function newsTabSet(t){
+  R.newsTab=t;$('#newsBody').dataset.tab=t;
+  for(const b of document.querySelectorAll('[data-newstab]'))b.classList.toggle('on',b.dataset.newstab===t),b.setAttribute('aria-selected',b.dataset.newstab===t);
+  if(t==='road'){R.roadFilter='all';renderRoadmap();$('#newsT').textContent='Roadmap'}else $('#newsT').textContent=R.newsTitle;
+  $('#newsBody').scrollTop=0;
+}
 function renderNews(auto){
   const seen=G.seen??0,fresh=UPDATES.filter(u=>u.v>seen);R.newsSpoil=[];R.newsAuto=auto;
   // a young save (Airfield or Local Airport) hasn't reached most of what's in the older history, so fold it away
   const n=G.level<=1?Math.max(fresh.length,3):UPDATES.length,head=UPDATES.slice(0,n),rest=UPDATES.slice(n);
   $('#newsList').innerHTML=head.map((u,k)=>newsRow(u,auto?u.v>seen:k===0,seen,auto)).join('')+(rest.length?`<details class="upd"><summary>${rest.length} earlier version${rest.length>1?'s':''}</summary>${rest.map(u=>newsRow(u,false,seen,auto)).join('')}</details>`:'');
-  $('#newsT').textContent=auto&&fresh.length?`What's new`:`What's new · all versions`;$('#newsBody').scrollTop=0;
+  R.newsTitle=$('#newsT').textContent=auto&&fresh.length?`What's new`:`What's new · all versions`;$('#newsBody').scrollTop=0;
 }
 // reveal one version's later-level points in place, open
 function newsSpoil(v){const u=UPDATES.find(x=>x.v===v),el=u&&$(`#newsList [data-v="${v}"]`);if(!el)return;R.newsSpoil.push(v);el.outerHTML=newsRow(u,true,G.seen??0,R.newsAuto)}
 function openNews(on,auto){
   const el=$('#news');if(!on){if(el.hidden)return;el.hidden=true;G.seen=UPDATES[0].v;save();if(R.newsPrev)setSpeed(R.newsPrev);return}
-  renderNews(auto);el.hidden=false;R.newsPrev=R.speed;setSpeed(0);$('#news .close').focus();
+  renderNews(auto);newsTabSet('news');el.hidden=false;R.newsPrev=R.speed;setSpeed(0);$('#news .close').focus();
 }
-$('#news').addEventListener('click',e=>{const g=e.target.closest('[data-newsgo]');if(g){newsGo(g.dataset.newsgo);return}const sp=e.target.closest('[data-newsspoil]');if(sp){newsSpoil(+sp.dataset.newsspoil);return}if(e.target.id==='news'||e.target.closest('[data-newsclose]'))openNews(false)});
+$('#news').addEventListener('click',e=>{const tb=e.target.closest('[data-newstab]');if(tb){if(tb.dataset.newstab!==R.newsTab)newsTabSet(tb.dataset.newstab);return}
+  const rf=e.target.closest('[data-rfilter]');if(rf){R.roadFilter=rf.dataset.rfilter;renderRoadmap();return}const g=e.target.closest('[data-newsgo]');if(g){newsGo(g.dataset.newsgo);return}const sp=e.target.closest('[data-newsspoil]');if(sp){newsSpoil(+sp.dataset.newsspoil);return}if(e.target.id==='news'||e.target.closest('[data-newsclose]'))openNews(false)});
 $('#newsAgain').addEventListener('click',()=>{openHelp(false);openNews(true,false)});
 document.addEventListener('keydown',e=>{if(!$('#news').hidden&&e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();openNews(false)}},true);
 // after loading: only when there's something the player hasn't seen, and never over the guided start
