@@ -1,27 +1,43 @@
-# Brief: Windows and watchers (a part of "The terminal as a place")
+# Brief: Windows and watchers (a part of "The terminal as a place", #133 step 3)
 
-The coordinator's brief for one part of `docs/specs/terminal-place.md` (approved on #48), in the first batch with two floors in Classic, and decor and local character. Start it as a fresh session with this file as its first message, on a branch from `main` after the groundwork (#GROUNDWORK) has merged.
+The coordinator's brief for one part of `docs/specs/terminal-place.md` (approved on #139, 28 Sep 2026), refreshed on 29 Sep against `main` after the roof terrace merged (#181). Two floors in Classic (#162), refactor 7 (#145, #156) and the roof terrace (#181) are in. This supersedes the 27 Sep version of this file. Decor and local character follows this part, one at a time.
 
 ## Goal and what it may touch
 
-- Glass along every airside wall that faces the apron, worked out from each layout's rooms (edges of airside rooms that border the apron, not another room): a sheen by day, lit at night, with warm pools on the apron from the lighting pass (`LIGHTS`, `lamp()`). Passengers already waiting for their gate call, within reach of the glass, drift to it when a wide-body taxis or pushes back nearby, stay until it has passed and go back to their seats; nobody watches after their gate is called and nobody misses a flight. Drawing and a little simulation; no saved fields; watchers never change the rating.
-- Switch on its pending checks by taking their lines out of `tools/checks/pending.txt`: the four `windows:` checks. Say in the PR how each failed on `main` and passes now.
-- Branch `feature/terminal-place-windows`, one PR, labelled `part:terminal-place`.
-- Files and hooks it may touch: a new `src/game/57-windows.js`, drawing on the `lit` layer (and `terminal` if the glass sits under the halls' walls) and adding to `LIGHTS`; the watchers as a step the market place's waiting passengers can take (a `PAX_STEP` state, or `TERM_MINUTE`; if #95's clock tables have merged, use them, `docs/systems/clocks.md`), without changing when anyone boards; the glass drawn only where `roofA()` is 0 or on the roof's edge, as the layers now gate; `tools/checks/windows.mjs` only to fix a mistake (say what and why); a new `docs/systems/windows.md`. Anything else is outside the brief.
-- Glass must follow `ROOMS` for every layout, so it keeps working when the floor plans part moves halls, and draws only on the floor shown (`onFloor`, `floorNow()` in `53-roofs.js`).
-- Screenshots at phone (390×844 and 320×568), tablet (768×1024) and desktop (1440×900), by day and night, zoomed out and at 1.6×, for Classic and Midfield, looked at before the PR opens.
+- **Glass** along every airside wall that faces the apron, worked out from each layout's rooms: edges of airside rooms that border the apron, not another room.
+  - A sheen by day. Lit at night, with warm pools on the apron from the lighting pass (`LIGHTS`, `lamp()`).
+  - Drawn only on the floor shown (`onFloor`, `floorNow()` in `53-roofs.js`), so the departures floor's glass shows on Departures, the arrivals floor's on Arrivals, and the terrace's own rail stays the terrace's.
+  - Worked out from `ROOMS` for every layout, so it keeps working when the floor plans part moves halls.
+- **Watchers:** passengers already waiting for their gate call, within reach of the glass, drift to it when a wide-body taxis or pushes back nearby, stay until it has passed, and go back to their seats.
+  - Nobody watches after their gate is called, and nobody misses a flight.
+  - No saved fields; watchers never change the rating.
+- Switch on the four `windows:` checks by taking their lines out of `tools/checks/pending.txt`. Say in the PR how each failed on `main` and passes now.
+- Branch `feature/terminal-place-windows` from `main`, one PR, labelled `part:terminal-place`.
+- **Files and hooks it may touch:**
+  - a new `src/game/68-windows.js`, drawing on the `lit` layer (and `terminal` if the glass sits under the halls' walls) and adding to `LIGHTS`;
+  - the watchers as a step the waiting passengers can take (a `PAX_STEP` state or `TERM_MINUTE`, as `67-terrace.js` does), without changing when anyone boards;
+  - `tools/checks/windows.mjs` only to fix a mistake (say what and why);
+  - guard checks elsewhere in `tools/checks/` only where the new glass breaks an assumption they make; list each in the PR (#181's lesson);
+  - a new `docs/systems/windows.md`, and the windows lines in `docs/systems/terminal.md` and `airport-scene.md`.
+  Anything else is outside the brief. Search `src/game/` for each new top-level name before using it.
+- **Lessons from the terrace (#181's look back):**
+  - Before rewriting game code to fit a pre-written check, print what the check's filter sees at its moment.
+  - Prefer a once-a-minute look over a short candidate list to wrapping a hot `PAX_STEP` entry everyone takes: wrapping one cost +0.02× on Midfield.
+  - Speed rows swing ±0.03×: three alternating runs each are a minimum.
+- Screenshots of the Departures and Arrivals stops at phone (390×844 and 320×568, portrait and landscape), tablet (768×1024) and desktop (1440×900), by day and night, zoomed out and at 1.6×, for Classic and Midfield. Looked at before the PR opens.
 
 ## Read first
 
-- The project notes, then `node tools/graph.mjs windows`, `node tools/graph.mjs LIGHTS`, `node tools/graph.mjs 46-market.js` and `node tools/graph.mjs 51-markings.js`, and only what they list.
-- `docs/specs/terminal-place.md` ("What they see", "How it works", the `windows` checks); `docs/systems/airport-scene.md` (layers, lighting pass, roofs and floors); `tools/checks/windows.mjs` and `tools/checks/lib/place.mjs`; the groundwork's look back in `docs/lessons/`.
+- The project notes, then `node tools/graph.mjs windows`, `node tools/graph.mjs LIGHTS`, `node tools/graph.mjs PAX_STEP` and `node tools/graph.mjs 67-terrace.js`, and only what they list.
+- `docs/specs/terminal-place.md` ("What they see", "How it works", the `windows` checks); `docs/systems/airport-scene.md` (layers, lighting pass, roofs and floors), `docs/systems/terminal.md` ("Passengers by state"), `docs/systems/terrace.md`; `tools/checks/windows.mjs` and `tools/checks/lib/place.mjs`; `docs/lessons/181-terrace.md`.
 
 ## Speed budget
 
-- Drawing: 15% of what the groundwork left. Worst scene (`npm run check -- scene`): 0.035× of about 0.23× left under 0.55×. Terminal zoomed in (`plans`): 0.014× of the same 0.09× left.
-- Simulation (`perf`): 0.01× (the watchers) on the late-game check.
-- One run varies by about ±0.05× for drawing and ±0.02× for simulation: measure the median of three runs on the branch minus three on `main`, on the same machine, and put both in the PR.
-- `PLAY` should stay within tolerance on seeds 1–3; watchers only move waiting passengers, so the Balance workflow's tables should barely move.
+The spec gives windows 15% of the drawing headroom and 0.01× of simulation. `main` as #181 measured it on its container (medians of three), with this part's share:
+- Simulation (`perf`): late game 0.106×, at most +0.01×. Sixteen stands of Midfield 0.147×, at most +0.01×. The throttled phone at sixteen stands must not fall by more than 0.3 game minutes a second (1.5 on `main` there).
+- Drawing (`scene`): Classic desktop 0.189×, at most +0.05×. Terminal zoomed in, Classic, 0.133×, at most +0.03×. Zoomed-in Midfield phone 0.154×, at most +0.024×.
+- Re-measure `main` on your own machine first: median of three runs on `main` and three on the branch, alternately, both in the PR.
+- `PLAY` should stay within tolerance on seeds 1–3. Watchers only move waiting passengers, so the Balance tables should barely move. If the watcher step draws `rnd()`, `PLAY` changes, and the Balance workflow on the PR is the one to read.
 
 ## Commit author
 
@@ -29,18 +45,17 @@ KyleLookingAround <KyleMck10@hotmail.com> (the session-start hook sets it; check
 
 ## Who merges and when
 
-- The coordinator, one part at a time, after the Parts workflow's comment shows the open parts green together. The part opens its PR (labelled `part:terminal-place`, from `.github/pull_request_template.md`), subscribes to its events and ends its turn; it doesn't merge or book its own check-ins.
-- The Catch up workflow merges `main` into open PRs; merge `main` yourself only for a real conflict. GitHub sometimes starts no pull-request run after a push: dispatch Checks with `workflow_dispatch`.
-- After opening the PR, read its description back and remove any "Generated by" footer or session link. Record [D] in the PR: (a) game-code bugs a pre-written check caught before the PR opened, (b) game-code bugs found after it opened, (c) pre-written checks you had to fix, and how (spec, "Measuring [D]").
-- Its look back goes in `docs/lessons/<pr>-<short-name>.md`, and its system's notes in its own `docs/systems/` file.
+- The session, per the `steward` playbook: open the PR from `.github/pull_request_template.md`, read its description back, and remove any "Generated by" footer or session link. Subscribe to its events (`subscribe_pr_activity`) and keep a `send_later` (about 20 minutes) as the fallback.
+- Record [D] in the PR: (a) game-code bugs a pre-written check caught before it opened, (b) found after, (c) pre-written checks you had to fix.
+- Once the look back (`docs/lessons/<pr>-windows.md`) is in and Checks, Description and Balance are green, mark it ready and turn on auto-merge (squash). Then confirm the Pages publish.
+- If pacing moves beyond 15% of `tools/baseline.json`, don't auto-merge: say so in the PR and leave it for the owner.
 
 ## What's left for others
 
-- The owner's limit: at most 5 sessions building changes at once. Don't start any session yourself: the coordinator does.
-- Not the other terminal-place parts: in this first batch, two floors in Classic, windows and watchers, and decor and local character (whichever aren't this one); in the second batch, the roof terrace and spotters, and each layout's own floor plan; then the PR that brings them together (balance on seeds 1–3, the speed of every part together, `pending.txt` empty, screenshots of every layout's two floors by day and night, What's new, version, save fixtures, link previews).
-- Refactor 7 (one passenger pass) runs between the groundwork and these parts or after; then refactor 10; the systems review's proposals 9, 8 and 2; the owner's answer on the rating and the one-city board; then the idea board (`docs/ideas/board-2026-09.md`) and `docs/ROADMAP.md`. Refactor 8 (weather in one place) touches weather drawing: leave `28-region-weather.js` and `54-weather.js` alone.
-- A release after the terminal-place parts merge is the owner's call.
-- Routine jobs (look backs, save fixtures, doc moves, screenshot reviews) go to the cheaper model (experiment [C]). Pass this list, and the limit of 5, on in any brief this session writes.
+- Not the other terminal-place parts: decor and local character, each layout's own floor plan, and the PR that brings them together. They follow, one at a time, from their own briefs.
+- No release: the coordinator starts one. Release 36 (the terrace) may be open at the same time; it touches only What's new, the roadmap lists and save fixtures.
+- Leave `28-region-weather.js` and `54-weather.js` alone (refactor 8, later); read weather and lighting through `drawnFx()` and `drawnHour()` as they are.
+- At most three default-model sessions run at once. Don't start any session yourself: the coordinator does.
 
 ## When to stop and ask
 
@@ -50,6 +65,6 @@ KyleLookingAround <KyleMck10@hotmail.com> (the session-start hook sets it; check
 
 ## Cost budget
 
-- Estimate: about $12 (glass worked out from rooms, lights, a watcher step, four checks switched on, screenshots).
-- At each stopping point (the PR opened, CI back), read `get_session`: `usage.cost_usd` against the estimate (a 0 means not yet known, not free), and `rate_limit_info`. If status is "rejected" or `isUsingOverage` is true, schedule a `send_later` for a minute after `resetsAt` and end the turn.
+- Estimate: about $14 (glass worked out from rooms on every layout, lights, a watcher step, four checks switched on, speed runs, screenshots at four sizes; the terrace cost about $22 for three times as much).
+- At each stopping point (the PR opened, CI back, a merge), read `get_session`: `usage.cost_usd` against the estimate (a 0 means not yet known, not free), and `rate_limit_info`. If status is "rejected" or `isUsingOverage` is true, schedule a `send_later` for a minute after `resetsAt` and end the turn. Ignore `allowed_warning` (the owner's call, 29 Sep).
 - Past twice the estimate: say why in the PR and in its look back, and trim or split what's left.

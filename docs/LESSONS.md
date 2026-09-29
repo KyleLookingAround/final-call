@@ -16,6 +16,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 ### Checks
 
+- [Windows and watchers · 29 Sep 2026](lessons/183-windows.md)
 - [The roof terrace floor · 29 Sep 2026](lessons/181-terrace.md)
 - [Release fix batches: #149 F2 goals, #150 P1 first level-up, #158 R1 saves, #159 P2 moments · 28 Sep 2026](lessons/159-release-fix-batches.md)
 - [#156 Systems refactor 7, part 2: arrivals, movement and the index in one pass · 28 Sep 2026](lessons/156-refactor-passes-merge.md)
@@ -76,6 +77,10 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 - [The coordinator's look back: two floors to release 35 · 29 Sep 2026](lessons/176-coordinator-release-35.md)
 - [Real airport parts: #50 planes, #55 vehicles, #52 roofs, #53 markings, #61 weather · 27 Sep 2026](lessons/50-real-airport-parts.md)
 - [The terminal built in parts: #18 halls, #19 hotel, #21 baggage, #22 departures, #23 arrivals, #24 market place, #26 together, #36 briefs · 26–27 Sep 2026](lessons/36-terminal-parts.md)
+
+### Release
+
+- [Release 36: the roof terrace and the Roadmap tab · 29 Sep 2026](lessons/182-release-36.md)
 
 ### Releases
 

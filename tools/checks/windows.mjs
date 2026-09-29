@@ -15,7 +15,8 @@ export default async function({open,ok,saveText,newest}){
     for(const id of ids){S.resetAll(JSON.parse(text));S.switchLayout(id);TP.build();S.applyLayout(id);
       const on=TP.built(),rooms=S.ROOMS.filter((r,k)=>on[k]),inAny=(x,y)=>S.ROOMS.some((r,k)=>(on[k]||r.open)&&TP.inPoly(r.poly,x,y));
       // the walls: each edge of an airside room whose outside, 8 units out, is apron: no room there, above the halls, on the map
-      const want=[];for(const r of rooms){if(r.land)continue;const [cx,cy]=TP.mid(r.poly);r.poly.forEach(([x1,y1],k)=>{const [x2,y2]=r.poly[(k+1)%r.poly.length],l=Math.hypot(x2-x1,y2-y1);if(l<10)return;
+      const want=[];for(const r of rooms){if(r.land||r.fl===2)continue; // the roof terrace (fl 2) keeps its own rail, not glass
+      const [cx,cy]=TP.mid(r.poly);r.poly.forEach(([x1,y1],k)=>{const [x2,y2]=r.poly[(k+1)%r.poly.length],l=Math.hypot(x2-x1,y2-y1);if(l<10)return;
         let nx=(y2-y1)/l,ny=-(x2-x1)/l;const mx=(x1+x2)/2,my=(y1+y2)/2;if((cx-mx)*nx+(cy-my)*ny>0){nx=-nx;ny=-ny}const ox=mx+nx*8,oy=my+ny*8;
         if(!inAny(ox,oy)&&oy<APRON_Y&&ox>0&&ox<S.W)want.push([x1,y1,x2,y2,r.id])})}
       const glass=S.glass?S.glass():null,o=out[id]={walls:want.length,glass:glass?glass.length:null,bare:[],stray:0};
@@ -41,7 +42,7 @@ export default async function({open,ok,saveText,newest}){
   const r=!play?{glass:0}:await page.evaluate(all=>{const S=__sim,G=S.G,R=S.R,TP=window.TP,glass=S.glass?S.glass():[];if(!glass.length&&!all)return {glass:0};
     TP.sim(30,0.1);const [mx,my]=TP.mid(TP.room('mkt').poly),face=i=>{const X=S.XF[i];return [X.ox,X.oy]};
     const i=S.SIDX.filter(i=>G.stands[i].built).sort((a,b)=>Math.hypot(face(a)[0]-mx,face(a)[1]-my)-Math.hypot(face(b)[0]-mx,face(b)[1]-my))[0],[fx,fy]=face(i);
-    const side=glass.filter(([a,b,c,d])=>Math.hypot((a+c)/2-fx,(b+d)/2-fy)<300),waiting=p=>!p.inbound&&['gate','mkt','shop','toGate','toShop','outShop'].includes(p.state);
+    const side=glass.filter(([a,b,c,d])=>Math.hypot((a+c)/2-fx,(b+d)/2-fy)<300),waiting=p=>!p.inbound&&(['gate','mkt','shop','toGate','toShop','outShop'].includes(p.state)||p.state==='watch'&&!!p.watch); // a watcher is still waiting, in the windows' own state
     const near=p=>side.some(([a,b,c,d])=>{const dx=c-a,dy=d-b,t=Math.max(0,Math.min(1,((p.x-a)*dx+(p.y-b)*dy)/(dx*dx+dy*dy||1)));return Math.hypot(a+dx*t-p.x,b+dy*t-p.y)<=8});
     const count=()=>R.pax.filter(p=>waiting(p)&&near(p)).length,before=count(),at0=new Set(R.pax.filter(p=>waiting(p)&&near(p)));
     const any=Object.values(R.st).map(s=>s.F).find(F=>F),wide=S.AIRCRAFT.reduce((a,b)=>b.rows*b.blocks.reduce((x,y)=>x+y,0)>a.rows*a.blocks.reduce((x,y)=>x+y,0)?b:a);
