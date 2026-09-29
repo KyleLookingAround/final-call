@@ -10,9 +10,6 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 <!-- joined:lessons from docs/lessons/ by tools/join.mjs: don't edit between these lines -->
 ### Balance
 
-- [#170 Release: terminal polish pass · 29 Sep 2026](lessons/170-release-terminal-polish.md)
-- [#167 The Balance workflow compares with the merge base, and the bot's `--why` · 29 Sep 2026](lessons/167-balance-compare.md)
-- [Release batch F1: tips that point the right way (#148, #166) · 29 Sep 2026](lessons/166-release-f1-tips.md)
 - [The first level-up in the first morning (#117) · 28 Sep 2026](lessons/117-early-first-level.md)
 - [#101 A rating that reflects the last day, measured and switched on; a network you have to keep, specced · 27 Sep 2026](lessons/101-balance-rating.md)
 - [Reading the game's logic: #57 game logic ideas, #66 systems review · 27 Sep 2026](lessons/66-game-logic-review.md)
@@ -81,14 +78,11 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 ### Releases
 
-- [#175 Release 35, the public release · 29 Sep 2026](lessons/175-release-35.md)
-- [Release P4: numbers, labels and the save panel · 29 Sep 2026](lessons/164-release-p4-labels.md)
-- [Cutting releases: version 32, #118 release 33, #126 release 34 · 27–28 Sep 2026](lessons/126-releases.md)
+- [Cutting releases: version 32, #118 release 33, #126 release 34, #175 release 35 · 27–29 Sep 2026](lessons/175-releases.md)
+- [Release audit batches: #164 P4 labels, #165 P3 small screens, #166 F1 tips, #170 terminal polish, #171 B1 pacing, #172 loose ends · 29 Sep 2026](lessons/172-release-audit-batches.md)
 
 ### Review
 
-- [Release P3, small screens and landscape · 29 Sep 2026](lessons/165-release-p3-screens.md)
-- [#159 Release batch P2: moments you can hear and see · 28 Sep 2026](lessons/159-release-p2-moments.md)
 - [Audits by helper agents: the polish audit, #106 launch audit, #155 release audit · 27–28 Sep 2026](lessons/155-audits.md)
 - [Systems review · 27 Sep 2026](lessons/66-systems-review.md)
 - [#47 Runbook experiment [E]: a fresh review before opening · 27 Sep 2026](lessons/47-reviewer-step.md)
@@ -114,9 +108,4 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 - [Phone and touch polish: #84 phone chrome, #87 overlay cards, #88 Masterplan on a small phone (scroll), #107 the top bar, #112 where players look, #124 the first minute · 27–28 Sep 2026](lessons/124-phone-polish.md)
 - [Modes that take over the stage: #100 photo mode, #102 day in a minute · 27–28 Sep 2026](lessons/102-stage-modes.md)
 - [#51 Clear roofs at the starting zoom · 27 Sep 2026](lessons/63-roofs-clear.md)
-
-### Not sorted yet
-
-- [Release loose ends · 29 Sep 2026](lessons/172-release-loose-ends.md)
-- [Release B1, level pacing and payoffs (#171) · 29 Sep 2026](lessons/171-release-b1-pacing.md)
 <!-- /joined:lessons -->
