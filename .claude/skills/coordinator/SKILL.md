@@ -8,11 +8,12 @@ description: Run the other Final Call sessions building a feature's parts - the 
 ## 1. Start fresh, retire the old one
 
 - A coordinator starts fresh for each feature, from a brief, never carrying over a finished feature's conversation.
+- Hand over at about 450–500k of context or at the cost estimate, whichever comes first, and at a quiet moment with no merge due: every turn re-reads the whole conversation, so the last 100k before a limit cost the most (Overgrow, `lessons/28-first-coordinator.md`, `lessons/46-second-coordinator.md`).
 - When a new coordinator takes over, it retires the old one: `list_triggers`, `delete_trigger` its heartbeat (§11) and any other Routine still bound to it, then `archive_session`. (The coordinator retired on 27 Sep had cost $176 and used 642k of context over 25 hours; look backs record numbers like these.)
 
 ## 2. The sweep, at each check-in
 
-- `list_sessions` (`mine: true`).
+- `get_session` on the ids you started or were told, and `list_sessions` (`mine: true`) only to find one you don't know: it lists every session on the account, Overgrow's too, and its output plus full briefs pasted into prompts filled most of Overgrow's first coordinator's context (Overgrow, `lessons/28-first-coordinator.md`).
 - For each live Final Call session, `get_session`: `status_bucket`, `post_turn_summary.status_detail`, `usage.cost_usd` against its brief's estimate, `context_usage.used_tokens`, and `rate_limit_info`.
 - `list_triggers` for booked check-ins.
 - Open PRs, with their check runs and mergeability.
@@ -34,15 +35,19 @@ description: Run the other Final Call sessions building a feature's parts - the 
 
 ## 5. A cap on sessions, and quiet windows for refactors
 
-- At most about four default-model sessions run at once; put the rest on the cheaper model (`create_session` with `model: "claude-sonnet-5"`) and stagger their starts. On `allowed_warning`, start nothing new; `rejected` or `isUsingOverage` still means book a `send_later` for a minute after `resetsAt` and end the turn. Ten default-model sessions started within 45 minutes on 27–28 Sep spent the five-hour allowance in about 80 minutes and killed every one of their turns mid-way (lesson #18, then `main-overnight-stall.md`).
+- At most three default-model sessions run at once (four of them plus three on the cheaper model hit the five-hour limit in under two hours on 29 Sep); put the rest on the cheaper model (`create_session` with `model: "claude-sonnet-5"`) and stagger their starts. On `allowed_warning`, start nothing new; `rejected` or `isUsingOverage` still means book a `send_later` for a minute after `resetsAt` and end the turn. Ten default-model sessions started within 45 minutes on 27–28 Sep spent the five-hour allowance in about 80 minutes and killed every one of their turns mid-way (lesson #18, then `main-overnight-stall.md`).
 - Sessions don't share bookkeeping files (lessons, roadmap items, What's new entries, decisions, systems' notes and check groups are each one file), and the Catch up workflow merges `main` into every open PR when it moves, so they don't chase `main`.
 - Only parts that edit the same game code are ordered, in the spec's order of work.
+- Work handed between batches falls through once the receiver has merged (a panel note left in another batch's file, a camera fix handed on twenty minutes late). Each batch lists what it hands on in its PR under one heading, and the coordinator plans a small loose-ends batch on the cheaper model at the end of every wave to collect them.
 - Small changes and routine jobs (look backs, save fixtures, doc moves, screenshot reviews) go to the cheaper model.
 - A refactor that changes what other files call (a hook signature, a shared read) runs in a quiet window, before or after a wave of feature sessions, never alongside one: refactor 8 changing how weather was read while eight feature branches were open needed a merge commit in each of them, and #102 went red after a clean Catch up merge.
 
 ## 6. Starting a session
 
 - Write its brief from `docs/briefs/TEMPLATE.md`, run `node tools/brief.mjs` on it.
+- Settle in the brief the questions a session would otherwise stop to ask: a change meant to leave play alone proves it with the Balance workflow's tables, not local bot runs; a release's What's new title names what is new in the game, not the process; a release brief names the newest save fixtures' version (releases that add no saved fields leave them several versions old).
+- When a brief says "wait for #N", message that session the moment #N merges: a session that opened its PR early is otherwise still changing lines #N moved.
+- A brief that sets a check's pass mark ("at least 70% of year one") first measures the mark's ceiling: the same run with the input the fix is about made unlimited. A mark above that ceiling on any seed can't be met by the fix, so the session has to stop and ask; measured first, it settles the check's shape before anyone builds (Overgrow, `lessons/48-garden-nutrients.md`, coordinator playbook §6).
 - `create_session` with `source_url`, `source_revision: "main"`, `outcome_branch: "feature/<name>"`, a title, a `final-call:<feature>` tag, and the model.
 - First message: the brief, with one line asking the session to save it as `docs/briefs/<name>.md` in its PR.
 

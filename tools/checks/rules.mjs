@@ -16,6 +16,8 @@ export default async function({open,ok,saveText,newest,out,HIST_TOP,root}){
     await ctx.close();return r};
   const a=await run(7),b=await run(7),c=await run(8);
   ok('rules: the same seed plays the same game',a===b&&a!==c,`seed 7 twice ${a===b?'same':'different'}, seed 8 ${a!==c?'different':'same'}`);
+  const readme=readFileSync(join(root,'README.md'),'utf8');
+  ok('rules: the README has no <owner> or <repo> placeholders in its links',!/<owner>|<repo>/.test(readme),(readme.match(/<owner>|<repo>/)||['none'])[0]);
   const {ctx,page,errs}=await open(undefined,saveText('v20-L8.json'),false,{still:true});
   const res=await page.evaluate(HIST_TOP=>{
     const S=__sim,G=S.G,out=[],t=(name,pass,info='')=>out.push([name,!!pass,info]),few=a=>a.slice(0,4).join(' ');
