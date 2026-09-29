@@ -4,8 +4,8 @@
 import {join} from 'node:path';
 
 // [width, height, touch, full screen and sound stay in the bar, narrowest touch target]: targets are at least 40px, but
-// 36px wide on a map under 272px (a small phone on its side)
-const SIZES=[[320,568,true,false],[390,844,true,true],[844,390,true,false],[667,375,true,false,36],[768,1024,true,true],[1440,900,false,true]];
+// 36px wide on a map under 272px and 29px under 240px (a small phone on its side)
+const SIZES=[[320,568,true,false],[390,844,true,true],[844,390,true,false],[667,375,true,false,36],[568,320,true,false,29],[768,1024,true,true],[1440,900,false,true]];
 export default async function({open,ok,saveText,newest,out}){
   for(const [w,h,touch,bar,minW=40] of SIZES){
     const {ctx,page,errs}=await open({width:w,height:h},saveText(newest),touch,{still:true});

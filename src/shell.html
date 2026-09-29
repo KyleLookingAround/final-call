@@ -41,7 +41,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--sign);outline-o
 .clock{font:500 17px/1 var(--mono);color:var(--sign);font-variant-numeric:tabular-nums;white-space:nowrap}
 .clock small{font-size:10px;color:var(--muted);letter-spacing:.1em;margin-right:6px;font-family:var(--disp);font-weight:700}
 .board{--fs:13px}
-.bcols,.brow,.hrow{display:grid;grid-template-columns:calc(var(--fs)*4.75 + 4px) calc(var(--fs)*5.7 + 5px) minmax(0,1fr) calc(var(--fs)*2.6 + 4px) calc(var(--fs)*9.5 + 9px);gap:8px;align-items:center}
+.bcols,.brow,.hrow{display:grid;grid-template-columns:calc(var(--fs)*4.75 + 4px) calc(var(--fs)*5.7 + 5px) minmax(0,1fr) calc(var(--fs)*2.6 + 4px) calc(var(--fs)*11.5 + 9px);gap:8px;align-items:center}
 .bcols{font:700 10px/1 var(--disp);letter-spacing:.14em;color:#5E6873;text-transform:uppercase;white-space:nowrap}
 .bcols span{overflow:hidden}
 .brow{font:500 var(--fs)/1 var(--mono);color:var(--sign);cursor:pointer;border-radius:3px}
@@ -178,7 +178,7 @@ table.fin tr.tot td{color:var(--sign);font-weight:600;border-bottom:0}
 
 @media (max-width:440px){
   .board{--fs:11px}
-  .bcols,.brow{gap:5px;grid-template-columns:calc(var(--fs)*4.75 + 4px) calc(var(--fs)*5.7 + 5px) calc(var(--fs)*2.85 + 2px) calc(var(--fs)*2.6 + 4px) calc(var(--fs)*9.5 + 9px)}
+  .bcols,.brow{gap:5px;grid-template-columns:calc(var(--fs)*4.75 + 4px) calc(var(--fs)*6.1 + 5px) calc(var(--fs)*2.85 + 2px) calc(var(--fs)*3.5 + 4px) calc(var(--fs)*9.5 + 9px)}
   .bcols .dl{font-size:0}.bcols .dl::before{content:"To";font-size:10px}
   .brow .city{display:none}
   .bcols{letter-spacing:.08em}
@@ -264,6 +264,7 @@ body.fs .tabs .drawclose{display:grid}
 .hcard{background:var(--surface);border:1px solid var(--line);border-radius:12px;width:min(640px,100%);max-height:100%;overflow:auto;padding:18px 20px 20px}
 .hcard h2{font:800 24px/1 var(--disp);letter-spacing:.06em;text-transform:uppercase;margin:0 0 4px}
 .hcard h3{font:700 11px/1 var(--disp);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:18px 0 8px}
+.hlinks{display:flex;flex-wrap:wrap;gap:0 14px}.hlinks .linkb[hidden]{display:none}
 .hcard p{margin:0;color:var(--muted);font-size:14px;max-width:60ch}
 .hgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px 18px}
 .hk{display:flex;gap:10px;align-items:center;font-size:13.5px}
@@ -547,7 +548,7 @@ button.lvtile:hover{border-color:var(--sign)}
 .ptag.low{top:var(--hb,42px);left:auto;right:8px;transform:none}
 .hud{max-width:calc(100% - 16px);flex-wrap:wrap;justify-content:flex-end}
 .ptag.low .pk{display:none}
-@media (pointer:coarse){.ptag .pk{display:none}.hkeys{display:none}}
+@media (pointer:coarse){.ptag .pk{display:none}.hkeys,.hcard .kh{display:none}}
 body.fsstack .fsbar{top:var(--hb,42px);right:auto}
 body.fsstack .toasts{top:calc(var(--hb,42px) + 36px)}
 .lcard.riv{border-left:3px solid #B58CFF}
@@ -588,6 +589,7 @@ body.fs .cam{max-width:calc(100% - 172px)}
 .stage.short .tip{display:none}
 .stage.short .toast{padding:5px 8px 5px 7px;font-size:11.5px;line-height:1.25} /* less height to clear the camera row (issue #103) */
 .stage.short .toast .tx{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+body.sheetfull .board{display:none}
 @media (max-width:899px){body:not(.fs) .side{position:relative;z-index:30}.side.dragging{box-shadow:0 -14px 30px rgba(0,0,0,.4)}}
 /* phones on their side: the map and the panel side by side, the board folded into the map's corner */
 @media (orientation:landscape) and (max-height:500px) and (min-width:560px){
@@ -621,6 +623,8 @@ body.fs .cam{max-width:calc(100% - 172px)}
   }
   @container stage (width < 356px){.hud #fsb,.hud #snd,.hud #photob{display:none}}
   @container stage (width < 272px){.hud button{min-width:36px;padding:0 3px}}
+  /* a phone on its side under 600px: the map is under 240px wide, so six buttons narrow again to stay on one row */
+  @container stage (width < 240px){.hud{gap:1px;padding:2px;right:4px;top:6px;max-width:calc(100% - 8px)}.hud button{min-width:29px;padding:0 2px}}
   .chip{padding:14px 10px 13px}
   .recrow .btns .chip{padding-block:14px 13px}
   .segs .chip{padding-block:14px 13px}
@@ -649,7 +653,12 @@ body.fs .cam{max-width:calc(100% - 172px)}
   .goal .gr{grid-column:1/-1;justify-self:end}
 }
 /* the side panel's own width, not the screen's: the same squeeze happens side-by-side in landscape (issue #103) */
-@container side (width < 380px){.tabs button{font-size:0}} /* icon only: no room for "Terminal"/"Airfield" without colliding */
+/* icon only once seven or more tabs are open: no room for "Terminal"/"Airfield" without colliding; with six or fewer the labels stay so a newcomer can tell Sales from Office. NEW shrinks to a dot so it doesn't cover the next icon */
+@container side (width < 380px){.tabs:has(button:nth-child(7)) button{font-size:0}.tabs:has(button:nth-child(7)) button .newb{font-size:0;width:8px;height:8px;padding:0;border-radius:50%;top:6px;right:calc(50% - 16px)}}
+/* the narrowest panels (a phone on its side): cash, the stars and on time, each in one line */
+@container side (width < 300px){.stats{grid-template-columns:auto auto minmax(0,1fr);gap:4px 10px}.stat:nth-child(4){display:none}.stat.cash output{font-size:16px;overflow:visible}.stat label{white-space:nowrap}#sRep small{display:none}}
+/* a stepper row's text keeps the width: below 340px the − and + take their own line under it */
+@container side (width < 340px){.row:has(>.lever){grid-template-columns:26px minmax(0,1fr)}.row>.lever{grid-column:2;justify-self:start}}
 @container side (width < 340px){
   .stats{grid-template-columns:1fr 1.6fr .7fr .8fr;gap:4px;padding-inline:8px}
   .stat output{font-size:13px;font-family:var(--disp)} /* condensed numerals fit more before the ellipsis would start */
@@ -772,7 +781,7 @@ body.photo .board,body.photo .side,body.photo .topgap,body.photo .spot,body.phot
     <button class="close" data-helpclose aria-label="Close">×</button>
     <h2 id="helpT">How to play</h2>
     <div class="chips hscr" id="hscr" hidden><button class="chip" id="hfs">Full screen</button><button class="chip" id="hsnd">Sound</button></div>
-    <p><button class="linkb" id="tourAgain">Replay the guided start</button> · <button class="linkb" id="newsAgain">What's new</button> · <button class="linkb" id="photoHelp">Photo mode</button> · <a class="linkb" id="feedbackLink" href="#" target="_blank" rel="noopener" hidden>Send feedback</a></p>
+    <p class="hlinks"><button class="linkb" id="tourAgain">Replay the guided start</button><button class="linkb" id="newsAgain">What's new</button><button class="linkb" id="photoHelp">Photo mode</button><a class="linkb" id="feedbackLink" href="#" target="_blank" rel="noopener" hidden>Send feedback</a></p>
     <p>Planes land full. Clear the arrivals, clean the cabin, and board the next flight on time. Short queues and punctual flights raise your rating, which fills more seats.</p>
     <h3>Moving around</h3>
     <div class="hgrid">
@@ -815,14 +824,14 @@ body.photo .board,body.photo .side,body.photo .topgap,body.photo .spot,body.phot
     </div>
     <h3>Growing</h3>
     <p><b>Levels:</b> hit the targets in Office › Progress to climb ten levels. Each level brings plan points.</p>
-    <p><b>Masterplan:</b> press <kbd>P</kbd>. Spend plan points to approve plans that unlock aircraft, routes, upgrades, shops and transport. You can’t have everything at once, so choose what your airport needs.</p>
-    <p><b>Routes:</b> press <kbd>W</kbd> for the world map. Each city has a market: open new routes when your flights start leaving emptier. Planes fly the best route within their range. Business cities pay more, holiday cities fill up in their season, and some attract groups.</p>
+    <p><b>Masterplan:</b> <span class="kh">(<kbd>P</kbd>)</span> spend plan points to approve plans that unlock aircraft, routes, upgrades, shops and transport. You can’t have everything at once, so choose what your airport needs.</p>
+    <p><b>Routes:</b> <span class="kh">(<kbd>W</kbd>)</span> each city has a market. Open new routes when flights leave emptier.</p>
     <p><b>Fleet:</b> bigger jets reach further. More planes keep gates busy; partner airlines fill the gaps for a cut.</p>
-    <p><b>Region:</b> press <kbd>R</kbd> for the map. Draw lines by tapping stations: buses, trams, trains, water buses, the metro and high-speed rail. Every line runs on its own, lines share track and stations, and riders change between them. Good links bring flyers, carry commuters, ease traffic and grow towns. Jobs fill business cities, tourism fills holiday cities, and high-speed rail feeds long-haul. Events need lines that can move the crowds.</p>
+    <p><b>Region:</b> <span class="kh">(<kbd>R</kbd>)</span> tap stations to draw lines. Good links bring flyers, carry commuters and grow towns. Events need lines that can move the crowds.</p>
     <p><b>Weather:</b> fog, rain, snow and storms drift across the region map. Watch the forecast on the board: storms close the runway while they’re overhead.</p>
     <p><b>Policies:</b> Office › Policies sets standing orders: late passengers, connections, repairs, staff pay, advertising and a night curfew.</p>
     <p><b>Tips:</b> the bar at the bottom of the map names your bottleneck and the fix.</p>
-    <p><b>Recommendations and managers:</b> the Region and Routes tabs suggest the lines, station upgrades, routes, fares and planes that would earn most, with one-tap Build, Open or Apply. A transport manager sets timetables and a route manager sets fares. Change anything yourself and they leave it to you; switch them off in Office › Settings when you want full control.</p>
+    <p><b>Managers:</b> managers and recommendations run fares, timetables and upgrades for you. Change anything yourself and they leave it to you (Office › Settings).</p>
     <p><b>Settings:</b> Office › Settings turns tips, messages, map pop-ups, recommendations, the goal bar, badges, managers and sound on or off.</p>
   </div>
 </div>
