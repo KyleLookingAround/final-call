@@ -49,19 +49,25 @@ function take(sv,pick,state,t){
 const MOVER_ST=new Set(['toArr','toShop','toMkt','toGate']); // the walks the mover can carry
 const onMover=p=>G.lv.mover&&G.pierB&&LAY.track&&MOVER_ST.has(p.state)&&(p.way||Math.abs(p.tx-p.x)>300);
 const walkMul=p=>p.way&&p.way[p.wi+3]?1:onMover(p)?2.5:(p.xferred&&LAY.xfer||1)*roomWalk(p);
-// passengers by state, for the states something reads as a list: R.byState[state] holds them in their order in R.pax,
-// gathered at the first read in each step (and again after a new game or a rebuild). It's a snapshot, so a reader checks
-// each passenger's state as it reads, and a passenger sent into a listed state after it is added by stateIn(p) where a
-// reader needs them later in the step (the market's, 46-market.js). A reader of another state adds it to the chain here:
-// comparisons are four times quicker than a list for every state, looked up by name, and the two scans it replaced
+// passengers by state, for the states something reads as a list: R.byState[state] holds them in their order in R.pax.
+// update()'s pass over passengers gathers them at the end of each step, for the next; byState() gathers them afresh if
+// that's missing (the first step, a new game or a rebuild). It's a snapshot, so a reader checks each passenger's state as
+// it reads, and a passenger sent into a listed state after it is added by stateIn(p) where a reader needs them later
+// (the market's, 46-market.js). A reader of another state adds it to bsPut's chain: comparisons are four times quicker
+// than a list for every state, looked up by name
+function bsLists(at){ // the lists, emptied, to gather as of step `at`
+  R.bsStep=at;R.bsPax=R.pax;R.bsLay=G.layout;R.bsIn=0;
+  const o=R.byState||(R.byState={gate:[],shop:[],toShop:[],mkt:[],toMkt:[]});
+  o.gate.length=o.shop.length=o.toShop.length=o.mkt.length=o.toMkt.length=0;return o;
+}
+function bsPut(o,p,s){if(s==='gate')o.gate.push(p);else if(s==='shop')o.shop.push(p);else if(s==='toShop')o.toShop.push(p);else if(s==='mkt')o.mkt.push(p);else if(s==='toMkt')o.toMkt.push(p)}
+// gathered in this step, or by the pass at the end of the last one (as of this step)
+const bsNow=()=>(R.bsStep===R.step||R.bsStep===R.step+1)&&R.bsPax===R.pax&&R.bsLay===G.layout;
 function byState(){
-  if(R.bsStep!==R.step||R.bsPax!==R.pax||R.bsLay!==G.layout){R.bsStep=R.step;R.bsPax=R.pax;R.bsLay=G.layout;R.bsIn=0;
-    const o=R.byState||(R.byState={gate:[],shop:[],toShop:[],mkt:[],toMkt:[]}),g=o.gate,sh=o.shop,ts=o.toShop,mk=o.mkt,tm=o.toMkt;
-    g.length=sh.length=ts.length=mk.length=tm.length=0;
-    for(const p of R.pax){const s=p.state;if(s==='gate')g.push(p);else if(s==='shop')sh.push(p);else if(s==='toShop')ts.push(p);else if(s==='mkt')mk.push(p);else if(s==='toMkt')tm.push(p)}}
+  if(!bsNow()){const o=bsLists(R.step);for(const p of R.pax)bsPut(o,p,p.state)}
   return R.byState;
 }
-function stateIn(p){if(R.bsStep===R.step&&R.bsPax===R.pax&&R.bsLay===G.layout){const L=R.byState[p.state];if(L){L.push(p);R.bsIn++}}}
+function stateIn(p){if(bsNow()){const L=R.byState[p.state];if(L){L.push(p);R.bsIn++}}}
 // each part of the terminal moves its own passengers: PAX_STEP[state](p,dt,D) for departing ones (42-terminal.js)
 function updateLandside(dt,D){
   updateCheckin(dt,D);updateSecurity(dt,D);updateBelt(dt);

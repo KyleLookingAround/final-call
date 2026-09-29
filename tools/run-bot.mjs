@@ -44,8 +44,9 @@ const fin=await m.evaluate(()=>B.run(1,0.1)),sv=await m.evaluate(()=>window.SAVE
 const gJson=await m.evaluate(()=>JSON.stringify({...__sim.G,savedAt:0}));writeFileSync(join(root,`build/state-${tag}.json`),gJson);
 const state=createHash('sha256').update(gJson).digest('hex').slice(0,16);
 // PLAY: the same, less the player's settings, the What's new version seen, and other one-off "seen this before" flags
-// that a UI-only change can add without changing how the game plays (the bot never resolves G.tip4x, issue #105)
-const play=createHash('sha256').update(JSON.stringify({...JSON.parse(gJson),set:0,seen:0,tip4x:0})).digest('hex').slice(0,16);
+// that a UI-only change can add without changing how the game plays (the bot never resolves G.tip4x, issue #105), and the
+// build stamp (G.ver, 22-save.js), deleted rather than zeroed so builds from before it keep their fingerprints
+const play=createHash('sha256').update(JSON.stringify({...JSON.parse(gJson),set:0,seen:0,tip4x:0,ver:undefined})).digest('hex').slice(0,16);
 if(!opts.layouts&&!opts.recs&&rateDay==null){mkdirSync(join(root,'build/saves'),{recursive:true});for(const k in sv)writeFileSync(join(root,'build/saves/L'+k+'.json'),sv[k])}
 console.log('SEED',seed);console.log('LVLAT',JSON.stringify(fin.lvlAt));console.log('STATE',state);console.log('PLAY',play);console.log('ERR',JSON.stringify(errs.slice(0,5)));
 await b.close();

@@ -16,6 +16,8 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 ### Checks
 
+- [#156 Systems refactor 7, part 2: arrivals, movement and the index in one pass · 28 Sep 2026](lessons/156-refactor-passes-merge.md)
+- [#150 Release P1: the first level-up and the guided start · 28 Sep 2026](lessons/150-first-level-up-card.md)
 - [#145 Systems refactor 7, part 1: passengers by state · 28 Sep 2026](lessons/145-refactor-passes-index.md)
 - [The terminal as a place: the checks refresh · 28 Sep 2026](lessons/144-terminal-place-checks-refresh.md)
 - [A page size budget check (#140) · 28 Sep 2026](lessons/140-page-size.md)
@@ -101,6 +103,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 ### Review
 
 - [Polish audit · 27 Sep 2026](lessons/main-polish-audit.md)
+- [#159 Release batch P2: moments you can hear and see · 28 Sep 2026](lessons/159-release-p2-moments.md)
 - [Release audit (#155) · 28 Sep 2026](lessons/155-release-audit.md)
 - [Launch polish audit · 27 Sep 2026](lessons/106-launch-audit.md)
 - [Photo mode (#100) · 27 Sep 2026](lessons/100-photo-mode.md)
@@ -110,10 +113,12 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 ### Saves
 
+- [Release R1: never freeze or lose a save (#158) · 28 Sep 2026](lessons/158-release-r1-saves.md)
 - [Refactor 5: save migration as a table · 27 Sep 2026](lessons/86-save-fields.md)
 
 ### Specs
 
+- [#142 A Roadmap tab on What's new: the spec · 28 Sep 2026](lessons/142-roadmap-tab-spec.md)
 - [#138 Multiple floors: the terminal-place spec refreshed · 28 Sep 2026](lessons/138-terminal-place-spec-refresh.md)
 - [#49 The terminal as a place: the spec, checks planned first · 27 Sep 2026](lessons/49-terminal-place-spec.md)
 - [Real airport groundwork, spec and parts' briefs · 27 Sep 2026](lessons/38-real-airport-groundwork.md)

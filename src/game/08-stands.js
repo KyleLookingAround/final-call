@@ -142,11 +142,8 @@ function finishArrival(p){
     floater(`${A.code}${A.no} CLEARED · ${Math.round(mins)} MIN`,970,738,avg>18+pat?'#FF7A8A':'#9FC2E0',true);
   }
 }
-// each part of the terminal moves its own arriving passengers: ARR_STEP[state](p,dt,D) (42-terminal.js)
-function updateArrivals(dt,D){
-  updateReclaimBelt(dt);updateImmigration(dt,D);
-  for(const p of R.pax){if(!p.inbound)continue;const f=ARR_STEP[p.state];if(f)f(p,dt,D)}
-}
+// the arrivals' belts and desks; update()'s pass over passengers then moves each arriving one: ARR_STEP[state](p,dt,D) (42-terminal.js)
+function updateArrivals(dt,D){updateReclaimBelt(dt);updateImmigration(dt,D)}
 function arrive(p,D){
   const F=p.F;p.pos=p.row;
   if(p.carry){p.phase='stow';p.t=D.stow*(1+0.9*F.bags/F.seatsN)}
