@@ -8,11 +8,12 @@ description: Run the other Final Call sessions building a feature's parts - the 
 ## 1. Start fresh, retire the old one
 
 - A coordinator starts fresh for each feature, from a brief, never carrying over a finished feature's conversation.
+- Hand over at about 450–500k of context or at the cost estimate, whichever comes first, and at a quiet moment with no merge due: every turn re-reads the whole conversation, so the last 100k before a limit cost the most (Overgrow, `lessons/28-first-coordinator.md`, `lessons/46-second-coordinator.md`).
 - When a new coordinator takes over, it retires the old one: `list_triggers`, `delete_trigger` its heartbeat (§11) and any other Routine still bound to it, then `archive_session`. (The coordinator retired on 27 Sep had cost $176 and used 642k of context over 25 hours; look backs record numbers like these.)
 
 ## 2. The sweep, at each check-in
 
-- `list_sessions` (`mine: true`).
+- `get_session` on the ids you started or were told, and `list_sessions` (`mine: true`) only to find one you don't know: it lists every session on the account, Overgrow's too, and its output plus full briefs pasted into prompts filled most of Overgrow's first coordinator's context (Overgrow, `lessons/28-first-coordinator.md`).
 - For each live Final Call session, `get_session`: `status_bucket`, `post_turn_summary.status_detail`, `usage.cost_usd` against its brief's estimate, `context_usage.used_tokens`, and `rate_limit_info`.
 - `list_triggers` for booked check-ins.
 - Open PRs, with their check runs and mergeability.
@@ -43,6 +44,7 @@ description: Run the other Final Call sessions building a feature's parts - the 
 ## 6. Starting a session
 
 - Write its brief from `docs/briefs/TEMPLATE.md`, run `node tools/brief.mjs` on it.
+- A brief that sets a check's pass mark ("at least 70% of year one") first measures the mark's ceiling: the same run with the input the fix is about made unlimited. A mark above that ceiling on any seed can't be met by the fix, so the session has to stop and ask; measured first, it settles the check's shape before anyone builds (Overgrow, `lessons/48-garden-nutrients.md`, coordinator playbook §6).
 - `create_session` with `source_url`, `source_revision: "main"`, `outcome_branch: "feature/<name>"`, a title, a `final-call:<feature>` tag, and the model.
 - First message: the brief, with one line asking the session to save it as `docs/briefs/<name>.md` in its PR.
 
