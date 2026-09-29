@@ -174,11 +174,40 @@ function routeRecs(){
   {const reach=Math.max(...open.map(c=>CITY[c].tier),0);if(reach>mt){const t=AC_ORDER.filter(t=>!AIRCRAFT[t].freighter&&has('ac:'+t)&&AIRCRAFT[t].tier>=reach&&(AIRCRAFT[t].tier<4||G.pierB)).sort((a,b)=>AIRCRAFT[a].cost-AIRCRAFT[b].cost)[0];
       if(t!=null)out.push({text:`Buy an ${AIRCRAFT[t].name}`,sub:`None of your planes can reach your ${RT_NAMES[reach].toLowerCase()} routes.`,btn:`<button class="buy" data-acbuy="${t}" data-cost="${AIRCRAFT[t].cost}">${money(AIRCRAFT[t].cost)}</button>`,tag:'PLANE'})}
     const idle=G.stands.some((s,k)=>s.built&&!R.st[k].F&&(R.st[k].idleT||0)>15),ready=own.some(f=>f.st==='base');
-    if(idle&&!ready&&sup<mk*0.9){let bt=null;for(const t of AC_ORDER){const a=AIRCRAFT[t];if(!a.freighter&&has('ac:'+t)&&(!a.fire||G.lv.fire>=a.fire)&&(a.tier<4||G.pierB))bt=t}
+    const fr=fleetRec();if(fr)out.push({text:fr.text,sub:fr.sub,btn:fr.kind==='sell'?`<button class="buy ghost" data-fleetsell="${fr.t}">Fleet</button>`:`<button class="buy" data-acbuy="${fr.t}" data-cost="${fr.cost}">${money(fr.cost)}</button>`,tag:'PLANE'});
+    if(idle&&!ready&&sup<mk*0.9&&!(fr&&fr.kind==='more')){let bt=null;for(const t of AC_ORDER){const a=AIRCRAFT[t];if(!a.freighter&&has('ac:'+t)&&(!a.fire||G.lv.fire>=a.fire)&&(a.tier<4||G.pierB))bt=t}
       if(bt!=null)out.push({text:`Buy another ${AIRCRAFT[bt].short}`,sub:'Gates sit empty while every plane is away, and your cities want more seats.',btn:`<button class="buy" data-acbuy="${bt}" data-cost="${AIRCRAFT[bt].cost}">${money(AIRCRAFT[bt].cost)}</button>`,tag:'PLANE'})}}
   let h=`<div class="lcard rec"><div class="rechead"><span class="lbl">Recommended</span><button class="chip${SET().autoFares?' on':''}" data-setq="autoFares" title="Sets each route’s fare to whatever earns most">${SET().autoFares?'✓ ':''}Auto fares</button></div>`;
   h+=out.length?out.slice(0,4).map(o=>`<div class="recrow"><span class="lbadge sm" style="--c:#8C97A1">${o.tag}</span><div><div class="rt">${o.text}</div><div class="rd">${o.sub}</div></div><div class="btns">${o.btn}</div></div>`).join(''):`<div class="rd">Your routes, fares and fleet look balanced.</div>`;
   return h+`</div>`;
+}
+// the fleet recommendation (release audit, row 5): more of your own planes while partner airlines hold your gates; else a
+// roomier type for the smallest you fly (the cheapest that seats 30% more and reaches as far), and, once enough of it
+// are bought, selling the small ones. R.ptAvg smooths how many gates partners hold over about two hours, so the advice
+// doesn't flicker as flights come and go. Read by routeRecs and the advisor
+const anA=s=>/^[AEFHILMNORSX]/.test(s)?'an':'a',acSeats=t=>AIRCRAFT[t].rows*AIRCRAFT[t].blocks.reduce((x,y)=>x+y,0);
+const acFlyable=t=>{const a=AIRCRAFT[t];return !a.freighter&&has('ac:'+t)&&(!a.fire||G.lv.fire>=a.fire)&&(a.tier<4||G.pierB)};
+function fleetRec(){
+  const own=G.fleet.filter(f=>!f.sold&&!AIRCRAFT[f.type].freighter),gates=builtCount();if(!gates||!own.length)return null;
+  const now=R.st.filter((S,k)=>G.stands[k].built&&S.F&&S.F.partner).length;
+  if(R.ptG!==G){R.ptG=G;R.ptAvg=now}else R.ptAvg+=(now-R.ptAvg)*(1-Math.exp(-Math.min(G.clock-R.ptT,600)/120));R.ptT=G.clock;
+  const n=t=>own.filter(f=>f.type===t).length,held=Math.round(R.ptAvg);
+  // more: another of the roomiest type you already fly
+  const mt=own.map(f=>f.type).filter(acFlyable).sort((x,y)=>acSeats(y)-acSeats(x))[0];
+  if(mt!=null&&held>=1&&own.length<gates*1.6){const A=AIRCRAFT[mt],t=`Partner airlines hold about ${held} of your ${gates} gates.`;
+    return {kind:'more',t:mt,cost:A.cost,text:`Buy another ${A.short}`,sub:`${t} Your own planes earn the full fare on every seat.`,tip:`${t} Another ${A.short} of your own would earn the full fare on its seats.`}}
+  // bigger: for the smallest type you fly, the cheapest that seats 30% more and flies as far
+  for(const w of [...new Set(own.map(f=>f.type))].sort((x,y)=>acSeats(x)-acSeats(y))){const W=AIRCRAFT[w],k=n(w);
+    const bt=AC_ORDER.filter(t=>acFlyable(t)&&AIRCRAFT[t].tier>=W.tier&&acSeats(t)>=acSeats(w)*1.3).sort((x,y)=>AIRCRAFT[x].cost-AIRCRAFT[y].cost)[0];if(bt==null)continue;
+    const A=AIRCRAFT[bt],more=k*(acSeats(bt)-acSeats(w));
+    // enough planes for the gates already: sell the small ones rather than buy more
+    if(own.length>=gates*2){const f=own.find(f=>f.type===w&&f.st==='base');if(!f||n(bt)<1)return null;
+      return {kind:'sell',t:w,cost:0,text:`Sell ${k>1?`your ${k} ${W.short}s`:`your ${W.short}`}`,sub:`Your ${A.short}s seat ${acSeats(bt)} to ${anA(W.short)} ${W.short}’s ${acSeats(w)}, and you have planes enough for your gates.`,
+        tip:`You have planes enough for your gates. Selling ${k>1?`your ${k} ${W.short}s`:`your ${W.short}`} as ${k>1?'they come':'it comes'} home leaves the gates to your ${A.short}s.`}}
+    return {kind:'bigger',t:bt,cost:A.cost,text:k>1?`Replace ${k} ${W.short}s with ${A.short}s`:`Replace your ${W.short} with ${anA(A.short)} ${A.short}`,
+      sub:`${anA(A.short).replace('a','A')} ${A.short} seats ${acSeats(bt)} to ${anA(W.short)} ${W.short}’s ${acSeats(w)}: +${num(more)} seats a round of flights. Sell ${k>1?'each':'the'} ${W.short} when it’s home.`,
+      tip:`${k>1?`Your ${k} ${W.short}s seat ${acSeats(w)} each`:`Your ${W.short} seats ${acSeats(w)}`} and ${anA(A.short)} ${A.short} seats ${acSeats(bt)}. Replacing ${k>1?'them':'it'} adds ${num(more)} seats a round of flights.`}}
+  return null;
 }
 function recsClick(d){
   if(d.setq){G.set[d.setq]=!SET()[d.setq];save();renderPanel();return true}
@@ -192,6 +221,7 @@ function recsClick(d){
   if(d.recfare){for(const c of d.recfare.split(','))if(G.routes[c]){G.routes[c].f=bestFare(c);G.routes[c].man=true}renderPanel();save();return true}
   if(d.lauto){const L=G.lines[d.lauto];if(L){delete L.man;renderPanel();save()}return true}
   if(d.rauto){const r=G.routes[d.rauto];if(r){delete r.man;renderPanel();save()}return true}
+  if(d.fleetsell){goTo('stands',`[data-sellt="${d.fleetsell}"]`);return true}
   if(d.rivbuy){if(buyRival()){renderPanel();save()}return true}
   return false;
 }
