@@ -267,16 +267,18 @@ When the link is shared, chat apps and social sites show `src/public/preview.jpg
 - **Keyboard:** Space pauses, R opens the region, W the world, P the Masterplan, F full screen and H help.
 - **Portrait phones:** the panel is a bottom sheet (`#side`) that is dragged by `#grip`.
   - While dragging, the sheet slides over the map using a negative `marginTop`, and `resize()` keeps the zoom. It snaps to 0/1/2 using `sheetMax()`.
+  - Fully open (snap 2) the departures board is hidden (`body.sheetfull`) so a 320 px phone keeps at least 240 px of panel (the `sheet` check).
   - In full screen, the sheet becomes a drawer opened with the Manage button.
 - **Landscape phones** (height ≤ 500) show the map and panel side by side, with the board hidden.
+- **Narrow side panel** (container `side`): tab labels stay while six tabs or fewer are open and drop to icons (with NEW as a dot) at seven or more below 380 px; under 340 px a stepper row's − and + take their own line; under 300 px the stats show cash, stars and on time only.
 - **Camera band:** `--gapsz` is set from the player's choice. It becomes `--topgap` in portrait and `--sidegap` in landscape.
 - **Top bar** (`.hud`): one row at every size (the `topbar` check). On touch screens its buttons are 42 px, and `.stage` is a size container (`stage`) so the bar steps down by the map's width, not the screen's:
   - under 560 px the four speeds fold into `#spdb`, which shows the speed and cycles 1×/2×/4×/8× (a tap on a paused game resumes it), and the buttons are 40 px;
   - under 356 px (a 320 px phone, or a phone on its side with the camera band) full screen, sound and photo mode leave the bar, and the help card has them instead (`#hscr`, `syncHscr()`, and its Photo mode link);
-  - under 272 px the buttons narrow to 36 px.
+  - under 272 px the buttons narrow to 36 px, and under 240 px (a 568×320 phone on its side) to 29 px, so the six stay on one row.
   - A new top-bar button counts against these widths: move the steps and the check with it.
   - Its background is `pointer-events:none` (buttons stay `auto`), so a tap that misses a button reaches the map underneath instead of doing nothing (issue #103).
-- **The side panel's own width** (`.side` is a size container, `side`), not the screen's, since landscape phones put it beside a narrow map: below 380 px the tab bar drops its labels (icons only, so seven tabs never collide); below 340 px the stats row and the goal bar take the same narrow treatment as a 340 px portrait phone (tighter grid, condensed numerals in `.stat output` so a value fits before the ellipsis would start, the goal wrapping instead of clipping).
+- **The side panel's own width** (`.side` is a size container, `side`), not the screen's, since landscape phones put it beside a narrow map: below 380 px the tab bar drops its labels only when seven or more tabs are open (icons only, so they never collide; six or fewer keep their labels); below 340 px the stats row and the goal bar take the same narrow treatment as a 340 px portrait phone (tighter grid, condensed numerals in `.stat output` so a value fits before the ellipsis would start, the goal wrapping instead of clipping).
 - **Toasts and the tip:** `.toasts` caps its height (`calc(100% - 120px)`) so a tall stack stays clear of the camera row on a short map, and a short map (`.stage.short`) also clamps a toast to two lines. `renderTip()` holds the advisor tip back entirely while two toasts are already up, rather than let them read as one jumble (issue #103).
 - **The 4× nudge** (`16-advisor.js`, `advise()`, issue #105's default option A): once the first flight has departed (`G.flights>=1`) while the game is still under 4×, the advisor offers a `Try 4×` tip that sets the speed. No pacing changed. Reaching 4× by any control (not just the tip's own button) or dismissing the tip sets the saved flag `G.tip4x`, so it never returns. Never offered in the headless sim (`R.sim`), which never touches `R.speed` and so could never resolve it, which would otherwise crowd out every other advisor tip for the rest of the run.
 
