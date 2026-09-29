@@ -1,6 +1,6 @@
 # Brief: Coordinator, 29 Sep 2026 from about 01:00 UTC, to the public release
 
-A handover from `session_01JtaiFWY7povechZrZ8WqD8` (465k of context by 00:30, past the 330k line). Follow the `coordinator` playbook, with the changes below. Where they differ, this brief wins.
+A handover from `session_01JtaiFWY7povechZrZ8WqD8` (465k of context by 00:30, past the 330k line; this is the state at 03:00 UTC on 29 Sep). Follow the `coordinator` playbook, with the changes below. Where they differ, this brief wins.
 
 ## Goal and what it may touch
 
@@ -18,16 +18,14 @@ A handover from `session_01JtaiFWY7povechZrZ8WqD8` (465k of context by 00:30, pa
 
 - The project notes, the `coordinator`, `steward` and `release` playbooks, `docs/ideas/release-audit.md`, `docs/specs/terminal-place.md`, and `node tools/graph.mjs brief`.
 
-**Where things stand at 00:30 UTC on 29 Sep.** All the sessions below were woken at 00:28–00:36 after the stall.
+**Where things stand at 03:00 UTC on 29 Sep.**
 
 | Session | Item | PR | State, cost against estimate |
 | --- | --- | --- | --- |
-| `0118pdGE2qspc7FCpC9JQcq6` | Two floors in Classic (#133 step 3), default model | not yet open | $12 of $25; the last feature before release; merges itself when green and within 15% pacing |
-| `01J4P94WSmQ3UZeKiUDxC7x2` | R1: never freeze or lose a save (#146) | #158 | $5.65 of $10 |
-| `011ki7ARFAgcCbx2cT5nWbuj` | P1: first level-up card and guided start (#150) | #157 | $11.7 of $6, finish only |
-| `01MvNbBcz6sFc3AoFFosfN4J` | F2: goals and levels that lead (#149) | not yet open | $14.4 of $6, finish only |
-| P2 (#151) | Records and stamps toasts, with their own chime | #159 merged | done, archived |
+| `0118pdGE2qspc7FCpC9JQcq6` | Two floors in Classic (#133 step 3), default model | #162 | checks re-running after #161's default (the old coordinator approved it: on-time departure on 2 of seeds 1–3); auto-merges when green; about $20 of $25 |
 
+- **Merged on 29 Sep:** #158 R1 saves, #157 P1 first level-up, #160 F2 goals; their sessions are archived.
+- **Added to B1 (#147)** from #161: at least one of the first three departures on time on every one of seeds 1–12.
 - **Merged on 28 Sep:**
   - #134 playbooks without Routines
   - #140 page size check
