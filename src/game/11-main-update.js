@@ -13,12 +13,16 @@ function update(dt){
   updateLandside(dt,D);updateStopVehicles(dt);
   updateWeather(dt);if(!R.reg||G.clock-R.reg.at>=5)regionTick();updateEvents(dt);regionMoney(dt);
   updateArrivals(dt,D);
-  let dead=false;
+  // one pass over passengers: each arriving one moves on (ARR_STEP), anyone on a bridge or in a cabin moves, and those
+  // still here are listed by state for the next step (byState, 07-passengers.js). Departing passengers moved in
+  // updateLandside, before the vehicles, weather and events, which draw on rnd() in between, so their pass stays apart
+  let dead=false;const o=bsLists(R.step+1);
   for(const p of R.pax){
+    if(p.inbound){const f=ARR_STEP[p.state];if(f)f(p,dt,D)}
     const s=p.state; // read once: passengers come in many shapes, so each read of a field is slow
     if(s==='bridge'||s==='aisle'||s==='dAisle'||s==='dBridge')moveTo(p,p.tx,p.ty,260,dt);
     else if(s==='sitting'){if(moveTo(p,p.tx,p.ty,140,dt))p.dead=true}
-    if(p.dead)dead=true;
+    if(p.dead)dead=true;else bsPut(o,p,s);
   }
   if(dead){const P=R.pax;let n=0;for(const p of P)if(!p.dead)P[n++]=p;P.length=n} // in place, keeping the order
   if(!R.sim){for(const f of R.floaters)f.t+=dt;R.floaters=R.floaters.filter(f=>f.t<(f.big?2.2:1))}
