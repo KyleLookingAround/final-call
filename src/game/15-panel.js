@@ -39,8 +39,8 @@ function gateStatus(i){const nx=G.fleet.some(f=>!f.sold&&f.st!=='gate'&&fitsGate
 function standLive(i){
   const F=R.st[i].F;if(!F)return gateWaitText(i);
   const s=statusText(F),col=statusCol(s),m=Math.ceil(F.std-G.clock),A=F.arr;
-  const arrLine=A.done?'':`<div class="sline" style="margin-bottom:4px"><span class="pill" style="--c:${statusCol(arrStatus(F))}">${arrStatus(F)}</span><b>${A.code}${A.no}</b>&nbsp;from ${A.from[1]} · <b>${A.n-A.onboard}/${A.n}</b>&nbsp;off · bags&nbsp;<b>${A.sent}/${A.bags}</b>&nbsp;unloaded</div>`;
-  return arrLine+`<div class="sline"><span class="pill" style="--c:${col}">${s}</span><b>${F.code}${F.no}</b>&nbsp;to ${F.dest[1]}</div><div class="prog"><i style="width:${F.seated/F.booked*100}%;background:${col}"></i></div><div class="sline"><b>${F.seated}/${F.booked}</b>&nbsp;seated · hold&nbsp;<b>${Math.floor(F.hold)}/${F.checkedTotal}</b>&nbsp;· departs&nbsp;<b>${hhmm(F.std)}</b>&nbsp;${m>=0?`(in ${m} min)`:`<span class="late">(${-m} min late)</span>`}</div>`;
+  const arrLine=A.done?'':`<div class="sline" style="margin-bottom:4px"><span class="pill" style="--c:${statusCol(arrStatus(F))}">${arrStatus(F)}</span><b>${A.code}${A.no}</b>&nbsp;from ${A.from[1]}${A.n?` · <b>${A.n-A.onboard}/${A.n}</b>&nbsp;off`:''} · bags&nbsp;<b>${A.sent}/${A.bags}</b>&nbsp;unloaded</div>`;
+  return arrLine+`<div class="sline"><span class="pill" style="--c:${col}">${s}</span><b>${F.code}${F.no}</b>&nbsp;to ${F.dest[1]}</div><div class="prog"><i style="width:${F.seated/F.booked*100}%;background:${col}"></i></div><div class="sline"><b>${F.seated}/${F.booked}</b>&nbsp;seated · bags&nbsp;<b>${Math.floor(F.hold)}/${F.checkedTotal}</b>&nbsp;· departs&nbsp;<b>${hhmm(F.std)}</b>&nbsp;${m>=0?`(in ${m} min)`:`<span class="late">(${-m} min late)</span>`}</div>`;
 }
 function buildLine(id){const b=buildOf(id);if(!b)return '';const p=bprog(id);return `<div class="rd">Under construction · <b>${Math.ceil(b.done-G.clock)} min</b> left</div><div class="prog"><i style="width:${p*100}%;background:var(--sign)"></i></div>`}
 function standLockedCard(i){
@@ -88,7 +88,7 @@ function renderPanel(){
   } else if(G.tab==='fleet'){
     const own=G.fleet.filter(f=>!f.sold),n=own.length,at=own.filter(f=>f.st==='gate').length,away=own.filter(f=>f.st==='away').length,ready=own.filter(f=>f.st==='base').length;
     h+=`<div class="lstats fl4" style="grid-template-columns:repeat(4,1fr)"><div><b>${n}</b><span>aircraft</span></div><div><b>${at}</b><span>at gates</span></div><div><b>${away}</b><span>flying</span></div><div><b>${ready}</b><span>ready</span></div></div>`;
-    h+=`<p class="note">The next ready plane takes the next free gate, then flies the most profitable open route within its range: short hops take ~${TRIP[0]} min, long-haul ${Math.round(TRIP[3]/60)}–${Math.round(TRIP[4]/60)} h. Widebodies need Pier B.</p>`;
+    h+=`<p class="note">Planes take the next free gate and fly the best route in range (short hops about ${TRIP[0]} min, long haul ${Math.round(TRIP[3]/60)}–${Math.round(TRIP[4]/60)} h). Widebodies need Pier B.</p>`;
     const back=own.filter(f=>f.st==='away').sort((a,b)=>a.back-b.back).slice(0,4);
     if(back.length)h+=`<div class="report">Next back: ${back.map(f=>`<b>${AIRCRAFT[f.type].short}</b> ${hhmm(f.back)}${f.late?` <span class="late">+${f.late}m</span>`:''}`).join(' · ')}</div>`;
     h+=crewPanel();
@@ -203,7 +203,8 @@ function reportsHistory(){
 }
 /* ---------- space for the camera: a per-device setting, kept out of the save so it doesn't follow the save code ---------- */
 const GAPS={off:0,small:24,medium:40,large:56},GAPKEY='final-call-topgap';
-function gapPref(){let v=null;try{v=localStorage.getItem(GAPKEY)}catch(e){}if(v&&v in GAPS)return v;return matchMedia('(pointer:coarse)').matches&&Math.min(screen.width,screen.height)<=520?'medium':'off'}
+function safeTop(){const d=document.createElement('div');d.style.cssText='position:fixed;visibility:hidden;padding-top:env(safe-area-inset-top,0px)';document.body.appendChild(d);const v=parseFloat(getComputedStyle(d).paddingTop)||0;d.remove();return v} // 0 unless the page reaches under a notch
+function gapPref(){let v=null;try{v=localStorage.getItem(GAPKEY)}catch(e){}if(v&&v in GAPS)return v;return safeTop()>0&&matchMedia('(pointer:coarse)').matches&&Math.min(screen.width,screen.height)<=520?'medium':'off'}
 function applyGap(){const px=GAPS[gapPref()];document.documentElement.style.setProperty('--gapsz',px+'px');$('#topgap').hidden=!px;if(typeof resize==='function')requestAnimationFrame(()=>resize())}
 applyGap();
 /* ---------- settings: what the game shows you ---------- */
@@ -395,8 +396,8 @@ $('#panel').addEventListener('click',e=>{
   }
   else if(b.id==='loadSave'){
     const raw=($('#saveIn').value||'').trim();let obj=null;try{obj=JSON.parse(decodeURIComponent(escape(atob(raw))))}catch(e){}
-    if(!obj||typeof obj.cash!=='number'||!Array.isArray(obj.stands)){toast('That save code didn’t work. Copy it again and paste the whole thing.',null,null,'warn',6);return}
-    if(!(R.armKey==='load'&&Date.now()-R.armT<3000)){R.armKey='load';R.armT=Date.now();b.textContent='Tap to replace this airport';return}
+    if(!obj||typeof obj!=='object'||typeof obj.cash!=='number'||!Array.isArray(obj.stands)){toast('That save code didn’t work. Copy it again and paste the whole thing.',null,null,'warn',6);return}
+    if(!(R.armKey==='load'&&Date.now()-R.armT<3000)){R.armKey='load';R.armT=Date.now();b.textContent='Tap to replace this airport';setTimeout(()=>{if(b.isConnected&&R.armKey==='load'){R.armKey=null;b.textContent='Load'}},3000);return}
     R.armKey=null;resetAll(obj);toast('Airport loaded.',null,null,'goal',5);return;
   }
   else if(b.id==='reset'){
