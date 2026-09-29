@@ -12,6 +12,7 @@ const GOLD={ // recorded on main, and again for every save fixture after 65-usag
   'v28-L3.json':'4855692106241f8e','v28-L5.json':'81784467e362aa56','v28-L9.json':'7daf76978102c1da','v29-L1.json':'141a006d5d75d13c',
   'v29-L3.json':'95a0a82ddc44c4b4','v29-L5.json':'edf5cfb6001348f8','v29-L9.json':'105d8d38d8e94718','v32-L1.json':'b6b19b6cd98e3566',
   'v32-L3.json':'01fd53c62f63ae54','v32-L5.json':'02f08e7c2515cd7d','v32-L9.json':'840ce9a3af7e2a33',
+  'v35-L1.json':'136f8c7a781ac08b','v35-L3.json':'b497ed91cb3874ea','v35-L5.json':'5e7085a16f66a4af','v35-L9.json':'b5c1b2e5622e2d7a',
 };
 const hash=s=>createHash('sha256').update(s).digest('hex').slice(0,16);
 // fields added to FIELDS since GOLD was recorded: left out of the hash, and every save must load them at their default
