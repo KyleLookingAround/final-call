@@ -1,8 +1,8 @@
 # Usage counts
 
 **Usage counts** (`65-usage-counts.js`). A cookie-free page counter, GoatCounter, so the owner can see whether anyone
-came from the launch posts. `USAGE_SITE` (the GoatCounter site code) sits in one place; empty, nothing loads and
-nothing is sent, ever, which is how this shipped before the owner had a GoatCounter site. With a code set, the
+came from the launch posts. `USAGE_SITE` (the GoatCounter site code) sits in one place and is `final-call`. Were it empty, nothing would load and
+nothing would be sent, ever, which is how this shipped before the owner had a GoatCounter site. With a code set, the
 counter's script tag loads only on the published site (`feedbackRepo()`, the same test the Help feedback link and the
 update check use), never in `R.sim`, never in `build/test.html` or from a local file, and only if the player hasn't
 turned it off in Office › Settings › Screen and sound ("Send anonymous usage counts", on by default, `G.set.usage`).

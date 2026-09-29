@@ -1,6 +1,6 @@
 # Start here
 
-Setup takes about five minutes, and after that every push to `main` publishes the game.
+Setup takes about five minutes (the first full `npm run check` takes 15–25 in a cloud session), and after that every push to `main` publishes the game.
 
 ## 1. Put these files in your repo
 
@@ -20,7 +20,7 @@ Your default branch needs to be called `main`. If it's `master`, change `branche
 
 ## 2. Check GitHub Pages is set to Actions
 
-Go to Settings › Pages › Build and deployment, and set Source to **GitHub Actions**. You said this is already on.
+Go to Settings › Pages › Build and deployment, and set Source to **GitHub Actions**. 
 
 After the first push, open the Actions tab. When "Publish to GitHub Pages" goes green, the game is live at `https://<your-username>.github.io/<repo>/`.
 
@@ -56,9 +56,9 @@ If a session can only push to its own branch, it opens a PR instead of pushing t
 | `src/game/*.js`, `src/shell.html` | The game's source: logic and drawing in numbered files, then CSS and HTML |
 | `tools/build.mjs` | Builds `dist/index.html` (published) and `build/test.html` (for tests) |
 | `tools/check.mjs`, `tools/checks/` | Checks for crashes, old saves, every screen size, phone gestures and the guided start, one group per file in `tools/checks/` |
-| `tools/run-bot.mjs`, `tools/bot.js` | A bot that plays for hundreds of game hours to check balance |
+| `tools/run-bot.mjs`, `tools/bot.js` | A bot that plays for over a thousand game hours to check balance |
 | `tools/saves/` | Saves from older versions and every stage of the game, used by the checks |
 | `.github/workflows/pages.yml` | Publishes to GitHub Pages on every push to `main` |
-| `.github/workflows/checks.yml` | Runs the checks on pull requests |
+| `.github/workflows/checks.yml` | Runs the checks on pull requests (`balance.yml`, `health.yml`, `description.yml`, `catch-up.yml` and `parts.yml` sit beside it: the bot's balance runs, the weekly health check, the description check, merging `main` into open PRs, and testing the parts of a split feature together) |
 | `CLAUDE.md` | Context and rules for Claude Code sessions |
-| `docs/` | The feature plan and version history |
+| `docs/` | How each system works (`SYSTEMS.md`, `systems/`), the roadmap, specs, decision records, lessons, briefs and version history |
