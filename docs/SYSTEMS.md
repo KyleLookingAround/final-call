@@ -22,7 +22,7 @@ The project notes (`CLAUDE.md`) hold what every change needs. This file holds ho
 - [Records, stamps and challenges](systems/records.md) (`35-records.js`, `06-sound.js`)
 - [Region](systems/region.md) (`24-region-places.js`, `30-region-ui.js`, `29-region-map.js`, `28-region-weather.js`)
 - [Routes](systems/routes.md) (`31-routes.js`, `03-state.js`)
-- [Saves](systems/saves.md) (`22-save.js`, `03-state.js`, `23-boot.js`)
+- [Saves](systems/saves.md) (`22-save.js`, `15-panel.js`, `03-state.js`, `23-boot.js`)
 - [Sound](systems/sound.md) (`06-sound.js`, `48-sound.js`, `23-boot.js`, `08-stands.js`, `35-records.js`, `15-panel.js`)
 - [The terminal](systems/terminal.md) (`42-terminal.js`, `47-hotel.js`, `66-floors.js`, `05-flights.js`, `07-passengers.js`, `08-stands.js`, `46-market.js`, `43-departures.js`)
 - [Transport manager](systems/transport-manager.md) (`32-managers.js`)
