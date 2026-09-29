@@ -10,6 +10,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 <!-- joined:lessons from docs/lessons/ by tools/join.mjs: don't edit between these lines -->
 ### Balance
 
+- [#163 Release: terminal polish pass · 29 Sep 2026](lessons/release-terminal-polish.md)
 - [The first level-up in the first morning (#117) · 28 Sep 2026](lessons/117-early-first-level.md)
 - [#101 A rating that reflects the last day, measured and switched on; a network you have to keep, specced · 27 Sep 2026](lessons/101-balance-rating.md)
 - [Reading the game's logic: #57 game logic ideas, #66 systems review · 27 Sep 2026](lessons/66-game-logic-review.md)
