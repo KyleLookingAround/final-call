@@ -19,7 +19,7 @@ SIMX.FIELDS=FIELDS;SIMX.MIGRATIONS=MIGRATIONS; // saving (03-state.js, 22-save.j
 const RECT=(x0,y0,x1,y1)=>[[x0,y0],[x1,y0],[x1,y1],[x0,y1]];
 const BAG_HALL=[560,SEC_Y,700,LAND_B]; // x0, y0, x1, y1
 // Each layout lists its own terminal, L.term: its halls, and its doorways and floor links. A hall may be on a floor, fl (0 the
-// lower, arrivals; 1 the upper, departures); a room without one (the concourse, the forecourt, the hotel) is on both. A doorway
+// lower, arrivals; 1 the upper, departures; 2 the roof terrace); a room without one (the concourse, the forecourt, the hotel) is on both. A doorway
 // joins rooms on one floor; a floor link (an escalator, a lift or stairs) joins two floors and is a doorway with two more items,
 // [hall, hall, x, y, half-width, 'esc', 'lift' or 'stairs', people a minute]: passengers queue for it and ride it (66-floors.js).
 // plain: [fl, x0, y0, x1, y1] floor inside the building that isn't a hall (no one walks it), drawn on that floor, and void: [x0,
@@ -53,6 +53,10 @@ const classicTerm=()=>{const T=flatTerm(),fl={mkt:1,sec:1,ci:1,imm:0,rec:0,cus:0
   T.doors[1]=['main','acr',1212,SEC_Y,22];
   T.doors.push(['acr','imm',1200,550,10,'esc',40],['acr','imm',1228,584,6,'lift',8]);
   T.plain=[[1,560,SEC_Y,700,SEC_LINE],[1,560,SEC_LINE,1240,LAND_B],[0,8,SEC_Y,560,LAND_B]];T.void=[770,612,1170,690];
+  // the roof terrace (67-terrace.js), once it's built: floor 2, over the concourse at the apron edge, up stairs and a lift at
+  // the market place's top wall (clear of its name). pub is its public side, drawn but never walked
+  T.halls.push({id:'ter',poly:RECT(12,450,170,SEC_Y),fl:2,need:'terrace',col:'#5B4B3C',pub:[176,450,290,SEC_Y]});
+  T.doors.push(['mkt','ter',60,SEC_Y-3,5,'stairs',30],['mkt','ter',96,SEC_Y-3,4,'lift',8]);
   return T};
 for(const L of Object.values(LAYOUTS))L.term=flatTerm();
 LAYOUTS.classic.term=classicTerm();

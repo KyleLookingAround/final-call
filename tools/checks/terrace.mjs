@@ -73,8 +73,12 @@ export default async function({open,ok,saveText}){
       const before2=spot();const F2=next();const landedOrd=land(F2);step(30);const afterOrd=spot();each=dry;
       out.steady={before,afterBig,before2,afterOrd,landedBig,landedOrd,lo,hi,big:big.short}}
     // three passengers on the terrace made dawdlers, their flights' final call brought forward: the floor link each takes
-    // down, whether they board, and the last line of their story
-    {const pick=R.pax.filter(p=>inTer(p)&&p.F&&!p.inbound&&!p.late&&R.st[p.F.i]&&R.st[p.F.i].F===p.F&&['turnaround','boarding'].includes(p.F.plane.state)).sort((a,b)=>a.F.std-b.F.std).slice(0,3);
+    // down, whether they board, and the last line of their story. A level 9 airport cleans a plane in under a minute, so
+    // most passengers up are waiting for theirs to finish deplaning, which can't be hurried: played on a minute at a time
+    // (up to three hours) until three are up whose plane is turning round or boarding
+    {const can=p=>inTer(p)&&p.F&&!p.inbound&&!p.late&&R.st[p.F.i]&&R.st[p.F.i].F===p.F&&['turnaround','boarding'].includes(p.F.plane.state);
+      for(let n=0;n<180&&R.pax.filter(can).length<3;n++)step(1);
+      const pick=R.pax.filter(can).sort((a,b)=>a.F.std-b.F.std).slice(0,3);
       const links=TP.allLinks(),fl=new Map(pick.map(p=>[p,TP.paxFl(p)])),via=new Map();
       for(const p of pick){TP.dawdler(p);TP.hurry(p.F)}
       each=()=>{dry();for(const p of pick){const f=TP.paxFl(p);if(f!=null&&fl.get(p)!=null&&f!==fl.get(p)){const [,k]=TP.nearLink(p.x,p.y,links);(via.get(p)||via.set(p,[]).get(p)).push(k)}if(f!=null)fl.set(p,f)}};

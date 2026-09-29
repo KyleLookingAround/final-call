@@ -13,6 +13,10 @@ const RUN_HOLD={wait:3,close:1}; // minutes the gate holds for runners once the 
 const DAWDLE=0.05,LINGER=15,LINGER_MKT=40,FC_LEFT=3; // odds a shopper browses on past the gate call, for up to LINGER minutes more; final call comes early with this many others left to board
 const TALES=new WeakMap(),RUNS=new WeakMap(); // passenger → their story; flight → its runners {list, n (can miss), holdAt}
 const RUN_LOG={started:0,boarded:0,missed:0}; // what the checks read
+// Other places a passenger can dawdle and run from, and their story lines (the roof terrace, 67-terrace.js): RUN_FROM[state]
+// (p, the flight's dawdlers) marks one who dawdles there, keeping their state; TALE_KIND names the note a run or a miss
+// leaves, by where they are; TALE_MORE[note](a) is the line for a note of another part's
+const RUN_FROM={},TALE_KIND={run:()=>'run',miss:()=>'miss'},TALE_MORE={};
 Object.assign(REPWHY,{runner:['passengers who ran for their gate and missed it',['walkway','mover'],' Calling gates earlier (Office › Policies) gives shoppers more time.']});REPLBL.runner='Runners who missed their flight';
 
 /* ---------- a passenger's story: what happened to them, noted as they finish each walk ---------- */
@@ -39,7 +43,7 @@ onLeave('toMkt',p=>{if(p.state!=='mkt')return;const t=tale(p),e=t.ev[t.ev.length
 /* ---------- runners ---------- */
 function runsOf(F){let r=RUNS.get(F);if(!r){r={list:[],n:0,holdAt:null,called:false,fc:false,daw:[]};RUNS.set(F,r)}return r}
 function startRun(p,t,F){
-  t.run=G.clock<F.std?1:2;const r=runsOf(F);r.list.push(p);if(t.run===1)r.n++;RUN_LOG.started++;note(p,'run',p.stand,-1);
+  t.run=G.clock<F.std?1:2;const r=runsOf(F);r.list.push(p);if(t.run===1)r.n++;RUN_LOG.started++;note(p,TALE_KIND.run(p),p.stand,-1);
 }
 function endRun(p,t,how){const r=RUNS.get(p.F),k=r?r.list.indexOf(p):-1;if(k>=0){r.list.splice(k,1);if(t.run===1)r.n--}t.run=how}
 const runPace=(p,D)=>{const v=D.cwalk*p.spd*walkMul(p),m=p.type==='prm'?RUN_PRM:RUN_MUL;return Math.max(v,Math.min(v*m,RUN_TOP))};
@@ -53,7 +57,7 @@ const runPace=(p,D)=>{const v=D.cwalk*p.spd*walkMul(p),m=p.type==='prm'?RUN_PRM:
 // a runner the gate closed on walks slowly back to the market place and leaves the airport's books
 PAX_STEP.missed=(p,dt,D)=>{if(walk(p,D.cwalk*p.spd*0.6,dt))p.dead=true};
 function missRun(p,i){
-  const t=tale(p),F=p.F;endRun(p,t,4);RUN_LOG.missed++;note(p,'miss',i,-3);
+  const t=tale(p),F=p.F;endRun(p,t,4);RUN_LOG.missed++;note(p,TALE_KIND.miss(p),i,-3);
   if(p.spot>=0){R.st[i].spots[p.spot]=null;p.spot=-1}
   F.booked--;repAdj(RUN_MISS,'runner',i);
   const [x0,y0,x1,y1]=mktBox();p.state='missed';p.tx=x0+40+p.rand*(x1-x0-80);p.ty=(y0+y1)/2;route(p,hallId('mkt'));
@@ -64,17 +68,18 @@ function dawdle(F){
   if(G.level<1)return; // not on the first morning: a new airport's first departures go on time
   const d=runsOf(F).daw,lead=new Set(),stay=p=>{const x=Math.max(0,Math.min(F.std-G.clock,p.t+LINGER)-p.t);p.late=true;p.t+=x;p.t0+=x;d.push(p)}; // a longer visit, and a full spend for it
   // or sits on in the market place, holding no seat or shop spot, until final call (state linger)
-  const sit=p=>{p.state='linger';p.late=true;p.sl=-1;p.t=G.clock+LINGER_MKT;R.occOut=true;d.push(p);note(p,'linger',p.act,0.3)},on=p=>p.state==='shop'?stay(p):sit(p);
-  for(const p of R.pax)if(p.F===F&&(p.state==='shop'||p.state==='mkt')&&!p.late&&!p.inbound&&!p.leader&&!p.kid&&rnd()<DAWDLE){on(p);lead.add(p)}
-  if(lead.size)for(const p of R.pax)if(p.leader&&lead.has(p.leader)&&(p.state==='shop'||p.state==='mkt')&&!p.late)on(p); // a party dawdles together
+  const sit=p=>{p.state='linger';p.late=true;p.sl=-1;p.t=G.clock+LINGER_MKT;R.occOut=true;d.push(p);note(p,'linger',p.act,0.3)},on=p=>p.state==='shop'?stay(p):RUN_FROM[p.state]?RUN_FROM[p.state](p,d):sit(p);
+  const can=p=>p.state==='shop'||p.state==='mkt'||!!RUN_FROM[p.state];
+  for(const p of R.pax)if(p.F===F&&can(p)&&!p.late&&!p.inbound&&!p.leader&&!p.kid&&rnd()<DAWDLE){on(p);lead.add(p)}
+  if(lead.size)for(const p of R.pax)if(p.leader&&lead.has(p.leader)&&can(p)&&!p.late)on(p); // a party dawdles together
 }
 PAX_STEP.linger=p=>{const F=p.F;if(G.clock>=F.std-RUN_AT&&F.plane.state==='boarding'||F.plane.state==='closing')toGate(p);else if(G.clock>=p.t){if(F.plane.state==='boarding')startRun(p,tale(p),F);toGate(p)}}; // an early final call sends them too; after LINGER_MKT they remember, and run if it's boarding
 // Final call: 12 minutes before departure, or sooner once all but a few are aboard, so dawdlers never hold a plane that
 // would otherwise leave early. Then the dawdlers leave their shops and run.
 function finalCall(F,r){
-  if(r.fc||F.plane.state!=='boarding')return;if(r.daw.length)r.daw=r.daw.filter(p=>(p.state==='shop'||p.state==='linger')&&p.F===F);
+  if(r.fc||F.plane.state!=='boarding')return;if(r.daw.length)r.daw=r.daw.filter(p=>(p.state==='shop'||p.state==='linger'||RUN_FROM[p.state])&&p.F===F);
   if(G.clock<F.std-RUN_AT&&!(r.daw.length&&F.seated>=F.booked-r.daw.length-FC_LEFT))return;
-  r.fc=true;for(const p of r.daw)if(p.F===F){if(p.state==='shop')leaveShop(p);else if(p.state==='linger')toGate(p)}r.daw.length=0;
+  r.fc=true;for(const p of r.daw)if(p.F===F){if(p.state==='shop')leaveShop(p);else if(p.state==='linger'||RUN_FROM[p.state])toGate(p)}r.daw.length=0;
 }
 // every game minute: the gates just called, then, once everyone else is seated after the departure time, hold the gate
 // and close it on the runners
@@ -126,7 +131,7 @@ function taleLines(p){
     const s=k==='came'?TALE_HOW[a]:k==='ci'?(a==='online'?'Checked in online':`Checked in at ${a==='kiosk'?'a kiosk':a==='drop'?'bag drop':'a desk'}`+(w>1?`, ${w} min queue`:'')):
       k==='sec'?`Through security`+(a>1?`, ${a} min queue`:''):k==='srch'?'Bag searched at security':k==='shop'?TALE_SHOP[a][0].toUpperCase()+TALE_SHOP[a].slice(1):
       k==='mkt'?TALE_ACT[a][0].toUpperCase()+TALE_ACT[a].slice(1):k==='linger'?'Lost track of time as the gate was called':k==='run'?`Final call: ran for gate ${GATES[a]}`:k==='gate'?`At gate ${GATES[a]}`+(t.run===3?', just in time':''):
-      k==='miss'?`Gate ${GATES[a]} closed. Missed the flight`:k==='board'?'On board':null;
+      k==='miss'?`Gate ${GATES[a]} closed. Missed the flight`:k==='board'?'On board':TALE_MORE[k]?TALE_MORE[k](a):null;
     if(s)out.push([c,s]);
   }
   if(F.called!=null&&t.ev.length&&F.called>=t.ev[0][0])out.push([F.called,`Gate ${GATES[p.stand]} called`]);

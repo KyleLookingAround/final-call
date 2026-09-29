@@ -15,15 +15,16 @@ const GOLD={ // recorded on main, and again for every save fixture after 65-usag
   'v35-L1.json':'136f8c7a781ac08b','v35-L3.json':'b497ed91cb3874ea','v35-L5.json':'5e7085a16f66a4af','v35-L9.json':'b5c1b2e5622e2d7a',
 };
 const hash=s=>createHash('sha256').update(s).digest('hex').slice(0,16);
-// fields added to FIELDS since GOLD was recorded: left out of the hash, and every save must load them at their default
-const ADDED=['famous','tip4x','ver'];
+// fields added to FIELDS since GOLD was recorded: left out of the hash, and every save must load them at their default;
+// likewise upgrades added to G.lv since, which must load at 0
+const ADDED=['famous','tip4x','ver','terrace'],ADDED_LV=['terrace'];
 
 export default async function({open,ok,saves,saveText}){
   const {ctx,page,errs}=await open(undefined,null,false,{still:true});
   const got={};
-  for(const f of saves)got[f]=hash(await page.evaluate(([t,ADDED])=>{const S=__sim;S.R.sim=true;S.seedRandom(1);S.resetAll(JSON.parse(t));S.R.sim=false;
-    const G=S.G,o={};for(const k of Object.keys(G).sort())if(!ADDED.includes(k))o[k]=k==='savedAt'?0:G[k];
-    const off=ADDED.filter(k=>JSON.stringify(G[k])!==JSON.stringify(S.FIELDS[k]()));return JSON.stringify(o)+(off.length?' not at their default: '+off.join(' '):'')},[saveText(f),ADDED]));
+  for(const f of saves)got[f]=hash(await page.evaluate(([t,ADDED,ADDED_LV])=>{const S=__sim;S.R.sim=true;S.seedRandom(1);S.resetAll(JSON.parse(t));S.R.sim=false;
+    const G=S.G,o={};for(const k of Object.keys(G).sort())if(!ADDED.includes(k))o[k]=k==='savedAt'?0:k==='lv'?Object.fromEntries(Object.entries(G.lv).filter(([u])=>!ADDED_LV.includes(u))):G[k];
+    const off=[...ADDED.filter(k=>JSON.stringify(G[k])!==JSON.stringify(S.FIELDS[k]())),...ADDED_LV.filter(u=>G.lv[u]!==0).map(u=>'lv.'+u)];return JSON.stringify(o)+(off.length?' not at their default: '+off.join(' '):'')},[saveText(f),ADDED,ADDED_LV]));
   const bad=saves.filter(f=>GOLD[f]&&got[f]!==GOLD[f]),added=saves.filter(f=>!GOLD[f]);
   ok('migrate: every save loads to the same airport as before',!bad.length&&!added.length,
     bad.length?`changed: ${bad.join(' ')}`:added.length?`no hash yet, add to GOLD: ${added.map(f=>`'${f}':'${got[f]}',`).join(' ')}`:`${saves.length} saves`);

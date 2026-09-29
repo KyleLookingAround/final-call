@@ -32,7 +32,8 @@ function rideLink(p,j,to,v,dt){
   let r=p.rideAt;
   if(r==null){const n=Math.max(1,Math.floor(d[4]*2/5));
     if(Math.hypot(ex-p.x,ey-p.y)>12+Math.ceil((q.length+1)/n)*5){moveTo(p,ex,ey,v,dt);return false}
-    q.push(p);p.rideAt=r=-1}
+    if(linkLate(p)){let k=0;while(k<q.length&&q[k].rideAt===-1&&linkLate(q[k]))k++;q.splice(k,0,p)}else q.push(p); // runners go ahead of anyone not running
+    p.rideAt=r=-1}
   if(r===-1){while(q.length&&(q[0].rideAt!==-1||q[0].dead||!q[0].way||q[0].way[q[0].wi+3]!==10+j))q.shift(); // gone, or queuing somewhere else now
     let k=q.indexOf(p);if(k<0){q.push(p);k=q.length-1}
     if(k===0&&Q.free[j][dir]<=G.clock){q.shift();Q.free[j][dir]=Math.max(Q.free[j][dir],G.clock-dt)+1/(d[6]||30);p.rideAt=r=-2}
@@ -56,7 +57,7 @@ LAYER.terminal.unshift(()=>{if(roofA())return;const A=plainOn();if(!A.length)ret
     ctx.strokeStyle='rgba(150,196,230,.4)';ctx.lineWidth=2;ctx.strokeRect(x0,y0,x1-x0,y1-y0)}}); // the glass balustrade
 // the escalators and lifts on both floors, and the names of the halls above or below drawn on the floor over them
 TERM_DRAW.push(()=>{const two=twoFloors();
-  for(const d of ROOM_DOORS){if(!isFloorLink(d))continue;const [a,b,x,y,hw,kind]=d,A=ROOMS[ROOM_ID[a]],B=ROOMS[ROOM_ID[b]];if(!A||!B||!roomOn(A)||!roomOn(B))continue;
+  for(const d of ROOM_DOORS){if(!isFloorLink(d))continue;const [a,b,x,y,hw,kind]=d,A=ROOMS[ROOM_ID[a]],B=ROOMS[ROOM_ID[b]];if(!A||!B||!roomOn(A)||!roomOn(B)||!onFloor(A.fl)&&!onFloor(B.fl))continue;
     if(kind==='lift'){ctx.fillStyle='#39414A';ctx.fillRect(x-hw-2,y-hw-2,2*hw+4,2*hw+4);ctx.strokeStyle='#8C97A1';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,y-hw);ctx.lineTo(x,y+hw);ctx.stroke();continue}
     const rl=LINK_RL[kind]||8,sx=linkFl(a)>linkFl(b)?1:-1; // chevrons the way it runs: riders down go on at its left end (rideLink)
     ctx.fillStyle='#2A3037';ctx.fillRect(x-rl-3,y-hw,2*rl+6,2*hw);ctx.strokeStyle='#39414A';ctx.lineWidth=1;ctx.beginPath();

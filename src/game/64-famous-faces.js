@@ -9,6 +9,7 @@ const FAMOUS_FIRST=['Lena','Marco','Siobhan','Tobias','Ines','Rafe','Anouk','Dar
 const FAMOUS_LAST=['Wrenfield','Castellane','Moorcroft','Ashdown','Brightwater','Kestrell','Delacourt','Farrowby','Quillon','Thornbury','Averill','Pennick'];
 const FAMOUS_ROYAL=[['Princess','Aurelia'],['Prince','Casimir'],['Princess','Ottilie'],['Prince','Anselm']],FAMOUS_REALM=['Valdoria','Ostmark','Lindenholm','the Caravel Isles'];
 const FAMOUS_CAFE=['cafe','coffee','dining','bar'];
+const FAMOUS_MIN=[]; // (R.famous) → each minute of the visit, for other parts (the roof terrace sends them up, 67-terrace.js)
 REPWHY.famous=['famous passengers’ flights',['atc','crew','tugs','handlers']];REPLBL.famous='Famous passengers';
 // days until the next visit: rarer at low levels
 const famousGap=()=>(G.level>=6?3:G.level>=4?4:6)+Math.floor(rnd()*(G.level>=6?3:4));
@@ -67,6 +68,7 @@ function famousMinute(){
   if(f&&v&&v.st===1){
     const F=f.F,p=f.p,air=p&&p.state!=='new'&&!LAND_ST.has(p.state)&&!['train','tram','bus'].includes(p.state);
     if(air&&f.out==null)f.out=G.clock;
+    for(const h of FAMOUS_MIN)h(f);
     if(f.out!=null){if(f.ph.length&&G.clock>=f.out+10)f.ph=[];if(f.fan.length&&G.clock>=f.out+30)f.fan=[]}
     // the busy hour: the shop they stop at, else the best café once they head for the gate
     if(f.shop<0){const j=p&&(p.state==='toShop'||p.state==='shop')?p.shop:(F.plane.state==='boarding'&&isCalled(F)||p&&(p.state==='toGate'||p.state==='gate'))?famousCafe():-1;
