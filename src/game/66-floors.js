@@ -33,7 +33,8 @@ function rideLink(p,j,to,v,dt){
   if(r==null){const n=Math.max(1,Math.floor(d[4]*2/5));
     if(Math.hypot(ex-p.x,ey-p.y)>12+Math.ceil((q.length+1)/n)*5){moveTo(p,ex,ey,v,dt);return false}
     q.push(p);p.rideAt=r=-1}
-  if(r===-1){while(q.length&&q[0].rideAt!==-1)q.shift();let k=q.indexOf(p);if(k<0){q.push(p);k=q.length-1}
+  if(r===-1){while(q.length&&(q[0].rideAt!==-1||q[0].dead||!q[0].way||q[0].way[q[0].wi+3]!==10+j))q.shift(); // gone, or queuing somewhere else now
+    let k=q.indexOf(p);if(k<0){q.push(p);k=q.length-1}
     if(k===0&&Q.free[j][dir]<=G.clock){q.shift();Q.free[j][dir]=Math.max(Q.free[j][dir],G.clock-dt)+1/(d[6]||30);p.rideAt=r=-2}
     else{const s=linkSlot(d,sx,k);moveTo(p,s[0],s[1],v,dt);return false}}
   if(r===-2){if(!moveTo(p,ex,ey,v,dt))return false;p.rideAt=r=G.clock}
@@ -76,8 +77,9 @@ function flyHall(id){const r=ROOMS&&ROOMS[ROOM_ID[id]];if(!r||R.view!=='airport'
   flyTo((x0+x1)/2,(y0+y1)/2);setFloor(r.fl===0?'down':R.floor==='roof'||r.fl===1?'up':R.floor);return true}
 // a tap on a hall's name: its own, where it's drawn (halls with a sign keep theirs for the Terminal tab), or the name drawn
 // on the floor over it
-PAX_TAP.push((wx,wy)=>{if(R.view!=='airport'||roofA()||!ROOMS)return false;const two=twoFloors(),fl=floorNow(),A=two?plainOn():[];
-  for(const r of LAY.term.halls){if(!r.name||!roomOn(r))continue;const own=!two||r.fl==null||r.fl===fl;if(own&&r.sign)continue;
+PAX_TAP.push((wx,wy)=>{if(R.view!=='airport'||roofA()||!ROOMS||!twoFloors())return false; // one floor: a tap in a hall opens the Terminal tab, as before
+  const fl=floorNow(),A=plainOn();
+  for(const r of LAY.term.halls){if(!r.name||!roomOn(r))continue;const own=r.fl==null||r.fl===fl;if(own&&r.sign)continue;
     const [lx,ly]=hallLabel(r.id);if(wx<lx-6||wx>lx+r.name.length*5.2+16||wy<ly-9||wy>ly+9)continue;
     if(!own&&!A.some(([,x0,y0,x1,y1])=>lx>=x0&&lx<=x1&&ly>=y0&&ly<=y1))continue;
     return flyHall(r.id)}
