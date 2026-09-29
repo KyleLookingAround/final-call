@@ -18,9 +18,11 @@ for s in 1 2 3; do nohup node tools/run-bot.mjs 1200 --seed $s > build/before-$s
 
 Keep the `LVLAT` line and the table at the end of each log.
 
-For a change meant to leave play as it is (a refactor, a UI change), "identical" means against a build of `main`, and the Balance workflow prints only the branch's `PLAY`. Make a `git worktree` of `main` in the scratchpad with `node_modules` symlinked in, build it, and run the seeds on both sides at once (twelve runs on four cores take about ten minutes; keep other loads off the machine). Compare with the branch's own base commit, not a `main` that has moved on, and a PR that adds a saved field runs the bot against that base before claiming `PLAY` is identical (`PLAY` leaves out the settings and a few one-off flags: `G.ver`, `G.set`, `G.seen`, `G.tip4x`).
+For a change meant to leave play as it is (a refactor, a UI change), "identical" means against the PR's merge base, not a `main` that has moved on. Label the PR `refactor` (or `balance`) and the Balance workflow's `compare` job builds both, runs seeds 1–3 keeping Classic, and prints in its summary whether `PLAY` and `STATE` match, seed by seed; read that rather than repeating the runs. A PR that adds a saved field expects `PLAY` to match and `STATE` to differ only by that field (`PLAY` leaves out the settings and a few one-off flags: `G.ver`, `G.set`, `G.seen`, `G.tip4x`).
 
-Before touching baselines for a pacing question, trace the bot: its snapshots carry cash, rating, the day's passengers, gates, supply against the market and a `why` field, and a 20-line script over them (or over `tools/bot.js` with `every:1`, hour by hour) shows which level requirement holds each level back in one run, before any tuning. Baseline runs go last, once, against the head that will merge.
+**Locally, while tuning** (the label runs it once per label): make a `git worktree` of the merge base (`git merge-base HEAD origin/main`) in the scratchpad with `node_modules` symlinked in, build it, and run the seeds on both sides at once (twelve runs on four cores take about ten minutes; keep other loads off the machine).
+
+Before touching baselines for a pacing question, trace the bot: its snapshots carry cash, rating, the day's passengers, gates, supply against the market and a `why` field. `node tools/run-bot.mjs 1200 --why` prints, per snapshot, which level requirement holds the next level back and the rating's causes, so read that before any tuning (or run `tools/bot.js` with `every:1` for hour by hour). Baseline runs go last, once, against the head that will merge.
 
 ## 2. Change, then after
 
@@ -40,7 +42,7 @@ Make the change, rebuild, and run the same three seeds into `build/after-$s.log`
 
 ## Tips
 
-- On a PR the Balance workflow runs the same seeds both ways, once when the PR opens or leaves draft, and again when the `balance` label is added. Run them locally while tuning; otherwise report the workflow's tables, so the same runs aren't made twice, and add the label to rerun it on the final code.
+- On a PR labelled `refactor` or `balance` the Balance workflow also compares `PLAY` and `STATE` with the merge base (section 1). On a PR the Balance workflow runs the same seeds both ways, once when the PR opens or leaves draft, and again when the `balance` label is added. Run them locally while tuning; otherwise report the workflow's tables, so the same runs aren't made twice, and add the label to rerun it on the final code.
 - Speed (`perf`, `scene`): one run varies by about ±0.05×, more than most changes, and the calibration ratio drifts with machine load. Take the median of three runs alternating with `main` on the same quiet machine, time a layer on and off in one page for its own share, and profile the functions a hot-loop change touches (`Profiler` over CDP). Compare per passenger when the change alters play. Numbers from different machines don't compare (lessons #49, #108, #113, #145, #162).
 - One part of a feature built in parts reports its numbers and tunes only outside 15% of the baselines. The whole feature is rebalanced once, with every part in.
 
