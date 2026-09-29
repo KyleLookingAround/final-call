@@ -64,7 +64,16 @@ const TECH=[
 ];
 const TECH_BY={},NODE_OF={};TECH.forEach(T=>{TECH_BY[T.id]=T;T.u.forEach(k=>NODE_OF[k]=T.id)});
 const LEVEL_PTS=4,LV_MAP=[0,1,3,4,6,7,9];
-const has=key=>!NODE_OF[key]||!!(G.tech&&G.tech[NODE_OF[key]]);
+// true only for a key some plan actually unlocks (researched) or a real, deliberately unlocked-from-the-start item
+// (the starter plane, the basic upgrades, bus lines...); false for anything else, so a typo hides its feature
+// rather than showing it early (row 40)
+function keyExists(a,v){
+  if(a==='up')return v in UPG;if(a==='ac')return AIRCRAFT[+v]!=null;if(a==='meth')return METHODS.some(m=>m.id===v);
+  if(a==='shop')return SHOPS.some(s=>s.id===v);if(a==='mode')return v in MODES;if(a==='dev')return v in DEV;
+  if(a==='stn')return v in STN_UP;if(a==='rt')return +v>=0&&+v<5;if(a==='feat')return v in FEAT_NAMES;if(a==='lay')return v in LAYOUTS;
+  return false;
+}
+const has=key=>{if(NODE_OF[key])return !!(G.tech&&G.tech[NODE_OF[key]]);const [a,v]=key.split(':');return keyExists(a,v)};
 const researched=id=>!!(G.tech&&G.tech[id]);
 function techState(T){if(researched(T.id))return 'done';if(T.t>G.level)return 'level';if((T.r||[]).some(r=>!researched(r)))return 'req';if((G.pts||0)<T.c)return 'pts';return 'ready'}
 const FEAT_NAMES={promo:'Route promotions',alliance:'Partners pay 40% and fly more',slots:'An edge over Lowmere',occ:'Fewer delays at the far end'};
@@ -84,6 +93,13 @@ function buyPoint(){if(G.level<4)return false;const c=consultCost();if(!buy(c))r
 const planHint=key=>{const T=TECH_BY[NODE_OF[key]];return T?`Approve <b>${T.n}</b> in the Masterplan${T.t>G.level?` (from ${LEVELS[T.t].name})`:''}.`:''};
 const TABS=[['stands','Gates','pier'],['fleet','Fleet','plane'],['routes','Routes','globe'],['terminal','Terminal','lane'],['ground','Airfield','runway'],['sales','Sales','ticket'],['region','Region','map'],['office','Office','chart']];
 const nRoutes=()=>Object.keys(G.routes||{}).length;
+// a level goal's bar and text follow whichever of that level's requirements is least met, not the level count
+// (row 6): levelChecks(n) already has each requirement's value, target, display size and unit
+const levelGoalReq=n=>levelChecks(n).reduce((a,c)=>c[1]/c[2]<a[1]/a[2]?c:a);
+// once the level itself is reached, the goal counts as met even if a requirement (rating, an old save's numbers) has
+// since slipped back below its target: reaching the level, not holding every number forever after, is the goal
+const levelGoalProgress=n=>{if(G.level>=n)return [1,1];const r=levelGoalReq(n);return [r[1],r[2]]};
+const levelGoalText=n=>{const [,v,tg,big,unit]=levelGoalReq(n);return `${LEVELS[n].name}: ${big?num(v):v} / ${big?num(tg):tg} ${unit}`};
 const GOALS=[
   {id:'seat',t:'Seat 30 passengers',p:()=>[G.paxSeated,30],r:15},
   {id:'desk',t:'Open a second check-in desk',go:['terminal','[data-buy="desks"]'],p:()=>[G.lv.desks,1],r:15},
@@ -94,45 +110,45 @@ const GOALS=[
   {id:'method',t:'Buy a new boarding method',go:['stands','[data-mbuy]'],p:()=>[Object.keys(G.methods).length-1,1],r:40},
   {id:'plane2',t:'Buy a second plane',go:['fleet','[data-acbuy]'],p:()=>[G.fleet.filter(f=>!f.sold).length,2],r:60},
   {id:'a2',t:'Open gate A2',go:['stands','[data-standbuy="1"]'],p:()=>[builtCount()-1,1],r:100},
-  {id:'l1',t:'Become a Local Airport',go:['office','#levels'],p:()=>[G.level,1],r:0},
+  {id:'l1',get t(){return levelGoalText(1)},go:['office','#levels'],p:()=>levelGoalProgress(1),r:0},
   {id:'plan',t:'Approve a plan in the Masterplan',go:['plan'],p:()=>[Object.keys(G.tech||{}).length,1],r:100,need:()=>G.level>=1},
   {id:'route',t:'Open a new route',go:['routes','[data-ropen]'],p:()=>[nRoutes(),4],r:150,need:()=>G.level>=1},
   {id:'two',t:'Run flights from two gates at once',go:['fleet','[data-acbuy]'],p:()=>[R.st.filter((S,k)=>G.stands[k].built&&S.F).length,2],r:120},
   {id:'bus',t:'Run a bus to Harbourgate',go:['region','[data-newline]'],p:()=>[Object.values(G.lines||{}).some(L=>L.mode==='bus'&&serves(L,'air')&&['hbc','old','hbs'].some(n=>serves(L,n)))?1:0,1],r:150,need:()=>G.level>=1},
   {id:'streak',t:'Three on-time departures in a row',p:()=>[G.bestStreak,3],r:150,pts:1},
-  {id:'l2',t:'Become a Regional Airport',go:['office','#levels'],p:()=>[G.level,2],r:0},
+  {id:'l2',get t(){return levelGoalText(2)},go:['office','#levels'],p:()=>levelGoalProgress(2),r:0},
   {id:'a3',t:'Open gate A3',go:['stands','[data-standbuy="2"]'],p:()=>[builtCount()-1,2],r:400,need:()=>G.level>=STAND[2].lvl},
   {id:'shops',t:'Earn $2,000 from shops',go:['sales','.shopcard'],p:()=>[G.revBy.shops,2000],r:300},
   {id:'biz',t:'Fly 500 business travellers',go:['routes','[data-ropen]'],p:()=>[G.bizFlown||0,500],r:500,pts:1},
-  {id:'l3',t:'Become a City Airport',go:['office','#levels'],p:()=>[G.level,3],r:0},
+  {id:'l3',get t(){return levelGoalText(3)},go:['office','#levels'],p:()=>levelGoalProgress(3),r:0},
   {id:'rail',t:'Open the railway station',go:['region','[data-buy="rail"]'],p:()=>[G.lv.rail,1],r:1200,need:()=>has('up:rail')},
   {id:'dev',t:'Build on a development site',go:['region','[data-dbuild]'],p:()=>[Object.keys(G.dev||{}).length,1],r:2000,pts:1,need:()=>G.level>=1},
-  {id:'low1',t:'Keep 55% of travellers on routes you share with Lowmere',go:['routes','.lcard.riv'],p:()=>[rivMix()==null?0:Math.round(rivMix()*100),55],r:3000,pts:1,need:()=>rivLive()&&rivMix()!=null},
   {id:'a4',t:'Open all four A gates',go:['stands','[data-standbuy="3"]'],p:()=>[builtCount()-1,3],r:2000,need:()=>G.level>=STAND[3].lvl},
   {id:'r10',t:'Fly to 10 destinations',go:['routes','[data-ropen]'],p:()=>[nRoutes(),10],r:3000,pts:1},
-  {id:'l4',t:'Become an International Airport',go:['office','#levels'],p:()=>[G.level,4],r:0},
+  {id:'l4',get t(){return levelGoalText(4)},go:['office','#levels'],p:()=>levelGoalProgress(4),r:0},
   {id:'tram',t:'Open a tram line',go:['region','[data-newline]'],p:()=>[anyMode('tram')?1:0,1],r:6000,need:()=>has('mode:tram')},
   {id:'link',t:'Link two lines at one station',go:['region','[data-newline]'],p:()=>[NODE_IDS.some(n=>linesAt(n).length>=2)?1:0,1],r:4000,pts:1,need:()=>G.level>=1},
   {id:'pier',t:'Build Pier B',go:['stands','[data-pierbuy]'],p:()=>[G.pierB?1:0,1],r:5000,need:()=>G.level>=PIER.lvl},
   {id:'long',t:'Open a long-haul route',go:['routes','[data-ropen]'],p:()=>[Object.keys(G.routes||{}).some(c=>CITY[c].tier>=3)?1:0,1],r:5000,need:()=>has('rt:3')},
   {id:'event',t:'Host a match, concert, cruise or conference',go:['region','[data-dbuild]'],p:()=>[G.evDone||0,1],r:15000,pts:1,need:()=>has('dev:stadium')},
   {id:'rwy',t:'Build a second runway',go:['ground','[data-buy="runway2"]'],p:()=>[G.lv.runway2,1],r:8000,need:()=>has('up:runway2')},
-  {id:'l5',t:'Become a Gateway Airport',go:['office','#levels'],p:()=>[G.level,5],r:0},
+  {id:'l5',get t(){return levelGoalText(5)},go:['office','#levels'],p:()=>levelGoalProgress(5),r:0},
+  {id:'low1',t:'Keep 55% of travellers on routes you share with Lowmere',go:['routes','.lcard.riv'],p:()=>[rivMix()==null?0:Math.round(rivMix()*100),55],r:3000,pts:1,need:()=>rivLive()&&rivMix()!=null},
   {id:'r20',t:'Fly to 20 destinations',go:['routes','[data-ropen]'],p:()=>[nRoutes(),20],r:20000,pts:1},
-  {id:'l6',t:'Become a Major Hub',go:['office','#levels'],p:()=>[G.level,6],r:0},
+  {id:'l6',get t(){return levelGoalText(6)},go:['office','#levels'],p:()=>levelGoalProgress(6),r:0},
   {id:'wide',t:'Fly the W-300 Widebody',go:['fleet','[data-acbuy="6"]'],p:()=>[G.fleet.some(f=>f.type===6&&!f.sold)?1:0,1],r:30000,need:()=>has('ac:6')},
   {id:'metro',t:'Dig a metro to the city',go:['region','[data-newline]'],p:()=>[anyMode('metro')?1:0,1],r:80000,need:()=>has('mode:metro')},
   {id:'riders',t:'Carry 1,000 riders an hour',go:['region','[data-newline]'],p:()=>[Math.round(R.reg?R.reg.riders:0),1000],r:120000,pts:1,need:()=>G.level>=1},
   {id:'g8',t:'Open all eight gates',go:['stands','[data-standbuy="7"]'],p:()=>[gatesOpen(),8],r:60000,need:()=>G.level>=STAND[7].lvl},
   {id:'tower',t:'Build the new control tower',go:['ground','[data-buy="tower"]'],p:()=>[G.lv.tower,1],r:100000,need:()=>has('up:tower')},
-  {id:'l7',t:'Become a Global Hub',go:['office','#levels'],p:()=>[G.level,7],r:0},
+  {id:'l7',get t(){return levelGoalText(7)},go:['office','#levels'],p:()=>levelGoalProgress(7),r:0},
   {id:'hsr',t:'Run high-speed trains to Lowmere',go:['region','[data-newline]'],p:()=>[anyMode('hsr')?1:0,1],r:250000,need:()=>has('mode:hsr')},
   {id:'r30',t:'Fly to 30 destinations',go:['routes','[data-ropen]'],p:()=>[nRoutes(),30],r:200000,pts:1},
   {id:'m10',t:'Earn $10 million',p:()=>[G.earned,1e7],r:0},
-  {id:'l8',t:'Become a World Gateway',go:['office','#levels'],p:()=>[G.level,8],r:0},
+  {id:'l8',get t(){return levelGoalText(8)},go:['office','#levels'],p:()=>levelGoalProgress(8),r:0},
   {id:'buylow',t:'Buy Lowmere Airport',go:['routes','[data-rivbuy]'],p:()=>[G.rival&&G.rival.owned?1:0,1],r:0,pts:1,need:()=>!!(G.rival&&G.rival.opened)},
   {id:'land3',t:'Finish three landmark projects',go:['ground','[data-buy="mall"]'],p:()=>[['tower','cargohub','mall','saf','icon'].filter(k=>G.lv[k]).length,3],r:500000,pts:1},
-  {id:'l9',t:'Become Airport of the Year',go:['office','#levels'],p:()=>[G.level,9],r:0},
+  {id:'l9',get t(){return levelGoalText(9)},go:['office','#levels'],p:()=>levelGoalProgress(9),r:0},
   {id:'land5',t:'Finish every landmark project',go:['ground','[data-buy="icon"]'],p:()=>[['tower','cargohub','mall','saf','icon'].filter(k=>G.lv[k]).length,5],r:0},
   {id:'m50',t:'Earn $50 million',p:()=>[G.earned,5e7],r:0},
 ];

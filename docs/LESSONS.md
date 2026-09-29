@@ -47,6 +47,10 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 - [Coordinator playbook · 27 Sep 2026](lessons/42-coordinator-playbook.md)
 - [One session for four PRs (#28, #30, #32, #33) · 27 Sep 2026](lessons/34-one-session-four-prs.md)
 
+### Correctness
+
+- [Release F2, goals and levels that lead (#149) · 28 Sep 2026](lessons/149-release-f2-goals.md)
+
 ### Cost
 
 - [The overnight stall, 27–28 Sep 2026](lessons/main-overnight-stall.md)

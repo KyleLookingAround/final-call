@@ -23,9 +23,12 @@ function finishBuild(b){
   else if(kind==='lounges')G.lounges=true;
   toast(`${b.label} is finished.`,null,null,'goal',7);fanfare();
 }
+// a curfew closes the airport 23:30-05:30, so its daily-passenger target scales to the 18 hours it's open, rather than
+// locking the game out of levels that need more than a curfewed airport's day can ever carry (row 8)
 function levelChecks(n){
-  const q=LEVELS[n].req,out=[['Passengers flown',G.flown,q.pax,true],['Rating',Math.round(G.rep),q.rep],['Gates open',gatesOpen(),q.gates]];
-  if(q.daily)out.splice(1,0,['Passengers in the last 24 hours',dailyPax(),q.daily,true]);
+  const q=LEVELS[n].req,dailyReq=q.daily&&pol('curfew')?Math.round(q.daily*18/24):q.daily;
+  const out=[['Passengers flown',G.flown,q.pax,true,'flown'],['Rating',Math.round(G.rep),q.rep,false,'rating'],['Gates open',gatesOpen(),q.gates,false,'gates']];
+  if(dailyReq)out.splice(1,0,['Passengers in the last 24 hours',dailyPax(),dailyReq,true,'a day']);
   return out;
 }
 const LVL_PTS=n=>[0,6,5,5,6,5,5,5,5,5][n]||0;
@@ -41,9 +44,11 @@ function unlocksAt(n){
 function checkLevel(){
   const n=G.level+1;if(!LEVELS[n])return;
   if(levelChecks(n).every(([_,v,t])=>v>=t)){
+    const wasOpen=new Set(TABS.filter(([id])=>tabOpen(id)).map(([id])=>id));
     G.level=n;earn(LEVELS[n].reward,'bonus');G.pts=(G.pts||0)+LVL_PTS(n);
     if(n===1)usageEvent('level-1');if(n===3)usageEvent('level-3');
-    {const nt=new Set(G.newTabs||[]);nt.add('office');if(STAND.some(x=>x.lvl===n)||PIER.lvl===n)nt.add('stands');if(n===1)nt.add('region');G.newTabs=[...nt]}
+    // mark NEW only the tabs a level-up actually reveals, not ones already on the bar (row 28)
+    {const nt=new Set(G.newTabs||[]);TABS.forEach(([id])=>{if(!wasOpen.has(id)&&tabOpen(id))nt.add(id)});G.newTabs=[...nt]}
     if(!R.sim){if(!lvlUp(n))toast(`Now ${aL(n,1)}! +${money(LEVELS[n].reward)} and <b>${LVL_PTS(n)} plan points</b> to spend.`,[{label:'Open the Masterplan',fn:()=>openPlan()},{label:'Later',fn:()=>{}}],null,'goal',14);fanfare();
       renderTabs();renderPanel();$('#lvlName').textContent=LEVELS[n].name;renderPlanBtn()}
   }
