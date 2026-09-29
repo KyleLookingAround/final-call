@@ -28,7 +28,7 @@ Make the change, rebuild, and run the same three seeds into `build/after-$s.log`
 
 ## 3. Compare
 
-- Put before and after side by side per level: each seed, and the mean. A level the run never reached reads `off` once the run passes its upper bound (the 1,200-hour run passes level 9's 1,160); "not run long enough" means a shorter run.
+- Put before and after side by side per level: each seed, and the mean. A level the run never reached reads `off` once the run passes its upper bound (the 1,200-hour run passes level 9's 1,110); "not run long enough" means a shorter run.
 - Against `tools/baseline.json`: `ok` is inside the range, `near` is within 15% of it, `off` is beyond. Aim for `ok`; `near` needs a reason; `off` needs the owner's agreement.
 - `ERR` must be empty on every seed.
 - Report the table in the PR description.
@@ -47,7 +47,7 @@ Make the change, rebuild, and run the same three seeds into `build/after-$s.log`
 - `build/saves/L<n>.json` are the bot's airports at each level; seed one through `localStorage['final-call-save-v2']` to look at a stage.
 - Bot options (JSON after the hours) change its strategy; they are read as `opts.*` in `tools/bot.js`. For example `'{"noBuyLow":true}'` never buys Lowmere, and `'{"layouts":true}'` rebuilds into better layouts (`layoutPath` picks which).
 - `--pol='{"late":"close"}'` plays with Office › Policies set (any `POLDEF` key, `01-constants.js`); those runs add `-pol` to the file names and don't write `build/saves/`.
-- **The bot's fares lock in the first morning.** It raises the fare 10% every two hours while the rating is under 70 and lowers it only at 92, and a new airport starts at 60, so the first morning's punctuality sets the fare for the whole run (seeds 1–3 settle at 120–160%). A slow first morning once left seed 1 at 240% and City Airport for good (#147). Read the `fare` in the snapshots when one seed lags the others.
+- **The bot's fare is set in the first morning.** It raises the fare 10% every two hours while the rating is under 70, but no further than the advisor's tips go (`FARE_TIP`, so 120% at most), and lowers it only at 92. A new airport starts at 60, so the first morning's punctuality decides whether it settles at 110% or 120%. Before #147 there was no cap, and a slow first morning left seed 1 at 240% and at City Airport for good. Read the `fare` in the snapshots when one seed lags.
 - `--rate-day=off` plays the old running-sum rating, for comparing against the rating that reflects the last day (`docs/systems/effects.md`), and `--rate-day='{"scale":6}'` tries other constants. Those runs don't write `build/saves/`, and they add `-sumrating` or `-rateday` to the bot's file names. The snapshots carry `rdT` (the rating's target) and `rdS` (the day's net score per departure).
 - The Balance workflow runs the three seeds on PRs that touch `src/game/` or the bot, once keeping Classic and once rebuilding: when the PR opens or leaves draft, when the `balance` label is added, and on demand. Its tables are in the run's summary; `off` levels show as warnings. The baselines are for keeping Classic; rebuilding should reach level 9 about 5–10% sooner, so its level 9 row reads `near`.
 
@@ -58,9 +58,9 @@ Make the change, rebuild, and run the same three seeds into `build/after-$s.log`
 | Level reached | Game hour |
 | --- | --- |
 | 1 Local Airport | 3–6 |
-| 3 City Airport | 95–117 |
-| 5 Gateway Airport | 325–360 |
-| 7 Global Hub | 630–770 |
-| 9 Airport of the Year | 1,100–1,160 |
+| 3 City Airport | 85–105 |
+| 5 Gateway Airport | 275–325 |
+| 7 Global Hub | 580–700 |
+| 9 Airport of the Year | 1,050–1,110 |
 
-With these baselines there are no errors. Level 1 was set for the first level-up in the first morning (`docs/decisions/ADR-2026-09-28-early-first-level.md`; before it, level 1 was 31–41). Levels 3–9 were set for the rating that reflects the last day (`docs/decisions/ADR-2026-09-27-rating-last-day.md`; before it, level 5 was 340–370 and level 9 1,080–1,115). Keeping Classic after #147, seeds 1–3 reach level 1 at 3.8–4.4, level 2 at 59–62, level 3 at 93–97, level 5 at 289–322, level 7 at 612–619 and level 9 at 1,077–1,103 (`near` on most rows, none `off`). They are for an airport that keeps Classic; rebuilding reaches level 9 about 5–10% sooner (967–1,020 on seeds 1–3). If the bot ignores Lowmere, its share settles at about 50–60%. Keep pacing within about 15% of these numbers unless the owner asks for a change.
+With these baselines there are no errors. Level 1 was set for the first level-up in the first morning (`docs/decisions/ADR-2026-09-28-early-first-level.md`; before it, level 1 was 31–41). Levels 3–9 were set for the rating that reflects the last day (`docs/decisions/ADR-2026-09-27-rating-last-day.md`; before it, level 5 was 340–370 and level 9 1,080–1,115). Levels 3–9 were set again in #147 (release batch B1), for its level changes and for the bot's fares capped at 120% like the advisor's tips (before it, level 3 was 95–117, level 5 325–360, level 7 630–770 and level 9 1,100–1,160). Keeping Classic, seeds 1–3 then reach level 1 at 3.8–4.4, level 2 at 58–62, level 3 at 87–92, level 5 at 280–307, level 7 at 589–599 and level 9 at 1,061–1,081, all at a fare of 120%. They are for an airport that keeps Classic; rebuilding reaches level 9 about 5–10% sooner (967–1,020 on seeds 1–3 before #147). If the bot ignores Lowmere, its share settles at about 50–60%. Keep pacing within about 15% of these numbers unless the owner asks for a change.
