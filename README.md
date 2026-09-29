@@ -1,15 +1,23 @@
 # Final Call
 
-An airport management game that runs in the browser, on phones, tablets and desktops. You start with one gate and one small plane and grow into the Airport of the Year. Along the way you run queues, boarding and turnarounds, a network of routes, the region's transport and a rival airport at Lowmere.
+An airport management game that runs in the browser, on phones, tablets and desktops. You start with one gate and one small plane and grow into the Airport of the Year.
 
-**Play:** `https://<owner>.github.io/<repo>/`. It publishes from `main` through GitHub Actions.
+**Play:** [Play Final Call](https://kylelookingaround.github.io/final-call/). It publishes from `main` through GitHub Actions.
+
+## What's in it
+
+- **The terminal.** Passengers walk through check-in, security, the shops and the gate, and back through immigration, reclaim and customs. In the Classic layout the terminal has two floors: departures upstairs, arrivals below, joined by escalators and a lift. There are nine airport layouts, and a roof view, weather and night lighting to look at.
+- **Routes.** A world map of cities, fares and demand for each route, and partner airlines that fly to the routes you leave quiet.
+- **The region.** Buses, trams, rail, metro and high-speed lines, development sites, events and weather.
+- **Lowmere.** A rival airport that competes for travellers on the routes you both fly, and that you can buy in the end.
+- **Managers and recommendations.** If you'd rather not tune everything, managers run lines, fares, crews and hotel prices, and recommendations say what to do next. Late in the game you can take control yourself.
 
 ## Develop
 
 ```
 npm run build          # dist/index.html, the whole game in one page (no dependencies needed)
 npm install            # Playwright, used for the checks
-npm run check          # crash, save, layout, touch and guided-start checks (about 1–2 min)
+npm run check          # crash, save, layout, touch and guided-start checks (about 15–25 min in a cloud session)
 npm run bot -- 1200    # bot plays 1,200 game hours and reports when each level was reached
 npm run preview        # remakes the link-preview image and home-screen icon in src/public/
 ```

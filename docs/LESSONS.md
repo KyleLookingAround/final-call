@@ -49,6 +49,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 ### Docs
 
+- [Release docs: README, notes and the game link (#173, #174) · 29 Sep 2026](lessons/174-release-docs.md)
 - [Docs clean-ups: #20 slimmer notes, #39 saves on the device, #97 rebuild figures, #141 roadmap tidy · 26–28 Sep 2026](lessons/141-docs-tidy-ups.md)
 
 ### Drawing
