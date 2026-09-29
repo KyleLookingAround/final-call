@@ -1,4 +1,4 @@
-// Quick regression checks for build/test.html (about 1-2 minutes). Run with: npm run check, or npm run check -- <group>
+// Quick regression checks for build/test.html (about 15–25 minutes in a cloud session). Run with: npm run check, or npm run check -- <group>
 // Each file in tools/checks/ is a group named after it: it exports a default async function that gets the helpers below
 // and reports through ok(name, pass, info), and its opening comment says what it covers (docs/SYSTEMS.md lists them all,
 // joined from those comments). Add a group by adding a file; nothing here lists them.
