@@ -18,13 +18,17 @@ for s in 1 2 3; do nohup node tools/run-bot.mjs 1150 --seed $s > build/before-$s
 
 Keep the `LVLAT` line and the table at the end of each log.
 
+For a change meant to leave play as it is (a refactor, a UI change), "identical" means against a build of `main`, and the Balance workflow prints only the branch's `PLAY`. Make a `git worktree` of `main` in the scratchpad with `node_modules` symlinked in, build it, and run the seeds on both sides at once (twelve runs on four cores take about ten minutes; keep other loads off the machine). Compare with the branch's own base commit, not a `main` that has moved on, and a PR that adds a saved field runs the bot against that base before claiming `PLAY` is identical (`PLAY` leaves out the settings and a few one-off flags: `G.ver`, `G.set`, `G.seen`, `G.tip4x`).
+
+Before touching baselines for a pacing question, trace the bot: its snapshots carry cash, rating, the day's passengers, gates, supply against the market and a `why` field, and a 20-line script over them (or over `tools/bot.js` with `every:1`, hour by hour) shows which level requirement holds each level back in one run, before any tuning. Baseline runs go last, once, against the head that will merge.
+
 ## 2. Change, then after
 
 Make the change, rebuild, and run the same three seeds into `build/after-$s.log`.
 
 ## 3. Compare
 
-- Put before and after side by side per level: each seed, and the mean.
+- Put before and after side by side per level: each seed, and the mean. The table's level 9 row reads "not run long enough" when the run stops before level 9's upper bound (1,160 h against 1,150 h run), which hides a level that was never reached: until the run is lengthened, read it as `off`.
 - Against `tools/baseline.json`: `ok` is inside the range, `near` is within 15% of it, `off` is beyond. Aim for `ok`; `near` needs a reason; `off` needs the owner's agreement.
 - `ERR` must be empty on every seed.
 - Report the table in the PR description.
@@ -37,6 +41,7 @@ Make the change, rebuild, and run the same three seeds into `build/after-$s.log`
 ## Tips
 
 - On a PR the Balance workflow runs the same seeds both ways, once when the PR opens or leaves draft, and again when the `balance` label is added. Run them locally while tuning; otherwise report the workflow's tables, so the same runs aren't made twice, and add the label to rerun it on the final code.
+- Speed (`perf`, `scene`): one run varies by about ±0.05×, more than most changes, and the calibration ratio drifts with machine load. Take the median of three runs alternating with `main` on the same quiet machine, time a layer on and off in one page for its own share, and profile the functions a hot-loop change touches (`Profiler` over CDP). Compare per passenger when the change alters play. Numbers from different machines don't compare (lessons #49, #108, #113, #145, #162).
 - One part of a feature built in parts reports its numbers and tunes only outside 15% of the baselines. The whole feature is rebalanced once, with every part in.
 
 - `build/saves/L<n>.json` are the bot's airports at each level; seed one through `localStorage['final-call-save-v2']` to look at a stage.

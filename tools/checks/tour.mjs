@@ -20,7 +20,7 @@ export default async function({open,ok}){
       });
       ok(`tour: step 2's spotlight clears the map toolbar at ${vp.width}px`,!r.overlap,JSON.stringify(r));
       ok(`tour: the toolbar's own background never blocks a tap at ${vp.width}px`,r.bg==='none'&&r.btn==='auto',JSON.stringify(r));
-      await page.click('#helpb');await page.waitForTimeout(200);
+      await page.click('#helpb');await page.waitForFunction(()=>document.querySelector('#coach').hidden&&document.querySelector('#spot').hidden,null,{timeout:3000}).catch(()=>{}); // waits for the state, not a set time
       const c=await page.evaluate(()=>({coach:!document.querySelector('#coach').hidden,spot:!document.querySelector('#spot').hidden}));
       ok(`tour: Help hides the coach and spotlight at ${vp.width}px`,!c.coach&&!c.spot,JSON.stringify(c));
     }
