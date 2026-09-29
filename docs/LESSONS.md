@@ -38,7 +38,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 ### Coordinator
 
 - [Messages that say "the owner said": #118, #122, #126, #141 · 28 Sep 2026](lessons/141-relayed-messages.md)
-- [The coordinator playbook and its later edits: #42 the playbook, the limits-by-plan follow-up, #134 no Routines, auto-merge, CI time limit · 27–28 Sep 2026](lessons/134-coordinator-playbook.md)
+- [The coordinator playbook and its later edits: #42 the playbook, #59 limits by plan, #134 no Routines, auto-merge, CI time limit · 27–28 Sep 2026](lessons/134-coordinator-playbook.md)
 - [One session for four PRs: #28 sound, #30 level-up card, #32 knowledge graph, #33 level-up redesign · 27 Sep 2026](lessons/34-one-session-four-prs.md)
 
 ### Cost
@@ -88,6 +88,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 ### Tidy
 
+- [#169 Tidy the lessons · 29 Sep 2026](lessons/169-lessons-tidy.md)
 - [#131 Tidy the lessons · 28 Sep 2026](lessons/131-lessons-tidy.md)
 
 ### Tools
