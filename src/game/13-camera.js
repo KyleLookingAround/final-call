@@ -1,6 +1,6 @@
 /* ================= camera ================= */
 function viewK(){return R.baseK*R.cam.z}
-// On a phone the camera bar overlays the foot of the map, so the airport view scrolls past Y1 by the bar's height (R.camH, px, set in resize/renderCam; 0 elsewhere)
+// On a phone the camera bar overlays the foot of the map, so the airport view scrolls past Y1 by the bar's height (R.camH, px, kept by measureCam; 0 elsewhere)
 function camPad(){return R.view==='airport'&&R.camH?R.camH/viewK():0}
 function camBounds(){return R.view==='region'?{x0:0,y0:0,x1:RW,y1:RH}:R.view==='world'?{x0:0,y0:0,x1:WW,y1:WH}:{x0:0,y0:Y0,x1:W,y1:Y1+camPad()}}
 function zMin(){const b=camBounds(),ph=R.view==='airport'?R.camH||0:0,bh=R.view==='airport'?Y1-Y0:b.y1-b.y0;return Math.min(1,Math.min(R.sw/(b.x1-b.x0),(R.sh-ph)/bh)/R.baseK)}

@@ -6,6 +6,7 @@ let W=2480; // world width
 const STAND_X=[170,470,770,1070,1370,1670,1970,2270];
 const GATES=['A1','A2','A3','A4','B1','B2','B3','B4'];
 const SHOP_X=STAND_X.map(x=>x+22),SHOP_PH=[1,1,1,1,2,2,2,2],SHOP_NAME=GATES.slice(); // shop units: left edge, phase (2 needs Pier B), label
+// defaults only: each layout sets its own stands, costs and levels (39-layouts.js: Classic's own list, the others from LADDER), so change a gate's price there
 const STAND=[
   {cost:0,build:0,lvl:0},{cost:400,build:30,lvl:0},{cost:3000,build:60,lvl:1},{cost:12000,build:90,lvl:3},
   {cost:80000,build:120,lvl:4,pier:1},{cost:150000,build:150,lvl:4,pier:1},{cost:300000,build:180,lvl:6,pier:1},{cost:500000,build:210,lvl:6,pier:1}];
@@ -26,7 +27,7 @@ const AIRCRAFT=[
   {name:'F-200 Freighter',short:'F-200',rows:22,blocks:[3,3],fare:0,perPax:1,cost:18000,op:220,tier:2,span:45,lvl:3,wear:1,freighter:1,cargo:80,blurb:'All cargo, no passengers. No queues, and happy to fly at night.'}
 ];
 const POLICIES=[
-  {k:'late',name:'Late passengers',opts:[['wait','Wait for them'],['close','Close on time']],desc:'Waiting risks a delay. Closing on time refunds their fare and hurts your rating. Either way, the gate holds only briefly for runners.'},
+  {k:'late',name:'Late passengers',opts:[['wait','Wait for them'],['close','Close on time']],desc:'Waiting risks a delay. Closing on time refunds twice their fare and hurts your rating. Either way, the gate holds only briefly for runners.'},
   {k:'xfer',name:'Connections',opts:[['hold','Hold the flight'],['leave','Leave on time']],desc:'Leaving pays half the fare as compensation and upsets them.'},
   {k:'repair',name:'Faults',opts:[['std','Standard repair'],['rush','Rush repair']],desc:'Rush repairs cost double the flight’s fuel but take 4 min, not 20.'},
   {k:'pay',name:'Staff pay',opts:[[0,'Low −20%'],[1,'Standard'],[2,'Good +25%']],desc:'Low pay: 10% slower staff, more sick days and strikes. Good pay: 10% faster, no strikes.'},
@@ -77,21 +78,21 @@ const SHOPS=[
 ];
 const LEVELS=[
   {name:'Airfield'},
-  {name:'Local Airport',req:{pax:80,rep:50,gates:1},reward:500},
-  {name:'Regional Airport',req:{pax:2000,daily:1500,rep:52,gates:3},reward:1500},
-  {name:'City Airport',req:{pax:6000,daily:3200,rep:55,gates:3},reward:4000},
+  {name:'Local Airport',req:{pax:80,rep:50,gates:1},reward:1000},
+  {name:'Regional Airport',req:{pax:1600,daily:1500,rep:52,gates:3},reward:1500},
+  {name:'City Airport',req:{pax:8000,daily:3200,rep:55,gates:3},reward:4000},
   {name:'International Airport',req:{pax:30000,daily:8000,rep:60,gates:4},reward:15000},
   {name:'Gateway Airport',req:{pax:60000,daily:13000,rep:62,gates:5},reward:30000},
   {name:'Major Hub',req:{pax:110000,daily:19000,rep:65,gates:6},reward:60000},
-  {name:'Global Hub',req:{pax:210000,daily:28000,rep:70,gates:8},reward:150000},
+  {name:'Global Hub',req:{pax:210000,daily:26000,rep:70,gates:8},reward:150000},
   {name:'World Gateway',req:{pax:380000,daily:33000,rep:75,gates:8},reward:300000},
-  {name:'Airport of the Year',req:{pax:560000,daily:36000,rep:80,gates:8},reward:600000},
+  {name:'Airport of the Year',req:{pax:560000,daily:34000,rep:80,gates:8},reward:600000},
 ];
 const CAPFRAC=[0.35,0.5,0.58,0.65,0.8,0.85,0.9,1,1,1];
 const SEASONS=[{name:'Spring',dem:1},{name:'Summer',dem:1.1},{name:'Autumn',dem:1},{name:'Winter',dem:0.9}];
 const EF={
   checkin:l=>1.8*Math.pow(0.88,l), kiosk:l=>1.0*Math.pow(0.93,l), sec:l=>1.5*Math.pow(0.87,l), scan:l=>1.3*Math.pow(0.85,l),
-  stow:l=>2.6*Math.pow(0.86,l), carry:l=>Math.max(0.2,0.85-0.13*l), clean:l=>6*Math.pow(0.8,l), bag:l=>2.4*Math.pow(1.28,l), tow:l=>3*Math.pow(0.85,l), land:l=>6*Math.pow(0.86,l), tko:l=>4.5*Math.pow(0.86,l),
+  stow:l=>2.3*Math.pow(0.86,l), carry:l=>Math.max(0.2,0.85-0.13*l), clean:l=>6*Math.pow(0.8,l), bag:l=>2.4*Math.pow(1.28,l), tow:l=>3*Math.pow(0.85,l), land:l=>6*Math.pow(0.86,l), tko:l=>4.5*Math.pow(0.86,l),
 };
 const f1=v=>v.toFixed(1),f2=v=>v.toFixed(2);
 const UPG={
@@ -136,7 +137,7 @@ const UPG={
   bagfee:{tab:'sales',sec:'Extras',icon:'bag',name:'Cabin bag fee',max:5,base:40,mult:2.1,fx:(l,m)=>m?`<b>${Math.round(EF.carry(l)*100)}%</b> bring a carry-on`:`Carry-ons <b>${Math.round(EF.carry(l)*100)}%</b> → <b>${Math.round(EF.carry(l+1)*100)}%</b>. Hold bags pay at the desk, but take longer to load.`},
   priority:{tab:'sales',sec:'Extras',icon:'prio',name:'Priority boarding',max:5,base:120,mult:1.9,lvl:1,fx:(l,m)=>m?`<b>${l*5}%</b> buy priority`:`<b>${l*5}%</b> → <b>${(l+1)*5}%</b> buy priority. They pay extra and board first, scrambling your method.`},
   business:{tab:'sales',sec:'Extras',icon:'seat',name:'Business cabin',max:1,base:180,mult:1,lvl:1,fx:(l,m)=>m?'Front rows pay 3× fare':'Front rows pay 3× fare. Starts with each gate’s next flight.'},
-  cargo:{tab:'sales',sec:'Extras',icon:'box',name:'Cargo sales',max:5,base:150,mult:2,lvl:3,fx:(l,m)=>m?`Hold space for <b>${l*6}%</b> of seats sold as cargo`:`Cargo <b>${l*6}%</b> → <b>${(l+1)*6}%</b> of seat count. Pays on departure; slows loading.`},
+  cargo:{tab:'sales',sec:'Extras',icon:'box',name:'Cargo sales',max:5,base:600,mult:2.3,lvl:3,fx:(l,m)=>m?`Hold space for <b>${l*6}%</b> of seats sold as cargo`:`Cargo <b>${l*6}%</b> → <b>${(l+1)*6}%</b> of seat count. Pays on departure; slows loading.`},
   carpark:{tab:'sales',sec:'Landside',icon:'car',name:'Car park',max:8,base:80,mult:2.1,fx:(l,m)=>m?`<b>${carCap(l)}</b> spaces at <b>${money(carFeeBase(l))}</b> a car`:`<b>${carCap(l)}</b> → <b>${carCap(l+1)}</b> spaces, <b>${money(carFeeBase(l))}</b> → <b>${money(carFeeBase(l+1))}</b> a car`},
   rail:{tab:'region',sec:'Airport station',icon:'train',name:'Railway station',max:1,base:2500,mult:1,lvl:3,build:180,fx:(l,m)=>m?'Trains, the metro and high-speed rail can reach the terminal. Demand +6%.':'Lets trains, the metro and high-speed rail reach the terminal. Demand +6%. 3 h build.'},
   rtinfo:{tab:'region',sec:'Network',icon:'phone',name:'Live departure screens',max:1,base:600,mult:1,lvl:1,fx:(l,m)=>m?'Waits feel 30% shorter':'Waits for buses, trams and trains feel 30% shorter, so more people ride.'},

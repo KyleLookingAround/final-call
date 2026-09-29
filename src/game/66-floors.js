@@ -64,14 +64,14 @@ TERM_DRAW.push(()=>{const two=twoFloors();
     ctx.strokeStyle='#8C97A1';ctx.lineWidth=1.2;ctx.beginPath();for(const dy of [-hw/2,hw/2]){ctx.moveTo(x-sx*3,y+dy-2.5);ctx.lineTo(x+sx*2,y+dy);ctx.lineTo(x-sx*3,y+dy+2.5)}ctx.stroke()}
   if(!two)return;const A=plainOn(),fl=floorNow();
   for(const r of LAY.term.halls){if(!r.name||r.fl==null||r.fl===fl||!roomOn(r))continue;const [lx,ly]=hallLabel(r.id);
-    if(A.some(([,x0,y0,x1,y1])=>lx>=x0&&lx<=x1&&ly>=y0&&ly<=y1))mono(`${r.name} ${r.fl<fl?'↓':'↑'}`,lx,ly,'#3E4750',8.5)}});
+    if(A.some(([,x0,y0,x1,y1])=>lx>=x0&&lx<=x1&&ly>=y0&&ly<=y1))hallText(`${r.name} ${r.fl<fl?'↓':'↑'}`,lx,ly,'#3E4750',8.5,'left',r.lab?r.lab[2]:hallW(r)-16)}});
 
 /* ---------- going to a hall ---------- */
 // where a hall's name is drawn, on its own floor or, dimmer, on the floor over it
-function hallLabel(id){const r=ROOMS&&ROOMS[ROOM_ID[id]];if(!r)return null;let x0=1e9,y0=1e9;for(const [x,y] of r.poly){x0=Math.min(x0,x);y0=Math.min(y0,y)}return [x0+8,y0+10]}
+function hallLabel(id){const r=ROOMS&&ROOMS[ROOM_ID[id]];if(!r)return null;let x0=1e9,y0=1e9;for(const [x,y] of r.poly){x0=Math.min(x0,x);y0=Math.min(y0,y)}const h=LAY.term.halls.find(h=>h.id===id);return h&&h.lab?h.lab.slice(0,2):[x0+8,y0+10]}
 // the camera flies to (x, y), at least a little zoomed in
 function flyTo(x,y){const c=R.cam;c.z=Math.max(c.z,1.1);clampCam();const k=viewK(),vw=R.sw/k,vh=R.sh/k;
-  c.tx=vw>=W?(W-vw)/2:clamp(x-vw/2,0,W-vw);c.ty=vh>=Y1-Y0?Y0+(Y1-Y0-vh)/2:clamp(y-vh/2,Y0,Y1-vh)}
+  c.tx=vw>=W?(W-vw)/2:clamp(x-vw/2,0,W-vw);{const b=camBounds();c.ty=vh>=b.y1-Y0?Y0+(b.y1-Y0-vh)/2:clamp(y-vh/2,Y0,b.y1-vh)}} // camBounds() keeps the phone camera bar's margin below Y1
 function flyHall(id){const r=ROOMS&&ROOMS[ROOM_ID[id]];if(!r||R.view!=='airport')return false;
   let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(const [x,y] of r.poly){x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y)}
   flyTo((x0+x1)/2,(y0+y1)/2);setFloor(r.fl===0?'down':R.floor==='roof'||r.fl===1?'up':R.floor);return true}
@@ -80,7 +80,7 @@ function flyHall(id){const r=ROOMS&&ROOMS[ROOM_ID[id]];if(!r||R.view!=='airport'
 PAX_TAP.push((wx,wy)=>{if(R.view!=='airport'||roofA()||!ROOMS||!twoFloors())return false; // one floor: a tap in a hall opens the Terminal tab, as before
   const fl=floorNow(),A=plainOn();
   for(const r of LAY.term.halls){if(!r.name||!roomOn(r))continue;const own=r.fl==null||r.fl===fl;if(own&&r.sign)continue;
-    const [lx,ly]=hallLabel(r.id);if(wx<lx-6||wx>lx+r.name.length*5.2+16||wy<ly-9||wy>ly+9)continue;
+    const [lx,ly]=hallLabel(r.id),z=labelSize(r.name+' ↓',8.5,r.lab?r.lab[2]:hallW(r)-16)/8.5;if(wx<lx-6||wx>lx+r.name.length*5.2*z+16||wy<ly-9||wy>ly+9*z)continue; // as big as it's drawn
     if(!own&&!A.some(([,x0,y0,x1,y1])=>lx>=x0&&lx<=x1&&ly>=y0&&ly<=y1))continue;
     return flyHall(r.id)}
   return false});

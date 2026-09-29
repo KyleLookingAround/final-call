@@ -31,13 +31,14 @@ const flatTerm=()=>({
     {id:'imm',poly:RECT(700,SEC_Y,1240,SEC_LINE),col:'#1B2127',name:'IMMIGRATION',sign:1},
     {id:'sec',poly:RECT(8,SEC_LINE,560,680),land:1,col:'#191D22',name:'SECURITY',sign:1},
     {id:'ci',poly:RECT(8,680,560,LAND_B),land:1,col:'#191D22',name:'CHECK-IN',sign:1},
-    {id:'rec',poly:RECT(700,SEC_LINE,1240,700),land:1,col:'#191D22',name:'BAGGAGE RECLAIM'},
+    {id:'rec',poly:RECT(700,SEC_LINE,1240,700),land:1,col:'#191D22',name:'BAGGAGE RECLAIM',lab:[960,606,121]},
     {id:'cus',poly:RECT(700,700,1240,720),land:1,col:'#1A1F24',name:'CUSTOMS',sign:1},
     {id:'arh',poly:RECT(700,720,1240,LAND_B),land:1,col:'#191D22',name:'ARRIVALS'},
     {id:'wlk',poly:RECT(1240,738,1262,752),land:1,need:'hotel',col:'#232A31'},
     {id:'hot',poly:RECT(1262,690,1472,LAND_B),land:1,need:'hotel',col:'#232A31',name:'HOTEL',sign:1},
     {id:'out',poly:RECT(0,LAND_B,1480,Y1),land:1,open:1} // the forecourt, stops, station and car park: drawn by drawLandside
   ],
+  // lab: [x, y, widest] where the hall's name goes, if not its top left corner (reclaim's: past the passport desks and e-gates)
   // [hall, hall, x, y, half-width]: the concourse opens wide onto the market place; check-in and security are one space with
   // a barrier; arriving passengers leave the concourse by one door, and the arrivals hall has doors to the forecourt and hotel
   doors:[['main','mkt',284,SEC_Y,250],['main','imm',1212,SEC_Y,22],['ci','sec',284,680,262],['ci','out',150,LAND_B,34],
@@ -82,10 +83,15 @@ function drawTerminalHalls(D){
     ctx.strokeStyle='#4E5964';ctx.lineWidth=3;ctx.strokeRect(bx0,by0,bx1-bx0,by1-by0);
     ctx.fillStyle='#2A3037';for(const y of [630,672]){ctx.fillRect(bx1,y-2,20,4)} // belts out to the carousels
     ctx.strokeStyle='#39414A';ctx.lineWidth=5;ctx.setLineDash([4,3]);ctx.beginPath();ctx.ellipse((bx0+bx1)/2,640,44,26,0,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
-    mono('BAGGAGE HALL',(bx0+bx1)/2,540,'#56606A',8.5,'center')}
+    hallText('BAGGAGE HALL',(bx0+bx1)/2,540,'#56606A',8.5,'center',bx1-bx0-12)}
   if(onFloor(1)){ctx.fillStyle='#2A3037';ctx.fillRect(16,684,bx0-16,4)} // the belt behind the check-in desks, down to the baggage hall
-  for(const r of LAY.term.halls)if(r.name&&!r.sign&&roomOn(r)&&onFloor(r.fl)){const [x0,y0]=r.poly[0];mono(r.name,x0+8,y0+10,'#56606A',8.5)}
+  for(const r of LAY.term.halls)if(r.name&&!r.sign&&roomOn(r)&&onFloor(r.fl)){const [lx,ly]=hallLabel(r.id);hallText(r.name,lx,ly,'#56606A',8.5,'left',r.lab?r.lab[2]:hallW(r)-16)}
 }
+// A label inside the terminal, kept readable on a small screen: drawn at least about 9 screen pixels high where there's
+// room (up to 2.4 times its size, and no wider than w), its top staying where it was, so zoomed in it's as before
+const labelSize=(t,size,w)=>Math.max(size,Math.min(size*2.4,9/(V.k||1),w?w/(t.length*0.62):Infinity));
+function hallText(t,x,y,col,size,align,w){const s=labelSize(t,size,w);mono(t,x,y+0.75*(s-size),col,s,align);return s}
+const hallW=r=>{let a=1e9,b=-1e9;for(const [x] of r.poly){a=Math.min(a,x);b=Math.max(b,x)}return b-a};
 
 // Under a solid roof (roofA() 1) nothing inside a hall is drawn: the roof covers the built rooms, so only the outline of rooms
 // not built yet (drawRooms) and the forecourt's kerb. What stands outside the halls (the taxi rank, the hotel's tower) draws

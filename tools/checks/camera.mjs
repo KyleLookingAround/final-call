@@ -10,12 +10,14 @@ export default async function({open,ok,saveText,newest}){
       const barTop=(bar.top-st.top)/S.viewK()+R.cam.y; // the bar's top edge in world units
       S.focus('all');R.cam.x=R.cam.tx??R.cam.x;R.cam.y=R.cam.ty??R.cam.y;S.clampCam();
       const all=R.cam.y+(R.sh-(R.camH||0))/S.viewK();
-      return {camH:R.camH||0,panned,barTop,all,Y1:S.Y1,Y0:S.Y0};
+      S.flyTo(700,1e5);const fly=R.cam.ty+R.sh/S.viewK(); // a hall's name at the very foot (66-floors.js)
+      return {camH:R.camH||0,panned,barTop,all,fly,Y1:S.Y1,Y0:S.Y0};
     });
     if(w<600){
       ok(`camera: at ${w}×${h} the view scrolls until the foot of the airport clears the bar`,r.camH>0&&r.panned>r.Y1+1&&r.barTop>=r.Y1-1,`view ends at ${Math.round(r.panned)}, bar top at ${Math.round(r.barTop)}, edge ${r.Y1}`);
+      ok(`camera: at ${w}×${h} flying to the foot of the map keeps the margin`,r.fly>r.Y1+1,`view ends at ${Math.round(r.fly)}, edge ${r.Y1}`);
       ok(`camera: at ${w}×${h} "All" fits the airport above the bar`,r.all>=r.Y1-1,`fits to ${Math.round(r.all)}, edge ${r.Y1}`);
-    }else ok(`camera: at ${w}×${h} the view stops at the edge`,r.camH===0&&Math.abs(r.panned-r.Y1)<1,`view ends at ${Math.round(r.panned)}, edge ${r.Y1}`);
+    }else ok(`camera: at ${w}×${h} the view stops at the edge`,r.camH===0&&Math.abs(r.panned-r.Y1)<1&&Math.abs(r.fly-r.Y1)<1,`view ends at ${Math.round(r.panned)}, edge ${r.Y1}`);
     if(errs.length)ok(`camera: no page errors at ${w}×${h}`,false,errs[0]);
     await ctx.close();
   }

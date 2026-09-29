@@ -57,18 +57,18 @@ jobs:
           mkdir -p build
           set -o pipefail
           npm run check 2>&1 | tee build/health-check.log
-      - name: Bot, seed 1, 1150 game hours, keeping Classic
+      - name: Bot, seed 1, 1200 game hours, keeping Classic
         if: always()
         continue-on-error: true
-        run: npm run bot -- 1150 --seed 1
-      - name: Bot, seed 2, 1150 game hours, keeping Classic
+        run: npm run bot -- 1200 --seed 1
+      - name: Bot, seed 2, 1200 game hours, keeping Classic
         if: always()
         continue-on-error: true
-        run: npm run bot -- 1150 --seed 2
-      - name: Bot, seed 3, 1150 game hours, keeping Classic
+        run: npm run bot -- 1200 --seed 2
+      - name: Bot, seed 3, 1200 game hours, keeping Classic
         if: always()
         continue-on-error: true
-        run: npm run bot -- 1150 --seed 3
+        run: npm run bot -- 1200 --seed 3
       - name: Read the bot's table against the baseline
         if: always()
         env:

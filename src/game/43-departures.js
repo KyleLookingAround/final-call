@@ -46,7 +46,7 @@ UPG.online.fx=(l,m)=>m?`<b>${l*12}%</b> check in online`:`<b>${l*12}%</b> → <b
 WAGE.drops=2.5;OWN.drops=()=>G.lv.bagdrop;
 WAGE.srch=2; // a searcher at each open search table, one for each open lane and the fast track
 const tablesOpen=D=>Math.min(8,D.lanes+(D.ft?1:0));
-function dropsOpen(){if(!G.lv.bagdrop)return 0;const n=staffed('drops');return R.fx.strike>G.clock?Math.max(1,Math.ceil(n/2)):n}
+function dropsOpen(){if(!G.lv.bagdrop)return 0;const n=staffed('drops');return weather.on('strike')?Math.max(1,Math.ceil(n/2)):n}
 const islOpen=(k,D)=>(2*k<D.desks)+(2*k+1<D.desks); // how many of island k's desks are open
 function bestIsland(D){let b=0,bw=1e9;for(let k=0;k<4;k++){const o=islOpen(k,D);if(!o)continue;const w=(CIN[k]+1)/o;if(w<bw){bw=w;b=k}}return b}
 TERM_MINUTE.push(()=>{
@@ -188,7 +188,7 @@ TERM_DRAW.push(onFl(1,D=>{
     ctx.fillStyle=open?'#4E5964':dim;ctx.fillRect(x,612,9,15);ctx.fillStyle=open?col:closed?'#7A3A42':own?off:dim;ctx.fillRect(x-9,617,2,9);ctx.fillRect(x-2,617,2,9);
     if(open){ctx.fillStyle='#FFC72C';ctx.fillRect(x+9,636,4,4)}};
   for(let i=0;i<8;i++){const x=laneX(i),open=i<D.lanes;if(open&&i<fam){ctx.fillStyle='rgba(107,227,154,.12)';ctx.fillRect(x-10,603,20,58)}
-    lane(x,open,i<OWN.lanes(),i===D.lanes&&R.fx.sick>G.clock,i<fam&&open?'#6BE39A':'#8C97A1')}
+    lane(x,open,i<OWN.lanes(),i===D.lanes&&weather.on('sick'),i<fam&&open?'#6BE39A':'#8C97A1')}
   if(fam)lbl('FAMILIES',242,677);
   if(D.ft){lane(FT_X,true,true,false,'#F5D08A');lbl('FAST TRACK',FT_X,660)}
   // trays: on the divest table, riding the belt with their owner, and at the repack bench; bags opened at the search tables
