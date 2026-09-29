@@ -1,4 +1,4 @@
-Theme: terminal
+Theme: drawing
 # Two floors in Classic · 29 Sep 2026
 
 - **Numbers:** estimate $25. PR #162, three commits before opening. `npm run check`: 357 of 358 pass before #161. The one failure was `first-level` seed 1's on-time clause (#161, `needs-owner`). The coordinator took the default; the full run then passed. `floors` takes about 7 s locally. Ten pending checks switched on.

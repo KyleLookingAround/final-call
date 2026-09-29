@@ -1,7 +1,0 @@
-Theme: review
-# Photo mode (#100) · 27 Sep 2026
-
-- **Numbers:** estimate $10; the session's cost wasn't reported yet at the PR's first stopping point. One build round, one review round, and two full local check runs before CI.
-- **What the review caught:** leaving on a tap brought the panels back before the browser's own click for that tap, which then landed on whatever was now under the finger (the sound or Region button at 390 and 320 px). The desktop mouse check couldn't see it; only a touch-context tap (`page.touchscreen.tap`) did. → Any control that hides or shows layout on `pointerup` must eat the click that follows, and its check must tap on a touch page, not click with a mouse. The `photo-mode` group now does, and fails without the fix.
-- **Scope against the brief:** "one or two lines" in `54-weather.js` became six, the same `R.fx` → `drawnFx()` read in each place. A read that's repeated is cheaper to route through one accessor than to swap `R.fx` around the frame, and the accessor keeps drawing from ever writing state that `update()` reads. The one exception is fog: `drawFog` gates itself on `R.fx.fog` in a file another session owns, so `drawnFog()` sets it for that one call and puts it back.
-- **Went well:** the checks' `still:true` pages stub `requestAnimationFrame`, so anything drawn from its own animation frame (the Region's sky overlay) has to be called directly in the check. The review spotted this. Exposing `photoRegionSky` on `SIMX` made it one line.
