@@ -10,8 +10,23 @@ export const OPEN="(()=>{\n'use strict';\n",CLOSE='})();\n';
 export const HEAD='<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n';
 
 export const shell=()=>readFileSync(join(root,'src/shell.html'),'utf8');
+// The Roadmap tab's list (docs/specs/roadmap-tab.md): one file per entry in src/roadmap.d/, in file-name order. Each is
+//   # Title / Status: next / Code: SOON / Summary: one line / "- " detail bullets / optional Note: line
+// and the build puts them into the game where 38-updates.js has /*ROADMAP*/[] (on one line, so line numbers still match).
+export const ROADMAP_STATUS=['landed','next','boarding','scheduled','radar'];
+export function roadmapEntries(){
+  const dir=join(root,'src/roadmap.d');
+  return readdirSync(dir).filter(f=>f.endsWith('.md')&&f!=='README.md').sort().map(file=>{
+    const s=readFileSync(join(dir,file),'utf8'),get=k=>(s.match(new RegExp(`^${k}:\\s*(.+)$`,'m'))||[])[1]?.trim();
+    const e={st:get('Status'),code:get('Code'),t:(s.match(/^# (.+)$/m)||[])[1]?.trim(),s:get('Summary'),d:[...s.matchAll(/^- (.+)$/gm)].map(m=>m[1].trim())};
+    if(get('Note'))e.n=get('Note');
+    return {file,e};
+  });
+}
+const roadmapJSON=()=>JSON.stringify(roadmapEntries().map(x=>x.e));
 export const parts=()=>readdirSync(join(root,'src/game')).filter(f=>f.endsWith('.js')).sort()
-  .map(file=>({file:'src/game/'+file,text:readFileSync(join(root,'src/game',file),'utf8')}));
+  .map(file=>{const text=readFileSync(join(root,'src/game',file),'utf8');
+    return {file:'src/game/'+file,text:text.includes('/*ROADMAP*/[]')?text.replace('/*ROADMAP*/[]',()=>roadmapJSON()):text}});
 export const joinGame=ps=>OPEN+ps.map(p=>p.text).join('')+CLOSE;
 export const page=(sh,js)=>HEAD+sh.replace('/*GAME*/',()=>js);
 

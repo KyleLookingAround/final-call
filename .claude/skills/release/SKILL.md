@@ -18,7 +18,7 @@ description: Cut a Final Call release - claim the version, fold the What's new f
    - `npm run check -- migrate` fails for the new files and prints their hashes: add those lines to `GOLD` in `tools/checks/migrate.mjs`. Never change an existing line there; if an old save's hash changed, what it loads to changed.
    - `npm run check`: every save, old and new, must load and play. The layout, sheet and screenshot checks use the newest save.
 4. **Link preview.** If the game looks noticeably different, `npm run preview`, look at `src/public/preview.jpg`, and commit it.
-5. **Roadmap.** Add `docs/roadmap.d/<date>-release-<version>.md` with `Section: done` and a line for the version, and change the shipped items' own files from `Section: now` to `Section: done`. `npm run build` rejoins the roadmap.
+5. **Roadmap.** Add `docs/roadmap.d/<date>-release-<version>.md` with `Section: done` and a line for the version, and change the shipped items' own files from `Section: now` to `Section: done`. `npm run build` rejoins the roadmap. Then the players' board: in `src/roadmap.d/`, change each shipped item's `Status:` from `next` to `landed` and its `Code:` to `V<version>` (files list in name order, so number a new landed entry below the other landed ones' to list it first), and drop an entry that no longer fits. The `roadmap-card` check fails on a landed code that isn't a version.
 6. **Ship** it as a PR (see the `steward` playbook): write the look back into the PR, mark it ready, turn on auto-merge with the squash method, book one `send_later` to confirm the merge, then confirm the "Publish to GitHub Pages" run finished green.
 
 ## Launch week

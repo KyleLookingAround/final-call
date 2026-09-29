@@ -6,6 +6,7 @@ What's being worked on, what's next, and ideas not yet agreed. Now, Next, the ru
 
 <!-- joined:now from docs/roadmap.d/ (Section: now) by tools/join.mjs: don't edit between these lines -->
 - **The terminal as a place, multiple floors** (#48, #133; spec `docs/specs/terminal-place.md`, refreshed and re-approved 28 Sep 2026): departures upstairs and arrivals below, a roof terrace passengers go up to (with spotters, famous faces and photos), windows, decor that comes with the building, local character, and each layout's own floor plan. Two floors in Classic shipped in version 35 (#162); the rest of #133 is still to do, the roof terrace first, then the other layouts' floors.
+- **A Roadmap tab on What's new** (#137): a second tab on the What's new page showing what's coming as a departures board, with details on tap and filter chips; spec `docs/specs/roadmap-tab.md`, notes `docs/systems/whats-new.md`. Built on `feature/roadmap-tab`; the board's list is `src/roadmap.d/`.
 <!-- /joined:now -->
 
 ## The owner's order of bundles
@@ -57,7 +58,6 @@ How sessions work, not the game. Each one is small, measured and recorded in the
 <!-- joined:next from docs/roadmap.d/ (Section: next) by tools/join.mjs: don't edit between these lines -->
 - **Draw the moving walkways** (from #89's look back, `docs/lessons/89-pax-movement.md`; PR #89): the moving walkways upgrade still speeds concourse walks up to 2.6× with nothing drawn for it. #89 fixed the same problem for the people mover (riders hidden, drawn on its cars, every change of pace eased) but left the walkways as pure numbers, calling drawing them a follow-up for the owner to decide. For the owner to order.
 - **Merge queue, proposed** (a GitHub ruleset on `main`, the owner's to set up): replaces the Catch up workflow's merge-and-dispatch dance, and the race it can't close — two PRs, each green on its own head and merged minutes apart, can still combine into a broken game. A merge queue tests each PR's merge commit against the combined queue head before it lands, one at a time, so nothing merges that doesn't pass together with what's ahead of it. For sessions, the change is small: instead of merging their own green PR, they add it to the queue and it merges once its turn comes and it passes; everything else (branch protection, review requirements) stays as it is. Do this after launch week, once `pages.yml`'s new check-before-deploy job (`docs/briefs/launch-safety.md`) has had a week to prove itself; the two aren't a conflict, just two ways of catching the same race, and the queue is the sturdier one to keep long-term.
-- **A Roadmap tab on What's new** (#137): a second tab on the What's new page showing what's coming as a departures board, with details on tap and filter chips; spec `docs/specs/roadmap-tab.md`.
 <!-- /joined:next -->
 
 ## Ideas (not agreed)
