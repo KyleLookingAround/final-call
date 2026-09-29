@@ -83,7 +83,7 @@ const LEVELS=[
   {name:'International Airport',req:{pax:30000,daily:8000,rep:60,gates:4},reward:15000},
   {name:'Gateway Airport',req:{pax:60000,daily:13000,rep:62,gates:5},reward:30000},
   {name:'Major Hub',req:{pax:110000,daily:19000,rep:65,gates:6},reward:60000},
-  {name:'Global Hub',req:{pax:210000,daily:28000,rep:70,gates:8},reward:150000},
+  {name:'Global Hub',req:{pax:210000,daily:26000,rep:70,gates:8},reward:150000},
   {name:'World Gateway',req:{pax:380000,daily:33000,rep:75,gates:8},reward:300000},
   {name:'Airport of the Year',req:{pax:560000,daily:34000,rep:80,gates:8},reward:600000},
 ];
