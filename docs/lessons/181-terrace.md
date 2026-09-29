@@ -1,0 +1,12 @@
+Theme: checks
+# The roof terrace floor · 29 Sep 2026
+
+- **Numbers:** estimate $25; the session record showed no cost yet when the PR opened. Started 18:00, PR #181 opened as a draft at about 19:50 after four commits. `npm run check`: 425/425 with 12 pending (the other parts'). Twelve pending checks switched on. The `terrace` group takes 19 s locally, where `main`'s run of the same plays takes 18 s. No hours waiting on the owner.
+- **[D]:** (a) three game-code bugs caught before opening: dawdlers stuck on the roof without a fallback timer (`terrace`), and, from the fresh review, a What's new target that went to a null tab on other layouts and rating credit for passengers turned back on the stairs. (b) none yet. (c) four checks fixed. The runners check assumed terrace visitors' planes would be turning round, but a level 9 airport cleans a plane in under a minute. Three guard checks (`plans`, `roofs`, `migrate`) assumed floors 0 and 1 only, escalators and lifts only, and no new saved fields.
+- **Balance:** within 15% on seeds 1–3, and level 9 about 2% sooner. Terrace income was 0.70% of a level 9 day.
+- **Went well:** building against the twelve pre-written checks: after the first build eleven passed, and the twelfth failed on its own setup rather than the game. Screenshots at every size found the stairs sitting over a hall's name, which no check measured.
+- **Lessons:**
+  - A pre-written check that picks passengers by plane state can assume timings the game no longer has: at level 9 a turnaround lasts under a minute and the duty manager calls gates early. Before rewriting game code to fit a check, print what the check's filter sees at its moment (here, the states of everyone on the terrace).
+  - Adding a floor, a link kind or a saved field breaks guards written for the old set (`plans`, `roofs`, `migrate`). Next time a brief adds one, grep `tools/checks/` for the old values (`fl!==1`, `'esc'||'lift'`, `ADDED`) and list those checks in the brief's file list.
+  - Wrapping a hot `PAX_STEP` entry for a rare event cost about +0.02× on Midfield, a layout without a terrace. A once-a-minute look over a short list of candidates cost nothing measurable. For per-passenger events, prefer a list you already keep over wrapping a step everyone takes.
+  - Speed rows swing ±0.03× from run to run here. Six runs each were needed before the Midfield difference could be told from noise; three runs alternating are a minimum, not a verdict.
