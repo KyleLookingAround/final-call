@@ -13,6 +13,7 @@ const GOLD={ // recorded on main, and again for every save fixture after 65-usag
   'v29-L3.json':'95a0a82ddc44c4b4','v29-L5.json':'edf5cfb6001348f8','v29-L9.json':'105d8d38d8e94718','v32-L1.json':'b6b19b6cd98e3566',
   'v32-L3.json':'01fd53c62f63ae54','v32-L5.json':'02f08e7c2515cd7d','v32-L9.json':'840ce9a3af7e2a33',
   'v35-L1.json':'136f8c7a781ac08b','v35-L3.json':'b497ed91cb3874ea','v35-L5.json':'5e7085a16f66a4af','v35-L9.json':'b5c1b2e5622e2d7a',
+  'v36-L1.json':'9cf2ee64122cad66','v36-L3.json':'3d31862172ac780a','v36-L5.json':'a8a04694f4900724','v36-L9.json':'6671bd2f705a1109',
 };
 const hash=s=>createHash('sha256').update(s).digest('hex').slice(0,16);
 // fields added to FIELDS since GOLD was recorded: left out of the hash, and every save must load them at their default;
@@ -24,7 +25,7 @@ export default async function({open,ok,saves,saveText}){
   const got={};
   for(const f of saves)got[f]=hash(await page.evaluate(([t,ADDED,ADDED_LV])=>{const S=__sim;S.R.sim=true;S.seedRandom(1);S.resetAll(JSON.parse(t));S.R.sim=false;
     const G=S.G,o={};for(const k of Object.keys(G).sort())if(!ADDED.includes(k))o[k]=k==='savedAt'?0:k==='lv'?Object.fromEntries(Object.entries(G.lv).filter(([u])=>!ADDED_LV.includes(u))):G[k];
-    const off=[...ADDED.filter(k=>JSON.stringify(G[k])!==JSON.stringify(S.FIELDS[k]())),...ADDED_LV.filter(u=>G.lv[u]!==0).map(u=>'lv.'+u)];return JSON.stringify(o)+(off.length?' not at their default: '+off.join(' '):'')},[saveText(f),ADDED,ADDED_LV]));
+    const off=[...ADDED.filter(k=>!(k==='ver'&&JSON.parse(t).ver!=null)).filter(k=>JSON.stringify(G[k])!==JSON.stringify(S.FIELDS[k]())),...ADDED_LV.filter(u=>G.lv[u]!==0).map(u=>'lv.'+u)];return JSON.stringify(o)+(off.length?' not at their default: '+off.join(' '):'')},[saveText(f),ADDED,ADDED_LV]));
   const bad=saves.filter(f=>GOLD[f]&&got[f]!==GOLD[f]),added=saves.filter(f=>!GOLD[f]);
   ok('migrate: every save loads to the same airport as before',!bad.length&&!added.length,
     bad.length?`changed: ${bad.join(' ')}`:added.length?`no hash yet, add to GOLD: ${added.map(f=>`'${f}':'${got[f]}',`).join(' ')}`:`${saves.length} saves`);

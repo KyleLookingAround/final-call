@@ -1,6 +1,6 @@
 # A roof terrace
-Status: next
-Code: SOON
+Status: landed
+Code: V36
 Summary: Watch the planes from a terrace above the halls.
 
 - A terrace at the apron edge that passengers go up to while they wait, to watch the planes and take photos.
