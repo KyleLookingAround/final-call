@@ -39,7 +39,7 @@ function gateStatus(i){const nx=G.fleet.some(f=>!f.sold&&f.st!=='gate'&&fitsGate
 function standLive(i){
   const F=R.st[i].F;if(!F)return gateWaitText(i);
   const s=statusText(F),col=statusCol(s),m=Math.ceil(F.std-G.clock),A=F.arr;
-  const arrLine=A.done?'':`<div class="sline" style="margin-bottom:4px"><span class="pill" style="--c:${statusCol(arrStatus(F))}">${arrStatus(F)}</span><b>${A.code}${A.no}</b>&nbsp;from ${A.from[1]}${A.n?` · <b>${A.n-A.onboard}/${A.n}</b>&nbsp;off`:''} · bags&nbsp;<b>${A.sent}/${A.bags}</b>&nbsp;unloaded</div>`;
+  const arrLine=A.done?'':`<div class="sline" style="margin-bottom:4px"><span class="pill" style="--c:${statusCol(arrStatus(F))}">${arrStatus(F)}</span><b>${A.code}${A.no}</b>&nbsp;from ${A.from[1]}${A.n?` ·&nbsp;<b>${A.n-A.onboard}/${A.n}</b>&nbsp;off`:''} · bags&nbsp;<b>${A.sent}/${A.bags}</b>&nbsp;unloaded</div>`;
   return arrLine+`<div class="sline"><span class="pill" style="--c:${col}">${s}</span><b>${F.code}${F.no}</b>&nbsp;to ${F.dest[1]}</div><div class="prog"><i style="width:${F.seated/F.booked*100}%;background:${col}"></i></div><div class="sline"><b>${F.seated}/${F.booked}</b>&nbsp;seated · bags&nbsp;<b>${Math.floor(F.hold)}/${F.checkedTotal}</b>&nbsp;· departs&nbsp;<b>${hhmm(F.std)}</b>&nbsp;${m>=0?`(in ${m} min)`:`<span class="late">(${-m} min late)</span>`}</div>`;
 }
 function buildLine(id){const b=buildOf(id);if(!b)return '';const p=bprog(id);return `<div class="rd">Under construction · <b>${Math.ceil(b.done-G.clock)} min</b> left</div><div class="prog"><i style="width:${p*100}%;background:var(--sign)"></i></div>`}

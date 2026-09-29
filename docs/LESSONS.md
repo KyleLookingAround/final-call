@@ -97,6 +97,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 ### Releases
 
 - [Version 32: ready for what's next · 27 Sep 2026](lessons/main-release-32.md)
+- [Release P4: numbers, labels and the save panel · 29 Sep 2026](lessons/release-p4-labels.md)
 - [#126 Cut release 34: famous faces and a real-looking region · 28 Sep 2026](lessons/126-release-34.md)
 - [#118 Cut release 33: a rating that keeps you on your toes · 28 Sep 2026](lessons/118-release-33.md)
 
