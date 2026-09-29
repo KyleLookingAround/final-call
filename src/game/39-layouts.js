@@ -264,7 +264,7 @@ function layoutPlan(L){
 function layoutPanel(){
   const ids=Object.keys(LAYOUTS).filter(id=>id===G.layout||id==='classic'||has('lay:'+id));
   const cur=LAY,building=layoutBuilding();
-  let h=`<p class="note">A new layout is built while the airport keeps running, and opens at 03:00. Gates, shops, planes and upgrades move across; anything the new layout has no room for is sold.</p>`;
+  let h=`<p class="note">A new layout is built while you keep flying and opens at 03:00. Gates, shops, planes and upgrades move across; what doesn’t fit is sold.</p>`;
   if(G.layoutNext)h+=`<div class="report">The <b>${LAYOUTS[G.layoutNext].name}</b> layout opens at 03:00${R.st.some((S,i)=>layoutDrains(i)&&S.F)?', once its last flights have left the stands it drops':''}.</div>`;
   for(const id of [G.layout,...ids.filter(x=>x!==G.layout)]){
     const L=LAYOUTS[id],me=id===G.layout,bld=building&&building.id==='layout:'+id;
