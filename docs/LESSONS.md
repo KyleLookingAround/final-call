@@ -60,6 +60,10 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 - [The region map, looking better · 27 Sep 2026](lessons/108-region-map-looks.md)
 - [Version 31: the real airport brought together · 27 Sep 2026](lessons/67-real-airport-together.md)
 
+### Exchange
+
+- [Lessons from Overgrow, carried into the playbooks (#178) · 29 Sep 2026](lessons/178-lessons-from-overgrow.md)
+
 ### Merge-chasing
 
 - [A busy `main` with Catch up running: #114 playbooks, #122 usage counts · 28 Sep 2026](lessons/122-busy-launch-night.md)
