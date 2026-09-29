@@ -6,5 +6,3 @@ Theme: checks
 - **Lessons:**
   - Measuring night by "warm pixels" counted the yellow labels by day as windows; comparing the same pixels by day and by night (only lit windows get brighter) is what separates them. Useful for any future day/night check on a canvas with coloured labels.
   - The Balance workflow's tables compare against the baselines, not against `main`, so "`PLAY` identical on seeds 1–3" still meant running `main` locally. A throwaway `git worktree` of `origin/main` (with `node_modules` symlinked) let the three `main` runs and three branch runs go side by side in about four minutes.
-  - The footer the PR tool adds failed the Description check again, as the two entries below found. No further change: the brief already asks for the read-back.
-  - `main` moved twice while CI ran (#84, then #87 and #90), so it took the brief's full two merges. Only the docs conflicted (`docs/SYSTEMS.md`'s one-line list of check groups and the top of this file), as the brief predicted.

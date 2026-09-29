@@ -1,7 +1,0 @@
-Theme: ui
-# Polish: put things where players look (#112) · 28 Sep 2026
-
-- **Numbers:** estimate $12; about $5 by the merge. Started 21:45 UTC, then stopped from about 22:20 to 04:05 when the account's five-hour limit ran out and nothing woke the session. The PR opened at 04:19 and merged at 04:34 on the first CI round.
-- **What slowed it:** the Fleet tab was built before anyone measured whether an eighth tab fits the strip. It didn't: 59 px over on desktop, and labels overrunning at 320 px. That half had to be unpicked into a patch and moved out to a later PR (#109, then this session's second PR once the top-bar work merged). → Measure the strip (each button's width against its label's) before adding a tab; a line in `docs/SYSTEMS.md` "UI" now says how the tabs share the strip.
-- **What went well:** comparing `PLAY` and `STATE` on seeds 1–3 against a `git worktree` of `main` ran while the docs were written, and the fresh review caught text the move made wrong outside the brief's file list (How to play, the README, the level-up link).
-- **Tooling:** a Playwright script that deletes what sits above the moved section before taking the picture showed each move on a phone without dragging the sheet.
