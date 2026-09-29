@@ -1,6 +1,6 @@
 # Windows on the apron
-Status: scheduled
-Code: TBA
+Status: next
+Code: SOON
 Summary: Glass along the apron, lit at night.
 
 - Glass along the walls that face the apron, with a sheen by day and warm light at night.
