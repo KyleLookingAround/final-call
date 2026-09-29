@@ -15,7 +15,7 @@ const GOLD={ // recorded on main, and again for every save fixture after 65-usag
 };
 const hash=s=>createHash('sha256').update(s).digest('hex').slice(0,16);
 // fields added to FIELDS since GOLD was recorded: left out of the hash, and every save must load them at their default
-const ADDED=['famous','tip4x'];
+const ADDED=['famous','tip4x','ver'];
 
 export default async function({open,ok,saves,saveText}){
   const {ctx,page,errs}=await open(undefined,null,false,{still:true});
