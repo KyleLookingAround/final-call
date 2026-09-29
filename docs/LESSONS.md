@@ -94,6 +94,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 ### Tidy
 
+- [#179 Tidy the lessons · 29 Sep 2026](lessons/179-lessons-tidy.md)
 - [#169 Tidy the lessons · 29 Sep 2026](lessons/169-lessons-tidy.md)
 - [#131 Tidy the lessons · 28 Sep 2026](lessons/131-lessons-tidy.md)
 
