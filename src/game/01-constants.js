@@ -85,7 +85,7 @@ const LEVELS=[
   {name:'Major Hub',req:{pax:110000,daily:19000,rep:65,gates:6},reward:60000},
   {name:'Global Hub',req:{pax:210000,daily:28000,rep:70,gates:8},reward:150000},
   {name:'World Gateway',req:{pax:380000,daily:33000,rep:75,gates:8},reward:300000},
-  {name:'Airport of the Year',req:{pax:560000,daily:36000,rep:80,gates:8},reward:600000},
+  {name:'Airport of the Year',req:{pax:560000,daily:34000,rep:80,gates:8},reward:600000},
 ];
 const CAPFRAC=[0.35,0.5,0.58,0.65,0.8,0.85,0.9,1,1,1];
 const SEASONS=[{name:'Spring',dem:1},{name:'Summer',dem:1.1},{name:'Autumn',dem:1},{name:'Winter',dem:0.9}];
