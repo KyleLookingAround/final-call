@@ -88,6 +88,8 @@ export default async function({open,ok,saveText,newest,out,HIST_TOP,root}){
     {const s1=JSON.stringify(S.G);S.resetAll(JSON.parse(s1));const g2=S.G,g1=JSON.parse(s1);
       bad=Object.keys(g1).filter(k=>k!=='savedAt'&&JSON.stringify(g1[k])!==JSON.stringify(g2[k])); // savedAt is when it was last saved
       t('rules: loading a save twice changes nothing',!bad.length,few(bad))}
+    {const m=[[999960,'$1.00M'],[999949,'$999.9k'],[-0.004,'$0'],[0.004,'$0'],[200000,'$200k'],[15000,'$15k'],[15040,'$15k'],[15150,'$15.2k'],[-12345,'−$12.3k'],[1234.4,'$1,234'],[1.5,'$1.50']].map(([v,w])=>[v,w,S.money(v)]).filter(([,w,g])=>w!==g);
+      t('rules: money() picks its unit after rounding and shows no stray zeros',!m.length,m.map(([v,w,g])=>`${v} → ${g}, not ${w}`).join('; ')||'11 values')}
     return out},HIST_TOP);
   for(const [name,pass,info] of res)ok(name,pass&&!errs.length,info+(errs.length?' '+errs[0]:''));
   await ctx.close();

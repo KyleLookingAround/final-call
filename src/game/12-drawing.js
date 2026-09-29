@@ -21,11 +21,11 @@ function drawStandApron(i){
   const st=G.stands[i],S=R.st[i],[ax,ay,aw,ah]=standArea(i);
   if(!st.built){
     if(isBuilding('stand:'+i)){ctx.save();standCtx(i);hatch(ax,ay,aw,ah,0,'');ctx.restore();toW(i,0,ay+ah/2);hatchLabel(WP.x,WP.y,bprog('stand:'+i),'BUILDING STAND '+GATES[i]);return}
-    if(!standOpen(i))return;
+    if(!standOpen(i)||STAND[i].lvl>G.level)return; // locked stands stay hidden
     ctx.save();standCtx(i);ctx.strokeStyle='#2B3238';ctx.lineWidth=1.5;ctx.setLineDash([6,6]);ctx.strokeRect(ax,ay,aw,ah);ctx.setLineDash([]);ctx.restore();
     toW(i,0,ay+ah*0.45);const lx=WP.x,ly=WP.y;
     ctx.font='800 22px "Saira Condensed","Arial Narrow",sans-serif';ctx.fillStyle='#2E363E';ctx.textAlign='center';ctx.textBaseline='alphabetic';ctx.fillText('STAND '+GATES[i],lx,ly);
-    mono(STAND[i].lvl>G.level?`Needs ${LEVELS[STAND[i].lvl].name}`:'For sale · '+money(STAND[i].cost),lx,ly+20,'#56606A',11,'center');
+    mono('For sale · '+money(STAND[i].cost),lx,ly+20,'#56606A',11,'center');
     return;
   }
   // a built stand's paint (lead-in, stop bar, safety lines, number) is on the apron layer: 51-markings.js
@@ -197,7 +197,7 @@ function gateBadge(i,dy){
   mono(dep?`${F.arr.code}${F.arr.no} ← ${F.arr.from[0]}`:`${F.code}${F.no} → ${F.dest[0]}`,x+6,y+32,'#ECE8DF',9.5);
   ctx.fillStyle='#232930';ctx.fillRect(x+6,y+38,w-12,4);ctx.fillStyle=col;ctx.fillRect(x+6,y+38,(w-12)*(dep?(F.arr.n-F.arr.onboard)/F.arr.n:F.seated/F.booked),4);
   const pl=F.plane;let left;
-  if(dep)left=`${F.arr.n-F.arr.onboard}/${F.arr.n} off`;else if(pl.state==='turnaround')left=`cleaning ${Math.ceil(pl.t)}m`;else if(pl.state==='wait'||pl.state==='approach')left=F.landed?'taxiing in':'on approach';else if(pl.state==='inbound')left='towing in';else if(F.fault>0)left=`repair ${Math.ceil(F.fault)}m`;else if(F.seated>=F.booked&&F.hold<F.checkedTotal)left=`hold ${Math.floor(F.hold)}/${F.checkedTotal}`;else left=`${F.seated}/${F.booked}`;
+  if(dep&&F.arr.n>0)left=`${F.arr.n-F.arr.onboard}/${F.arr.n} off`;else if(pl.state==='turnaround')left=`cleaning ${Math.ceil(pl.t)}m`;else if(pl.state==='wait'||pl.state==='approach')left=F.landed?'taxiing in':'on approach';else if(pl.state==='inbound')left='towing in';else if(F.fault>0)left=`repair ${Math.ceil(F.fault)}m`;else if(F.seated>=F.booked&&F.hold<F.checkedTotal)left=`bags ${Math.floor(F.hold)}/${F.checkedTotal}`;else left=`${F.seated}/${F.booked}`;
   const m=Math.ceil(F.std-G.clock);let rt=m>=0?`dep ${m}m`:`+${-m}m`;
   ctx.font='500 8.5px "IBM Plex Mono",monospace';
   if(ctx.measureText(left).width+ctx.measureText(rt).width+6>w-12){left=left.replace('on approach','approach').replace('taxiing in','taxi in').replace('towing in','tow in').replace('cleaning','clean');if(ctx.measureText(left).width+ctx.measureText(rt).width+6>w-12&&m>=0)rt=`${m}m`}

@@ -32,13 +32,16 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const pad=n=>String(n).padStart(2,'0');
 const hhmm=m=>{m=Math.floor(m);return pad(Math.floor(m/60)%24)+':'+pad(m%60)};
 function money(v){
+  if(Math.abs(v)<0.005)v=0;
   const s=v<0?'−':'';v=Math.abs(v);
-  if(v>=1e6) return s+'$'+(v/1e6).toFixed(2)+'M';
-  if(v>=1e4) return s+'$'+(v/1e3).toFixed(1)+'k';
+  if(v>=1e4){ // pick the unit after rounding, so 999,960 reads $1.00M and never $1000.0k
+    if(Math.round(v/100)>=1e4) return s+'$'+(v/1e6).toFixed(2)+'M';
+    return s+'$'+(Math.round(v/100)/10).toFixed(1).replace(/\.0$/,'')+'k';
+  }
   if(v>=100) return s+'$'+Math.round(v).toLocaleString('en-GB');
   const r=Math.round(v*100)/100;return s+'$'+(Number.isInteger(r)?r:r.toFixed(2));
 }
-const num=v=>v>=1e6?(v/1e6).toFixed(2)+'M':v>=1e4?(v/1e3).toFixed(1)+'k':Math.round(v).toLocaleString('en-GB');
+const num=v=>v>=1e4&&Math.round(v/100)>=1e4?(v/1e6).toFixed(2)+'M':v>=1e4?(v/1e3).toFixed(1)+'k':Math.round(v).toLocaleString('en-GB');
 const code=()=>{const n=(G.name||'Northwind').toUpperCase().replace(/[^A-Z ]/g,'').trim()||'NW';const w=n.split(/\s+/);if(w.length>1&&w[1]) return w[0][0]+w[1][0];if(n==='NORTHWIND')return 'NW';const c=n.slice(1).match(/[^AEIOU]/);return n[0]+(c?c[0]:'X')};
 const PRICE=[1,1.6,3,5,15,25,40,90,120,150];
 const capAt=(k,L)=>{const u=UPG[k];if(u.max<=1)return u.max;return Math.min(u.max,Math.max(1,Math.ceil(u.max*CAPFRAC[L])))};

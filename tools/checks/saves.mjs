@@ -88,4 +88,18 @@ export default async function({open,ok,saveText,saves,newest,url}){
       `frames ${n0} → ${r.raf}, speed ${r.speed}, ${r.toasts} toasts, save kept ${r.kept===before}`);
     await ctx.close();
   }
+  { // Settings › Save › Load: the first tap arms it, the label comes back after 3 s, and only a second tap inside 3 s loads
+    const {ctx,page}=await open(undefined,saveText(newest),false,{still:true});
+    const r=await page.evaluate(async()=>{const S=__sim,G=S.G,wait=ms=>new Promise(r=>setTimeout(r,ms));
+      S.R.setSub='save';S.setTab('office');S.R.oSub='settings';S.setTab('office');
+      const code=btoa(unescape(encodeURIComponent(JSON.stringify({...G,cash:12345,savedAt:Date.now()}))));
+      const box=document.querySelector('#saveIn'),btn=()=>document.querySelector('#loadSave');
+      if(!box)return {err:'no Save panel'};
+      box.value=code;btn().click();const armed=btn().textContent;
+      await wait(3500);const back=btn().textContent,cashAfterWait=G.cash;
+      btn().click();const rearmed=btn().textContent;btn().click();
+      return {armed,back,rearmed,loaded:S.G.cash===12345,notLoadedEarly:cashAfterWait!==12345}});
+    ok('saves: Load re-arms after 3 s, and two taps inside 3 s replace the airport',!r.err&&r.armed==='Tap to replace this airport'&&r.back==='Load'&&r.rearmed==='Tap to replace this airport'&&r.loaded&&r.notLoadedEarly,JSON.stringify(r));
+    await ctx.close();
+  }
 }
