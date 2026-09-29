@@ -28,7 +28,7 @@ The project notes (`CLAUDE.md`) hold what every change needs. This file holds ho
 - [Transport manager](systems/transport-manager.md) (`32-managers.js`)
 - [Update check](systems/update-check.md) (`37-update-check.js`)
 - [Usage counts](systems/usage-counts.md) (`65-usage-counts.js`)
-- [Weather and events](systems/weather.md) (`28-region-weather.js`, `10-events-toasts.js`, `54-weather.js`, `41-airside.js`, `07-passengers.js`, `12-drawing.js`, `39-layouts.js`, `43-departures.js`, `47-hotel.js`, `04-geometry.js`)
+- [Weather and events](systems/weather.md) (`28-region-weather.js`, `10-events-toasts.js`, `54-weather.js`, `41-airside.js`, `07-passengers.js`, `04-geometry.js`, `39-layouts.js`, `43-departures.js`, `47-hotel.js`, `12-drawing.js`)
 - [What's new](systems/whats-new.md) (`38-updates.js`)
 <!-- /joined:systems -->
 
