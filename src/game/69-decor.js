@@ -1,5 +1,6 @@
 /* ================= DECOR: planters, benches, art and boards that come with the building, and local names ================= */
-// Every hall of the terminal gets planters, benches, art and a grand departures board (docs/systems/decor.md, spec
+// Every hall of the terminal gets planters, benches and art, and the check-in hall, the market place and the arrivals hall a
+// grand departures (or arrivals) board (docs/systems/decor.md, spec
 // docs/specs/terminal-place.md), worked out from the layout's rooms (LAY.term), what's built (roomOn) and the level: more
 // with each level, and a hall's decor arrives with the hall. Placed along the walls, never on a queue slot, counter, lane,
 // doorway, floor link or the walk between two doorways (decObst). The roof terrace adds planters and benches on its public
@@ -19,6 +20,9 @@ let DEC=null,DEC_NAMES=null; // {key, all: each hall's full list} and the local 
 // what decor keeps clear of: every counter, queue slot and doorway as [x, y, r]; the walk between any two doorways of a
 // hall, and from its doorways to the desks people walk to, as segments; the halls' furniture and labels as boxes
 function decObst(){
+  // The counters and queues come from their own functions, so they follow a plan that moves them; the furniture boxes
+  // and walk goals below are where 43-47 draw them today (Classic's plan, which every layout shares until the floor plans
+  // part), kept on every floor, which only keeps decor further away
   const pts=[],P=(x,y,r)=>pts.push([x,y,r]),segs=[],rects=[],hs=new Set(LAY.term.halls.map(h=>h.id));
   const dY=i=>typeof deskY==='function'?deskY(i):707,lY=i=>typeof laneY==='function'?laneY(i):SEC_LINE,kY=i=>typeof kioskY==='function'?kioskY(i):707; // Classic's, until a plan moves them
   for(let i=0;i<8;i++){P(deskX(i),dY(i),10);P(laneX(i),lY(i),10);const b=boothPos(i),e=egatePos(i);P(b.x,b.y,8);P(e.x,e.y,8)}
@@ -85,10 +89,10 @@ function decor(){
   list.push(...decTerrace());DEC.key=key;DEC.list=list;DEC_NAMES=null;return list;
 }
 // the names a food or book shop takes from a place, kept short enough for the unit's front
-const DEC_SHOP={coffee:n=>n+' Coffee',cafe:n=>n+' Kitchen',bar:n=>'The '+n+' Arms',dining:n=>n+' Grill',books:n=>n+' News'};
+const DEC_SHOP={coffee:n=>n+' Café',cafe:n=>n+' Deli',bar:n=>n+' Tap',dining:n=>n+' Inn',books:n=>n+' News'};
 // Which units take one, and which place, worked out for every unit at once in the units' order: a unit's own hash picks
 // the first place to try, and it takes the first from there that no unit before it has and whose name has at most 13
-// letters, so the level and the count still fit beside it (the first that fits if every place is taken)
+// characters (spaces too), so the level and the count still fit beside it (the first that fits if every place is taken)
 let DEC_SHOPS=null;
 function decShopPlace(j){
   const sig=G.shops.map(s=>s?s.type:'').join();if(DEC_SHOPS&&DEC_SHOPS.sig===sig)return DEC_SHOPS.pl[j];
@@ -120,6 +124,7 @@ function drawDecor(D){
   for(const d of ds){if(d.hall==='ter'||!onFloor(d.fl)||d.x1<V.x0||d.x0>V.x1||d.y1<V.y0||d.y0>V.y1)continue;const w=d.x1-d.x0,h=d.y1-d.y0;
     if(far){sq(d.x0,d.y0,w,h,d.kind==='planter'?DEC_PLANT:d.kind==='bench'?DEC_WOOD:d.kind==='art'?DEC_COL[d.place]:'#2A3037');continue}
     decItem(d,w,h,k,sq)}
+  if(k>=2.2){ctx.textAlign='left';ctx.textBaseline='alphabetic'}
 }
 function decItem(d,w,h,k,sq){
   const cx=(d.x0+d.x1)/2,cy=(d.y0+d.y1)/2;
