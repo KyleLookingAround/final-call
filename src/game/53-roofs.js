@@ -11,7 +11,7 @@ const floorNow=()=>R.floor==='down'?0:1; // the floor of halls drawn: 0 arrivals
 // shows Roof and Halls), worked out once per plan (ROOMS is made afresh by applyLayout)
 let FL2=null;
 function twoFloors(){if(!ROOMS)return false;if(FL2&&FL2.rs===ROOMS)return FL2.two;FL2={rs:ROOMS,two:ROOMS.some(r=>r.fl===0)&&ROOMS.some(r=>r.fl===1)};return FL2.two}
-const onFloor=fl=>fl==null||fl===floorNow()||!twoFloors(); // a room or passenger without a floor is on both; with one floor, everything shows
+const onFloor=fl=>fl===2?!!roofA():fl==null||fl===floorNow()||!twoFloors(); // a room or passenger without a floor is on both; with one floor, everything shows; the roof terrace (2) only on the roof
 function setFloor(f){if(f==='down'&&!twoFloors())f='up';if(R.floor===f)return;R.floor=f;renderCam()}
 // is (x, y) under a built roof? P is roofNow()'s plan
 function underRoof(P,x,y){const rs=P.rooms;for(let j=0;j<rs.length;j++){const r=rs[j];if(x>=r.x0&&x<=r.x1&&y>=r.y0&&y<=r.y1&&inPoly(r.poly,x,y))return true}return false}

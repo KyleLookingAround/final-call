@@ -13,9 +13,10 @@ export default async function({open,ok,saveText,newest}){
     S.renderCam();const start=R.floor,halls=[0.01,1,1.6].map(seen); // the halls, clear at every zoom
     btn().click();const up=R.floor,pressed=btn().classList.contains('on'),roof=[0.01,1,1.6].map(seen),a=S.roofA(); // the roof, at every zoom
     btn('up').click();const down=R.floor,back=seen(0.01);btn().click(); // and down to departures again; the rest is checked on the roof
-    // not built yet: Pier B's rooms before Pier B, the hotel before it's bought (and roofed once they are)
+    // not built yet: Pier B's rooms before Pier B, the hotel before it's bought (and roofed once they are). The roof terrace
+    // (fl 2) is left out: it sits on the concourse's roof, so its middle is roofed either way
     zoom(0.01);const pierB=G.pierB,hotel=G.lv.hotel;G.pierB=false;G.lv.hotel=0;
-    const later=S.ROOMS.filter(r=>r.ph===2||r.need),at=r=>{const P=r.poly,x=P.reduce((a,p)=>a+p[0],0)/P.length,y=P.reduce((a,p)=>a+p[1],0)/P.length;return roofed(x,y)},
+    const later=S.ROOMS.filter(r=>(r.ph===2||r.need)&&r.fl!==2),at=r=>{const P=r.poly,x=P.reduce((a,p)=>a+p[0],0)/P.length,y=P.reduce((a,p)=>a+p[1],0)/P.length;return roofed(x,y)},
       hid=later.map(at),planned=S.roofNow().rooms.length;G.pierB=true;G.lv.hotel=Math.max(1,hotel||0);const all=S.roofNow().rooms.length,shown=later.map(at);G.pierB=pierB;G.lv.hotel=hotel;
     // taps through the roof: a shop under it opens Sales, a stand selects it
     zoom(0.01);S.draw();const k=S.viewK(),tap=(x,y)=>{R.lastTap=0;S.tapAt((x-R.cam.x)*k,(y-R.cam.y)*k)};

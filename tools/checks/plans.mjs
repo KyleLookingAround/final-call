@@ -34,10 +34,10 @@ export default async function({open,ok,saveText,saves,newest}){
       const own=new Set(L.rooms.map(r=>r.id)),merged=S.ROOMS.filter(r=>!own.has(r.id)).map(r=>r.id).sort();
       o.table=T?(merged.join()===T.halls.map(h=>h.id).sort().join()&&T.halls.every(h=>{const r=TP.room(h.id);return r&&JSON.stringify(r.poly)===JSON.stringify(h.poly)})):false;
       o.faults=S.layoutFaults(id).slice(0,2);S.applyLayout(id);
-      // floors: a hall's is 0, 1 or none; a doorway joins rooms that share a floor, or is a floor link
+      // floors: a hall's is 0, 1, 2 (the roof terrace) or none; a doorway joins rooms that share a floor, or is a floor link
       const fl=k=>S.ROOMS[S.hallId(k)]&&S.ROOMS[S.hallId(k)].fl;
-      o.badFl=S.ROOMS.filter(r=>r.fl!=null&&r.fl!==0&&r.fl!==1).map(r=>r.id);
-      o.badDoor=TP.doors().filter(d=>!TP.isLink(d)&&fl(d[0])!=null&&fl(d[1])!=null&&fl(d[0])!==fl(d[1])).map(d=>d[0]+'–'+d[1]);
+      o.badFl=S.ROOMS.filter(r=>r.fl!=null&&r.fl!==0&&r.fl!==1&&!(r.fl===2&&r.id==='ter')).map(r=>r.id);
+      o.badDoor=TP.doors().filter(d=>!TP.anyLink(d)&&fl(d[0])!=null&&fl(d[1])!=null&&fl(d[0])!==fl(d[1])).map(d=>d[0]+'–'+d[1]);
       // halls inside the main building, clear of the airside rooms and the stands
       const halls=TP.halls().filter(r=>!r.open),air=L.rooms.filter(r=>!r.open).map(r=>r.poly);
       const standQ=S.SIDX.map(i=>[[-150,30],[150,30],[150,500],[-150,500]].map(([a,b])=>{const X=S.XF[i];return [X.ox+a*X.c-b*X.s,X.oy+a*X.s+b*X.c]}));

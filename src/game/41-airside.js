@@ -116,9 +116,9 @@ function layoutFaults(id){
   ROOMS.forEach(r=>{const P=r.poly,n=P.length;let sgn=0;for(let k=0;k<n;k++){const [a,b]=P[k],[c,d]=P[(k+1)%n],[e,f]=P[(k+2)%n],cr=Math.sign((c-a)*(f-d)-(d-b)*(e-c));if(cr&&sgn&&cr!==sgn){bad.push(`room ${r.id} isn't convex`);break}if(cr)sgn=cr}
     const root=r.land?'out':'main';if(r.id!==root&&!ROUTE[ROOM_ID[r.id]][ROOM_ID[root]])bad.push(`room ${r.id} can't be reached`)}); // landside halls from outside, airside ones from the concourse
   bad.push(...terminalFaults());
-  // floors: a room's is 0, 1 or none; a doorway is on the wall of both its rooms and joins one floor, and a floor link stands
+  // floors: a room's is 0, 1, 2 (the roof terrace) or none; a doorway is on the wall of both its rooms and joins one floor, and a floor link stands
   // in both its rooms and joins two
-  ROOMS.forEach(r=>{if(r.fl!=null&&r.fl!==0&&r.fl!==1)bad.push(`room ${r.id} has no floor ${r.fl}`)});
+  ROOMS.forEach(r=>{if(r.fl!=null&&r.fl!==0&&r.fl!==1&&r.fl!==2)bad.push(`room ${r.id} has no floor ${r.fl}`)});
   const flOf=id=>ROOM_ID[id]!=null?ROOMS[ROOM_ID[id]].fl:undefined;
   for(const d of ROOM_DOORS){const [a,b,x,y]=d,fa=flOf(a),fb=flOf(b);
     if(isFloorLink(d)){for(const r of [a,b])if(ROOM_ID[r]==null||!(inPoly(ROOMS[ROOM_ID[r]].poly,x,y)||edgeDist(ROOMS[ROOM_ID[r]].poly,x,y)<=3))bad.push(`the ${d[5]==='lift'?'lift':'escalator'} ${a}–${b} isn't in ${r}`);

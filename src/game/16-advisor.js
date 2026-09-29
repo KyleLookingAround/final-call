@@ -25,7 +25,7 @@ function advise(){
   if(!a&&ciW>7)a=up(`Check-in queue is about ${Math.round(ciW)} min.`,['desks','training','kiosks','online']);
   if(!a&&R.st.some(s=>s.F&&s.F.plane.state==='boarding'&&s.F.seated>=s.F.booked-2&&s.F.hold<s.F.checkedTotal-2))a=up('A full plane is waiting on hold bags.',['handlers','bagsys']);
   if(!a){const crowd=R.st.some((S,i)=>S.F&&S.F.plane.state==='boarding'&&R.pax.filter(p=>p.stand===i&&p.state==='gate').length>14);if(crowd)a=up('Passengers are piling up at a gate.',['scanners','walkway'])}
-  if(!a)a=cafeTip()||hotelTip(up);
+  if(!a)a=cafeTip()||hotelTip(up)||terraceTip();
   if(!a){const jam=R.st.some(S=>S.aisle.flat().filter(p=>p.phase==='stow'||p.phase==='shuffle').length>=4);if(jam)a=up('Aisles are jammed with people stowing bags.',['bins'])}
   if(!a&&SET().recs!==false&&R.trRecs&&R.trRecs.sig===recSig()){const c=R.trRecs.list.find(c=>!c.id||G.lines[c.id]);if(c&&c.pay<12&&G.cash>=c.cost)a={...recTip(c),label:'See it'}}
   if(!a&&tabOpen('routes')){let sup=0,mk=0;for(const c in (G.routes||{})){sup+=rsOf(c).s;mk+=cityMarket(c)}if(mk>0&&sup>mk*1.15&&CITIES.some(c=>!routeOpen(c[0])&&has('rt:'+c[2])))a={text:`Your planes offer ${Math.round(sup/mk*100)}% of the seats your cities want, so flights leave emptier. A new route opens a new market.`,go:['routes','[data-ropen]'],label:'Routes'}}

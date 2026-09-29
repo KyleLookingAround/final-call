@@ -109,7 +109,9 @@ function airside(p,x,room){
   p.nv=0;nextAct(p,true);
 }
 // what next: the gate once it's called; otherwise a shop, or somewhere to wait in the market place. Anyone through
-// security after their gate is called may still stop at one shop on the way, as they did before gate calls.
+// security after their gate is called may still stop at one shop on the way, as they did before gate calls. Before a
+// seat, NEXT_ACT's hooks may send them elsewhere: (p) → true if one has (the roof terrace, 67-terrace.js)
+const NEXT_ACT=[];
 function nextAct(p,first){
   p.sl=-1;R.occOut=true;const called=isCalled(p.F);
   if(called&&!first){toGate(p);return}
@@ -117,6 +119,7 @@ function nextAct(p,first){
   if(L&&(L.state==='toShop'||L.state==='shop')&&G.shops[L.shop]){const s=freeSpot('s'+L.shop,shopCap(L.shop));if(s>=0){toShop(p,L.shop,s);return}}
   if(!L&&pickShop(p,first)>=0)return;
   if(called){toGate(p);return}
+  for(const f of NEXT_ACT)if(f(p))return;
   if(L&&(L.state==='toMkt'||L.state==='mkt')&&!p.kid){goAct(p,L.act==='play'?'playB':L.act);return}
   goAct(p,pickAct(p));
 }
