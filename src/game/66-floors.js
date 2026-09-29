@@ -71,7 +71,7 @@ TERM_DRAW.push(()=>{const two=twoFloors();
 function hallLabel(id){const r=ROOMS&&ROOMS[ROOM_ID[id]];if(!r)return null;let x0=1e9,y0=1e9;for(const [x,y] of r.poly){x0=Math.min(x0,x);y0=Math.min(y0,y)}const h=LAY.term.halls.find(h=>h.id===id);return h&&h.lab?h.lab.slice(0,2):[x0+8,y0+10]}
 // the camera flies to (x, y), at least a little zoomed in
 function flyTo(x,y){const c=R.cam;c.z=Math.max(c.z,1.1);clampCam();const k=viewK(),vw=R.sw/k,vh=R.sh/k;
-  c.tx=vw>=W?(W-vw)/2:clamp(x-vw/2,0,W-vw);c.ty=vh>=Y1-Y0?Y0+(Y1-Y0-vh)/2:clamp(y-vh/2,Y0,Y1-vh)}
+  c.tx=vw>=W?(W-vw)/2:clamp(x-vw/2,0,W-vw);{const b=camBounds();c.ty=vh>=b.y1-Y0?Y0+(b.y1-Y0-vh)/2:clamp(y-vh/2,Y0,b.y1-vh)}} // camBounds() keeps the phone camera bar's margin below Y1
 function flyHall(id){const r=ROOMS&&ROOMS[ROOM_ID[id]];if(!r||R.view!=='airport')return false;
   let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(const [x,y] of r.poly){x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y)}
   flyTo((x0+x1)/2,(y0+y1)/2);setFloor(r.fl===0?'down':R.floor==='roof'||r.fl===1?'up':R.floor);return true}

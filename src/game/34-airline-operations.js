@@ -49,6 +49,6 @@ function crewPanel(){
   const s=crewState(),t=crewTarget(),auto=SET().autoCrews!==false;
   return `<div class="sec">Crews<span>wages ${money(s.n*crewWage())} an hour</span></div>
     <div class="lstats fl4" style="grid-template-columns:repeat(4,1fr)"><div><b>${s.n}</b><span>crews</span></div><div><b>${s.fly}</b><span>flying</span></div><div><b>${s.rest}</b><span>resting</span></div><div><b style="color:${s.ready?'':'var(--bad)'}">${s.ready}</b><span>ready</span></div></div>
-    <p class="note">Every departure needs a rested crew. Crews rest 12 h after about 10 h on duty.${auto?` The fleet manager keeps about ${t}.`:''}</p>
+    <p class="note">Each departure needs a rested crew: about 10 h on duty, then 12 h rest.${auto?` The fleet manager keeps about ${t}.`:''}</p>
     <div class="chips"><button class="chip" data-crewhire="1" data-cost="${crewFee()}">Hire a crew <small>${money(crewFee())}</small></button>${s.n>1?`<button class="chip" data-crewrel="1">Release one</button>`:''}<button class="chip${auto?' on':''}" data-setq="autoCrews">${auto?'✓ ':''}Auto crews</button></div>`;
 }
