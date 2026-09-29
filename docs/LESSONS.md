@@ -10,8 +10,6 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 <!-- joined:lessons from docs/lessons/ by tools/join.mjs: don't edit between these lines -->
 ### Balance
 
-- [#170 Release: terminal polish pass · 29 Sep 2026](lessons/170-release-terminal-polish.md)
-- [Release batch F1: tips that point the right way (#148, #166) · 29 Sep 2026](lessons/166-release-f1-tips.md)
 - [The first level-up in the first morning (#117) · 28 Sep 2026](lessons/117-early-first-level.md)
 - [#101 A rating that reflects the last day, measured and switched on; a network you have to keep, specced · 27 Sep 2026](lessons/101-balance-rating.md)
 - [Reading the game's logic: #57 game logic ideas, #66 systems review · 27 Sep 2026](lessons/66-game-logic-review.md)
@@ -60,6 +58,10 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 - [The region map, looking better · 27 Sep 2026](lessons/108-region-map-looks.md)
 - [Version 31: the real airport brought together · 27 Sep 2026](lessons/67-real-airport-together.md)
 
+### Exchange
+
+- [Lessons from Overgrow, carried into the playbooks (#178) · 29 Sep 2026](lessons/178-lessons-from-overgrow.md)
+
 ### Merge-chasing
 
 - [A busy `main` with Catch up running: #114 playbooks, #122 usage counts · 28 Sep 2026](lessons/122-busy-launch-night.md)
@@ -70,19 +72,17 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 ### Parts
 
+- [The coordinator's look back: two floors to release 35 · 29 Sep 2026](lessons/176-coordinator-release-35.md)
 - [Real airport parts: #50 planes, #55 vehicles, #52 roofs, #53 markings, #61 weather · 27 Sep 2026](lessons/50-real-airport-parts.md)
 - [The terminal built in parts: #18 halls, #19 hotel, #21 baggage, #22 departures, #23 arrivals, #24 market place, #26 together, #36 briefs · 26–27 Sep 2026](lessons/36-terminal-parts.md)
 
 ### Releases
 
-- [#175 Release 35, the public release · 29 Sep 2026](lessons/175-release-35.md)
-- [Release P4: numbers, labels and the save panel · 29 Sep 2026](lessons/164-release-p4-labels.md)
-- [Cutting releases: version 32, #118 release 33, #126 release 34 · 27–28 Sep 2026](lessons/126-releases.md)
+- [Cutting releases: version 32, #118 release 33, #126 release 34, #175 release 35 · 27–29 Sep 2026](lessons/175-releases.md)
+- [Release audit batches: #164 P4 labels, #165 P3 small screens, #166 F1 tips, #170 terminal polish, #171 B1 pacing, #172 loose ends · 29 Sep 2026](lessons/172-release-audit-batches.md)
 
 ### Review
 
-- [Release P3, small screens and landscape · 29 Sep 2026](lessons/165-release-p3-screens.md)
-- [#159 Release batch P2: moments you can hear and see · 28 Sep 2026](lessons/159-release-p2-moments.md)
 - [Audits by helper agents: the polish audit, #106 launch audit, #155 release audit · 27–28 Sep 2026](lessons/155-audits.md)
 - [Systems review · 27 Sep 2026](lessons/66-systems-review.md)
 - [#47 Runbook experiment [E]: a fresh review before opening · 27 Sep 2026](lessons/47-reviewer-step.md)
@@ -94,6 +94,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 ### Tidy
 
+- [#179 Tidy the lessons · 29 Sep 2026](lessons/179-lessons-tidy.md)
 - [#169 Tidy the lessons · 29 Sep 2026](lessons/169-lessons-tidy.md)
 - [#131 Tidy the lessons · 28 Sep 2026](lessons/131-lessons-tidy.md)
 
@@ -112,6 +113,4 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 ### Not sorted yet
 
 - [#180 A Roadmap tab on What's new · 29 Sep 2026](lessons/180-roadmap-tab.md)
-- [Release loose ends · 29 Sep 2026](lessons/172-release-loose-ends.md)
-- [Release B1, level pacing and payoffs (#171) · 29 Sep 2026](lessons/171-release-b1-pacing.md)
 <!-- /joined:lessons -->

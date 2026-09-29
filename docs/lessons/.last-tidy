@@ -9,7 +9,6 @@
 122-busy-launch-night.md
 122-usage-counts.md
 124-phone-polish.md
-126-releases.md
 127-phone-bugs.md
 129-whats-new-card.md
 131-lessons-tidy.md
@@ -25,9 +24,14 @@
 156-refactor-passes-merge.md
 156-systems-refactors.md
 159-release-fix-batches.md
-159-release-p2-moments.md
 162-terminal-place-floors.md
 169-lessons-tidy.md
+172-release-audit-batches.md
+174-release-docs.md
+175-releases.md
+176-coordinator-release-35.md
+178-lessons-from-overgrow.md
+179-lessons-tidy.md
 34-one-session-four-prs.md
 36-terminal-parts.md
 43-description-check.md

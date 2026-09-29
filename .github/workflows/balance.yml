@@ -4,6 +4,8 @@ name: Balance
 # tools/baseline.json, once keeping the Classic layout and once rebuilding into better layouts
 # (which should reach level 9 about 5-10% sooner). Runs once on a PR that changes the game or the bot, when it opens
 # (or leaves draft), and again when the `balance` label is added; and on demand. Not on every push.
+# A PR labelled `refactor` or `balance` also gets the `compare` job: it builds the PR's merge base (not the moved `main`)
+# and prints, seed by seed, whether `PLAY` and `STATE` match the branch's. It runs when either label is added.
 on:
   pull_request:
     types: [opened, reopened, ready_for_review, labeled]
@@ -54,3 +56,76 @@ jobs:
         if: steps.pw-cache.outputs.cache-hit == 'true'
       # the table lands in the run's summary, and a level far off its baseline becomes a warning
       - run: npm run bot -- 1200 '{"layouts":${{ matrix.layouts }}}' --seed ${{ matrix.seed }}
+
+  # the branch's PLAY and STATE beside its merge base's, on seeds 1-3 keeping Classic; a change meant to leave play as it
+  # is (a refactor, a UI change) must match on every seed, and a balance change shows where it moved. Never fails the PR.
+  compare:
+    if: >-
+      github.event_name == 'pull_request' && !github.event.pull_request.draft &&
+      (contains(github.event.pull_request.labels.*.name, 'refactor') || contains(github.event.pull_request.labels.*.name, 'balance')) &&
+      (github.event.action != 'labeled' || github.event.label.name == 'refactor' || github.event.label.name == 'balance')
+    concurrency:
+      group: balance-compare-${{ github.event.pull_request.number }}-${{ matrix.seed }}
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        seed: [1, 2, 3]
+    steps:
+      # the PR's own head, not the merge with a moved `main` that a pull_request run checks out by default
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - id: pw-version
+        run: echo "version=$(node -p "require('./package-lock.json').packages['node_modules/playwright'].version")" >> "$GITHUB_OUTPUT"
+      - id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw-version.outputs.version }}
+      - run: npx playwright install --with-deps chromium
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+      - run: npx playwright install-deps chromium
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+      - name: Build the merge base beside the branch
+        run: |
+          base=$(git merge-base "${{ github.event.pull_request.head.sha }}" "origin/${{ github.event.pull_request.base.ref }}")
+          echo "BASE_SHA=$base" >> "$GITHUB_ENV"
+          git worktree add "$RUNNER_TEMP/base" "$base"
+          ln -s "$PWD/node_modules" "$RUNNER_TEMP/base/node_modules"
+          npm run build
+          (cd "$RUNNER_TEMP/base" && npm run build)
+      - name: Play both, side by side
+        run: |
+          node tools/run-bot.mjs 1200 --seed ${{ matrix.seed }} > "$RUNNER_TEMP/head.log" 2>/dev/null & head=$!
+          (cd "$RUNNER_TEMP/base" && node tools/run-bot.mjs 1200 --seed ${{ matrix.seed }} > "$RUNNER_TEMP/base.log" 2>/dev/null) & base=$!
+          # a run with errors exits 1; the Balance job above reports those, so this only compares
+          wait $head || true
+          wait $base || true
+      - name: Compare
+        run: |
+          get() { grep -m1 "^$2 " "$1" | cut -d' ' -f2; }
+          hp=$(get "$RUNNER_TEMP/head.log" PLAY); bp=$(get "$RUNNER_TEMP/base.log" PLAY)
+          hs=$(get "$RUNNER_TEMP/head.log" STATE); bs=$(get "$RUNNER_TEMP/base.log" STATE)
+          same() { if [ -n "$1" ] && [ "$1" = "$2" ]; then echo match; else echo DIFFERENT; fi; }
+          play=$(same "$hp" "$bp"); state=$(same "$hs" "$bs")
+          {
+            echo "Seed ${{ matrix.seed }}, the branch against its merge base \`${BASE_SHA:0:7}\`"
+            echo
+            echo "| | Branch | Merge base | |"
+            echo "| --- | --- | --- | --- |"
+            echo "| PLAY | \`${hp:-none}\` | \`${bp:-none}\` | $play |"
+            echo "| STATE | \`${hs:-none}\` | \`${bs:-none}\` | $state |"
+            echo
+            echo "PLAY leaves out the settings and a few one-off flags, so a change that only adds a setting or a What's new entry differs in STATE alone."
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+          if [ "$play" = match ]; then echo "::notice::Seed ${{ matrix.seed }}: PLAY matches the merge base (STATE $state)"
+          else echo "::warning::Seed ${{ matrix.seed }}: PLAY differs from the merge base (${bp:-no run} against ${hp:-no run})"; fi
