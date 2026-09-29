@@ -145,4 +145,8 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 - [#107 The phone's top bar back on one row · 27 Sep 2026](lessons/107-phone-topbar.md)
 - [Polish: phone chrome and touch targets · 27 Sep 2026](lessons/84-phone-chrome.md)
 - [#51 Clear roofs at the starting zoom · 27 Sep 2026](lessons/63-roofs-clear.md)
+
+### Not sorted yet
+
+- [Release B1, level pacing and payoffs (#171) · 29 Sep 2026](lessons/171-release-b1-pacing.md)
 <!-- /joined:lessons -->

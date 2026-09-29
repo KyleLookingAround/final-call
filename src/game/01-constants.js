@@ -6,6 +6,7 @@ let W=2480; // world width
 const STAND_X=[170,470,770,1070,1370,1670,1970,2270];
 const GATES=['A1','A2','A3','A4','B1','B2','B3','B4'];
 const SHOP_X=STAND_X.map(x=>x+22),SHOP_PH=[1,1,1,1,2,2,2,2],SHOP_NAME=GATES.slice(); // shop units: left edge, phase (2 needs Pier B), label
+// defaults only: each layout sets its own stands, costs and levels (39-layouts.js: Classic's own list, the others from LADDER), so change a gate's price there
 const STAND=[
   {cost:0,build:0,lvl:0},{cost:400,build:30,lvl:0},{cost:3000,build:60,lvl:1},{cost:12000,build:90,lvl:3},
   {cost:80000,build:120,lvl:4,pier:1},{cost:150000,build:150,lvl:4,pier:1},{cost:300000,build:180,lvl:6,pier:1},{cost:500000,build:210,lvl:6,pier:1}];
