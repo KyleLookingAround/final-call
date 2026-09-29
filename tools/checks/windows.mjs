@@ -15,7 +15,8 @@ export default async function({open,ok,saveText,newest}){
     for(const id of ids){S.resetAll(JSON.parse(text));S.switchLayout(id);TP.build();S.applyLayout(id);
       const on=TP.built(),rooms=S.ROOMS.filter((r,k)=>on[k]),inAny=(x,y)=>S.ROOMS.some((r,k)=>(on[k]||r.open)&&TP.inPoly(r.poly,x,y));
       // the walls: each edge of an airside room whose outside, 8 units out, is apron: no room there, above the halls, on the map
-      const want=[];for(const r of rooms){if(r.land)continue;const [cx,cy]=TP.mid(r.poly);r.poly.forEach(([x1,y1],k)=>{const [x2,y2]=r.poly[(k+1)%r.poly.length],l=Math.hypot(x2-x1,y2-y1);if(l<10)return;
+      const want=[];for(const r of rooms){if(r.land||r.fl===2)continue; // the roof terrace (fl 2) keeps its own rail, not glass
+      const [cx,cy]=TP.mid(r.poly);r.poly.forEach(([x1,y1],k)=>{const [x2,y2]=r.poly[(k+1)%r.poly.length],l=Math.hypot(x2-x1,y2-y1);if(l<10)return;
         let nx=(y2-y1)/l,ny=-(x2-x1)/l;const mx=(x1+x2)/2,my=(y1+y2)/2;if((cx-mx)*nx+(cy-my)*ny>0){nx=-nx;ny=-ny}const ox=mx+nx*8,oy=my+ny*8;
         if(!inAny(ox,oy)&&oy<APRON_Y&&ox>0&&ox<S.W)want.push([x1,y1,x2,y2,r.id])})}
       const glass=S.glass?S.glass():null,o=out[id]={walls:want.length,glass:glass?glass.length:null,bare:[],stray:0};

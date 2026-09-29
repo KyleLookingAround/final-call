@@ -77,6 +77,10 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 - [Real airport parts: #50 planes, #55 vehicles, #52 roofs, #53 markings, #61 weather · 27 Sep 2026](lessons/50-real-airport-parts.md)
 - [The terminal built in parts: #18 halls, #19 hotel, #21 baggage, #22 departures, #23 arrivals, #24 market place, #26 together, #36 briefs · 26–27 Sep 2026](lessons/36-terminal-parts.md)
 
+### Release
+
+- [Release 36: the roof terrace and the Roadmap tab · 29 Sep 2026](lessons/182-release-36.md)
+
 ### Releases
 
 - [Cutting releases: version 32, #118 release 33, #126 release 34, #175 release 35 · 27–29 Sep 2026](lessons/175-releases.md)
