@@ -91,7 +91,7 @@ const CAPFRAC=[0.35,0.5,0.58,0.65,0.8,0.85,0.9,1,1,1];
 const SEASONS=[{name:'Spring',dem:1},{name:'Summer',dem:1.1},{name:'Autumn',dem:1},{name:'Winter',dem:0.9}];
 const EF={
   checkin:l=>1.8*Math.pow(0.88,l), kiosk:l=>1.0*Math.pow(0.93,l), sec:l=>1.5*Math.pow(0.87,l), scan:l=>1.3*Math.pow(0.85,l),
-  stow:l=>2.6*Math.pow(0.86,l), carry:l=>Math.max(0.2,0.85-0.13*l), clean:l=>6*Math.pow(0.8,l), bag:l=>2.4*Math.pow(1.28,l), tow:l=>3*Math.pow(0.85,l), land:l=>6*Math.pow(0.86,l), tko:l=>4.5*Math.pow(0.86,l),
+  stow:l=>2.3*Math.pow(0.86,l), carry:l=>Math.max(0.2,0.85-0.13*l), clean:l=>6*Math.pow(0.8,l), bag:l=>2.4*Math.pow(1.28,l), tow:l=>3*Math.pow(0.85,l), land:l=>6*Math.pow(0.86,l), tko:l=>4.5*Math.pow(0.86,l),
 };
 const f1=v=>v.toFixed(1),f2=v=>v.toFixed(2);
 const UPG={
