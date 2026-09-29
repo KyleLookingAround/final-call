@@ -180,7 +180,7 @@ function applyLayout(id){
   fill(XF,L.stands.map(standXf));ROOM_DOORS=[...(L.doors||[]),...L.term.doors];buildRooms({...L,rooms:[...L.rooms,...L.term.halls],doors:ROOM_DOORS});AF_Y=L.top||0;Y0=AF_Y-180;placeBadges();
 }
 
-const busMul=i=>STAND_KIND[i]!=='remote'?1:!G.lounges&&(R.fx.rain>G.clock||R.fx.snow>G.clock)?1.4:2.2; // buses outpace walkers, less so in bad weather; mobile lounges don't mind it
+const busMul=i=>STAND_KIND[i]!=='remote'?1:!G.lounges&&(weather.on('rain')||weather.on('snow'))?1.4:2.2; // buses outpace walkers, less so in bad weather; mobile lounges don't mind it
 // mobile lounges (Washington Dulles): lounges on stilts that drive out to remote stands and rise to the door
 const LOUNGES={cost:200000,build:120};
 const layoutOk=id=>id==='classic'||has('lay:'+id);

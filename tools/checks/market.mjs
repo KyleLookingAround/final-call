@@ -45,4 +45,14 @@ export default async function({open,ok,saveText}){
       return {cafes:cafes.length,quiet:!!quiet,busy:busy&&busy.go[1],want:`[data-shopup="${want}"]`,hotel:!!G.lv.hotel,hq:!!hq,hb:hb&&hb.text}});
     ok('advisor: points at the fullest café, and at a hotel that turned guests away',t.cafes>1&&!t.quiet&&t.busy===t.want&&t.hotel&&!t.hq&&/turned away 14/.test(t.hb||'')&&!errs.length,JSON.stringify(t)+(errs.length?' '+errs[0]:''));
     await ctx.close()}
+  // a top-level coffee cart in a prime unit is pointed at a better shop on Sales › Shops, and a restaurant isn't; and the
+  // terminal's labels (a hall's name, a unit to let) are drawn at least about 8 screen pixels high on a phone and a tablet
+  {const {ctx,page,errs}=await open(undefined,saveText('v32-L9.json'),false,{still:true});
+    const r=await page.evaluate(()=>{const S=__sim,G=S.G,R=S.R;const kinds=G.shops.map((s,j)=>s&&[S.SHOPS[s.type].id,s.lvl,S.betterShop(j)&&S.betterShop(j).t.id]).filter(Boolean);
+      R.sSub='shops';S.setTab('sales');const txt=document.querySelector('#panel').textContent;
+      const px=[0.21,0.41,0.58].map(k=>{S.V.k=k;return +(S.labelSize('MARKET PLACE',8.5,536)*k).toFixed(1)});return {kinds,said:/is at its top level/.test(txt),px}});
+    const cart=r.kinds.find(k=>k[0]==='coffee'&&k[1]>=4),duty=r.kinds.filter(k=>k[0]==='duty'||k[0]==='dining');
+    ok('market: a top-level coffee cart is pointed at a better shop',!!cart&&!!cart[2]&&duty.every(k=>!k[2])&&r.said&&!errs.length,JSON.stringify(r.kinds)+(errs.length?' '+errs[0]:''));
+    ok('market: the terminal\'s labels can be read on a phone and a tablet',r.px[1]>=8&&r.px[2]>=8.5,`hall names at ${r.px.join(', ')} screen px (320 phone, 390 phone, tablet, all at their starting zoom)`);
+    await ctx.close()}
 }

@@ -70,7 +70,7 @@ function crewRest(back){return G.lv.hotel&&hotelBook('crew',back+HOTEL_REST)?HOT
 // runway; its passengers are owed a room once the airport's big enough for a hotel. Yours cost little and please them;
 // the rest go to a city hotel, which is dear and costs rating
 function hotelStranded(){
-  if(!(R.fx.storm>G.clock||R.fx.fog>G.clock)||G.level<UPG.hotel.lvl)return;const h=hour();if(h>=4&&h<22)return;
+  if(!(weather.on('storm')||weather.on('fog'))||G.level<UPG.hotel.lvl)return;const h=hour();if(h>=4&&h<22)return;
   for(const i of SIDX){const F=R.st[i].F;if(F&&F.plane.state==='boarding')strand(i,F)}
   for(const m of R.rwy.q)if(m.type==='dep')strand(m.stand,m.F);
 }
