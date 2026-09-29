@@ -56,14 +56,14 @@ const classicTerm=()=>{const T=flatTerm(),fl={mkt:1,sec:1,ci:1,imm:0,rec:0,cus:0
   // the roof terrace (67-terrace.js), once it's built: floor 2, over the concourse at the apron edge, up stairs and a lift at
   // the market place's top wall (clear of its name). pub is its public side, drawn but never walked
   T.halls.push({id:'ter',poly:RECT(12,450,170,SEC_Y),fl:2,need:'terrace',col:'#5B4B3C',pub:[176,450,290,SEC_Y]});
-  T.doors.push(['mkt','ter',60,SEC_Y-3,5,'stairs',30],['mkt','ter',96,SEC_Y-3,4,'lift',8]);
+  T.doors.push(['mkt','ter',120,SEC_Y-3,5,'stairs',30],['mkt','ter',90,SEC_Y-3,4,'lift',8]);
   return T};
 for(const L of Object.values(LAYOUTS))L.term=flatTerm();
 LAYOUTS.classic.term=classicTerm();
 const isFloorLink=d=>d[5]==='esc'||d[5]==='lift'||d[5]==='stairs';
 const onFl=(fl,f)=>(f.fl=fl,f); // a TERM_DRAW entry drawn only on floor fl (0 or 1; every floor without it)
 let ROOM_DOORS=[]; // the layout's doorways and its terminal's (floor links too), as buildRooms saw them
-const roomOn=r=>!(r.ph===2&&!G.pierB)&&!(r.need&&!G.lv[r.need]); // halls that exist yet: second-phase rooms need Pier B, the hotel needs a hotel
+const roomOn=r=>!(r.ph===2&&!G.pierB)&&!(r.need&&!G.lv[r.need]); // halls that exist yet: second-phase rooms need Pier B, the hotel needs a hotel, the roof terrace its upgrade
 const hallId=id=>ROOM_ID[id];
 // where each part of the terminal is, for checks and the next steps to build on: desks, kiosks and bag belts in the check-in
 // hall; lanes in the security wall; passport desks and e-gates in the immigration wall; carousels in reclaim

@@ -12,7 +12,7 @@
 // for each passenger who went up and made their gate, at most +0.4 a day; -0.1 an hour at capacity) and says nothing:
 // the crowd is the only sign.
 const TER_CAP=40,TER_ODDS=1/6,TER_WIDE=1/4,TER_STAY=[10,20],TER_OPEN=[6,22],TER_CAFE=7,TER_FEE=6,TER_REP=0.01,TER_REP_DAY=0.4,TER_FULL=-0.1;
-const TER_BEEN=new WeakSet(); // passengers who went up, until they reach their gate (the rating line)
+const TER_BEEN=new WeakSet(); // passengers who reached the deck, until they reach their gate (the rating line, and counted once a visit to the airport)
 const TER_WET=['rain','snow','storm'];
 Object.assign(UPG,{terrace:{get tab(){return G.level>=2&&terRoom()!=null?'terminal':null},sec:'Concourse',icon:'glass',name:'Roof terrace',max:1,base:6000,mult:1,lvl:2,build:120,
   req:()=>G.level>=2&&terRoom()!=null,reqText:'Needs a terminal with a roof terrace.',
@@ -28,7 +28,7 @@ const terDay=()=>{const T=G.terrace||(G.terrace={d:0,up:0,take:0}),d=dayOf(G.clo
 // who is up or on the way: passengers in state toTer or ter, looked over once a minute
 function terList(){const L=R.terL;if(L&&L.pax===R.pax&&L.G===G)return L.list;return (R.terL={pax:R.pax,G,list:[]}).list}
 const onTer=p=>p.state==='toTer'||p.state==='ter';
-const terOn=()=>R.terOpen&&terRoom()!=null; // open, and still in this layout (a rebuild can come between two minutes)
+const terOn=()=>R.terOpen&&terBuilt(); // open, and built in this layout (a rebuild or a load can come between two minutes)
 const terUp=p=>ROOMS&&p.room!=null&&p.room===terRoom(); // on the terrace itself
 
 /* ---------- where people stand ---------- */
@@ -56,16 +56,16 @@ function roofGo(p,stay,k){
 // follows its leader up. One rnd() draw decides both whether and how long
 NEXT_ACT.push(p=>{
   if(!terOn()||terUp(p))return false;const L=p.leader;
-  if(L){if(!onTer(L)||L.dead)return false;const k=terFree();if(k<0)return false;roofGo(p,Math.max(1,L.t-G.clock),k);TER_BEEN.add(p);return true}
+  if(L){if(!onTer(L)||L.dead)return false;const k=terFree();if(k<0)return false;roofGo(p,Math.max(1,L.t-G.clock),k);return true}
   if(p.kid)return false;const k=terFree();if(k<0)return false;
   const odds=R.terWide?TER_WIDE:TER_ODDS,r=rnd();if(r>=odds)return false;
-  roofGo(p,TER_STAY[0]+TER_STAY[1]*r/odds,k);TER_BEEN.add(p);return true;
+  roofGo(p,TER_STAY[0]+TER_STAY[1]*r/odds,k);return true;
 });
 // up the stairs (or the lift): once there, a coffee from the kiosk for about half of them
 PAX_STEP.toTer=(p,dt,D)=>{
   if(isCalled(p.F)&&!p.late){toGate(p);return}
   if(!terOn()){nextAct(p,false);return}
-  if(walk(p,D.cwalk*p.spd*walkMul(p),dt)){p.state='ter';terDay().up++;note(p,'ter',0,0.6);terraceCafe(p)}
+  if(walk(p,D.cwalk*p.spd*walkMul(p),dt)){p.state='ter';if(!TER_BEEN.has(p)){TER_BEEN.add(p);terDay().up++}note(p,'ter',0,0.6);terraceCafe(p)}
 };
 function terraceCafe(p){
   if((p.rand*7919)%1>=0.5)return;const f=R.famous,v=TER_CAFE*(1+0.3*p.F.ac.tier)*(f&&f.p&&terUp(f.p)?1.6:1),h=terHall();
@@ -115,7 +115,7 @@ TERM_MINUTE.push(terraceMinute);
 // their gate is called, once. One rnd() draw
 FAMOUS_MIN.push(f=>{
   const p=f.p;if(f.ter||!terOn()||!p||p.dead||(p.state!=='mkt'&&p.state!=='toMkt')||callAt(f.F)-G.clock<40)return;
-  f.ter=G.clock;p.sl=-1;R.occOut=true;roofGo(p,TER_STAY[0]+10*rnd(),-2);TER_BEEN.add(p);
+  f.ter=G.clock;p.sl=-1;R.occOut=true;roofGo(p,TER_STAY[0]+10*rnd(),-2);
 });
 // late runners (61-late-runners.js): a passenger on the terrace can dawdle there until final call, and runs down the
 // stairs; the story says so
@@ -130,12 +130,12 @@ Object.assign(TALE_MORE,{ter:()=>'Up on the roof terrace',roofRun:a=>`Ran from t
   return `<div class="sec" id="terrace">Roof terrace<span>today</span></div><div class="rd"><b>${T.up}</b> passengers went up · <b>${R.spot||0}</b> spotters on the public side${R.terOpen?'':' · closed to passengers'}</div>`+
     `<div class="rd">Café and public side took <b>${money(T.take)}</b> · rating <b>+${rd.toFixed(2)}</b> today${r<0?' (crowded at times)':''}</div>`;
 });
-// once, from level 3, while the market place is packed: a terrace would give waiting passengers somewhere to go (16-advisor.js)
+// once a visit (R.terTip), from level 3, while the market place is packed: a terrace would give waiting passengers somewhere to go (16-advisor.js)
 function terraceTip(){
-  const T=G.terrace;if(!T||G.level<2||G.lv.terrace||terRoom()==null||isBuilding('up:terrace')||T.tip&&G.clock-T.tip>360)return null;
+  const t=R.terTip&&R.terTip.G===G?R.terTip.t:null;if(G.level<2||G.lv.terrace||terRoom()==null||isBuilding('up:terrace')||t!=null&&G.clock-t>360)return null;
   let n=0;for(const p of byState().mkt)if(p.state==='mkt'&&p.sl<0)n++;if(n<10)return null;
   const c=upCost('terrace');if(!upBuyable('terrace')||G.cash<c||tipHold('terrace',c))return null;
-  if(!T.tip)T.tip=G.clock;
+  if(t==null)R.terTip={G,t:G.clock};
   return {text:`The market place is packed, with ${n} standing. A roof terrace would give waiting passengers somewhere to watch the planes.`,go:['terminal','[data-buy="terrace"]'],label:'Terrace'};
 }
 
