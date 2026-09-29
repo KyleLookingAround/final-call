@@ -14,9 +14,10 @@ export default async function({browser,url,ok,saves,saveText,newest}){
     ok('rating-day: switched off, a change goes straight onto the rating',r.on==null&&Math.abs(r.moved+3)<1e-9&&!r.saved&&!errs.length,errs[0]||`moved ${r.moved}`);await ctx.close()}
 
   // on: a level 9 airport plays a day to fill its rolling score, then the next day twice from the same seed, once
-  // clear and once with fog and storms from 06:00 to 12:00, the rating read every hour
+  // clear and once with fog and storms from 06:00 to 12:00, the rating read every hour. The Maintenance policy is off in
+  // both, so servicing at the gate (fewer faults, a slightly higher rating) doesn't blur what the weather does (#148)
   const day=async fog=>{const {ctx,page,errs}=await open(saveText(newest),null);
-    const r=await page.evaluate(fog=>{const S=__sim,G=S.G,R=S.R;R.sim=true;const on=!!R.rateDay,out=[];
+    const r=await page.evaluate(fog=>{const S=__sim,G=S.G,R=S.R;R.sim=true;(G.pol||(G.pol={})).checks=false;const on=!!R.rateDay,out=[];
       const day=Math.floor(G.clock/1440)*1440+2880;while(G.clock<day)S.update(0.1);
       const reps=[];for(let h=0;h<24;h++){if(fog&&h>=6&&h<12){R.fx.fog=G.clock+61;R.fx.storm=G.clock+61}
         for(let k=0;k<600;k++){S.update(0.1);if(G.rep<5||G.rep>100)out.push(G.rep)}reps.push(+G.rep.toFixed(2))}

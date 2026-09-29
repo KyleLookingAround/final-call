@@ -2,9 +2,9 @@
 //   npm run bot -- 1200                      (about 3-4 minutes; progress on stderr)
 //   npm run bot -- 1200 --seed 2             (another run of the dice; the default seed is 1)
 //   npm run bot -- 300 '{"noBuyLow":true}'   (bot options, see tools/bot.js)
-//   npm run bot -- 1150 '{"layouts":true}'   (also rebuilds into better layouts; the baselines are for never rebuilding)
-//   npm run bot -- 1150 '{"recs":true}'      (also follows the transport manager's best suggestion)
-//   npm run bot -- 1150 --rate-day=off       (the old running-sum rating, for comparing; --rate-day='{"scale":6}' tries constants)
+//   npm run bot -- 1200 '{"layouts":true}'   (also rebuilds into better layouts; the baselines are for never rebuilding)
+//   npm run bot -- 1200 '{"recs":true}'      (also follows the transport manager's best suggestion)
+//   npm run bot -- 1200 --rate-day=off       (the old running-sum rating, for comparing; --rate-day='{"scale":6}' tries constants)
 // The same seed and the same code always give the same run, so a difference between two
 // versions is the code's doing. Compare a few seeds before calling a balance change good.
 // Prints one JSON line per 6 game hours, then LVLAT {level: hour reached}, STATE <fingerprint>, PLAY <fingerprint without settings>, ERR [...], and a

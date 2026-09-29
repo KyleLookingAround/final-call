@@ -17,5 +17,15 @@ export default async function({open,ok,saveText,newest,out}){
   await page.click('#fsManage');await page.waitForTimeout(400);
   const shown=await page.evaluate(()=>document.querySelector('#side').getBoundingClientRect().bottom<=innerHeight+1&&document.querySelector('#side').getBoundingClientRect().top<innerHeight*0.7);
   ok('sheet: full-screen drawer hides and opens',hid&&shown,`hidden ${hid}, open ${shown}`);
+  // a small phone: fully open, the sheet still shows at least 240px of panel (the board steps aside)
+  {const {ctx:c2,page:p2,errs:e2}=await open({width:320,height:568},saveText(newest),true);
+    const cd=await c2.newCDPSession(p2);
+    const sw=async(y0,y1)=>{await cd.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:160,y:y0}]});for(let k=1;k<=10;k++){await cd.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:160,y:y0+(y1-y0)*k/10}]});await p2.waitForTimeout(16)}await cd.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await p2.waitForTimeout(350)};
+    const grip=()=>p2.evaluate(()=>{const g=document.querySelector('#grip').getBoundingClientRect();return g.top+g.height/2});
+    await sw(await grip(),100);
+    const r=await p2.evaluate(()=>({panel:Math.round(document.querySelector('#panel').getBoundingClientRect().height),snap:__sim.G.sheet,scroll:document.documentElement.scrollHeight-innerHeight}));
+    if(r.panel<240)await p2.screenshot({path:join(out,'sheet-320.png')});
+    ok('sheet: 320px phone keeps 240px of panel when fully open',r.panel>=240&&r.snap===2&&r.scroll<=0&&!e2.length,`panel ${r.panel}px, snap ${r.snap}`+(e2.length?' '+e2[0]:''));
+    await c2.close()}
   await ctx.close();
 }

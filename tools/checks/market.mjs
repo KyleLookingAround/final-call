@@ -36,13 +36,13 @@ export default async function({open,ok,saveText}){
       R.sim=false;return {through,skipped,earned:Math.round((G.dfEarned||0)-e0)}});
     ok('market: with a walk-through duty free, everyone out of security walks through it',r.through>0&&!r.skipped&&r.earned>0&&!errs.length,`${r.through} through, ${r.skipped} not, ${r.earned} earned`+(errs.length?' '+errs[0]:''));
     await ctx.close()}
-  // the advisor points at the fullest café, and at a hotel that turned guests away last night
+  // the advisor points at the fullest café (an upgrade only below its top level; release audit, row 26), and at a hotel that turned guests away last night
   {const {ctx,page,errs}=await open(undefined,saveText('v28-L9.json'),false,{still:true});
     const t=await page.evaluate(()=>{const S=__sim,G=S.G,R=S.R;
       const cafes=G.shops.map((s,j)=>s&&['coffee','cafe','bar','dining'].includes(S.SHOPS[s.type].id)?j:-1).filter(j=>j>=0);
-      R.awayH=[];const quiet=S.cafeTip();cafes.forEach((j,k)=>R.awayH[j]=6+k*5);const busy=S.cafeTip(),want=cafes.at(-1);
+      R.awayH=[];const quiet=S.cafeTip();cafes.forEach((j,k)=>R.awayH[j]=6+k*5);const want=cafes.at(-1),lv=G.shops[want].lvl;G.shops[want].lvl=2;const busy=S.cafeTip();G.shops[want].lvl=4;const top=S.cafeTip();G.shops[want].lvl=lv;
       G.hotelBook.last={...(G.hotelBook.last||{}),away:4};const hq=S.hotelTip();G.hotelBook.last.away=14;const hb=S.hotelTip();
-      return {cafes:cafes.length,quiet:!!quiet,busy:busy&&busy.go[1],want:`[data-shopup="${want}"]`,hotel:!!G.lv.hotel,hq:!!hq,hb:hb&&hb.text}});
-    ok('advisor: points at the fullest café, and at a hotel that turned guests away',t.cafes>1&&!t.quiet&&t.busy===t.want&&t.hotel&&!t.hq&&/turned away 14/.test(t.hb||'')&&!errs.length,JSON.stringify(t)+(errs.length?' '+errs[0]:''));
+      return {cafes:cafes.length,quiet:!!quiet,busy:busy&&busy.go[1],want:`[data-shopup="${want}"]`,top:top&&top.go[1],hotel:!!G.lv.hotel,hq:!!hq,hb:hb&&hb.text}});
+    ok('advisor: points at the fullest café, never at an upgrade past its top, and at a hotel that turned guests away',t.cafes>1&&!t.quiet&&t.busy===t.want&&!/data-shopup/.test(t.top||'')&&t.hotel&&!t.hq&&/turned away 14/.test(t.hb||'')&&!errs.length,JSON.stringify(t)+(errs.length?' '+errs[0]:''));
     await ctx.close()}
 }

@@ -8,5 +8,4 @@ Theme: checks
   - Measuring the network from the bot's final state (`build/state-<seed>.json`) needed no new bot output.
 - **Lessons:**
   - The `sound` check needed a final call in a fixed morning. With planes spread over more routes, flights were emptier, finished boarding early, and no final call came, so the check failed although sound hadn't changed. It now brings one boarding flight's departure forward to be sure of a final call. → A check that needs an event to happen should cause it, not wait for the traffic to make one.
-  - `news` failed once in the full run while two shell loops polled the log beside it, and passed on its own. → Wait for the full check with one quiet waiter, not several.
   - Partners, not the bot's planes, did the spreading: the bot buys only widebodies and never uses Keep. Its numbers show what partners do for a player who ignores the feature; teaching the bot Keep would show what a player gains by using it.

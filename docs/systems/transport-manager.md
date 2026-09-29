@@ -14,4 +14,5 @@
   - `recJob` measures them a slice at a time between frames, all pinned to the moment it started (`computeTransitRecs` does all at once for the bot and checks);
   - they show quickest payback first, at most one per line and within a week (`REC_PAY`);
   - `applyRec` carries one out, and Not now hides one for a day (`R.recHide`).
+- **The fleet recommendation** (`fleetRec`, release audit row 5): while partner airlines hold about one gate or more (`R.ptAvg`, smoothed over about two hours so it doesn't flicker) and you own under 1.6 planes a gate, buy another of the roomiest type you fly. Otherwise, for the smallest type you fly, the cheapest type that seats 30% more and flies as far, with the seats a round of flights gains; once you have 2 planes a gate, sell the small ones instead (the Fleet tab's Sell chip). It shows in Routes' Recommended card, and the advisor offers it as a tip.
 - **Upgrades** are line builds with `up` (and `from`, the old code): the old line runs until the build finishes, then takes the new kind, number (reserved by `nextNum`) and colour.
