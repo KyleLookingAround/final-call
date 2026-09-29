@@ -77,6 +77,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 ### Review
 
+- [Release P3, small screens and landscape · 29 Sep 2026](lessons/165-release-p3-screens.md)
 - [#159 Release batch P2: moments you can hear and see · 28 Sep 2026](lessons/159-release-p2-moments.md)
 - [Audits by helper agents: the polish audit, #106 launch audit, #155 release audit · 27–28 Sep 2026](lessons/155-audits.md)
 - [Systems review · 27 Sep 2026](lessons/66-systems-review.md)
