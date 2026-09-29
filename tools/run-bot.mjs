@@ -4,6 +4,7 @@
 //   npm run bot -- 300 '{"noBuyLow":true}'   (bot options, see tools/bot.js)
 //   npm run bot -- 1200 '{"layouts":true}'   (also rebuilds into better layouts; the baselines are for never rebuilding)
 //   npm run bot -- 1200 '{"recs":true}'      (also follows the transport manager's best suggestion)
+//   npm run bot -- 1200 --why                (also prints, per snapshot, the requirement holding the next level back, and the day's rating causes)
 //   npm run bot -- 1200 --rate-day=off       (the old running-sum rating, for comparing; --rate-day='{"scale":6}' tries constants)
 // The same seed and the same code always give the same run, so a difference between two
 // versions is the code's doing. Compare a few seeds before calling a balance change good.
@@ -23,6 +24,9 @@ const args=process.argv.slice(2),flag=k=>{const i=args.indexOf(k);return i<0?nul
 const rdi=args.findIndex(a=>a.startsWith('--rate-day')),rateDay=rdi<0?null:(v=>v==='off'?false:JSON.parse(v||'{}'))(args.splice(rdi,1)[0].split('=').slice(1).join('='));
 // --pol='{"late":"close"}' sets Office › Policies before the first minute
 const pi=args.findIndex(a=>a.startsWith('--pol=')),pols=pi<0?null:JSON.parse(args.splice(pi,1)[0].slice(6));
+// --why prints a WHY line per snapshot: the next level's requirements (the lowest share of its target first, the one
+// holding the level back), and the causes the rating moved for over the last 6 hours (the snapshot's `why`)
+const wi=args.indexOf('--why'),why=wi>=0&&!!args.splice(wi,1);
 const seed=+(flag('--seed')??1)>>>0,hours=+args[0]||48,opts=JSON.parse(args[1]||'{}'),tag=seed+(opts.layouts?'-layouts':'')+(opts.recs?'-recs':'')+(rateDay===false?'-sumrating':rateDay?'-rateday':'')+(pols?'-pol':'');
 const exe=process.env.CHROMIUM_PATH;
 const b=await chromium.launch(exe?{executablePath:exe}:{});
@@ -34,9 +38,22 @@ const errs=[];m.on('pageerror',e=>errs.push(e.message+' '+(e.stack||'').split('\
 await m.goto(pathToFileURL(join(root,'build/test.html')).href);await m.waitForTimeout(500);
 await m.addScriptTag({path:join(root,'tools/bot.js')});
 await m.evaluate(([o,p])=>{__sim.R.sim=true;__sim.R.speed=0;if(p)__sim.G.pol=Object.assign(__sim.G.pol||{},p);window.B=BOT(o)},[opts,pols]);
+const fmtN=n=>n>=1e4?Math.round(n/1e3)+'k':String(Math.round(n));
+function whyLine(l,q){
+  const causes=Object.entries(JSON.parse(l.why||'{}')).filter(e=>e[1]).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])).slice(0,4).map(e=>e[0]+' '+(e[1]>0?'+':'')+e[1]);
+  let holds='';
+  if(q){const rs=q.req.map(([t,v,g])=>({t,v,g,f:g?v/g:1})).sort((a,b)=>a.f-b.f);
+    holds=` | to ${q.name}: holds back ${rs[0].t} ${fmtN(rs[0].v)}/${fmtN(rs[0].g)} (${Math.round(rs[0].f*100)}%); others ${rs.slice(1).map(r=>r.t+' '+Math.round(r.f*100)+'%').join(', ')}`}
+  return `WHY d${l.d} h${l.h} L${l.lvl} rating ${l.rep} [${causes.join(', ')||'no moves'}]${holds}`;
+}
 const t0=Date.now();
 for(let h=0;h<hours;h+=6){
   const r=await m.evaluate(()=>B.run(360,0.1));r.log.forEach(l=>console.log(JSON.stringify(l)));
+  if(why){
+    // the requirements are read once per chunk, so they belong to the last snapshot; the causes are each snapshot's own
+    const q=await m.evaluate(()=>{const n=__sim.G.level+1;return __sim.LEVELS[n]?{n,name:__sim.LEVELS[n].name,req:__sim.levelChecks(n).map(([t,v,g])=>[t,v,g])}:null});
+    r.log.forEach((l,i)=>console.log(whyLine(l,i===r.log.length-1?q:null)));
+  }
   if(h%48===0)console.error('levels reached at hour',JSON.stringify(r.lvlAt),'after',((Date.now()-t0)/1000).toFixed(0)+'s');
   if(errs.length)break;
 }
