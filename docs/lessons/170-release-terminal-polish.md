@@ -1,5 +1,5 @@
 Theme: balance
-# #163 Release: terminal polish pass · 29 Sep 2026
+# #170 Release: terminal polish pass · 29 Sep 2026
 
 - **Numbers:** estimate $18; `get_session` showed no cost yet at the PR's first stopping point. Twelve bot runs (low, standard and good pay on `main`, then seeds 1–3 plain on `main` and on the branch) and forty screenshots, about 35 minutes of wall-clock time.
 - **What it found:** O5's two options were written before anyone looked at the wage line: `payMul` was already charged on the counter staff's rate, and all wages are about 2% of income, about 90% of it crew wages that pay doesn't touch. Good pay reached level 7 8–12% sooner than low pay on every seed, so no multiplier on counter wages could make it a choice. → Pay stays as it is here, and the tables and a proposal are on #154. **Measure the share of the thing a lever acts on before writing its options into an audit row**: the policy runs would have shown it in the audit.
