@@ -111,6 +111,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 ### Not sorted yet
 
+- [#180 A Roadmap tab on What's new · 29 Sep 2026](lessons/180-roadmap-tab.md)
 - [Release loose ends · 29 Sep 2026](lessons/172-release-loose-ends.md)
 - [Release B1, level pacing and payoffs (#171) · 29 Sep 2026](lessons/171-release-b1-pacing.md)
 <!-- /joined:lessons -->
