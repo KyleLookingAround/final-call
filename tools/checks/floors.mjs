@@ -54,13 +54,17 @@ export default async function({open,ok,saveText,saves}){
     for(let m=0;m<90*7.5;m++)frame(2,1/15);R.sim=false;
     const stuck=R.pax.filter(p=>t-seen.get(p).since>90&&TP.stuck(p,AWAY)).map(p=>p.state);
     const mean=a=>a.length?+(a.reduce((x,y)=>x+y,0)/a.length).toFixed(1):0,cp=caused&&caused.p,tl=cp&&S.taleOf(cp);
+    // the runner asked which floor link they'd take in place of the lift (pickLink), as a family would be given it
+    const doors=TP.doors(),liftJ=doors.findIndex(d=>d[5]==='lift'),pick=cp&&liftJ>=0&&typeof S.pickLink==='function'?doors[S.pickLink(cp,liftJ)][5]:null;
     return {links:links.length,changes,far,worst:Math.round(worst),lift,run,dep:mean(dep),arr:mean(arr),nd:dep.length,na:arr.length,stuck,held:held.size,ease,drawn,through,wd:Math.round(wd),
-      caused:caused&&(caused.none?'none waiting':`${cp.F.code}${cp.F.no}, waiting on floor ${caused.fl??'-'} (${caused.state}), ${tl&&tl.run?'ran':'never ran'}`),ran:!!(tl&&tl.run)}},[AWAY,MAIN]);
+      caused:caused&&(caused.none?'none waiting':`${cp.F.code}${cp.F.no}, waiting on floor ${caused.fl??'-'} (${caused.state}), ${tl&&tl.run?'ran':'never ran'}`),ran:!!(tl&&tl.run),up:!!caused&&caused.fl===1,pick}},[AWAY,MAIN]);
   const none='not played: no halls on two floors yet';
   ok('floors: people change floor only on escalators and lifts',!!p&&p.changes>=50&&!p.far&&!errs.length,p?`${p.changes} changes of floor in three hours (at least 50), ${p.far} more than 12 from a floor link (worst ${p.changes?p.worst:'-'}), ${p.links} floor links`+(errs.length?' '+errs[0]:''):none);
   const share=g=>g[0]?g[1]/g[0]:0;
   ok('floors: families take the lift',!!p&&p.lift.fam[0]>0&&share(p.lift.fam)>=0.8&&share(p.lift.rest)<=0.05,p?`families and those who need help: ${p.lift.fam[1]} of ${p.lift.fam[0]} by lift (80% or more); others: ${p.lift.rest[1]} of ${p.lift.rest[0]} (5% or fewer)`:none);
-  ok('floors: runners take the stairs or escalator',two&&!!p&&p.ran&&p.run.mine>0&&!p.run.lift,p?`${two?'':'no halls on two floors yet; '}the dawdler caused on ${p.caused}, changing floor ${p.run.mine} times as they ran (at least once); runners changed floor ${p.run.changes} times, ${p.run.lift} by lift (none)`:none);
+  // a dawdler waiting upstairs, where the gate lounges are, has no floor to change on the way (in Classic nobody waits
+  // downstairs), so then the runner is asked which link they'd take in place of the lift
+  ok('floors: runners take the stairs or escalator',two&&!!p&&p.ran&&(p.run.mine>0||p.up&&!!p.pick&&p.pick!=='lift')&&!p.run.lift,p?`${two?'':'no halls on two floors yet; '}the dawdler caused on ${p.caused}, changing floor ${p.run.mine} times as they ran (at least once, unless they waited upstairs with the gates), offered the lift they'd take the ${p.pick||'-'}; runners changed floor ${p.run.changes} times, ${p.run.lift} by lift (none)`:none);
   ok('floors: nobody is drawn through a floor',!!p&&p.ease&&p.changes>0&&p.drawn>0&&!p.through,p?`${p.ease?'':'no paxEase; '}${p.changes?'':'nobody changes floor yet; '}${p.drawn} drawn points while the drawing caught up with a change of floor, ${p.through} more than 12 from a floor link (worst ${p.through?p.wd:'-'})`:none);
   const within=(a,b)=>b>0&&Math.abs(a/b-1)<=0.15;
   ok('floors: walks stay about the same',!!p&&p.changes>0&&within(p.dep,MAIN.dep)&&within(p.arr,MAIN.arr),p?`${p.changes?'':'nobody changes floor yet; '}forecourt to gate ${p.dep} min (main ${MAIN.dep}, ${p.nd} passengers), stand to forecourt ${p.arr} min (main ${MAIN.arr}, ${p.na}); each within 15%`:none);

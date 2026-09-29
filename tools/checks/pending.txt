@@ -3,20 +3,6 @@
 # its line comes out, so each part takes out its own lines in its PR. Only the checks-first PR and the coordinator add
 # lines, and the PR that brings the parts together leaves this file with comments only.
 
-# needs halls on two floors: the two floors part
-scene: one floor at a time
-
-# two floors in Classic
-floors: departures upstairs, arrivals below
-floors: people change floor only on escalators and lifts
-floors: families take the lift
-floors: runners take the stairs or escalator
-floors: nobody is stuck between floors
-floors: nobody is drawn through a floor
-floors: walks stay about the same
-floors: tapping a hall goes to its floor
-floors: old saves land on the right floor
-
 # windows and watchers
 windows: glass on every airside wall facing the apron
 windows: passengers watch a big jet go by

@@ -123,6 +123,10 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 - [#49 The terminal as a place: the spec, checks planned first · 27 Sep 2026](lessons/49-terminal-place-spec.md)
 - [Real airport groundwork, spec and parts' briefs · 27 Sep 2026](lessons/38-real-airport-groundwork.md)
 
+### Terminal
+
+- [Two floors in Classic · 29 Sep 2026](lessons/162-terminal-place-floors.md)
+
 ### Tidy
 
 - [#131 Tidy the lessons · 28 Sep 2026](lessons/131-lessons-tidy.md)

@@ -134,7 +134,7 @@ function drawArrivals(D){
   if(G.lv.hotel){ctx.fillStyle='#3A424B';ctx.fillRect(1206,736,14,5);mono('HOTEL',1213,733,'#909AA4',6.5,'center')}
   drawMeeters();
 }
-TERM_DRAW.push(drawArrivals);
+TERM_DRAW.push(onFl(0,drawArrivals));
 // the taxi rank on the kerb outside, on every floor
 LAYER.terminal.push(()=>{
   ctx.fillStyle='#1A1F24';ctx.fillRect(TAXI.x-40,LAND_B+10,80,16);

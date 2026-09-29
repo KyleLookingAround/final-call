@@ -221,7 +221,7 @@ TERM_PANEL['sales:shops'].push(()=>{
 TERM_CLICK.push(d=>{if(!d.pol||!d.pol.startsWith('gates:'))return false;(G.pol||(G.pol={})).gates=JSON.parse(d.pol.slice(6));G.set.autoDuty=false;renderPanel();save();return true});
 
 /* ---------- drawing ---------- */
-TERM_DRAW.push(()=>{drawMarket();for(let i=0;i<SHOP_X.length;i++)if(shopOpen(i))drawShopUnit(i)});
+TERM_DRAW.push(()=>{if(onFloor(1))drawMarket();for(let i=0;i<SHOP_X.length;i++)if(shopOpen(i))drawShopUnit(i)});
 function drawMarket(){
   const M=mktPlan(),[x0,y0,x1,y1]=M.box,sq=(x,y,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(x,y,w,h)};
   for(const [x,y] of M.window)sq(x-3.5,y-5,7,2,'#3A424B'),sq(x-3,y-3,6,6,'#2A3037');

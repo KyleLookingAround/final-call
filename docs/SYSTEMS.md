@@ -12,6 +12,7 @@ The project notes (`CLAUDE.md`) hold what every change needs. This file holds ho
 - [Day in a minute](systems/day-in-a-minute.md) (`63-day-in-a-minute.js`)
 - [Effects: the rating and money ledger](systems/effects.md) (`04-effects.js`, `15-panel.js`)
 - [Famous faces](systems/famous-faces.md) (`64-famous-faces.js`, `03-state.js`, `14-board.js`)
+- [Floors](systems/floors.md) (`66-floors.js`, `42-terminal.js`, `61-late-runners.js`, `53-roofs.js`, `13-camera.js`)
 - [Guided start](systems/guided-start.md) (`36-guided-start.js`)
 - [Late runners and passengers' stories](systems/late-runners.md) (`61-late-runners.js`, `46-market.js`, `43-departures.js`, `12-drawing.js`, `14-board.js`, `13-camera.js`)
 - [Level-up card](systems/level-up-card.md) (`49-levelup.js`, `36-guided-start.js`)
@@ -23,7 +24,7 @@ The project notes (`CLAUDE.md`) hold what every change needs. This file holds ho
 - [Routes](systems/routes.md) (`31-routes.js`, `03-state.js`)
 - [Saves](systems/saves.md) (`22-save.js`, `03-state.js`, `23-boot.js`)
 - [Sound](systems/sound.md) (`06-sound.js`, `48-sound.js`, `23-boot.js`, `08-stands.js`, `35-records.js`, `15-panel.js`)
-- [The terminal](systems/terminal.md) (`42-terminal.js`, `47-hotel.js`, `05-flights.js`, `07-passengers.js`, `08-stands.js`, `46-market.js`, `43-departures.js`)
+- [The terminal](systems/terminal.md) (`42-terminal.js`, `47-hotel.js`, `66-floors.js`, `05-flights.js`, `07-passengers.js`, `08-stands.js`, `46-market.js`, `43-departures.js`)
 - [Transport manager](systems/transport-manager.md) (`32-managers.js`)
 - [Update check](systems/update-check.md) (`37-update-check.js`)
 - [Usage counts](systems/usage-counts.md) (`65-usage-counts.js`)
@@ -132,6 +133,7 @@ The main names, by file group (the joined table below is the complete list, from
 | `63-day-in-a-minute.js` | DAY IN A MINUTE: a time-lapse of yesterday, played back over the airport view |
 | `64-famous-faces.js` | FAMOUS FACES: now and then a celebrity flies through, with a crowd, a busy café hour and a rating stake |
 | `65-usage-counts.js` | usage counts: anonymous page counts for launch week |
+| `66-floors.js` | FLOORS: halls on two floors, the escalators and lift between them, and going to a hall's floor |
 | `99-start.js` | the `/*SIM_HOOK*/` marker and the call that starts the game |
 <!-- /joined:files -->
 
@@ -187,7 +189,7 @@ The main names, by file group (the joined table below is the complete list, from
 - `effects`: The effects ledger (04-effects.js, docs/SYSTEMS.md): every cause the rating moves for over a day of play has a REPWHY entry (what the advisor says) and a REPLBL label (the Money tab's rating list); R.repWhy adds up to the change in the day's score the rating follows; and the airport's own rating events carry the stand they happened at.
 - `famous-faces`: Famous faces (docs/systems/famous-faces.md): over a seeded level 5 run a visit is booked a day ahead and announced in the region news and under the board; on the day a crowd gathers and clears once their flight leaves, the café's busy hour and the rating move through the ledger with the flight's stand as the place, nothing throws with R.sim, and an older save without the field loads with its default.
 - `feedback`: The feedback link in Help (docs/specs/feedback-link.md): hidden outside GitHub Pages; on GitHub Pages it opens a prefilled issue for the repo the page is served from, and the body stays well under GitHub's URL length limit.
-- `first-level`: The first level-up comes early (docs/specs/early-first-level.md): a fresh airport at 1× with the bot's default play (tools/bot.js) is a Local Airport by game hour 6 on seeds 1–3, and its first departure has gone on time by then.
+- `first-level`: The first level-up comes early (docs/specs/early-first-level.md): a fresh airport at 1× with the bot's default play (tools/bot.js) is a Local Airport by game hour 6 on seeds 1–3, and has had a departure go on time by then on at least two of them (#161: two floors reshuffled the first morning's random order; first-morning punctuality is followed in #147).
 - `floors`: Two floors (docs/specs/terminal-place.md): departures upstairs and arrivals below, people changing floor only on the escalators and the lift (families and those who need help by lift, runners never), nobody stuck, nobody drawn through a floor, walks about as long as before, taps going to a hall's floor, and old saves landing on the right floor. Written before the code (tools/checks/pending.txt). Reads the names in lib/place.mjs, plus a baggage hall room 'bag', hallLabel(id) → [x, y] where a hall's name is drawn, an advisor tip {hall: id} flying the camera to that hall, and paxEase(p), the drawn catch-up (p.ex, p.ey). One page: the floors and taps, one three-hour play for every play check, then each old save loaded into the same page (resetAll, as the boot does).
 - `graph`: The map in tools/graph.mjs: every link in the docs resolves, every system in docs/systems/ names its files, and the joined lists (tools/join.mjs) are sound; a system's file changed without its notes is a warning, and so are notes naming three or more functions that live in one file outside the system's own (a file its first line mentions only after a ";" isn't its own).
 - `hotel`: The airport hotel (docs/specs/terminal.md): it's never overbooked, crews resting there are ready sooner, stranded passengers get rooms, late arrivals walk through to the lobby, early guests come down from it, and with no hotel nothing changes.

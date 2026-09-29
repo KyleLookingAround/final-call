@@ -14,16 +14,18 @@ function drawBusRoad(i){
 }
 function drawTower(x,y){ctx.fillStyle='#39414A';ctx.fillRect(x-7,y,14,200);ctx.fillStyle='#2A333C';ctx.beginPath();ctx.moveTo(x-26,y);ctx.lineTo(x+26,y);ctx.lineTo(x+18,y-22);ctx.lineTo(x-18,y-22);ctx.closePath();ctx.fill();
   ctx.fillStyle='rgba(92,200,255,.55)';ctx.fillRect(x-17,y-18,34,10);ctx.fillStyle='#5A646E';ctx.fillRect(x-1,y-40,2,18)}
-// A 2D layout's floors: every room filled, then its walls with a gap at each doorway (a door's fifth number is its
-// half-width). Rooms in the second phase show only a dashed outline until Pier B, or its equivalent, is built.
+// A 2D layout's floors: every room on the floor shown filled (onFloor, 53-roofs.js), then its walls with a gap at each
+// doorway (a door's fifth number is its half-width); with two floors, only its own doorways, so a door upstairs leaves no
+// gap in the wall of the hall below it. Rooms in the second phase show only a dashed outline until Pier B, or its
+// equivalent, is built.
 function polyPath(P){ctx.beginPath();P.forEach(([x,y],k)=>k?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath()}
 function drawRooms(){
-  const shut=r=>r.ph===2&&!G.pierB;
-  for(const r of ROOMS){if(!roomOn(r)||r.open)continue;ctx.fillStyle=r.col||'#1C2228';polyPath(r.poly);ctx.fill()}
+  const shut=r=>r.ph===2&&!G.pierB,two=twoFloors();
+  for(const r of ROOMS){if(!roomOn(r)||r.open||!onFloor(r.fl))continue;ctx.fillStyle=r.col||'#1C2228';polyPath(r.poly);ctx.fill()}
   const doors=ROOM_DOORS;ctx.strokeStyle='#4E5964';ctx.lineWidth=3;ctx.lineCap='square';ctx.beginPath();
-  for(const r of ROOMS){if(!roomOn(r)||r.open)continue;const P=r.poly;
+  for(const r of ROOMS){if(!roomOn(r)||r.open||!onFloor(r.fl))continue;const P=r.poly;
     for(let k=0;k<P.length;k++){const [x1,y1]=P[k],[x2,y2]=P[(k+1)%P.length],len=Math.hypot(x2-x1,y2-y1),ux=(x2-x1)/len,uy=(y2-y1)/len;
-      const cuts=[];for(const d of doors){const t=(d[2]-x1)*ux+(d[3]-y1)*uy,off=Math.abs((d[2]-x1)*uy-(d[3]-y1)*ux);if(off<3&&t>-40&&t<len+40)cuts.push([t-(d[4]||34),t+(d[4]||34)])}
+      const cuts=[];for(const d of doors){if(isFloorLink(d)||two&&d[0]!==r.id&&d[1]!==r.id)continue;const t=(d[2]-x1)*ux+(d[3]-y1)*uy,off=Math.abs((d[2]-x1)*uy-(d[3]-y1)*ux);if(off<3&&t>-40&&t<len+40)cuts.push([t-(d[4]||34),t+(d[4]||34)])}
       cuts.sort((a,b)=>a[0]-b[0]);let t0=0;
       for(const [a,b] of cuts){if(a>t0){ctx.moveTo(x1+ux*t0,y1+uy*t0);ctx.lineTo(x1+ux*Math.min(a,len),y1+uy*Math.min(a,len))}t0=Math.max(t0,b)}
       if(t0<len){ctx.moveTo(x1+ux*t0,y1+uy*t0);ctx.lineTo(x2,y2)}}}
