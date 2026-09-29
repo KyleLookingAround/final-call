@@ -180,7 +180,7 @@ function applyLayout(id){
   fill(XF,L.stands.map(standXf));ROOM_DOORS=[...(L.doors||[]),...L.term.doors];buildRooms({...L,rooms:[...L.rooms,...L.term.halls],doors:ROOM_DOORS});AF_Y=L.top||0;Y0=AF_Y-180;placeBadges();
 }
 
-const busMul=i=>STAND_KIND[i]!=='remote'?1:!G.lounges&&(R.fx.rain>G.clock||R.fx.snow>G.clock)?1.4:2.2; // buses outpace walkers, less so in bad weather; mobile lounges don't mind it
+const busMul=i=>STAND_KIND[i]!=='remote'?1:!G.lounges&&(weather.on('rain')||weather.on('snow'))?1.4:2.2; // buses outpace walkers, less so in bad weather; mobile lounges don't mind it
 // mobile lounges (Washington Dulles): lounges on stilts that drive out to remote stands and rise to the door
 const LOUNGES={cost:200000,build:120};
 const layoutOk=id=>id==='classic'||has('lay:'+id);
@@ -264,7 +264,7 @@ function layoutPlan(L){
 function layoutPanel(){
   const ids=Object.keys(LAYOUTS).filter(id=>id===G.layout||id==='classic'||has('lay:'+id));
   const cur=LAY,building=layoutBuilding();
-  let h=`<p class="note">A new layout is built while the airport keeps running, and opens at 03:00. Gates, shops, planes and upgrades move across; anything the new layout has no room for is sold.</p>`;
+  let h=`<p class="note">A new layout is built while you keep flying and opens at 03:00. Gates, shops, planes and upgrades move across; what doesn’t fit is sold.</p>`;
   if(G.layoutNext)h+=`<div class="report">The <b>${LAYOUTS[G.layoutNext].name}</b> layout opens at 03:00${R.st.some((S,i)=>layoutDrains(i)&&S.F)?', once its last flights have left the stands it drops':''}.</div>`;
   for(const id of [G.layout,...ids.filter(x=>x!==G.layout)]){
     const L=LAYOUTS[id],me=id===G.layout,bld=building&&building.id==='layout:'+id;
