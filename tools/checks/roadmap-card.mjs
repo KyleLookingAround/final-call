@@ -49,10 +49,12 @@ export default async function({open,ok,saveText}){
     await page.locator('#roadmapList .rrow summary').first().click();
     const tap=await page.evaluate(()=>{const rows=[...document.querySelectorAll('#roadmapList .rrow')],o=rows.filter(r=>r.open);return {open:o.length,lis:o[0]?o[0].querySelectorAll('li').length:0,vis:o[0]?o[0].querySelector('.rdet').getBoundingClientRect().height>0:false}});
     ok('roadmap-card: a tap on a row opens its details',tap.open===1&&tap.lis>=1&&tap.vis,JSON.stringify(tap));
+    // a second tap on the open tab changes nothing, and the title comes back exactly as the card set it
+    await page.click('#news [data-newstab="road"]');
     // back to What's new: the list is back, the title is back, and closing and reopening starts on What's new with All showing
     await page.click('#news [data-newstab="news"]');
-    const back=await page.evaluate(()=>{const q=s=>document.querySelector(s);const r={list:getComputedStyle(q('#newsList')).display,title:q('#newsT').textContent,road:getComputedStyle(q('#roadmapList')).display};__sim.openNews(false);__sim.openNews(true,false);r.tab=q('#newsBody').dataset.tab;__sim.openNews(false);return r});
-    ok('roadmap-card: What\'s new tab brings back the list and its title; the card reopens on it',back.list!=='none'&&back.road==='none'&&/^What's new/.test(back.title)&&back.tab==='news'&&!errs.length,JSON.stringify(back)+(errs.length?' '+errs[0]:''));
+    const back=await page.evaluate(()=>{const q=s=>document.querySelector(s);const r={list:getComputedStyle(q('#newsList')).display,title:q('#newsT').textContent,road:getComputedStyle(q('#roadmapList')).display};__sim.openNews(false);__sim.openNews(true,false);r.tab=q('#newsBody').dataset.tab;r.again=q('#newsT').textContent;__sim.openNews(false);return r});
+    ok('roadmap-card: What\'s new tab brings back the list and its title; the card reopens on it',back.list!=='none'&&back.road==='none'&&back.title==="What's new · all versions"&&back.again==="What's new · all versions"&&back.tab==='news'&&!errs.length,JSON.stringify(back)+(errs.length?' '+errs[0]:''));
     await ctx.close()}
   // fit: tab strip, chips and Play in view at each size (the card's own newest-version checks stay in news-card)
   for(const [w,h,touch,name] of SIZES){

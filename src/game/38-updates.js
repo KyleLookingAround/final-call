@@ -136,15 +136,15 @@ function renderRoadmap(){
 function newsTabSet(t){
   R.newsTab=t;$('#newsBody').dataset.tab=t;
   for(const b of document.querySelectorAll('[data-newstab]'))b.classList.toggle('on',b.dataset.newstab===t),b.setAttribute('aria-selected',b.dataset.newstab===t);
-  if(t==='road'){R.roadFilter='all';renderRoadmap();R.newsTitle=$('#newsT').textContent;$('#newsT').textContent='Roadmap'}else if(R.newsTitle)$('#newsT').textContent=R.newsTitle;
+  if(t==='road'){R.roadFilter='all';renderRoadmap();$('#newsT').textContent='Roadmap'}else $('#newsT').textContent=R.newsTitle;
   $('#newsBody').scrollTop=0;
 }
 function renderNews(auto){
-  const seen=G.seen??0,fresh=UPDATES.filter(u=>u.v>seen);R.newsSpoil=[];R.newsTab='news';R.newsAuto=auto;
+  const seen=G.seen??0,fresh=UPDATES.filter(u=>u.v>seen);R.newsSpoil=[];R.newsAuto=auto;
   // a young save (Airfield or Local Airport) hasn't reached most of what's in the older history, so fold it away
   const n=G.level<=1?Math.max(fresh.length,3):UPDATES.length,head=UPDATES.slice(0,n),rest=UPDATES.slice(n);
   $('#newsList').innerHTML=head.map((u,k)=>newsRow(u,auto?u.v>seen:k===0,seen,auto)).join('')+(rest.length?`<details class="upd"><summary>${rest.length} earlier version${rest.length>1?'s':''}</summary>${rest.map(u=>newsRow(u,false,seen,auto)).join('')}</details>`:'');
-  $('#newsT').textContent=auto&&fresh.length?`What's new`:`What's new · all versions`;$('#newsBody').scrollTop=0;
+  R.newsTitle=$('#newsT').textContent=auto&&fresh.length?`What's new`:`What's new · all versions`;$('#newsBody').scrollTop=0;
 }
 // reveal one version's later-level points in place, open
 function newsSpoil(v){const u=UPDATES.find(x=>x.v===v),el=u&&$(`#newsList [data-v="${v}"]`);if(!el)return;R.newsSpoil.push(v);el.outerHTML=newsRow(u,true,G.seen??0,R.newsAuto)}
@@ -152,7 +152,7 @@ function openNews(on,auto){
   const el=$('#news');if(!on){if(el.hidden)return;el.hidden=true;G.seen=UPDATES[0].v;save();if(R.newsPrev)setSpeed(R.newsPrev);return}
   renderNews(auto);newsTabSet('news');el.hidden=false;R.newsPrev=R.speed;setSpeed(0);$('#news .close').focus();
 }
-$('#news').addEventListener('click',e=>{const tb=e.target.closest('[data-newstab]');if(tb){newsTabSet(tb.dataset.newstab);return}
+$('#news').addEventListener('click',e=>{const tb=e.target.closest('[data-newstab]');if(tb){if(tb.dataset.newstab!==R.newsTab)newsTabSet(tb.dataset.newstab);return}
   const rf=e.target.closest('[data-rfilter]');if(rf){R.roadFilter=rf.dataset.rfilter;renderRoadmap();return}const g=e.target.closest('[data-newsgo]');if(g){newsGo(g.dataset.newsgo);return}const sp=e.target.closest('[data-newsspoil]');if(sp){newsSpoil(+sp.dataset.newsspoil);return}if(e.target.id==='news'||e.target.closest('[data-newsclose]'))openNews(false)});
 $('#newsAgain').addEventListener('click',()=>{openHelp(false);openNews(true,false)});
 document.addEventListener('keydown',e=>{if(!$('#news').hidden&&e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();openNews(false)}},true);
