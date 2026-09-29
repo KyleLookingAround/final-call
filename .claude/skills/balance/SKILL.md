@@ -5,7 +5,7 @@ description: Measure and tune Final Call's economy and pacing with the bot on se
 
 # Balance
 
-The bot plays 1,150 game hours and records the hour it reaches each level. The same seed and code always give the same run, but any change to the code shifts the dice, so judge a change on several seeds, before and after.
+The bot plays 1,200 game hours and records the hour it reaches each level. The same seed and code always give the same run, but any change to the code shifts the dice, so judge a change on several seeds, before and after.
 
 ## 1. Before
 
@@ -13,7 +13,7 @@ On the branch's starting point (usually `main`), run three seeds side by side. E
 
 ```
 npm run build
-for s in 1 2 3; do nohup node tools/run-bot.mjs 1150 --seed $s > build/before-$s.log 2>&1 & done
+for s in 1 2 3; do nohup node tools/run-bot.mjs 1200 --seed $s > build/before-$s.log 2>&1 & done
 ```
 
 Keep the `LVLAT` line and the table at the end of each log.
@@ -44,7 +44,7 @@ Make the change, rebuild, and run the same three seeds into `build/after-$s.log`
 - `--rate-day=off` plays the old running-sum rating, for comparing against the rating that reflects the last day (`docs/systems/effects.md`), and `--rate-day='{"scale":6}'` tries other constants. Those runs don't write `build/saves/`, and they add `-sumrating` or `-rateday` to the bot's file names. The snapshots carry `rdT` (the rating's target) and `rdS` (the day's net score per departure).
 - The Balance workflow runs the three seeds on PRs that touch `src/game/` or the bot, once keeping Classic and once rebuilding: when the PR opens or leaves draft, when the `balance` label is added, and on demand. Its tables are in the run's summary; `off` levels show as warnings. The baselines are for keeping Classic; rebuilding should reach level 9 about 5–10% sooner, so its level 9 row reads `near`.
 
-## Baselines (bot, 1150 game hours)
+## Baselines (bot, 1200 game hours)
 
 `tools/baseline.json` holds these ranges; the bot and the Balance workflow read them from there. Change both together, and only for a balance change the owner asked for.
 
