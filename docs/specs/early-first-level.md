@@ -36,7 +36,7 @@ A newcomer at 1× reaches Local Airport, the game's first real moment, in about 
 
 ## Files
 
-`src/game/01-constants.js` (one line), `tools/baseline.json`, `tools/checks/first-level.mjs` (new), `.claude/skills/balance/SKILL.md`, `docs/systems/levels-and-masterplan.md`, `docs/decisions/ADR-2026-09-28-early-first-level.md`, `src/updates.d/early-first-level.md`, `docs/briefs/early-first-level.md`, this spec.
+`src/game/01-constants.js` (one line), `tools/baseline.json`, `tools/checks/first-level.mjs` (new), `.claude/skills/balance/SKILL.md`, `docs/systems/levels-and-masterplan.md`, `docs/decisions/ADR-2026-09-28-early-first-level.md`, `docs/briefs/early-first-level.md`, this spec.
 
 ## Left out
 

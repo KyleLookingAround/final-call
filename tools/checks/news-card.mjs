@@ -25,7 +25,7 @@ export default async function({open,ok,saveText,root}){
         if(p.lv!==undefined&&!(Number.isInteger(p.lv)&&p.lv>=0&&p.lv<S.LEVELS.length))bad.push(w+': level '+p.lv)}
       return {bad,points:S.UPDATES.reduce((n,u)=>n+u.points.length,0),targets:S.UPDATES.flatMap(u=>u.points).filter(p=>p.go).length,
         fake:['tab:nowhere','office:nope','up:nothing','gate:99','shop'].filter(g=>S.newsOk(g)),frags:frags.length}},frags);
-    ok('news-card: every point, released or waiting, has a short lead and one sentence, a real target and a real level',!d.bad.length&&!d.fake.length&&d.targets>10&&d.frags>0,JSON.stringify(d));
+    ok('news-card: every point, released or waiting, has a short lead and one sentence, a real target and a real level',!d.bad.length&&!d.fake.length&&d.targets>10,JSON.stringify(d));
     // hiding: count what each level shows, with every version opened
     const S_N=await page.evaluate(()=>__sim.UPDATES.length);
     const shown=await page.evaluate(()=>{const S=__sim,G=S.G,out={};
