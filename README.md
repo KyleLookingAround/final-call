@@ -18,7 +18,7 @@ An airport management game that runs in the browser, on phones, tablets and desk
 npm run build          # dist/index.html, the whole game in one page (no dependencies needed)
 npm install            # Playwright, used for the checks
 npm run check          # crash, save, layout, touch and guided-start checks (about 15–25 min in a cloud session)
-npm run bot -- 1150    # bot plays 1,150 game hours and reports when each level was reached
+npm run bot -- 1200    # bot plays 1,200 game hours and reports when each level was reached
 npm run preview        # remakes the link-preview image and home-screen icon in src/public/
 ```
 
