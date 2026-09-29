@@ -9,12 +9,12 @@ description: Cut a Final Call release - claim the version, fold the What's new f
 
 1. **Claim the version.** It's the next number after the top row of `docs/HISTORY.md`. `git fetch origin main`, check no other `feature/release-*` branch is open (`git ls-remote origin 'refs/heads/feature/release-*'`), then claim it by creating the branch on GitHub before any work, with the GitHub tools' `create_branch` (or `POST /repos/{owner}/{repo}/git/refs`) from `main`: GitHub refuses it if the branch already exists. A `git push` can't claim it: it succeeds quietly when the branch already sits at the same commit. If the create is refused, another session has claimed that version: stop and say so. Then `git fetch origin && git checkout -b feature/release-<version> origin/feature/release-<version>`.
 2. **Fold the fragments.** `node tools/join.mjs` lists what's waiting in `src/updates.d/`. From them write:
-   - one `UPDATES` entry at the top of `src/game/38-updates.js`: the version, a short title and two to four points players will see;
+   - one `UPDATES` entry at the top of `src/game/38-updates.js`: the version, a short title and one to four points players will see, each fragment line `- **Lead.** Sentence. (go: … · level: …)` copied as `{b, t, go, lv}` (style and targets in `src/updates.d/README.md`; the `news-card` check fails a plain string);
    - one row at the top of `docs/HISTORY.md`: a bold headline, then what players will notice, in concise UK English, from the fragments' History lines. Leave out code-only changes.
    Then delete the folded fragments (keep the folder's README). The `rules` check fails if the two versions disagree.
-3. **Save fixtures.** If anything added saved fields since the last version:
+3. **Save fixtures.** If anything added saved fields since the last version (diff `FIELDS` in `03-state.js` and `DEFAULT()` against the last fixtures' commit; a field named in `ADDED` in `tools/checks/migrate.mjs` is already left out of the recorded hashes and checked to default, so it needs no new fixtures on its own):
    - `npm run bot -- 1150 --seed 1` (3-4 minutes).
-   - Copy `build/saves/L1.json`, `L3.json`, `L5.json` and `L9.json` to `tools/saves/v<version>-L<n>.json`.
+   - Copy `build/saves/L1.json`, `L3.json`, `L5.json` and `L9.json` to `tools/saves/v<version>-L<n>.json`, and backdate each one's `savedAt` past three hours: the newest fixture is the one `scene` loads, and a `savedAt` inside the 90 s–3 h window pays a welcome-back bonus that grows with wall-clock time, so its drawn and undrawn halves differ (version 32).
    - `npm run check -- migrate` fails for the new files and prints their hashes: add those lines to `GOLD` in `tools/checks/migrate.mjs`. Never change an existing line there; if an old save's hash changed, what it loads to changed.
    - `npm run check`: every save, old and new, must load and play. The layout, sheet and screenshot checks use the newest save.
 4. **Link preview.** If the game looks noticeably different, `npm run preview`, look at `src/public/preview.jpg`, and commit it.

@@ -8,6 +8,7 @@ description: Drive a Final Call pull request to green and merged - reading CI fa
 ## Checks workflow (`checks.yml`)
 
 - It runs `npm run check` on every non-draft PR (a draft only runs the groups its changes touch, below), and a newer push cancels the older run. Failure screenshots are in the `check-failures` artifact; `screenshots` is kept on every run.
+- A run of the whole suite is 15–25 minutes in a session's container; the `feature` playbook, step 4, says how to run it without corrupting it.
 - Every page is seeded, so a failure repeats locally: `npm run check -- <group>` (the groups are listed in the project notes).
 - A line number from an error in the built page: `node tools/where.mjs <line>`.
 - Fix the cause. Never skip, weaken or delete a check to get green, and never push an empty commit to re-run CI.
@@ -72,7 +73,8 @@ When several branches were built side by side (the `feature` playbook's "Splitti
 
 - `npm run build` and `npm run check` pass locally.
 - The commit message is a plain imperative subject with no attribution lines; the commit hook enforces this.
-- The PR title and description are plain and follow the template. The Description check (`.github/workflows/description.yml`) enforces this; the tools may add a footer when a PR opens, so read the description back once it's up.
+- The PR title and description are plain and follow the template. The Description check (`.github/workflows/description.yml`) enforces this and strips a trailing footer itself; but the tools add one to every GitHub post, issue comments and review replies too, which nothing checks, so read each back once it's up (lessons #138, #142).
+- Keep literal `.claude/…` paths and links to screenshot pages out of PR descriptions: they trip the same filter as a commit message. Put the links in a PR comment (#102, #134).
 
 ## The look back, before the PR is ready
 

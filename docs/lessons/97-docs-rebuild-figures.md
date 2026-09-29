@@ -1,9 +1,0 @@
-Theme: docs
-# Rebuild figures and the moving walkways follow-up · 27 Sep 2026
-
-- **Numbers:** session `session_01Q1sE41U8AfqEFUYe6Euq7U`, estimate $3. PR #97 opened 21:10, docs only, one commit. `npm run check` and `npm run build` clean; the two touched check groups (`graph`, `brief`) pass.
-- **What it found:** the stale figure lived in one place that mattered, `.claude/skills/balance/SKILL.md`'s living baseline note; the same numbers also appear in `docs/specs/transport-manager.md` and `docs/specs/airport-shapes.md`, but those are each PR's own historical bot-run record (airport-shapes.md's own 988/978/973 already sits close to #89's measurement, confirming they're dated snapshots, not notes that drift), so they were left alone.
-- **Went well:** the brief's own grep (`grep -rn "953" .claude docs CLAUDE.md`) found every candidate in one pass, and PR #89's description already carried the exact source numbers (989.1, 988.9, 974.6), so no bot rerun was needed.
-- **Lessons:**
-  - A figure that looks stale isn't always a note to fix: a spec's "Results" section records what a specific bot run measured for that PR, and rewriting it to match today's `main` would falsify history rather than correct drift. Only living guidance (a playbook's baseline, not a dated measurement) needed the update. → When a brief says "correct it wherever it appears", check whether each match is ongoing guidance or a historical record before editing it.
-  - `docs/roadmap.d/` only joins `now`, `next`, `runbook` and `done` (`tools/join.mjs`'s `SECTIONS`); a brief's "ideas or next" instruction only has one file-backed option, since the roadmap's hand-edited "Ideas" list isn't sourced from `docs/roadmap.d/` at all. → A roadmap item asked for the "ideas" section goes to `next` instead, when only a file will do.
