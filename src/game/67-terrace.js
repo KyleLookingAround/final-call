@@ -65,7 +65,7 @@ NEXT_ACT.push(p=>{
 PAX_STEP.toTer=(p,dt,D)=>{
   if(isCalled(p.F)&&!p.late){toGate(p);return}
   if(!terOn()){nextAct(p,false);return}
-  if(walk(p,D.cwalk*p.spd*walkMul(p),dt)){p.state='ter';if(!TER_BEEN.has(p)){TER_BEEN.add(p);terDay().up++}note(p,'ter',0,0.6);terraceCafe(p)}
+  if(walk(p,D.cwalk*p.spd*walkMul(p),dt)){p.state='ter';if(!TER_BEEN.has(p)){TER_BEEN.add(p);terBeen().push(p);terDay().up++}note(p,'ter',0,0.6);terraceCafe(p)}
 };
 function terraceCafe(p){
   if((p.rand*7919)%1>=0.5)return;const f=R.famous,v=TER_CAFE*(1+0.3*p.F.ac.tier)*(f&&f.p&&terUp(f.p)?1.6:1),h=terHall();
@@ -83,8 +83,10 @@ PAX_STEP.ter=(p,dt)=>{
   if(!p.late&&G.clock>=p.t)nextAct(p,false);
 };
 // a passenger who went up and reached their gate: a small lift in the rating, at most TER_REP_DAY a day as it lands
-// (effect() may scale a rise, so the day's cap is kept on what it did)
-{const f=PAX_STEP.toGate;PAX_STEP.toGate=(p,dt,D)=>{f(p,dt,D);if(p.state==='gate'&&TER_BEEN.has(p)){TER_BEEN.delete(p);boardedFromRoof(p)}}}
+// (effect() may scale a rise, so the day's cap is kept on what it did). Looked for once a minute among those who went up
+// (R.terB), not on every step of every walk to a gate
+const TER_AT_GATE=new Set(['gate','bridge','aisle','sitting','bus']);
+function terBeen(){const B=R.terB;if(B&&B.pax===R.pax&&B.G===G)return B.list;return (R.terB={pax:R.pax,G,list:[]}).list}
 function boardedFromRoof(p){
   const d=dayOf(G.clock),T=R.terRep&&R.terRep.d===d&&R.terRep.G===G?R.terRep:(R.terRep={d,G,v:0});if(T.v>=TER_REP_DAY-1e-9)return;
   const m=(G.lv.saf?1.25:1)*(G.dev&&devSum('green')?1.1:1),x=Math.min(TER_REP,(TER_REP_DAY-1e-9-T.v)/m);T.v+=x*m;repAdj(x,'terrace',p.stand);
@@ -103,6 +105,7 @@ function terraceMinute(){
   const L=terList();R.terOpen=terOpenNow();
   const f=R.famous;R.terFam=!!(f&&f.p&&terBuilt()&&terUp(f.p)&&onTer(f.p));
   R.spot=terSpotters();
+  const B=terBeen();for(let k=B.length-1;k>=0;k--){const p=B[k];if(p.dead||p.state==='missed')B.splice(k,1);else if(TER_AT_GATE.has(p.state)){B.splice(k,1);TER_BEEN.delete(p);boardedFromRoof(p)}}
   if(!terBuilt()){if(L.length)L.length=0;R.terFull=0;return}
   let n=0;for(let k=L.length-1;k>=0;k--){const p=L[k];if(p.dead||!onTer(p))L.splice(k,1);else n++}
   R.terWide=SIDX.some(i=>{const F=R.st[i].F;return F&&!F.freighter&&F.ac.blocks.length>2});
