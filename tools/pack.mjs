@@ -210,7 +210,7 @@ Nothing here should be copied wholesale; it was written for one game repo with o
 playbook assumes about Final Call, and what's really just "how to run sessions on any repo":
 
 - **\`balance\`** is entirely Final Call-specific: it exists to tune this game's economy with a bot
-  that plays 1,150 simulated hours and a baselines file for this game's levels. A different project
+  that plays 1,200 simulated hours and a baselines file for this game's levels. A different project
   has its own way of judging "did this change break anything that matters", or none at all - keep the
   shape (measure before, measure after, compare against a recorded target) and throw out the rest.
 - **\`coordinator\`** carries over almost as it is: starting and sweeping sessions, a cap on how many

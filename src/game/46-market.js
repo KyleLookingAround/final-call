@@ -210,10 +210,17 @@ TERM_FIELDS.dfEarned=()=>0;
 
 /* ---------- Sales › Shops: how full each shop is ---------- */
 TERM_PANEL['sales:shops']=TERM_PANEL['sales:shops']||[];
+// a shop at its top level that an unlocked kind would beat by half again or more, for each passer-by (spend times how many
+// stop, and the layout's bonus, at level 1 against its top level): the coffee carts and news stands in the prime units
+// otherwise stay as they are all game
+function betterShop(j){const s=G.shops[j];if(!s||s.lvl<4)return null;const t=SHOPS[s.type],v=u=>u.spend*u.pull*(LAY.shopBonus&&LAY.shopBonus[u.id]||1),now=v(t)*Math.pow(1.25,s.lvl);let b=null,bv=now*1.5;
+  for(const u of SHOPS)if(!u.vip&&u!==t&&has('shop:'+u.id)&&v(u)>bv){bv=v(u);b=u}
+  return b&&{t:b,x:bv/now}}
 TERM_PANEL['sales:shops'].push(()=>{
+  const tips=[];G.shops.forEach((s,j)=>{if(!shopOpen(j))return;const b=betterShop(j);if(b)tips.push(`<div class="rd"><b>${SHOP_NAME[j]}</b> ${SHOPS[s.type].name} is at its top level. A ${b.t.name.toLowerCase()} would take about ${Math.floor(b.x)}× as much from each passer-by: close it and build one.</div>`)});
   const rows=[];G.shops.forEach((s,j)=>{if(!s||!shopOpen(j))return;const n=shopUsed(j),c=shopCap(j),a=(R.awayH||[])[j]||0;
     rows.push(`<div class="rd"><b>${SHOP_NAME[j]}</b> ${SHOPS[s.type].name}: <b style="color:${n>=c?'var(--bad)':'inherit'}">${n}/${c}</b> inside${a?` · ${a} turned away last hour`:''}</div>`)});
-  let h=rows.length?`<div class="sec">How full<span>now</span></div><p class="note">A full shop sends people elsewhere. Each level adds room.</p>`+rows.join(''):'';
+  let h=(tips.length?`<div class="sec">Better shops<span>top level</span></div>`+tips.join(''):'')+(rows.length?`<div class="sec">How full<span>now</span></div><p class="note">A full shop sends people elsewhere. Each level adds room.</p>`+rows.join(''):'');
   if(G.lv.wtdf)h+=`<div class="rd"><b>Walk-through duty free</b>: ${money(G.dfEarned||0)} earned</div>`;
   return h+upSection('sales',['Market place']);
 });
@@ -251,12 +258,12 @@ function drawShopUnit(j){
       else{sq(x-3,e-3,6,6,'#2A3037');if(q%2===0)sq(x+3,e-2.5,4,5,id==='dining'?'#E6E1D6':id==='bar'?'#5A4A6E':'#4A4131')}}
     if(id==='lounge')sq(100,31,11,5,'#D9A066');else if(id==='bar')for(let q=0;q<5;q++)sq(98+q*3,12,2,4,'#C39BFF');
     if(flip){ctx.translate(118,40);ctx.rotate(Math.PI)}
-    const n=shopUsed(j),c=shopCap(j),ty=flip?38:8.5;
-    ctx.font='700 8px "Saira Condensed","Arial Narrow",sans-serif';ctx.fillStyle=t.col;ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.fillText(`${t.name.toUpperCase()} · ${s.lvl+1}`,4,ty);
-    mono(`${n}/${c}`,114,ty,n>=c?'#FF7A8A':'#909AA4',7.5,'right')}
-  else{ctx.strokeStyle='#343C45';ctx.lineWidth=1;ctx.setLineDash([3,3]);ctx.strokeRect(.5,.5,117,39);ctx.setLineDash([]);if(flip){ctx.translate(118,40);ctx.rotate(Math.PI)}mono('UNIT TO LET',59,24,'#4A535D',8.5,'center')}
+    const n=shopUsed(j),c=shopCap(j),nm=`${t.name.toUpperCase()} · ${s.lvl+1}`,cn=`${n}/${c}`;let fs=labelSize(nm,8,108); // readable on a phone, as the halls' names, and no wider than 76
+    const nf=z=>`700 ${z}px "Saira Condensed","Arial Narrow",sans-serif`;ctx.font=nf(fs);const nw=ctx.measureText(nm).width;if(nw>76){fs=Math.max(8,fs*76/nw);ctx.font=nf(fs)}const ty=flip?38:8.5+0.75*(fs-8);ctx.fillStyle=t.col;ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.fillText(nm,4,ty);
+    mono(cn,114,ty,n>=c?'#FF7A8A':'#909AA4',labelSize(cn,7.5,26),'right')}
+  else{ctx.strokeStyle='#343C45';ctx.lineWidth=1;ctx.setLineDash([3,3]);ctx.strokeRect(.5,.5,117,39);ctx.setLineDash([]);if(flip){ctx.translate(118,40);ctx.rotate(Math.PI)}hallText('UNIT TO LET',59,24-0.375*(labelSize('UNIT TO LET',8.5,110)-8.5),'#4A535D',8.5,'center',110)}
   ctx.restore();
 }
 
-SIMX.cafeTip=cafeTip;SIMX.hotelTip=hotelTip;SIMX.isCalled=isCalled;SIMX.shopCap=shopCap;SIMX.shopUsed=shopUsed;SIMX.mktPlan=mktPlan;SIMX.callLead=callLead;SIMX.gateWalkMin=gateWalkMin;SIMX.boardEta=boardEta;
+SIMX.cafeTip=cafeTip;SIMX.betterShop=betterShop;SIMX.hotelTip=hotelTip;SIMX.isCalled=isCalled;SIMX.shopCap=shopCap;SIMX.shopUsed=shopUsed;SIMX.mktPlan=mktPlan;SIMX.callLead=callLead;SIMX.gateWalkMin=gateWalkMin;SIMX.boardEta=boardEta;
 Object.assign(SIMX,{onMover,paxHidden,paxEase}); // for the movement check (tools/checks/movement.mjs): 07-passengers.js, 12-drawing.js
