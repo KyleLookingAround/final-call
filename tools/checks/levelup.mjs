@@ -1,6 +1,7 @@
 // The level-up card (docs/specs/level-up.md): it opens once on a level-up, pauses the game and puts the speed back; it
-// lists only what has just unlocked; each link lands on the right tab; two levels at once make one card; the setting,
-// the guided start and the headless sim keep it closed; and it fits phones, tablets and desktops.
+// lists only what has just unlocked, at most 5 plans and one upgrade chip a tab; each link lands on the right tab; two
+// levels at once make one card; the setting and the headless sim keep it closed; the guided start queues it and opens
+// it once the tour ends; and it fits phones, tablets and desktops.
 const EASY=()=>{const S=__sim;window.easy=(...ns)=>{for(const n of ns)S.LEVELS[n].req={pax:0,rep:0,gates:1}};
   window.card=()=>{const el=document.querySelector('#lvlup');return el.hidden?null:{title:el.querySelector('#lvlT').textContent.replace(/^(Now an?)/,'$1 '),text:el.textContent,go:[...el.querySelectorAll('#lvlList [data-lvgo]')].map(b=>b.dataset.lvgo)}}};
 export default async function({open,ok}){
@@ -34,12 +35,37 @@ export default async function({open,ok}){
     const two=await page.evaluate(()=>{const S=__sim,G=S.G,R=S.R;easy(2,3);S.checkLevel();S.checkLevel();S.lvlTick();const c=card();S.lvlCardOpen(false);S.lvlTick();
       return {level:G.level,title:c&&c.title,two:!!c&&/Two levels up/.test(c.text),after:!!card()}});
     ok('levelup: two levels at once make one card',two.level===3&&/City Airport/.test(two.title)&&two.two&&!two.after,JSON.stringify(two));
-    // the setting, the guided start and the headless sim keep it closed; with the setting off, the toast comes as before
+    // the setting and the headless sim keep it closed; with the setting off, the toast comes as before
     const off=await page.evaluate(()=>{const S=__sim,G=S.G,R=S.R,out={};const t0=R.toasts.length;
       G.set.lvlCard=false;easy(4);S.checkLevel();S.lvlTick();out.setting={card:!!card()||!!R.lvlCard,toast:R.toasts.slice(t0).some(t=>/Now /.test(t.msg||t.text||JSON.stringify(t)))};G.set.lvlCard=true;
-      G.tour={s:0};easy(5);S.checkLevel();S.lvlTick();out.tour=!!card()||!!R.lvlCard;G.tour={done:1};
+      // during the tour: level 5's card queues but stays shut, and the queueing means no fallback toast either
+      G.tour={s:0};const t1=R.toasts.length;easy(5);S.checkLevel();S.lvlTick();
+      out.tour={shown:!!card(),queued:!!R.lvlCard,toast:R.toasts.slice(t1).some(t=>/Now /.test(t.msg||t.text||JSON.stringify(t)))};
+      // the tour's own last step opens the card it was holding back
+      G.tour.s=S.TOUR.length-1;S.tourNext();out.tourEnd={shown:!!card(),title:card()&&card().title};S.lvlCardOpen(false);
       R.sim=true;easy(6);S.checkLevel();S.lvlTick();out.sim=!!card()||!!R.lvlCard;R.sim=false;out.level=G.level;return out});
-    ok('levelup: the setting, the guided start and the headless sim keep it closed',off.level===6&&!off.setting.card&&off.setting.toast&&!off.tour&&!off.sim,JSON.stringify(off));
+    ok('levelup: the setting and the headless sim keep it closed',off.level===6&&!off.setting.card&&off.setting.toast&&!off.sim,JSON.stringify(off));
+    ok('levelup: the guided start queues the card, with no toast, and opens it once the tour ends',
+      !off.tour.shown&&off.tour.queued&&!off.tour.toast&&off.tourEnd.shown&&/^Now a Gateway Airport$/.test(off.tourEnd.title),JSON.stringify(off));
+    // Skip tour is the other way the tour ends: it opens a queued card too, not only tourNext's own natural end
+    const skip=await page.evaluate(()=>{const S=__sim,G=S.G,R=S.R;G.tour={s:0};S.tourStep();
+      easy(7);S.checkLevel();const queued={shown:!!card(),queued:!!R.lvlCard};
+      document.querySelector('#coach [data-tskip]').click();
+      return {queued,after:{shown:!!card(),title:card()&&card().title},done:!!G.tour.done}});
+    ok('levelup: Skip tour also opens the card it was holding back',
+      !skip.queued.shown&&skip.queued.queued&&skip.done&&skip.after.shown&&/^Now a Global Hub$/.test(skip.after.title),JSON.stringify(skip));
+    // row 39: a level with lots to list still fits — at most 5 plan rows plus "and N more", one chip a tab not one a upgrade
+    const big=await page.evaluate(()=>{const S=__sim,R=S.R;R.lvlCard={from:0,to:9};S.lvlCardOpen(true);
+      const U=S.lvlUnlocks(0,9),tabs=new Set(U.more.map(x=>x.tab));
+      // isolate the Masterplan section's own rows: 'go:plan' is shared with the tiles button and Consultants' "Opens up" row
+      const section=document.querySelector('#lvlList').innerHTML.split('New in the Masterplan')[1].split('<div class="lvsec">')[0];
+      const out={plansData:U.plans.length,moreData:U.more.length,tabs:tabs.size,
+        planRows:(section.match(/class="lvgo"/g)||[]).length,
+        note:(/and (\d+) more in the Masterplan/.exec(section)||[])[1],
+        chips:document.querySelectorAll('#lvlList .lvchip').length};
+      S.lvlCardOpen(false);return out});
+    ok('levelup: at most 5 plans (plus "and N more") and one upgrade chip a tab',
+      big.plansData>5&&big.planRows===5&&+big.note===big.plansData-5&&big.moreData>big.tabs&&big.chips===big.tabs,JSON.stringify(big));
     if(errs.length)ok('levelup: no page errors',false,errs[0]);
     await ctx.close();}
   // it fits: phones (320 px and 390×844, portrait and landscape, with the camera band), a tablet and a desktop

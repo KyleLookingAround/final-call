@@ -1,6 +1,7 @@
 /* ================= the level-up card: what a new level has just unlocked, with links straight there ================= */
 // checkLevel hands a level-up to lvlUp; the card opens at the frame loop's next UI tick (lvlTick), so levels reached together
-// share one card. Never in the headless sim or the guided start, and not with G.set.lvlCard off: then the toast, as before.
+// share one card. Never in the headless sim, and not with G.set.lvlCard off: then the toast, as before. During the guided
+// start it still queues (never the toast) but stays shut until tourNext ends or skips the tour (36-guided-start.js).
 // It pauses the game and puts the previous speed back when it closes, as What's new does. R.lvlCard is runtime only.
 const lvlCities=t=>{const c=CITIES.filter(x=>x[2]===t).map(x=>x[1]);return c.length>4?c.slice(0,4).join(', ')+` and ${c.length-4} more`:c.join(', ')};
 // what's new between level `from` and level `to`, from the same data the game gates on
@@ -35,16 +36,19 @@ function renderLvl(from,to){
   const sec=(t,k)=>`<div class="lvsec">${t}${k?` <em>${k}</em>`:''}</div>`;
   let h=`<div class="lvtiles"><div class="lvtile"><b>+${money(cash)}</b><span>Reward</span></div><button class="lvtile pts" data-lvgo="plan"><b>${pts} ★</b><span>Plan points to spend</span></button></div>`;
   if(U.gates.length)h+=sec('At the airport')+U.gates.map(row).join('');
-  if(U.plans.length)h+=sec('New in the Masterplan',U.plans.length)+U.plans.map(row).join('');
+  if(U.plans.length){h+=sec('New in the Masterplan',U.plans.length)+U.plans.slice(0,5).map(row).join('');
+    if(U.plans.length>5)h+=`<p class="note">and ${U.plans.length-5} more in the Masterplan.</p>`}
   if(U.open.length)h+=sec('Opens up')+U.open.map(row).join('');
+  // one chip a tab, not one a upgrade: a level with a dozen upgrades still fits a phone
   if(U.more.length){h+=sec('Upgrades can go higher',U.more.length);const tabs=[...new Set(U.more.map(x=>x.tab))];
-    for(const t of tabs)h+=`<div class="lvgrp">${LV_TAB[t]||t}</div><div class="lvchips">`+U.more.filter(x=>x.tab===t).map(x=>`<button class="lvchip chip" data-lvgo="${x.go}">${lvIc(x.ic)}${x.t}</button>`).join('')+`</div>`}
+    h+='<div class="lvchips">'+tabs.map(t=>{const g=U.more.filter(x=>x.tab===t);return `<button class="lvchip chip" data-lvgo="${g[0].go}">${lvIc(g[0].ic)}${LV_TAB[t]||t} <em>${g.length}</em></button>`}).join('')+'</div>'}
   h+=`<div class="kofifoot"><a class="kofi" href="https://ko-fi.com/kylemck" target="_blank" rel="noopener">${svg('cup')}Buy me a Ko-fi</a></div>`;
   $('#lvlList').innerHTML=h;$('#lvlList').scrollTop=0;
   $('#lvlPlan').innerHTML=`Masterplan${pts?`<span class="lvpts"> · ${pts} ★</span>`:''}`;
 }
 function lvlUp(n){
-  if(R.sim||SET().lvlCard===false||(G.tour&&!G.tour.done))return false;
+  if(R.sim||SET().lvlCard===false)return false;
+  // queues even during the tour: it just waits to open until tourNext ends it, rather than falling back to the toast
   const c=R.lvlCard||(R.lvlCard={from:n-1,to:n});c.to=Math.max(c.to,n);if(!$('#lvlup').hidden)renderLvl(c.from,c.to);return true;
 }
 function lvlCardOpen(on){
@@ -52,8 +56,8 @@ function lvlCardOpen(on){
   if(!on){if(el.hidden)return;el.hidden=true;R.lvlCard=null;if(R.lvlPrev>0)setSpeed(R.lvlPrev);R.lvlPrev=0;return}
   const c=R.lvlCard;if(!c)return;renderLvl(c.from,c.to);el.hidden=false;R.lvlPrev=R.speed;setSpeed(0);$('#lvlup .lvplay').focus();
 }
-// from the frame loop: open a waiting card once nothing else is over the game
-function lvlTick(){if(R.sim||!R.lvlCard||!$('#lvlup').hidden||$$('.help:not([hidden])').length)return;lvlCardOpen(true)}
+// from the frame loop: open a waiting card once nothing else is over the game, and once the guided start is out of the way
+function lvlTick(){if(R.sim||!R.lvlCard||!$('#lvlup').hidden||$$('.help:not([hidden])').length||(G.tour&&!G.tour.done))return;lvlCardOpen(true)}
 function lvlGo(g){
   lvlCardOpen(false);const i=g.indexOf(':'),a=i<0?g:g.slice(0,i),b=g.slice(i+1);
   if(a==='plan')openPlan();else if(a==='tab')setTab(b);else if(a==='up')goTo(UPG[b].tab,`[data-buy="${b}"]`);
