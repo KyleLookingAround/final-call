@@ -108,5 +108,5 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 ### Not sorted yet
 
-- [Release loose ends · 29 Sep 2026](lessons/release-loose-ends.md)
+- [Release loose ends · 29 Sep 2026](lessons/172-release-loose-ends.md)
 <!-- /joined:lessons -->
