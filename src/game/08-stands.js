@@ -27,7 +27,7 @@ function updateStand(i,dt,D){
   if(F.manifest.length){F.spawnT-=dt;const rate=arrivalRate(F);while(F.spawnT<=0&&F.manifest.length){const L=F.manifest.pop(),pt=[L];while(F.manifest.length&&F.manifest[F.manifest.length-1].leader===L)pt.push(F.manifest.pop());spawnParty(pt);F.spawnT+=pt.length>1?1.6/rate:1/rate}}
   if(F.straggler&&G.clock>=F.stragglerAt){spawn(F.straggler);F.straggler=null}
   if(F.straggler&&pol('late')==='close'&&pl.state==='boarding'&&F.seated>=F.booked-1&&G.clock>=F.std){
-    if(F.straggler.checked)F.checkedTotal--;F.booked--;spend(F.fare,'costs',i);F.straggler=null;repAdj(-1.5,'missed',i);toW(i,0,CABIN_TOP-24);floater('DOORS CLOSED',WP.x,WP.y,'#FFC72C',true);
+    if(F.straggler.checked)F.checkedTotal--;F.booked--;spend(F.fare*2,'costs',i);F.straggler=null;repAdj(-4,'missed',i);toW(i,0,CABIN_TOP-24);floater('DOORS CLOSED',WP.x,WP.y,'#FFC72C',true);
   }
   // gate scanners, one per door
   if(pl.state==='boarding'){
