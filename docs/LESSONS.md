@@ -72,6 +72,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 ### Releases
 
+- [Release P4: numbers, labels and the save panel · 29 Sep 2026](lessons/164-release-p4-labels.md)
 - [Cutting releases: version 32, #118 release 33, #126 release 34 · 27–28 Sep 2026](lessons/126-releases.md)
 
 ### Review
