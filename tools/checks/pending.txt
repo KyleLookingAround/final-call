@@ -4,11 +4,6 @@
 # lines, and the PR that brings the parts together leaves this file with comments only.
 
 # decor and local character
-decor: nothing to place
-decor: it comes with the building
-decor: never in the way
-decor: local names from the region
-decor: signs fit their halls
 
 # each layout's own floor plan
 plans: halls inside each main building

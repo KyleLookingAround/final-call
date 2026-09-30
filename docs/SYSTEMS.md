@@ -7,9 +7,10 @@ The project notes (`CLAUDE.md`) hold what every change needs. This file holds ho
 <!-- joined:systems from docs/systems/ by tools/join.mjs: don't edit between these lines -->
 - [Airline operations](systems/airline-operations.md) (`34-airline-operations.js`)
 - [Airport layouts](systems/airport-layouts.md) (`39-layouts.js`, `12-drawing.js`, `23-boot.js`)
-- [The airport scene](systems/airport-scene.md) (`50-scene.js`, `51-markings.js`, `55-vehicles.js`, `12-drawing.js`, `42-terminal.js`, `07-passengers.js`, `28-region-weather.js`, `04-effects.js`, `01-constants.js`, `68-windows.js`, `62-photo-mode.js`, `54-weather.js`, `52-planes.js`, `53-roofs.js`, `13-camera.js`, `67-terrace.js`, `08-stands.js`, `04-geometry.js`, `29-region-map.js`)
+- [The airport scene](systems/airport-scene.md) (`50-scene.js`, `51-markings.js`, `55-vehicles.js`, `12-drawing.js`, `42-terminal.js`, `07-passengers.js`, `28-region-weather.js`, `04-effects.js`, `01-constants.js`, `68-windows.js`, `62-photo-mode.js`, `54-weather.js`, `52-planes.js`, `53-roofs.js`, `13-camera.js`, `67-terrace.js`, `69-decor.js`, `08-stands.js`, `04-geometry.js`, `29-region-map.js`)
 - [Clocks and day stats](systems/clocks.md) (`02-clocks.js`, `08-stands.js`, `34-airline-operations.js`, `45-baggage.js`)
 - [Day in a minute](systems/day-in-a-minute.md) (`63-day-in-a-minute.js`)
+- [Decor and local names](systems/decor.md) (`69-decor.js`, `67-terrace.js`, `46-market.js`)
 - [Effects: the rating and money ledger](systems/effects.md) (`04-effects.js`, `15-panel.js`)
 - [Famous faces](systems/famous-faces.md) (`64-famous-faces.js`, `03-state.js`, `14-board.js`)
 - [Floors](systems/floors.md) (`66-floors.js`, `42-terminal.js`, `61-late-runners.js`, `53-roofs.js`, `13-camera.js`)
@@ -139,6 +140,7 @@ The main names, by file group (the joined table below is the complete list, from
 | `66-floors.js` | FLOORS: halls on two floors, the escalators and lift between them, and going to a hall's floor |
 | `67-terrace.js` | THE ROOF TERRACE: a third floor over the concourse, where waiting passengers watch the planes |
 | `68-windows.js` | WINDOWS: glass along the apron, and passengers who watch the big jets go by |
+| `69-decor.js` | DECOR: planters, benches, art and boards that come with the building, and local names |
 | `99-start.js` | the `/*SIM_HOOK*/` marker and the call that starts the game |
 <!-- /joined:files -->
 

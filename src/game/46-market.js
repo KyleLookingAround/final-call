@@ -253,7 +253,7 @@ function drawMarket(){
 function drawShopUnit(j){
   const s=G.shops[j],a=((SHOP_A[j]%360)+360)%360,flip=a>90&&a<=270;ctx.save();ctx.translate(SHOP_X[j],SHOP_Y[j]);ctx.rotate(a*Math.PI/180);
   const sq=(x,y,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(x,y,w,h)};
-  if(s){const t=SHOPS[s.type],k=SHOP_IN[t.id],id=t.id,rows=Math.ceil(shopCap(j)/8);sq(0,0,118,40,'#242A31');sq(0,0,118,10,'#1C2126');sq(0,38,118,3,t.col);
+  if(s){const t=shopLook(j,SHOPS[s.type]),k=SHOP_IN[t.id],id=t.id,rows=Math.ceil(shopCap(j)/8);sq(0,0,118,40,'#242A31');sq(0,0,118,10,'#1C2126');sq(0,38,118,3,t.col);
     sq(96,11,18,27,'#39414A');for(let q=0;q<tills(j);q++)sq(99,13+q*10,5,4,'#FFC72C'); // the counter and its tills
     if(!k.sit){for(let r=0;r<rows;r++){const e=13+r*10;sq(3,e-4.5,78,2,'#3A424B');for(let x=5;x<80;x+=5){ctx.fillStyle=(x/5)%3?t.col:'#ECE8DF';ctx.fillRect(x,e-6,2,1.5)}}} // shelves behind each aisle
     else for(let r=0;r<rows;r++)for(let q=0;q<8;q++){const x=8+q*10,e=15+r*10; // a seat at every spot, and the tables, stools or buffet around them

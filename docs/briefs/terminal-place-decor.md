@@ -1,26 +1,49 @@
-# Brief: Decor and local character (a part of "The terminal as a place")
+# Brief: Decor and local character (a part of "The terminal as a place", #133 step 3)
 
-The coordinator's brief for one part of `docs/specs/terminal-place.md` (approved on #48), in the first batch with two floors in Classic, and windows and watchers. Start it as a fresh session with this file as its first message, on a branch from `main` after the groundwork (#GROUNDWORK) has merged.
+The coordinator's brief for one part of `docs/specs/terminal-place.md` (approved on #139, 28 Sep 2026), refreshed on 29 Sep against `main` after windows and watchers merged (#183). Two floors in Classic (#162), refactor 7 (#145, #156), the roof terrace (#181, released in 36) and windows and watchers (#183) are in. This supersedes the 27 Sep version of this file. Each layout's own floor plan follows this part.
 
 ## Goal and what it may touch
 
-- Every hall gets planters, benches, art, a grand departures board and signs, fitted to its shape, worked out from the layout's rooms, what's built (`roomOn`) and the level: more with each level, a hall's decor when the hall is built, and never in a queue, lane, doorway, floor link or walkway. Some shops, cafés and the art take their names and colours from the region's places (`PLACES`), picked with a hash of the unit's index, not `rnd()`. The player places nothing (the owner said no), decor is never saved, and it doesn't change the rating (the owner's choice). Drawing only: `PLAY` identical on seeds 1–3 against `main`.
-- Switch on its pending checks by taking their lines out of `tools/checks/pending.txt`: the five `decor:` checks. Say in the PR how each failed on `main` and passes now.
-- Branch `feature/terminal-place-decor`, one PR, labelled `part:terminal-place`.
-- Files and hooks it may touch: a new `src/game/58-decor.js` (a `decor()` worked out and cached per layout, level and what's built, and its drawing as a `TERM_DRAW` entry, so it's never drawn under the roof); reading `ROOMS`, `L.term`, `roomOn`, the queue slots (`ciSlot`, `secSlot`, `arrSlot`, `ftSlot`) and `PLACES` without changing them; shop units' names through a hook rather than editing `46-market.js` beyond one line if it must; `tools/checks/decor.mjs` only to fix a mistake (say what and why); a new `docs/systems/decor.md`. Anything else is outside the brief.
-- Decor must follow each layout's rooms and floors (`fl`, `onFloor`), so it keeps working when the two floors and floor plans parts move halls.
-- Screenshots at phone (390×844 and 320×568), tablet (768×1024) and desktop (1440×900), by day and night, zoomed out and at 1.6×, for Classic and Midfield at levels 1, 5 and 9, looked at before the PR opens.
+- **Decor.** Every hall gets planters, benches, art, a grand departures board and signs, fitted to its shape.
+  - Worked out from the layout's rooms, what's built (`roomOn`) and the level: more with each level, and a hall's decor arrives when the hall is built.
+  - Never in a queue, lane, doorway, floor link or walkway.
+  - The terrace gets its own: rail, benches, parasols, and a telescope on the public side. Leave anything `67-terrace.js` already draws there, and add only what's missing.
+- **Local names.** Some shops, cafés, the terrace café and the art take their names and colours from the region's places (`PLACES`), picked with a hash of the unit's index, not `rnd()`.
+- **Rules:** the player places nothing (the owner said no), decor is never saved, and it doesn't change the rating. Drawing only: `PLAY` and `STATE` identical on seeds 1–3 against the merge base. Add the `refactor` label so the Balance workflow's compare job (#177) proves it.
+- **What's new:** add two fragments to `src/updates.d/`. One is for windows and watchers, which #183 left out (level 1; "Show me" the Departures stop). The other is for decor and local names.
+- Switch on the five `decor:` checks by taking their lines out of `tools/checks/pending.txt`. Say in the PR how each failed on `main` and passes now.
+- Branch `feature/terminal-place-decor` from `main`, one PR, labelled `part:terminal-place`.
+- **Files and hooks it may touch:**
+  - a new `src/game/69-decor.js`: a `decor()` worked out and cached per layout, level and what's built, `localNames()`, and their drawing as a `TERM_DRAW` entry, so it's never drawn under the roof;
+  - reading `ROOMS`, `L.term`, `roomOn`, the queue slots and counters (`ciSlot`, `secSlot`, `arrSlot`, `ftSlot` and the rest `decor.mjs` names) and `PLACES`, without changing them;
+  - adding to `SIMX` what `tools/checks/decor.mjs` reads (`boothPos`, `egatePos`, `carX`, `carY`, `arrSlot`, as its header says);
+  - shop units' and the terrace café's names through a hook, rather than editing `46-market.js` or `67-terrace.js` beyond one line each if it must;
+  - `tools/checks/decor.mjs` only to fix a mistake (say what and why);
+  - guard checks elsewhere in `tools/checks/` only where the decor breaks an assumption they make; list each in the PR;
+  - the two fragments;
+  - a new `docs/systems/decor.md`, and the decor lines in `docs/systems/terminal.md` and `airport-scene.md`.
+  Anything else is outside the brief. Search `src/game/` for each new top-level name before using it.
+- Decor must follow each layout's rooms and floors (`fl`, `onFloor`), so it keeps working when the floor plans part moves halls.
+- **Lessons from the terrace and windows** (`docs/lessons/181-terrace.md`, `183-windows.md`):
+  - Print what a pre-written check's filter sees before changing game code to fit it.
+  - After merging `main` (a release adds a newer save that checks play), rerun your own group before anything else.
+  - Time the part's own drawing directly with an A/B in one page (take the layer entry out and put it back) before trimming it to fit a noisy `scene` row.
+- Screenshots at phone (390×844 and 320×568, portrait and landscape), tablet (768×1024) and desktop (1440×900). By day and night, zoomed out and at 1.6×, for Classic and Midfield at levels 1, 5 and 9, and the terrace. Looked at before the PR opens, with names legible and nothing over a queue.
 
 ## Read first
 
 - The project notes, then `node tools/graph.mjs decor`, `node tools/graph.mjs PLACES`, `node tools/graph.mjs 42-terminal.js` and `node tools/graph.mjs 46-market.js`, and only what they list.
-- `docs/specs/terminal-place.md` ("What they see", "How it works", the `decor` checks); `docs/systems/terminal.md` and `docs/systems/airport-scene.md` (layers, roofs and floors); `tools/checks/decor.mjs` and `tools/checks/lib/place.mjs`; the groundwork's look back in `docs/lessons/`.
+- `docs/specs/terminal-place.md` ("What they see", "How it works", the `decor` checks); `docs/systems/terminal.md`, `airport-scene.md`, `terrace.md` and `windows.md`; `tools/checks/decor.mjs` and `tools/checks/lib/place.mjs`; the two lessons above.
 
 ## Speed budget
 
-- Drawing: 25% of what the groundwork left, shared with nothing else in this part. Worst scene (`npm run check -- scene`): 0.058× of about 0.23× left under 0.55×. Terminal zoomed in (`plans`): 0.023× of the same 0.09× left. Cache what only changes with the layout, level or what's built, and drop fine detail when zoomed out (`V.z`).
-- Simulation: none; both `perf` checks stay where `main` has them (within ±0.02×).
-- One run varies by about ±0.05× for drawing: measure the median of three runs on the branch minus three on `main`, on the same machine, and put both in the PR.
+The spec gives decor and local names 20% of the drawing headroom and no simulation. Measure `main` on your own machine first: median of three runs on `main` and three on the branch, alternately, both in the PR. #183 measured `main` plus windows on its container as follows, with this part's share:
+- Drawing (`scene`):
+  - Classic desktop about 0.37×: at most +0.035×.
+  - Terminal zoomed in, Classic, about 0.17×: at most +0.03×.
+  - Zoomed-in Midfield phone about 0.21×: at most +0.02×.
+- Cache what changes only with the layout, level or what's built, and drop fine detail when zoomed out (`V.z`).
+- Simulation: none. Both `perf` rows stay where `main` has them (within ±0.02×), and nothing reachable from `update()` changes.
 
 ## Commit author
 
@@ -28,18 +51,16 @@ KyleLookingAround <KyleMck10@hotmail.com> (the session-start hook sets it; check
 
 ## Who merges and when
 
-- The coordinator, one part at a time, after the Parts workflow's comment shows the open parts green together. The part opens its PR (labelled `part:terminal-place`, from `.github/pull_request_template.md`), subscribes to its events and ends its turn; it doesn't merge or book its own check-ins.
-- The Catch up workflow merges `main` into open PRs; merge `main` yourself only for a real conflict. GitHub sometimes starts no pull-request run after a push: dispatch Checks with `workflow_dispatch`.
-- After opening the PR, read its description back and remove any "Generated by" footer or session link. Record [D] in the PR: (a) game-code bugs a pre-written check caught before the PR opened, (b) game-code bugs found after it opened, (c) pre-written checks you had to fix, and how (spec, "Measuring [D]").
-- Its look back goes in `docs/lessons/<pr>-<short-name>.md`, and its system's notes in its own `docs/systems/` file.
+- The session, per the `steward` playbook: open the PR from `.github/pull_request_template.md`, read its description back, and remove any "Generated by" footer or session link. Subscribe to its events (`subscribe_pr_activity`) and keep a `send_later` (about 20 minutes) as the fallback.
+- Record [D] in the PR: (a) game-code bugs a pre-written check caught before it opened, (b) found after, (c) pre-written checks you had to fix.
+- Once the look back (`docs/lessons/<pr>-decor.md`) is in, and Checks, Description and Balance (with the compare job showing `PLAY` identical) are green, mark it ready and turn on auto-merge (squash). Then confirm the Pages publish.
 
 ## What's left for others
 
-- The owner's limit: at most 5 sessions building changes at once. Don't start any session yourself: the coordinator does.
-- Not the other terminal-place parts: in this first batch, two floors in Classic, windows and watchers, and decor and local character (whichever aren't this one); in the second batch, the roof terrace and spotters, and each layout's own floor plan; then the PR that brings them together (balance on seeds 1–3, the speed of every part together, `pending.txt` empty, screenshots of every layout's two floors by day and night, What's new, version, save fixtures, link previews).
-- Refactor 7 (one passenger pass) runs between the groundwork and these parts or after; then refactor 10; the systems review's proposals 9, 8 and 2; the owner's answer on the rating and the one-city board; then the idea board (`docs/ideas/board-2026-09.md`) and `docs/ROADMAP.md`. Refactor 8 (weather in one place) touches weather drawing: leave `28-region-weather.js` and `54-weather.js` alone.
-- A release after the terminal-place parts merge is the owner's call.
-- Routine jobs (look backs, save fixtures, doc moves, screenshot reviews) go to the cheaper model (experiment [C]). Pass this list, and the limit of 5, on in any brief this session writes.
+- Not the other terminal-place parts: each layout's own floor plan, and the PR that brings them together. They follow from their own briefs.
+- No release: the coordinator starts release 37 after this merges.
+- Leave `28-region-weather.js` and `54-weather.js` alone (refactor 8, later).
+- At most three default-model sessions run at once. Don't start any session yourself: the coordinator does.
 
 ## When to stop and ask
 
@@ -49,6 +70,6 @@ KyleLookingAround <KyleMck10@hotmail.com> (the session-start hook sets it; check
 
 ## Cost budget
 
-- Estimate: about $12 (decor worked out from rooms and levels, local names, five checks switched on, screenshots at three levels).
-- At each stopping point (the PR opened, CI back), read `get_session`: `usage.cost_usd` against the estimate (a 0 means not yet known, not free), and `rate_limit_info`. If status is "rejected" or `isUsingOverage` is true, schedule a `send_later` for a minute after `resetsAt` and end the turn.
+- Estimate: about $16 (decor fitted to every layout's halls and levels, local names, five checks switched on, two fragments, speed runs, screenshots at three levels and four sizes; windows cost about $15).
+- At each stopping point (the PR opened, CI back, a merge), read `get_session`: `usage.cost_usd` against the estimate (a 0 means not yet known, not free), and `rate_limit_info`. If status is "rejected" or `isUsingOverage` is true, schedule a `send_later` for a minute after `resetsAt` and end the turn. Ignore `allowed_warning` (the owner's call, 29 Sep).
 - Past twice the estimate: say why in the PR and in its look back, and trim or split what's left.
