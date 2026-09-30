@@ -1,23 +1,19 @@
 # Brief: Coordinator, from decor through the floor plans and bringing the terminal together
 
-A handover from `session_01GnLSn9mHsUYxPjZiqbmLpC`, the coordinator that ran from 17:46 on 29 Sep to about 00:00 on 30 Sep. It handed over at 425k of context and about $11. This is the state at 00:00 UTC on 30 Sep. Follow the `coordinator` playbook, with the changes below; where they differ, this brief wins.
+A handover from `session_01GnLSn9mHsUYxPjZiqbmLpC`, the coordinator that ran from 17:46 on 29 Sep to about 00:00 on 30 Sep. It handed over at 425k of context and about $11. This is the state at 01:20 UTC on 30 Sep. Follow the `coordinator` playbook, with the changes below; where they differ, this brief wins.
 
 ## Goal and what it may touch
 
-- **Where the game is:** release 36 ("the roof terrace and the Roadmap tab") is live at https://kylelookingaround.github.io/final-call/ (d64b2ee). Windows and watchers (#183) merged after it, so it isn't released yet.
+- **Where the game is:** release 36 ("the roof terrace and the Roadmap tab") is live at https://kylelookingaround.github.io/final-call/ (d64b2ee). Windows and watchers (#183) and decor (#184) merged after it; release 37 ships them.
 - **The owner parked the public launch** (29 Sep, about 17:55). There is no launch triage, no 48-hour hold and no one-release-a-day limit. If the owner says they've shared the game, the `release` playbook's launch-week rules and `docs/briefs/launch-triage.md` apply again.
 - **The plan, in order:**
-  1. **Decor and local character** (#133 step 3) is building: `session_012uotJnS5weEeewvif5E6e7`, default model, $16 estimate, `feature/terminal-place-decor`. It was $7.59 at 23:50, with fixes pushed and CI running. It merges itself. Its brief (committed in its PR as `docs/briefs/terminal-place-decor.md`) also has it write the What's new fragment windows left out.
-  2. **Release 37** once decor merges. Use the cheaper model, in the shape of `docs/briefs/release-36.md`:
-     - fold the windows and decor fragments;
-     - in `src/roadmap.d/`, windows and decor go to `landed` V37 and the floor plans to `next`;
-     - save fixtures only if `FIELDS` changed.
-     Then update the players' roadmap page (see below) and tell the owner in a few lines.
+  1. **Decor and local character** (#184) merged at about 01:00 on 30 Sep (fb005f5), $11.74. Its Pages publish was green, and its session is archived.
+  2. **Release 37** (windows and decor) was started by the outgoing coordinator at about 01:20: `claude-sonnet-5-5`, `feature/release-37`, brief `docs/briefs/release-37.md`. It commits this brief too, and merges itself. After it merges, update the players' roadmap page (see below) and tell the owner in a few lines.
   3. **Each layout's own floor plan** (#133 step 5; step 6 in the spec's order of work):
      - all eight other layouts, with the terrace; a new numbered file after decor's;
      - the three `plans:` checks;
      - default model; its brief decides whether to split the pier layouts from the rest.
-     Model the brief on `docs/briefs/terminal-place-windows.md` and `terminal-place-decor.md`, with the speed numbers from decor's PR and the lessons in `docs/lessons/181-terrace.md`, `183-windows.md` and decor's.
+     Model the brief on `docs/briefs/terminal-place-windows.md` and `terminal-place-decor.md`, with the speed numbers from decor's PR (#184) and the lessons in `docs/lessons/181-terrace.md`, `183-windows.md` and decor's.
   4. **Bring it together** (#133 step 6), as the spec's order of work says, then a release.
   5. **Refactors 8 and 10,** in a quiet window with no feature sessions open.
   6. **O1 (#154):** planes leaving hours before the board's time. Recommend it to the owner as its own batch once the terminal work settles, and only build it if they say yes.
@@ -29,13 +25,13 @@ A handover from `session_01GnLSn9mHsUYxPjZiqbmLpC`, the coordinator that ran fro
   1. `list_triggers`: delete "Final Call: coordinator heartbeat" (`trig_01GjWcW7Mp295s5oCywQafC7`) and any other Routine bound to `session_01GnLSn9mHsUYxPjZiqbmLpC`, then `archive_session` it.
   2. Book your own hourly heartbeat (playbook §11).
   3. Sweep.
-  4. Have your first session commit this brief as `docs/briefs/coordinator-2026-09-30.md` (the release 37 session is the natural one).
+  4. Check that the release 37 session committed this brief as `docs/briefs/coordinator-2026-09-30.md`. If it didn't, have your first session do it.
 
 ## Read first
 
 - The project notes, the `coordinator`, `steward` and `release` playbooks, `docs/specs/terminal-place.md` (order of work, speed budget, checks), and `node tools/graph.mjs brief`.
 
-**Where things stand at 00:00 UTC on 30 Sep.**
+**Where things stand at 01:20 UTC on 30 Sep.**
 
 - **Merged since the 29 Sep (a) handover:**
 
@@ -49,10 +45,11 @@ A handover from `session_01GnLSn9mHsUYxPjZiqbmLpC`, the coordinator that ran fro
 | #181 | The roof terrace floor (#133 step 4) | default | $23.38 |
 | #182 | Release 36 | cheaper | $2.21 |
 | #183 | Windows and watchers (#133 step 3) | default | $17.10 |
+| #184 | Decor and local character (#133 step 3) | default | $11.74 |
 
 - **Estimates:**
   - The cheaper model came in well under on every routine batch (the Roadmap tab $5.28 of $10, release 36 $2.21 of $5).
-  - The default model ran at or a little over on terminal parts: the terrace $23 of $25, windows $17 of $14.
+  - The default model ran at or a little over on terminal parts: the terrace $23 of $25, windows $17 of $14, decor $12 of $16.
   - Budget terminal parts at about $16–25.
 - **The owner's calls:**
   - #167: defaulted to yes and built in #177. Label a PR `refactor` or `balance` for the merge-base compare.
