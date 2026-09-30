@@ -3,6 +3,10 @@
 // A point is {b, t, go, lv}: a bold lead of a few words, one short sentence, and optionally a place "Show me" goes to
 // (newsOk lists them) and the level it needs (the card hides it below that). A plain string still shows as it is.
 const UPDATES=[
+  {v:37,title:'Windows on the apron and halls with character',points:[
+    {b:'Glass on the apron',t:'Waiting passengers go to the windows to watch the big jets.',lv:1},
+    {b:'Halls with character',t:'Planters, benches, murals and a departures board arrive as you grow.'},
+    {b:'Local names',t:'Some cafés, shops, murals and the terrace café are named after the region.'}]},
   {v:36,title:'A roof terrace and a Roadmap',points:[
     {b:'A roof terrace',t:'Waiting passengers watch the planes from the roof, with spotters beside them.',go:'terminal:staff',lv:3},
     {b:'A Roadmap tab',t:'See what’s coming on a departures board, with filters and details on tap.'}]},

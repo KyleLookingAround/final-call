@@ -5,7 +5,7 @@ What's being worked on, what's next, and ideas not yet agreed. Now, Next, the ru
 ## Now
 
 <!-- joined:now from docs/roadmap.d/ (Section: now) by tools/join.mjs: don't edit between these lines -->
-- **The terminal as a place, multiple floors** (#48, #133; spec `docs/specs/terminal-place.md`, refreshed and re-approved 28 Sep 2026): departures upstairs and arrivals below, a roof terrace passengers go up to (with spotters, famous faces and photos), windows, decor that comes with the building, local character, and each layout's own floor plan. Two floors in Classic shipped in version 35 (#162) and the roof terrace in version 36 (#181); windows, decor and the other layouts’ floors are still to do.
+- **The terminal as a place, multiple floors** (#48, #133; spec `docs/specs/terminal-place.md`, refreshed and re-approved 28 Sep 2026): departures upstairs and arrivals below, a roof terrace passengers go up to (with spotters, famous faces and photos), windows, decor that comes with the building, local character, and each layout's own floor plan. Two floors in Classic shipped in version 35 (#162) and the roof terrace in version 36 (#181), and windows, decor and local names in version 37 (#183, #184); the other layouts’ floors are still to do.
 <!-- /joined:now -->
 
 ## The owner's order of bundles
@@ -119,6 +119,7 @@ How sessions work, not the game. Each one is small, measured and recorded in the
 ## Done
 
 <!-- joined:done from docs/roadmap.d/ (Section: done) by tools/join.mjs: don't edit between these lines -->
+- **Version 37: windows on the apron and decor.** Windows and watchers (#183) and decor and local character (#184, both #133 step 3), folded into one What's new entry. The next item for players, a floor plan for each layout, moves to Next update.
 - **Version 36: the roof terrace and the Roadmap tab.** The roof terrace (#181, #133 step 4) and the Roadmap tab on What's new (#180, #137), folded into one What's new entry. The next item for players, windows on the apron, moves to Next update.
 - **Version 35: the public release.** Two floors in Classic (#162), the release audit's batches (saves, pacing, tips, goals and the polish rounds), the loose ends and the docs and README, folded into one What's new entry: the first game the wider public sees.
 - **A Roadmap tab on What's new** (#137): a second tab on the What's new page showing what's coming as a departures board, with details on tap and filter chips; spec `docs/specs/roadmap-tab.md`, notes `docs/systems/whats-new.md`. Built on `feature/roadmap-tab`; the board's list is `src/roadmap.d/`.

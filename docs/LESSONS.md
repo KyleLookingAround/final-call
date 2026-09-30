@@ -82,6 +82,7 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 ### Release
 
 - [Release 36: the roof terrace and the Roadmap tab · 29 Sep 2026](lessons/182-release-36.md)
+- [Release 37: windows on the apron and decor · 30 Sep 2026](lessons/97-release-37.md)
 
 ### Releases
 

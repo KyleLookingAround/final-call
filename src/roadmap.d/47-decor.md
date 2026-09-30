@@ -1,6 +1,6 @@
 # Decor that comes with the building
-Status: scheduled
-Code: TBA
+Status: landed
+Code: V37
 Summary: Planters, benches, art and shops named after your region.
 
 - Planters, benches, art and signs arrive with the building, with no placing to do.
