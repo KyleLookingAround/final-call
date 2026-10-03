@@ -1,7 +1,6 @@
 ---
 type: System
 description: Demand, fares and the dispatcher, with the world map.
-verified: { by: process:notes-review, at: 2026-09-28T11:15:16Z }
 ---
 # Routes
 

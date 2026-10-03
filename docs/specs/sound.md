@@ -2,7 +2,7 @@
 type: Spec
 description: Announcements, ambience and tones for the airport.
 status: stable
-verified: { by: human:KyleLookingAround, at: 2026-09-27T06:44:31Z }
+verified: { by: human:KyleLookingAround, at: "2026-09-27T07:07:47Z" }
 ---
 # Sound
 

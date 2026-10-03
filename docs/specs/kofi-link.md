@@ -2,7 +2,7 @@
 type: Spec
 description: A quiet Ko-fi link at the foot of Settings.
 status: stable
-verified: { by: human:KyleLookingAround, at: 2026-09-27T14:37:53Z }
+verified: { by: human:KyleLookingAround, at: "2026-09-27T14:37:53Z" }
 ---
 # A Ko-fi link
 

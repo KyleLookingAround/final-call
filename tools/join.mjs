@@ -76,10 +76,10 @@ function fileTable(){
 }
 export const LISTS=[
   ['docs/LESSONS.md','lessons','docs/lessons/',lessonIndex],
-  ['docs/ROADMAP.md','now','docs/roadmap.d/ (Section: now)',()=>roadmapSection('now')],
-  ['docs/ROADMAP.md','next','docs/roadmap.d/ (Section: next)',()=>roadmapSection('next')],
-  ['docs/ROADMAP.md','runbook','docs/roadmap.d/ (Section: runbook)',()=>roadmapSection('runbook')],
-  ['docs/ROADMAP.md','done','docs/roadmap.d/ (Section: done)',()=>roadmapSection('done')],
+  ['docs/ROADMAP.md','now','docs/roadmap.d/ (section: now)',()=>roadmapSection('now')],
+  ['docs/ROADMAP.md','next','docs/roadmap.d/ (section: next)',()=>roadmapSection('next')],
+  ['docs/ROADMAP.md','runbook','docs/roadmap.d/ (section: runbook)',()=>roadmapSection('runbook')],
+  ['docs/ROADMAP.md','done','docs/roadmap.d/ (section: done)',()=>roadmapSection('done')],
   ['docs/decisions/README.md','decisions','the ADR files here',decisionTable],
   ['docs/SYSTEMS.md','systems','docs/systems/',systemList],
   ['docs/SYSTEMS.md','checks','tools/checks/, each file\'s opening comment',checkList],

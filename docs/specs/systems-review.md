@@ -2,7 +2,7 @@
 type: Spec
 description: How the systems connect, the refactors that make them easier to change, and how to make choices interesting.
 status: stable
-verified: { by: human:KyleLookingAround, at: 2026-09-27T16:56:18Z }
+verified: { by: human:KyleLookingAround, at: "2026-09-27T16:56:18Z" }
 ---
 # Systems review: how the systems connect, and how to make choices interesting
 

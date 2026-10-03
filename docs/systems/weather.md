@@ -1,7 +1,6 @@
 ---
 type: System
 description: "Weather cells crossing the region, and the flags that say what's on now: weather, terminal events, fuel prices and disruptions."
-verified: { by: process:notes-review, at: 2026-09-29T05:24:08Z }
 ---
 # Weather and events
 

@@ -1,7 +1,6 @@
 ---
 type: System
 description: Each layout as data (stands, rooms, doorways and its own terminal), copied into the game's tables when it is built.
-verified: { by: process:notes-review, at: 2026-09-28T10:58:39Z }
 ---
 # Airport layouts
 

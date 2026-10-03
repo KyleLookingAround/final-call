@@ -1,7 +1,6 @@
 ---
 type: System
 description: Tells players on the published site when a new version is ready.
-verified: { by: process:notes-review, at: 2026-09-27T20:02:14Z }
 ---
 # Update check
 

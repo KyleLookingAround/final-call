@@ -1,7 +1,6 @@
 ---
 type: System
 description: The card that opens on each level-up and lists what it unlocks.
-verified: { by: process:notes-review, at: 2026-09-29T00:51:14Z }
 ---
 # Level-up card
 

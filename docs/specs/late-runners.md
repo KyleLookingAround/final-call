@@ -2,7 +2,7 @@
 type: Spec
 description: Passengers who dawdle and run for final call, and a tap on one to read their story.
 status: stable
-verified: { by: human:KyleLookingAround, at: 2026-09-28T10:22:57Z }
+verified: { by: human:KyleLookingAround, at: "2026-09-28T10:22:57Z" }
 ---
 # Late runners, and a passenger's story
 

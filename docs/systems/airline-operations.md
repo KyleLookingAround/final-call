@@ -1,7 +1,6 @@
 ---
 type: System
 description: Crews that need rest, planes that come back late, and the Maintenance policy that services worn planes.
-verified: { by: process:notes-review, at: 2026-09-29T04:49:50Z }
 ---
 # Airline operations
 

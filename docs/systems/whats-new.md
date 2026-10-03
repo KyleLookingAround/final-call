@@ -1,7 +1,6 @@
 ---
 type: System
 description: The What's new card, each version's entries, and how a release adds them.
-verified: { by: process:notes-review, at: 2026-09-29T20:18:43Z }
 ---
 # What's new
 

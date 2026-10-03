@@ -2,7 +2,7 @@
 type: Spec
 description: A link in Help that lets players send feedback.
 status: stable
-verified: { by: human:KyleLookingAround, at: 2026-09-27T12:30:08Z }
+verified: { by: human:KyleLookingAround, at: "2026-09-27T12:30:08Z" }
 ---
 # A feedback link in Help
 

@@ -1,7 +1,6 @@
 ---
 type: System
 description: A time-lapse of yesterday, recorded every five game minutes and played back over the airport in about a minute.
-verified: { by: process:notes-review, at: 2026-09-28T04:45:36Z }
 ---
 # Day in a minute
 

@@ -5,7 +5,7 @@
 //   node tools/graph.mjs --check    fails on broken doc links and docs/systems/ files that name no game files; warns when a
 //                                   system's file changed on this branch but its notes didn't, when a system's notes
 //                                   name three or more functions that live in one file outside its own, and when systems'
-//                                   notes were last verified (their frontmatter) before their files last changed
+//                                   notes were last changed and last verified (their frontmatter) before their files
 //   node tools/graph.mjs --stale    lists those systems, with the dates
 // What it reads: src/game/*.js (top-level functions and names, the hooks each file registers, saved fields),
 // tools/checks/*.mjs (each group and what it calls through window.__sim), the docs' own link lines: docs/systems/
@@ -110,7 +110,7 @@ export function query(g,q){
   add('files like it',Object.keys(g.files).filter(f=>f.includes(lo)));return out.length?out:[`nothing found for ${q}`];
 }
 // broken links, systems without files, systems whose files changed without their section, and (stale) systems whose
-// notes were last verified before their files changed
+// notes were last changed and verified before their files
 export function check(g){
   const errs=[],warns=[],exists=p=>existsSync(join(root,p));
   for(const [k,S] of Object.entries(g.systems)){if(!S.files.length)errs.push(`${S.doc}: "${k}" names no game files`);for(const f of S.refs)if(!exists(f))errs.push(`${S.doc} links to ${f}, which doesn't exist`)}
@@ -121,12 +121,18 @@ export function check(g){
   let changed=[];try{const base=execSync('git merge-base HEAD origin/main',{cwd:root,stdio:['ignore','pipe','ignore']}).toString().trim();changed=execSync(`git diff --name-only ${base}`,{cwd:root}).toString().split('\n').filter(Boolean)}catch(e){}
   const warned=new Set(),stale=[];
   if(changed.length)for(const [k,S] of Object.entries(g.systems)){const hit=S.files.filter(f=>changed.includes(f));if(hit.length&&!changed.includes(S.doc)){warned.add(k);warns.push(`${hit.join(', ')} changed but ${S.doc} ("${k}") didn't: is it still true?`)}}
-  // a system's own files committed after its notes were last verified (the latest "verified" in their frontmatter): read the
-  // notes against the code, fix what's wrong, and move verified's "at" on
-  for(const [k,S] of Object.entries(g.systems)){const c=(g.concepts||[]).find(c=>c.doc===S.doc);if(warned.has(k)||!c||!c.verifiedAt||!S.own.length)continue;
-    let at='';try{at=execSync(`git log -1 --format=%cI -- ${S.own.join(' ')}`,{cwd:root,stdio:['ignore','pipe','ignore']}).toString().trim()}catch(e){}
-    if(at&&Date.parse(at)>Date.parse(c.verifiedAt))stale.push(`${S.doc} ("${k}"): last verified ${c.verifiedAt}, its files changed ${new Date(at).toISOString().replace('.000','')}`)}
-  if(stale.length)warns.push(`${stale.length} system notes were last verified before their files changed: node tools/graph.mjs --stale lists them`);
+  // a system's own files committed after its notes' text last changed and after they were last verified (the latest
+  // "verified" in their frontmatter, if any): read the notes against the code, fix what's wrong, and add or move on
+  // verified's "at". A PR that changes both lands in one commit, so it isn't stale; a change to the frontmatter alone
+  // isn't a change to the notes
+  const sh=c=>execSync(c,{cwd:root,stdio:['ignore','pipe','ignore']}).toString().trim();
+  const last=ps=>{try{return sh(`git log -1 --format=%cI -- ${ps.join(' ')}`)}catch(e){return ''}};
+  const lastText=p=>{try{for(const l of sh(`git log --format=%H%x09%cI -- ${p}`).split('\n').filter(Boolean)){const [h,at]=l.split('\t');
+    let before=null;try{before=parse(sh(`git show ${h}^:${p}`)).body}catch(e){}if(before!==parse(sh(`git show ${h}:${p}`)).body)return at}}catch(e){}return ''};
+  for(const [k,S] of Object.entries(g.systems)){const c=(g.concepts||[]).find(c=>c.doc===S.doc);if(warned.has(k)||!c||!S.own.length)continue;
+    const at=last(S.own),notes=[lastText(S.doc),c.verifiedAt].filter(Boolean).map(Date.parse),seen=notes.length?Math.max(...notes):0;
+    if(at&&seen&&Date.parse(at)>seen)stale.push(`${S.doc} ("${k}"): notes last changed or verified ${new Date(seen).toISOString().replace('.000','')}, its files changed ${new Date(at).toISOString().replace('.000','')}`)}
+  if(stale.length)warns.push(`${stale.length} system notes are older than their files' last change: node tools/graph.mjs --stale lists them`);
   // a system's notes that name three or more functions living in one file outside its own: they belong with the system, or the file with the section
   for(const [k,S] of Object.entries(g.systems)){const by={};
     for(const n of S.names){const at=(g.defs[n]||[]).filter(f=>g.files[f].funcs.includes(n));if(at.length&&!at.some(f=>S.own.includes('src/game/'+f)))(by[at[0]]||(by[at[0]]=[])).push(n)}
@@ -137,7 +143,7 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
   const a=process.argv.slice(2),g=build();
   if(a[0]==='--write'){mkdirSync(join(root,'docs'),{recursive:true});writeFileSync(join(root,'docs/graph.json'),JSON.stringify(g,null,1));console.log('wrote docs/graph.json')}
   else if(a[0]==='--check'){const {errs,warns}=check(g);for(const w of warns)console.log('WARN  '+w);for(const e of errs)console.log('FAIL  '+e);console.log(errs.length?`${errs.length} broken`:'graph: links and sections all sound');process.exit(errs.length?1:0)}
-  else if(a[0]==='--stale'){const {stale}=check(g);console.log(stale.length?stale.join('\n'):'every system\'s notes were verified after its files last changed')}
+  else if(a[0]==='--stale'){const {stale}=check(g);console.log(stale.length?stale.join('\n'):'every system\'s notes are as new as its files')}
   else if(a.length)for(const q of a)console.log(query(g,q).join('\n')+'\n');
   else console.log('node tools/graph.mjs <system | file | function | hook | saved field | check group | docs file>   (--write, --check, --stale)');
 }

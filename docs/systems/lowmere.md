@@ -1,7 +1,6 @@
 ---
 type: System
 description: The rival airport that opens after City Airport and takes a share of shared routes.
-verified: { by: process:notes-review, at: 2026-09-27T20:02:14Z }
 ---
 # Lowmere
 

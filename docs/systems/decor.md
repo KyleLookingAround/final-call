@@ -1,7 +1,6 @@
 ---
 type: System
 description: Planters, benches, art and local names in the terminal's halls, worked out from the layout and only drawn.
-verified: { by: process:notes-review, at: 2026-09-30T00:42:06Z }
 ---
 # Decor and local names
 

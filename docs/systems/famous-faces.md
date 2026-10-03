@@ -1,7 +1,6 @@
 ---
 type: System
 description: Invented celebrities who now and then fly from the airport from level 3, with a crowd, a busy hour and the rating at stake.
-verified: { by: process:notes-review, at: 2026-09-29T20:36:46Z }
 ---
 # Famous faces
 

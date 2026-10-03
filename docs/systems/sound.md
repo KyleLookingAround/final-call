@@ -1,7 +1,6 @@
 ---
 type: System
 description: Announcements, ambience and tones, played only from the frame loop and never changing the game.
-verified: { by: process:notes-review, at: 2026-09-28T21:21:09Z }
 ---
 # Sound
 

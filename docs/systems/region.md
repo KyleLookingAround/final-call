@@ -1,7 +1,6 @@
 ---
 type: System
 description: Bus, tram, rail, metro and high-speed lines, development sites, events and weather in the region round the airport.
-verified: { by: process:notes-review, at: 2026-09-28T05:08:41Z }
 ---
 # Region
 

@@ -7,11 +7,12 @@
 //                                      malformed field, a path that doesn't exist, or a status its body contradicts
 // The profile (the decision record has the reasons):
 //   every file    type (its folder's, below); optional description, status (draft|stable|deprecated), tags, verified,
-//                 stale_after, sources. Actors are human:<login> or process:<name>, never a tool's or model's name.
+//                 stale_after, sources. Actors are human:<login> or process:<name>, never a tool's name.
 //   docs/*.md and README.md files are guides (any type, with a description); TEMPLATE.md files carry their folder's type
 //   and are left out of the index. docs/index.md is the bundle's index (joined by tools/join.mjs) and is reserved.
-// The frontmatter is a small YAML subset that any YAML reader parses the same way: key: value, flow lists [a, b] and
-// maps { a: x }, block lists of scalars, flow maps or maps, and one level of block map. Anything else fails the check.
+// The frontmatter is a small YAML subset: key: value, flow lists [a, b] and maps { a: x }, block lists of scalars, flow
+// maps or maps, and block maps. It refuses the plain values other YAML readers turn into something other than text
+// (times and dates, yes and no, numbers written other ways), so they must be quoted and read the same everywhere.
 import {readFileSync,readdirSync,existsSync,statSync} from 'node:fs';
 import {dirname,join,posix} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -20,7 +21,7 @@ export const root=join(dirname(fileURLToPath(import.meta.url)),'..');
 export const BUNDLE='docs',OKF_VERSION='0.2';
 // folder in docs/, its type, and the fields it needs beyond `type`
 export const KINDS=[
-  ['systems','System',['description','verified']],
+  ['systems','System',['description']],
   ['decisions','Decision',['description','status']],
   ['specs','Spec',['description','status']],
   ['metrics','Metric',['description']],
@@ -31,7 +32,7 @@ export const KINDS=[
   ['roadmap.d','Roadmap item',['section']],
 ];
 export const STATUSES=['draft','stable','deprecated'],SECTIONS=['now','next','runbook','done'];
-const ACTOR=/^(human|process):[A-Za-z0-9._@-]+$/,WHEN=/^\d{4}-\d\d-\d\dT\d\d:\d\d(:\d\d(\.\d+)?)?(Z|[+-]\d\d:\d\d)$/;
+const ACTOR=/^(human|process):[A-Za-z0-9._@-]+$/,TOOLISH=/(^|[^a-z])(ai|llm|bot|agent|assistant|model|claude|anthropic|openai|gpt|gemini|copilot|llama|mistral)([^a-z]|$)/i,WHEN=/^\d{4}-\d\d-\d\dT\d\d:\d\d(:\d\d(\.\d+)?)?(Z|[+-]\d\d:\d\d)$/;
 
 // ---- the YAML subset ----
 class YamlError extends Error{constructor(line,msg){super(msg);this.line=line}}
@@ -63,6 +64,7 @@ function scalar(s,line,flow){
   if(flow&&/[,\[\]{}]/.test(s))throw new YamlError(line,`quote ${s}: it has a comma or bracket in a flow collection`);
   if(s==='true'||s==='false')return s==='true';
   if(/^-?(0|[1-9]\d*)(\.\d+)?$/.test(s))return +s;
+  if(/^\d{4}-\d\d?-\d\d?([Tt ]|$)/.test(s))throw new YamlError(line,`quote ${s}: other YAML readers take it for a date or time`);
   // words and numbers other YAML readers would take for a boolean or a number
   if(/^(yes|no|on|off|y|n|true|false|null)$/i.test(s)||/^[-+]?(0b[01_]+|0x[\da-f_]+|0o?[0-7_]+|[\d_]*\.?[\d_]+([e][-+]?\d+)?|\.(inf|nan)|[\d_]+(:[0-5]?\d)+(\.\d*)?)$/i.test(s))
     throw new YamlError(line,`quote ${s}: other YAML readers take it for a boolean or a number`);
@@ -87,7 +89,8 @@ function block(lines,first){ // a mapping, from lines with no indent of their ow
     if(m[1] in out)throw new YamlError(at,`${m[1]} twice`);
     const rest=m[2]==null?'':stripComment(m[2]);i++;
     if(rest.trim()){out[m[1]]=value(rest,at);continue}
-    const sub=[];while(i<lines.length&&(!lines[i].trim()||indentOf(lines[i])>0)){sub.push(lines[i]);i++}
+    // the nested block: indented lines, comments and blank lines, and a list written at the key's own indent
+    const sub=[];while(i<lines.length&&(!lines[i].trim()||indentOf(lines[i])>0||/^#/.test(lines[i])||/^-(\s|$)/.test(lines[i]))){sub.push(lines[i]);i++}
     out[m[1]]=nested(sub,at+1);
   }
   return out;
@@ -100,8 +103,8 @@ function nested(lines,first){
   if(/^-(\s|$)/.test(live[0][0].trim())){
     const items=[];
     for(const [l,at] of live){const t=l.slice(base);
-      if(indentOf(l)===base){if(!/^-(\s|$)/.test(t))throw new YamlError(at,'a list item must start with "- "');items.push([[t.slice(1).replace(/^ /,'')],at])}
-      else{const pad=base+2;if(indentOf(l)<pad)throw new YamlError(at,'uneven indent in a list item');items.at(-1)[0].push(l.slice(pad))}}
+      if(indentOf(l)===base){const d=t.match(/^-(\s+|$)/);if(!d)throw new YamlError(at,'a list item must start with "- "');items.push([[t.slice(d[0].length)],at,base+d[0].length])}
+      else{const pad=items.at(-1)[2];if(indentOf(l)<pad)throw new YamlError(at,'uneven indent in a list item');items.at(-1)[0].push(l.slice(pad))}}
     return items.map(([ls,at])=>{
       if(/^[A-Za-z_][\w-]*:(\s|$)/.test(ls[0]))return block(ls,at);
       if(ls.length>1)throw new YamlError(at,'a list item that runs on must be a map');
@@ -112,7 +115,7 @@ function nested(lines,first){
 }
 // a file's frontmatter and body; data is null when there's no frontmatter, and error says why it didn't parse
 export function parse(text){
-  const lines=text.split('\n');
+  const lines=text.replace(/^\uFEFF/,'').split('\n');
   if(lines[0].replace(/\r$/,'')!=='---')return {data:null,body:text,error:'no frontmatter (the file must open with a "---" line)'};
   const end=lines.findIndex((l,i)=>i>0&&l.replace(/\r$/,'')==='---');
   if(end<0)return {data:null,body:text,error:'frontmatter has no closing "---" line'};
@@ -201,6 +204,7 @@ export function check(now=new Date().toISOString(),all=concepts()){
       if(v==null)continue;
       if(typeof v!=='object'||Array.isArray(v)){err(c,`${k} must be { by, at }`);continue}
       if(!ACTOR.test(String(v.by)))err(c,`${k} by "${v.by}" must be human:<login> or process:<name>`);
+      else if(/^process:/.test(v.by)&&TOOLISH.test(v.by.slice(8)))err(c,`${k} by "${v.by}": name the process by what it does, not the tool that ran it`);
       if(v.at!=null&&!WHEN.test(String(v.at)))err(c,`${k} at "${v.at}" must be a date and time with its offset, such as 2026-10-03T09:00:00Z`);
       else if(k==='verified'&&v.at==null)err(c,'verified needs at');
     }
@@ -210,9 +214,10 @@ export function check(now=new Date().toISOString(),all=concepts()){
     if(d.sources!=null){
       const src=Array.isArray(d.sources)?d.sources:[];if(!Array.isArray(d.sources))err(c,'sources must be a list');
       for(const s of src)if(!s||typeof s!=='object'||!s.resource)err(c,'each of sources needs a resource');
-      const ids=src.map(s=>s&&s.id).filter(Boolean);
-      for(const m of c.body.matchAll(/\[\^([\w-]+)\](?!:)/g))if(!ids.includes(m[1]))err(c,`footnote [^${m[1]}] matches no sources id`);
     }
+    // footnotes cite sources by id, outside code
+    const ids=(Array.isArray(d.sources)?d.sources:[]).map(s=>s&&s.id).filter(Boolean),prose=c.body.replace(/```[\s\S]*?```/g,'').replace(/`[^`\n]*`/g,'');
+    for(const m of prose.matchAll(/\[\^([\w-]+)\](?!:)/g))if(!ids.includes(m[1]))err(c,`footnote [^${m[1]}] matches no sources id`);
     for(const [field,p,at] of paths(c))if(!existsSync(join(root,at)))err(c,`${field} ${p} doesn't exist (${at})`);
     // per type
     if(d.type==='Roadmap item'&&!c.template&&!SECTIONS.includes(d.section))err(c,`section must be ${SECTIONS.join(', ')}`);

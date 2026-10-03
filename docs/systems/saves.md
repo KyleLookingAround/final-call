@@ -1,7 +1,6 @@
 ---
 type: System
 description: Saves on the device, save codes between devices, loading older saves, and never losing one.
-verified: { by: process:notes-review, at: 2026-09-29T03:59:34Z }
 ---
 # Saves
 

@@ -2,7 +2,7 @@
 type: Spec
 description: A Roadmap tab on the What's new card that shows players what is coming.
 status: stable
-verified: { by: human:KyleLookingAround, at: 2026-09-28T20:17:58Z }
+verified: { by: human:KyleLookingAround, at: "2026-09-28T20:17:58Z" }
 ---
 # A Roadmap tab on What's new
 

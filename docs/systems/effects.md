@@ -1,7 +1,6 @@
 ---
 type: System
 description: The one entry point for every change to the rating and to cash, and the rating that reflects the last day.
-verified: { by: process:notes-review, at: 2026-09-29T04:49:50Z }
 ---
 # Effects: the rating and money ledger
 

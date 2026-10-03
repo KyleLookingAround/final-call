@@ -1,7 +1,6 @@
 ---
 type: System
 description: The six-step tour for new games, which can be skipped or replayed from Help.
-verified: { by: process:notes-review, at: 2026-09-29T00:51:14Z }
 ---
 # Guided start
 

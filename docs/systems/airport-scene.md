@@ -1,7 +1,6 @@
 ---
 type: System
 description: "How the airport is drawn: the layers in order, the lighting pass, and the real airport's parts."
-verified: { by: process:notes-review, at: 2026-09-30T00:42:06Z }
 ---
 # The airport scene
 

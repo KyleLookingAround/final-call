@@ -2,7 +2,7 @@
 type: Spec
 description: "The airport looks like a real one: markings, planes, roofs, weather and vehicles."
 status: stable
-verified: { by: human:KyleLookingAround, at: 2026-09-27T11:30:45Z }
+verified: { by: human:KyleLookingAround, at: "2026-09-27T11:30:45Z" }
 ---
 # Looks like a real airport
 

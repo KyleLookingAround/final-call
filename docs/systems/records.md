@@ -1,7 +1,6 @@
 ---
 type: System
 description: Personal bests, stamps and the week's challenges, each with its own toast.
-verified: { by: process:notes-review, at: 2026-09-28T21:21:09Z }
 ---
 # Records, stamps and challenges
 

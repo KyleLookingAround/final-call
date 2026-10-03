@@ -2,7 +2,7 @@
 type: Spec
 description: Hide the panels, pick a time and sky, and save a picture of the airport.
 status: stable
-verified: { by: human:KyleLookingAround, at: 2026-09-28T04:02:08Z }
+verified: { by: human:KyleLookingAround, at: "2026-09-28T04:02:08Z" }
 ---
 # Photo mode
 

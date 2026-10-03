@@ -2,7 +2,7 @@
 type: Spec
 description: Tell players when a new version of the game is ready.
 status: stable
-verified: { by: human:KyleLookingAround, at: 2026-09-27T15:44:50Z }
+verified: { by: human:KyleLookingAround, at: "2026-09-27T15:44:50Z" }
 ---
 # Tell players when a new version is ready
 

@@ -2,7 +2,7 @@
 type: Spec
 description: A time-lapse of yesterday, played back over the airport in about a minute.
 status: stable
-verified: { by: human:KyleLookingAround, at: 2026-09-28T04:45:36Z }
+verified: { by: human:KyleLookingAround, at: "2026-09-28T04:45:36Z" }
 ---
 # Day in a minute
 

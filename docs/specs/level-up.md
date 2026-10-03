@@ -2,7 +2,7 @@
 type: Spec
 description: A card on each level-up that shows what the new level unlocks.
 status: stable
-verified: { by: human:KyleLookingAround, at: 2026-09-27T06:52:21Z }
+verified: { by: human:KyleLookingAround, at: "2026-09-27T07:07:47Z" }
 ---
 # Level-up screen
 

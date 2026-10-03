@@ -1,7 +1,6 @@
 ---
 type: System
 description: Classic's halls on two floors, departures upstairs and arrivals below, joined by escalators, lifts and stairs.
-verified: { by: process:notes-review, at: 2026-09-29T20:36:46Z }
 ---
 # Floors
 

@@ -2,7 +2,7 @@
 type: Spec
 description: Players rebuild their airport into different layouts, each with its own stands, costs and strengths.
 status: stable
-verified: { by: human:KyleLookingAround, at: 2026-09-26T17:30:20Z }
+verified: { by: human:KyleLookingAround, at: "2026-09-26T17:30:20Z" }
 ---
 # Airport layouts
 

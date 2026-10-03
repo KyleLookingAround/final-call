@@ -1,7 +1,6 @@
 ---
 type: System
 description: "The roof terrace upgrade: a deck over the concourse where passengers and spotters watch the planes while it's dry."
-verified: { by: process:notes-review, at: 2026-09-29T20:36:46Z }
 ---
 # The roof terrace
 

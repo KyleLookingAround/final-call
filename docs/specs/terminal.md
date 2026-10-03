@@ -2,7 +2,7 @@
 type: Spec
 description: "A terminal that works like a real one: check-in, security, passport control, shops, gates and arrivals."
 status: stable
-verified: { by: human:KyleLookingAround, at: 2026-09-26T20:45:34Z }
+verified: { by: human:KyleLookingAround, at: "2026-09-27T07:07:47Z" }
 ---
 # A terminal that works like a real one
 

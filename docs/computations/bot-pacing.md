@@ -26,7 +26,7 @@ npm run build
 node tools/run-bot.mjs <hours> --seed <seed>
 ```
 
-`--why` may be added: it prints more but doesn't change the run. Nothing else: no bot options after the hours, no `--rate-day` and no `--pol`. Those are for tuning and comparing (the `balance` playbook),[^balance] not for pacing.
+`--why` may be added: it prints more but doesn't change the run. Nothing else: no bot option set to true after the hours (the Balance workflow passes `'{"layouts":false}'`, which is the same run), no `--rate-day` and no `--pol`. Those are for tuning and comparing (the `balance` playbook),[^balance] not for pacing.
 
 ## The receipt
 
@@ -37,10 +37,10 @@ The run writes `build/bot-<seed>.json`:
 | `seed`, `hours` | The parameters it ran with |
 | `lvlAt` | The game hour it first reached each level |
 | `rows` | The table it printed: each baseline level's hour and `ok`, `near` or `off` |
-| `errs` | Errors the game threw (the run stops at the first) |
+| `errs` | Errors the game threw (the run stops after the six game hours in which the first came) |
 | `build` | A hash of the `build/test.html` it played |
 | `baseline` | A hash of the `tools/baseline.json` it was judged on |
-| `opts`, `rateDay`, `pols` | Bot options, `--rate-day` and `--pol`: empty or null for this computation |
+| `opts`, `rateDay`, `pols` | Bot options, `--rate-day` and `--pol`: for this computation no option is true, and the other two are null |
 | `commit` | The commit it ran on, for the reader (the build's hash is what's checked) |
 
 It also holds `state` and `play`, the fingerprints the Balance workflow compares; they aren't part of pacing.

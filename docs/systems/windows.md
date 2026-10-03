@@ -1,7 +1,6 @@
 ---
 type: System
 description: Glass along the terminal's apron walls, and waiting passengers who walk to it to watch a wide-body go by.
-verified: { by: process:notes-review, at: 2026-09-29T22:42:57Z }
 ---
 # Windows
 

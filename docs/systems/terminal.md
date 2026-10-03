@@ -1,7 +1,6 @@
 ---
 type: System
 description: The terminal's halls in the order real airports use them, each layout's own plan, and how passengers move through it.
-verified: { by: process:notes-review, at: 2026-09-30T00:42:06Z }
 ---
 # The terminal
 

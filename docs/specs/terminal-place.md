@@ -2,7 +2,7 @@
 type: Spec
 description: "The terminal as a place: two floors, a roof terrace, windows on the apron, decor and local character."
 status: stable
-verified: { by: human:KyleLookingAround, at: 2026-09-27T13:39:54Z }
+verified: { by: human:KyleLookingAround, at: "2026-09-28T17:49:48Z" }
 ---
 # The terminal as a place
 

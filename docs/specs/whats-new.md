@@ -2,7 +2,7 @@
 type: Spec
 description: A What's new card that shows each version's changes once, and on demand.
 status: stable
-verified: { by: human:KyleLookingAround, at: 2026-09-26T17:30:20Z }
+verified: { by: human:KyleLookingAround, at: "2026-09-28T12:21:06Z" }
 ---
 # What's new
 

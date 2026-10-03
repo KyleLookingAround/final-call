@@ -1,7 +1,6 @@
 ---
 type: System
 description: Levels and their requirements, goals and plan points, and the Masterplan with the plan recommended next.
-verified: { by: process:notes-review, at: 2026-09-29T05:58:23Z }
 ---
 # Levels and Masterplan
 
