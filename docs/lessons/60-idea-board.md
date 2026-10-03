@@ -1,4 +1,7 @@
-Theme: tools
+---
+type: Lesson
+theme: tools
+---
 # #60 Idea board, September 2026 · 27 Sep 2026
 
 - **Numbers:** session `session_01JryZpLH3H7sVAKb1DwUm61`, estimate $10: about $2.70 by the time the ratings were recorded, 180k of 1M context. Board published 12:44; the owner rated all 60 ideas by 13:12 and said "done"; ratings read back and recorded the same afternoon.

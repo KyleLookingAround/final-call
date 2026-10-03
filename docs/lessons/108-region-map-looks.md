@@ -1,4 +1,7 @@
-Theme: drawing
+---
+type: Lesson
+theme: drawing
+---
 # The region map, looking better · 27 Sep 2026
 
 - **Numbers:** session `session_018BWv4fSJ3dHAn96PMVRZ2T`, estimate $14. `get_session` hadn't reported a cost yet when the PR was opened, and the rate limit read `allowed_warning`. Started 21:04 UTC and opened the PR at 21:57. Most of that time went on screenshots, three rounds of look-and-fix, and the speed work.

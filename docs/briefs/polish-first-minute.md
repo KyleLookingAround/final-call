@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Polish: the first minute on a phone
 
 Fix batch 1 of the launch polish audit (#103), plus the default taken on #105.

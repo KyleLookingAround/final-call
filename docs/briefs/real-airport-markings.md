@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Apron markings and lighting (a part of "Looks like a real airport")
 
 The coordinator's brief for one part of `docs/specs/real-airport.md`, in the first batch, with the other two of markings, planes and roofs. Start it as a fresh session with this file as its first message.

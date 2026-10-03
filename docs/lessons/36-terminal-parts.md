@@ -1,4 +1,7 @@
-Theme: parts
+---
+type: Lesson
+theme: parts
+---
 # The terminal built in parts: #18 halls, #19 hotel, #21 baggage, #22 departures, #23 arrivals, #24 market place, #26 together, #36 briefs · 26–27 Sep 2026
 
 The first split feature: a groundwork PR, then five parts run side by side from briefs, then a finishing session. Every lesson below already changed the `feature`, `steward` or `coordinator` playbook (→).

@@ -1,3 +1,7 @@
+---
+type: System
+description: Classic's halls on two floors, departures upstairs and arrivals below, joined by escalators, lifts and stairs.
+---
 # Floors
 
 **Halls on two floors** (`66-floors.js`, Classic's `term` table in `42-terminal.js`; spec `docs/specs/terminal-place.md`, "Two floors"). Classic's halls stand on two floors: departures upstairs (`fl` 1: check-in, security, the market place, and the gate lounges on the concourse), arrivals below (`fl` 0: immigration, reclaim, customs, the arrivals hall, the hotel walkway and the baggage hall). The concourse, the forecourt and the hotel have no floor and show on both. The other layouts keep one floor (`flatTerm()`, Classic's plan before it had two) until the floor plans part gives each its own.

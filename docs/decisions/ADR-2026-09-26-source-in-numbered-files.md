@@ -1,3 +1,8 @@
+---
+type: Decision
+description: The source is numbered files in src/game/, joined in name order into one strict IIFE.
+status: stable
+---
 # ADR-2026-09-26: The source is numbered files joined into one script
 
 ## Status

@@ -1,4 +1,7 @@
-Theme: checks
+---
+type: Lesson
+theme: checks
+---
 # Passengers who suddenly sped down the piers (#82) · 27 Sep 2026
 
 - **Numbers:** session `session_017MmM6KJ5fiP2s9m1RzVJZn`, estimate $10: $5.69 and 242k of 1M context at the pre-merge check-in. Started 17:23, issue and PR opened by 17:52, all CI green on the first push; one merge of `main` (a `docs/SYSTEMS.md` conflict with #90's pending-checks note).

@@ -1,3 +1,7 @@
+---
+type: Ideas
+description: "What stood between Final Call and a polished public release on 28 Sep 2026: bugs, balance, refactors and easy wins."
+---
 # Release audit, 28 Sep 2026
 
 What stands between Final Call and a polished public release, found by playing, measuring and reading (brief `docs/briefs/release-audit.md`). Five parts: the brain itch, bugs, balance, refactors, and easy wins. Nothing here is fixed in this session.

@@ -1,3 +1,7 @@
+---
+type: System
+description: Demand, fares and the dispatcher, with the world map.
+---
 # Routes
 
 **Routes** (`31-routes.js`: demand, fares and the dispatcher, with the world map; the tables they read, such as `TIERBASE`, `RFARE` and `SEA_MUL`, stay in `03-state.js`).

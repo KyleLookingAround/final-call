@@ -2,8 +2,8 @@
 //   node tools/touched.mjs [base]   prints "groups=<space-separated groups>" for $GITHUB_OUTPUT, or "groups="
 //                                   (nothing) when every group should run
 // Used by .github/workflows/checks.yml on a draft PR, so it only spends time on the check groups the PR's
-// changed files touch, plus `brief` and `graph` (cheap) and `sim` (a floor). Only src/game/ files, the graph
-// and brief scripts, tools/checks/*.mjs and the SAFE list below map to a narrower set; anything else
+// changed files touch, plus `brief`, `graph` and `okf` (cheap) and `sim` (a floor). Only src/game/ files, the graph,
+// brief, okf and attester scripts, tools/checks/*.mjs and the SAFE list below map to a narrower set; anything else
 // (tools/build.mjs, src/shell.html, package*.json, a workflow file in .github/workflows/, tools/check.mjs…)
 // falls back to every group, same as a change this script itself fails to read. Never exits non-zero: an
 // unreadable diff falls back to every group too.
@@ -13,7 +13,7 @@ import {fileURLToPath} from 'node:url';
 import {build,checksCalling} from './graph.mjs';
 
 const root=join(dirname(fileURLToPath(import.meta.url)),'..');
-const FLOOR=['brief','graph','sim'];
+const FLOOR=['brief','graph','okf','sim'];
 // files whose change needs no check beyond the floor: docs, playbooks and templates, and the bot (which the
 // Balance workflow covers, not npm run check)
 const SAFE=/^(docs\/|\.claude\/|\.github\/(ISSUE_TEMPLATE|pull_request_template\.md)|tools\/bot\.js$|tools\/run-bot\.mjs$|tools\/baseline\.json$|README)/;
@@ -24,6 +24,7 @@ export function groupsFor(files,g=build()){
   for(const f of files){
     if(f==='tools/graph.mjs'){groups.add('graph');continue}
     if(f==='tools/brief.mjs'||f==='tools/touched.mjs'){groups.add('brief');continue}
+    if(f==='tools/okf.mjs'||f==='tools/attest-pacing.mjs'){groups.add('okf');continue}
     if(/^tools\/checks\/[\w-]+\.mjs$/.test(f)){groups.add(f.slice('tools/checks/'.length,-4));continue}
     if(f.startsWith('src/game/')){
       const file=g.files[f.slice('src/game/'.length)];

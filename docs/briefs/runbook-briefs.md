@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Runbook experiment [A]: briefs, the needs-owner queue, cost budgets and testing parts together
 
 The owner's brief for this session, in the template's shape. It changes how sessions work, not the game.

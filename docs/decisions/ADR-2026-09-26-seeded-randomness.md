@@ -1,3 +1,8 @@
+---
+type: Decision
+description: Anything that can change the game state draws from rnd(); Math.random() is for cosmetic lines only.
+status: stable
+---
 # ADR-2026-09-26: The simulation uses a seeded random generator
 
 ## Status

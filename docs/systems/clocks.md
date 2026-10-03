@@ -1,3 +1,7 @@
+---
+type: System
+description: The minute, hour, night and day clocks that run each system's hooks, and the day stats they keep.
+---
 # Clocks and day stats
 
 **Clocks and day stats** (`02-clocks.js`; steps 4 and 6 of `docs/specs/systems-review.md`).

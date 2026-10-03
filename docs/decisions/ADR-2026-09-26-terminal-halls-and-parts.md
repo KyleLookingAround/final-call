@@ -1,3 +1,8 @@
+---
+type: Decision
+description: The terminal is a set of halls shared by every layout, and its parts live in their own files and plug in.
+status: stable
+---
 # ADR-2026-09-26: The terminal is halls, and its parts plug in
 
 ## Status

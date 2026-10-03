@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Bug: rebuilding twice stops the game
 
 Bug #78, found by the terminal-place checks session.

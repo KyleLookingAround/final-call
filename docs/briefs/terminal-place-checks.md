@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: "The terminal as a place": checks first
 
 Step 1 of the approved spec's "Order of work" (`docs/specs/terminal-place.md`, approved on #48), and experiment [D]: the checks are written before any of the feature's code.

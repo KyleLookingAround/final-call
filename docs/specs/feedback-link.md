@@ -1,3 +1,9 @@
+---
+type: Spec
+description: A link in Help that lets players send feedback.
+status: stable
+verified: { by: human:KyleLookingAround, at: "2026-09-27T12:30:08Z" }
+---
 # A feedback link in Help
 
 Issue: (Roadmap "Next": "Feedback from players") · PRs: (added when it opens) · Status: Approved (a small change the owner allowed in the coordinator's session of 27 Sep 2026; `docs/briefs/feedback-link.md` describes it)

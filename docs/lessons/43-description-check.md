@@ -1,4 +1,7 @@
-Theme: ci
+---
+type: Lesson
+theme: ci
+---
 # #43 Description check · 27 Sep 2026
 
 - **Numbers:** session `session_01AoXGiU2yJ1jzRSxvJm7cpK`, estimate $4: `usage.cost_usd` and context still read 0 at merge, as in #28's entry below. No game code, so no bot run.

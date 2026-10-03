@@ -1,3 +1,7 @@
+---
+type: System
+description: Hides the panels, picks a time and sky, and saves or shares a picture of the airport.
+---
 # Photo mode
 
 **Photo mode** (`62-photo-mode.js`; spec `docs/specs/photo-mode.md`; check `photo-mode`).

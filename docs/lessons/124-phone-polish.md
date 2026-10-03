@@ -1,4 +1,7 @@
-Theme: ui
+---
+type: Lesson
+theme: ui
+---
 # Phone and touch polish: #84 phone chrome, #87 overlay cards, #88 Masterplan on a small phone (scroll), #107 the top bar, #112 where players look, #124 the first minute · 27–28 Sep 2026
 
 - **Numbers:** #84 estimate $8, $5.97 and 285k by the merge; a fresh review; all four batches pure CSS. #87 estimate $5, $6.18; opened 17:44, merged 18:16. #107 estimate $5, $2.89; opened 21:56. #112 estimate $12, about $5; stopped from about 22:20 to 04:05 by the account's limit; opened 04:19 and merged 04:34. #124 estimate $8, $42.53 and 714k of 1M by the merge (5.3×): opened 09:02, merged 09:59, seven merges of `main` (all but one Catch-up fast-forwards; the one real conflict was both branches adding a `FIELDS` line, resolved by adopting `main`'s new `ADDED` list in the `migrate` check). #88's merge-chasing is in `88-busy-main-before-catch-up.md`.

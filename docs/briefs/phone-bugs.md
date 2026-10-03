@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Three bugs from the owner's phone: gate cards, the people mover, walls
 
 The owner played on their phone on the morning of 28 Sep 2026 and saw three things wrong. They start sharing the game today, so these are launch fixes: small, safe, and looked at on a phone.

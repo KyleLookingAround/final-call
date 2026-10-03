@@ -1,3 +1,7 @@
+---
+type: System
+description: Crews that need rest, planes that come back late, and the Maintenance policy that services worn planes.
+---
 # Airline operations
 
 **Airline operations** (`34-airline-operations.js`).

@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Launch polish audit
 
 The owner starts posting and sharing the game from 28 Sep. Overnight they asked to keep polishing: how it looks, how it feels, the menus (moving things where they'd be easier to find), balance, anything. This audit finds what a newcomer arriving from a shared link would notice first; fix sessions follow from its issues.

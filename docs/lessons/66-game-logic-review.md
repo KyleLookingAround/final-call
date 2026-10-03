@@ -1,4 +1,7 @@
-Theme: balance
+---
+type: Lesson
+theme: balance
+---
 # Reading the game's logic: #57 game logic ideas, #66 systems review · 27 Sep 2026
 
 - **Numbers:** #57 estimate $8, $3.01 and 186k at the first merge attempt; #66 estimate $15, cost not reported by the time the PR opened. Both docs only, no Balance run. The three bot runs on `main` ran in the background from the first minute (about 12 minutes side by side) while the code was read; #66 also had four helper agents map the region, the terminal's hooks, the UI and the tools (about 4 minutes each) and read their reports in place of the files.

@@ -1,3 +1,7 @@
+---
+type: System
+description: Announcements, ambience and tones, played only from the frame loop and never changing the game.
+---
 # Sound
 
 **Sound** (`06-sound.js` for the tones, `48-sound.js` for the rest; spec `docs/specs/sound.md`).

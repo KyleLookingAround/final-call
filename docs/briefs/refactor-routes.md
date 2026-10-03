@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Systems refactor 2: routes and demand in one file
 
 Step 2 of Part 3 of the approved systems review (`docs/specs/systems-review.md`).

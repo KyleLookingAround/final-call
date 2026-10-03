@@ -1,3 +1,7 @@
+---
+type: System
+description: Glass along the terminal's apron walls, and waiting passengers who walk to it to watch a wide-body go by.
+---
 # Windows
 
 **Windows and watchers** (`68-windows.js`; spec `docs/specs/terminal-place.md`, step 4 of its order of work; check group `windows`). Glass along the terminal's apron walls, lit at night, and waiting passengers who walk to it to watch a wide-body go by. Drawing and a short walk only: no saved state and no rating. The glass and the choice of watchers draw no `rnd()`; the walk back to a seat in the market place draws it as any seat does (`goAct`, `toMkt`), so `PLAY` moves a little.

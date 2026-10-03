@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Launch safety: main is green, a release cadence, and launch-day triage
 
 Three small process changes for launch week (the owner starts sharing the game on 28 Sep 2026). Workflows and docs; no game code.

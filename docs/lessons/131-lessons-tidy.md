@@ -1,4 +1,7 @@
-Theme: tidy
+---
+type: Lesson
+theme: tidy
+---
 # #131 Tidy the lessons · 28 Sep 2026
 
 - **Numbers:** 26 lessons new since the last tidy (43 files listed in `.last-tidy`, 69 in the folder), well past the 8-lesson trigger. The tidy Routine (`trig_01WWjSqun7aAX15iLCb4PQdc`) fired at 10:01 but had no repository or GitHub attached, so its session pushed nothing; this session ran the brief by hand instead. 68 lesson files left after the tidy (69 minus one merge). One PR, no bot run: no game code.

@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: A coordinator playbook
 
 The coordinator's brief for a small runbook change: write down how a coordinator runs the other sessions, from what the coordinator of 27 Sep 2026 learned. No game code.

@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: The region map, looking better
 
 The owner starts sharing the game from 28 Sep and asked overnight for the region map to look better. It's a restyle of what's already drawn, not a new feature: nothing about how the region plays changes.

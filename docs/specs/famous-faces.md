@@ -1,3 +1,9 @@
+---
+type: Spec
+description: Invented celebrities fly from the airport now and then, with a crowd, a busy hour and the rating at stake.
+status: stable
+verified: { by: human:KyleLookingAround, at: "2026-09-28T05:20:18Z" }
+---
 # Famous faces
 
 Issue: none (the owner's idea board, `docs/ideas/board-2026-09.md`, rated Love it) · Status: Approved (the owner's rating and the overnight brief, `docs/briefs/famous-faces.md`, stand in for approval) · PRs: (added as they open)

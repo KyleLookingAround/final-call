@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Balance workflow compares with the merge base, and a bot `--why` summary (#167)
 
 ## Goal and what it may touch

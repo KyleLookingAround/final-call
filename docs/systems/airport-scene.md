@@ -1,3 +1,7 @@
+---
+type: System
+description: "How the airport is drawn: the layers in order, the lighting pass, and the real airport's parts."
+---
 # The airport scene
 
 **The airport scene: drawing layers, the lighting pass and the real airport's parts** (`50-scene.js`, `51-markings.js` to `55-vehicles.js`, `draw()` in `12-drawing.js`; spec `docs/specs/real-airport.md`, version 31).

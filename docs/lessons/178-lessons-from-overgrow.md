@@ -1,5 +1,7 @@
-Theme: exchange
-
+---
+type: Lesson
+theme: exchange
+---
 # Lessons from Overgrow, carried into the playbooks (#178) · 29 Sep 2026
 
 - **Numbers:** written in the same session as Overgrow's PR (its lesson has the figures); docs only, no bot run and no speed budget.

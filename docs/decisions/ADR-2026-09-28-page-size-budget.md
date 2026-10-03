@@ -1,3 +1,8 @@
+---
+type: Decision
+description: The built page has a byte budget, checked by the page-size group and raised only on purpose.
+status: stable
+---
 # ADR-2026-09-28: A byte budget on the built page
 
 ## Status

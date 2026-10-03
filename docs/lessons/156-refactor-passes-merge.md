@@ -1,4 +1,7 @@
-Theme: checks
+---
+type: Lesson
+theme: checks
+---
 # #156 Systems refactor 7, part 2: arrivals, movement and the index in one pass · 28 Sep 2026
 
 - **Numbers:** session `session_01MCKoS3dpP6BCBYJdBBRqPC`, estimate $20 for both PRs, $5.53 spent when this PR opened, with 24% of its context used. Started 17:53 UTC. #145 merged at 19:21 and this PR opened at 19:50, from the new `main` with no merges needed. Seeds 1–3 of the bot, run locally against a build of `main`, gave identical `STATE` and `PLAY`.

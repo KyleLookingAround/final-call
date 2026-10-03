@@ -1,3 +1,9 @@
+---
+type: Spec
+description: A smarter transport manager that runs lines by what each change is worth.
+status: stable
+verified: { by: human:KyleLookingAround, at: "2026-09-26T19:17:53Z" }
+---
 # A smarter transport manager
 
 Issue: #15 · Status: Built · PRs: #16

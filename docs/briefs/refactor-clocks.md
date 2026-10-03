@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Systems refactors 4 and 6: hook tables for the clocks, day stats as a registry
 
 Steps 4 and 6 of Part 3 of the approved systems review (`docs/specs/systems-review.md`), in one session. Their blockers, refactor 3 (#85, the effects ledger) and refactor 5 (#86, saves as a table), have merged.

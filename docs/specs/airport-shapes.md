@@ -1,3 +1,9 @@
+---
+type: Spec
+description: "Layouts shaped like real airports: piers, satellites, a midfield concourse and remote stands."
+status: stable
+verified: { by: human:KyleLookingAround, at: "2026-09-26T17:31:39Z" }
+---
 # Real airport shapes
 
 Issue: #10 · Status: Built · PRs: #11, #12, #13, #14

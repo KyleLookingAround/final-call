@@ -1,4 +1,7 @@
-Theme: drawing
+---
+type: Lesson
+theme: drawing
+---
 # The terminal as a place: groundwork, with refactor 9 · 28 Sep 2026
 
 - **Numbers:** estimate $18; about $7.40 at the PR's first stopping point. Started 20:40 on 27 Sep, paused by the account's five-hour limit from about 22:20 until the coordinator woke it at 04:05; PR #113 opened at 04:22.

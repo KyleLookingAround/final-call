@@ -1,3 +1,8 @@
+---
+type: Decision
+description: Managers compare options by the money each is worth in the game's own model, and do the work a little at a time.
+status: stable
+---
 # ADR-2026-09-26: Managers decide by measured value, a little at a time
 
 ## Status

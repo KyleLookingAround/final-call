@@ -1,3 +1,9 @@
+---
+type: Spec
+description: A card on each level-up that shows what the new level unlocks.
+status: stable
+verified: { by: human:KyleLookingAround, at: "2026-09-27T07:07:47Z" }
+---
 # Level-up screen
 
 Issue: #29 · PRs: #30 · Status: Built. Approved (the owner's addition before bundle 2, approved in advance in the brief of 27 Sep 2026)

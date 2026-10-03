@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: A Roadmap tab on What's new, the build (#137)
 
 The owner approved the spec, `docs/specs/roadmap-tab.md`, on 28 Sep with all three defaults (#143). This session builds it.

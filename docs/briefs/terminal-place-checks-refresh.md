@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Multiple floors, the checks refresh (#133, step 2a)
 
 The owner approved the refreshed `docs/specs/terminal-place.md` on 28 Sep (#139, #138), with every choice at its default except rare crowds of spotters, which were declined. This is its order of work, step 2's checks refresh. It runs side by side with refactor 7, which touches no file this session does.

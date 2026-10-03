@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Polish: overlay cards that match
 
 Fix batch 6 of the polish audit (#77).

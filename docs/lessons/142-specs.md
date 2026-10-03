@@ -1,4 +1,7 @@
-Theme: specs
+---
+type: Lesson
+theme: specs
+---
 # Specs for big features: #38 real airport groundwork, #49 the terminal as a place, #138 multiple floors, #142 a Roadmap tab · 27–28 Sep 2026
 
 - **Numbers:**

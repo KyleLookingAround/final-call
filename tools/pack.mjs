@@ -52,6 +52,8 @@ const ENTRIES=[
   ['.githooks/commit-msg','The hook that strips tool attribution from a commit message and refuses one that still has it.'],
   ['tools/join.mjs','Joins the one-file-per-entry folders (lessons, roadmap items, What’s new, decisions) into their lists.'],
   ['tools/graph.mjs','node tools/graph.mjs <name>: everything related to a system, file, function, hook, field or check.'],
+  ['tools/okf.mjs','Reads and checks the frontmatter every docs file opens with (the Open Knowledge Format); join.mjs and graph.mjs use it.'],
+  ['docs/index.md','The docs’ index, joined from every file’s frontmatter: what each one is, in a line.'],
   ['tools/touched.mjs','Maps a PR’s changed files to the check groups worth running, for cheaper checks on draft PRs.'],
   ['tools/health.mjs','Turns a weekly bot run into a drift verdict against the balance baselines, for an issue.'],
   ['tools/check.mjs','Runs every check group and reports pass/fail; each group is a file in tools/checks/.'],

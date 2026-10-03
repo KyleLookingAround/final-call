@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: A page size budget check
 
 ## Goal and what it may touch

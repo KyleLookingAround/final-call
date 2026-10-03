@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Release version 37, windows on the apron and decor
 
 The coordinator's brief. Windows and watchers (#183) and decor and local character (#184) have merged since release 36 (#133 step 3). The owner parked the public launch on 29 Sep, so there's no one-release-a-day rule: release as soon as this is ready.

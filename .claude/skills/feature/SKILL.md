@@ -18,7 +18,7 @@ Work through these steps in order. Small fixes (a label, a nit, an obvious bug) 
 - Copy `docs/specs/TEMPLATE.md` to `docs/specs/<short-name>.md` and fill it in. Keep it to a page.
 - Check it against the owner's preferences in the project notes: no scenario choice, locked things hidden, impacts on the map/board/gates, concise UK English, phones down to 320 px, managers for players who'd rather not.
 - A spec for unbuilt work names a planned check or file by folder and name ("a new `roadmap-card` check group in `tools/checks/`"), not a backticked path with its extension: the `graph` check reads that as a claim the file exists, unless the checks-first pattern below is used.
-- Get the owner's approval of the spec before writing code, and mark it `Approved` when they agree. A brief that approves a spec in advance counts: mark it `Approved`, say so in the spec, and build.
+- Get the owner's approval of the spec before writing code, and mark it `Approved` when they agree, in its Status line and its frontmatter (step 5). A brief that approves a spec in advance counts: mark it `Approved`, say so in the spec, and build.
 
 ## 3. Build
 
@@ -44,12 +44,15 @@ Work through these steps in order. Small fixes (a label, a nit, an obvious bug) 
 
 ## 5. Keep the docs true
 
-Every list a session adds to is one file per entry, so two sessions never edit the same lines. Never edit between the `joined` markers in `docs/LESSONS.md`, `docs/ROADMAP.md`, `docs/decisions/README.md` or `docs/SYSTEMS.md`: `npm run build` rebuilds them from the files.
+Every list a session adds to is one file per entry, so two sessions never edit the same lines. Never edit between the `joined` markers in `docs/LESSONS.md`, `docs/ROADMAP.md`, `docs/decisions/README.md`, `docs/SYSTEMS.md` or `docs/index.md`: `npm run build` rebuilds them from the files.
 
-- **The system's notes.** A change to how a system works updates its own file in `docs/systems/`; a new system adds one (`# Name`, then how it works, naming its files), and the spec's first line lists its PRs. `npm run check -- graph` fails on a broken link or a system file that names no game files, and warns when a system's game file changed but its notes didn't. Shared rules (state, time, the sim, checks) are in `docs/SYSTEMS.md`; the project notes keep only the core.
-- **The roadmap item.** Add or edit its own file in `docs/roadmap.d/` (`<date>-<short-name>.md`, first line `Section: now`, `next`, `runbook` or `done`): move it along by changing that line. The owner's order and the ideas in `docs/ROADMAP.md` are edited by hand.
+- **Frontmatter.** Every file in `docs/` opens with YAML frontmatter (`docs/SYSTEMS.md`, "The docs as a knowledge bundle"): its folder's `type`, a one-line `description` for systems, decisions, specs, ideas, metrics and computations, and what its type needs. Copy the shape from a neighbour or a template. Actors are `human:<login>` or `process:<name>`, never a tool's name, and times are quoted (`"2026-10-03T09:00:00Z"`). The `okf` check group fails anything missing or malformed.
+
+- **The system's notes.** A change to how a system works updates its own file in `docs/systems/`; a new system adds one (frontmatter, `# Name`, then how it works, naming its files), and the spec's first line lists its PRs. When you've read a system's notes against its code and they're true without needing a change, say so in its frontmatter: `verified: { by: process:notes-review, at: "<now>" }`. `npm run check -- graph` fails on a broken link or a system file that names no game files, and warns when a system's game file changed but its notes didn't, and when its files changed after its notes' text last changed and after they were last verified (`node tools/graph.mjs --stale` lists them). Shared rules (state, time, the sim, checks) are in `docs/SYSTEMS.md`; the project notes keep only the core.
+- **The roadmap item.** Add or edit its own file in `docs/roadmap.d/` (`<date>-<short-name>.md`, with `type: Roadmap item` and `section: now`, `next`, `runbook` or `done` in its frontmatter): move it along by changing `section`. The owner's order and the ideas in `docs/ROADMAP.md` are edited by hand.
 - **What's new.** A change players will notice adds `src/updates.d/<short-name>.md` (the format is in that folder's README), never an `UPDATES` entry or a `docs/HISTORY.md` row and never a version number: the `release` playbook gives those.
-- **Decisions.** Add a record in `docs/decisions/` if the change sets a rule other changes must follow; the index is joined from the folder.
+- **Decisions.** Add a record in `docs/decisions/` if the change sets a rule other changes must follow; the index is joined from the folder. Its frontmatter's `status` is `deprecated` once it's superseded, with the tags `experiment` or `superseded-in-part` where its Status section says so.
+- **Specs.** A spec's frontmatter `status` is `draft` while it's Proposed; when the owner approves it, `status: stable` and `verified: { by: human:KyleLookingAround, at: "…" }` with the time the approval is recorded.
 
 ## 6. A fresh review before opening
 

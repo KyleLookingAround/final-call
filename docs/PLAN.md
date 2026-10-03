@@ -1,3 +1,7 @@
+---
+type: Plan
+description: The plan and status of the first five features, all built and live.
+---
 # Five features: plan and status
 
 All five are built and live, together with the phone camera gap and the mobile fixes that followed.

@@ -1,4 +1,7 @@
-Theme: merge-chasing
+---
+type: Lesson
+theme: merge-chasing
+---
 # A busy `main` with Catch up running: #114 playbooks, #122 usage counts · 28 Sep 2026
 
 - **Numbers:** #114: estimate $4, $7.35 and 299k by the merge; opened 04:41, merged 05:22; Catch up merged `main` into the branch four times in 41 minutes (once needing a manual `git merge` after a rejected push, the rest fast-forwards). #122: estimate $5, about $21 by the merge (four times over); opened 05:30, merged 10:03, nearly all of it CI and merge-chasing (the code and checks were green well before 06:00). `main` moved about ten times in its life, and Catch up restarted Checks on every new head.

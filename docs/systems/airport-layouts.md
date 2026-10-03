@@ -1,3 +1,7 @@
+---
+type: System
+description: Each layout as data (stands, rooms, doorways and its own terminal), copied into the game's tables when it is built.
+---
 # Airport layouts
 
 **Airport layouts.** `LAYOUTS` in `39-layouts.js` lists each layout's stands (x, how far back the plane sits `dy`, gate name, price, level, `pier` for the second phase, `kind:'remote'` for bus stands), its buying `order` and its shop units. `applyLayout` copies the current one into `STAND_X`, `STAND_DY`, `STAND`, `GATES`, `SIDX`, `STAND_ORDER`, `SHOP_X` and friends in place, so code that reads those follows the layout.

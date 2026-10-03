@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Release audit, what stands between Final Call and a polished public release
 
 The owner, 28 Sep: "keep going till you have the two floors and then do a final refactor sweep, any fixes or balance fixes sweep, any easy wins, basically the game actual release at that point. Make it very polished, you can change anything to get to that point. I'll wait for you to finish before I start sharing with the wider public. Current feedback is that it 'really scratched a brain itch' so that's the aim."

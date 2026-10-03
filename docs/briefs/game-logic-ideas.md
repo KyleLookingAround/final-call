@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Ideas to improve the game logic
 
 The owner's brief for a ranked list of ideas to improve the game logic. No game code: ideas, not building.

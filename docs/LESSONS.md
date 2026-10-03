@@ -1,9 +1,13 @@
+---
+type: Guide
+description: The look back at each merged PR, grouped by theme, and how the tidy keeps them short.
+---
 # Lessons from each PR
 
 After a PR merges, look back at the session that built it: what it cost, what slowed it, and what would have saved time or credits (the `steward` playbook's last step). A lesson marked → changed something, and says where.
 
-- **One file per PR:** `docs/lessons/<pr>-<short-name>.md` (`main-<short-name>.md` for a change pushed straight to `main`), in the shape the others have: `# Title · date`, then **Numbers**, **Went well** and **Lessons**, one line each, with → where a lesson changed something. Never add an entry to this file: the list below is joined from the folder by `node tools/join.mjs` (`npm run build` runs it).
-- **The tidy.** Once 8 lessons are new since the last tidy (`node tools/join.mjs` counts them against `docs/lessons/.last-tidy`), the session that added the 8th fires the tidy Routine (the `coordinator` playbook has its id). The tidy merges lessons that say the same thing, groups them by theme (a `Theme:` first line), deletes those out of date or already written into a playbook, the notes or a check, and turns a lesson seen three times without a → into a change (`docs/briefs/lessons-tidy.md`).
+- **One file per PR:** `docs/lessons/<pr>-<short-name>.md` (`main-<short-name>.md` for a change pushed straight to `main`), in the shape the others have: frontmatter with `type: Lesson`, then `# Title · date`, **Numbers**, **Went well** and **Lessons**, one line each, with → where a lesson changed something. Never add an entry to this file: the list below is joined from the folder by `node tools/join.mjs` (`npm run build` runs it).
+- **The tidy.** Once 8 lessons are new since the last tidy (`node tools/join.mjs` counts them against `docs/lessons/.last-tidy`), the session that added the 8th fires the tidy Routine (the `coordinator` playbook has its id). The tidy merges lessons that say the same thing, groups them by theme (`theme:` in each file's frontmatter), deletes those out of date or already written into a playbook, the notes or a check, and turns a lesson seen three times without a → into a change (`docs/briefs/lessons-tidy.md`).
 
 ## The lessons
 
@@ -120,5 +124,6 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 ### Not sorted yet
 
+- [The docs as an Open Knowledge Format bundle · 3 Oct 2026](lessons/186-docs-as-okf.md)
 - [#180 A Roadmap tab on What's new · 29 Sep 2026](lessons/180-roadmap-tab.md)
 <!-- /joined:lessons -->

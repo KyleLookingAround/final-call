@@ -1,4 +1,7 @@
-Theme: ui
+---
+type: Lesson
+theme: ui
+---
 # Modes that take over the stage: #100 photo mode, #102 day in a minute · 27–28 Sep 2026
 
 - **Numbers:** #100 estimate $10, cost not yet reported; one build round, one review round, two full local check runs. #102 estimate $16 (cost read 0 at the stopping points); one build, one review, two full local runs, two CI rounds on the first head, and a merge of `main` by hand when #100 landed. The account's five-hour limit stopped #102 at about 22:20 and nothing woke it until the coordinator did at 04:00 (`main-overnight-stall.md`).

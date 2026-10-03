@@ -1,4 +1,7 @@
-Theme: review
+---
+type: Lesson
+theme: review
+---
 # #47 Runbook experiment [E]: a fresh review before opening · 27 Sep 2026
 
 - **Numbers:** session `session_016m4g3NhqFbyAZLveBkhwDn`, estimate $4: $1.72 and 129k of 1M context by the time checks came back, $4.01 by the second merge-in, past the estimate by the third. Created 11:51, PR opened 11:55 (four minutes), Checks green at 12:01 (six minutes) — the feature itself was done and green well before the merge-chase started.

@@ -1,3 +1,7 @@
+---
+type: System
+description: Personal bests, stamps and the week's challenges, each with its own toast.
+---
 # Records, stamps and challenges
 
 **Records, stamps and challenges** (`35-records.js`).

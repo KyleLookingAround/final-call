@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Release loose ends
 
 The release audit's batches (`docs/ideas/release-audit.md`, #155) have nearly all merged. This picks up three small things they handed on to files no running batch owns.

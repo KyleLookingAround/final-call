@@ -1,4 +1,7 @@
-Theme: checks
+---
+type: Lesson
+theme: checks
+---
 # Systems refactors: #81 routes, #85 effects ledger, #86 save fields, #95 clocks and day stats, #98 weather, #145 and #156 passes over passengers · 27–28 Sep 2026
 
 Seven refactors meant to leave the game as it is. They shared one method, and each met its own trap.

@@ -14,7 +14,7 @@ These notes are the short core every session needs. The details live with their 
 | Releases: version numbers, What's new, history and save fixtures | `.claude/skills/release/SKILL.md` |
 | Running other sessions, and the lessons tidy | `.claude/skills/coordinator/SKILL.md` |
 
-Keep them true: a PR that changes how something works updates that topic's file in the same PR. Find your way with `node tools/graph.mjs <system, file, function, hook, field or check>` rather than reading the docs end to end.
+Keep them true: a PR that changes how something works updates that topic's file in the same PR. Find your way with `docs/index.md` (every docs file in a line) and `node tools/graph.mjs <system, file, function, hook, field, check or docs file>` rather than reading the docs end to end.
 
 ## Commits, PRs and attribution (always)
 
@@ -47,7 +47,7 @@ Every change goes round the same loop, and each round leaves something that make
 5. **Ship.** A PR from `.github/pull_request_template.md`; the session squash-merges it once checks are green (see Publishing); `main` publishes.
 6. **Learn.** A bug that reached players gets the check that would have caught it. A change that sets a rule gets a record in `docs/decisions/`. After each merge, a short look back at the session that built it goes in its own file in `docs/lessons/`, and a lesson that would have saved real time or credits changes the playbook that allowed it.
 
-**One file per entry, never a shared list.** Lessons (`docs/lessons/`), roadmap items (`docs/roadmap.d/`), What's new entries (`src/updates.d/`), decision records, systems' notes and check groups each get their own file. The lists that show them (`docs/LESSONS.md`, the roadmap's Now, Next, runbook and Done, `docs/decisions/README.md`, and the lists in `docs/SYSTEMS.md`) are joined by `node tools/join.mjs`, which `npm run build` runs: never edit between their `joined` markers. Only a release gives a version number. The "Catch up" workflow merges `main` into open PRs whenever it moves (the `steward` playbook).
+**Every docs file opens with frontmatter** in the Open Knowledge Format: its folder's `type`, for most a one-line `description`, and what its type needs (`docs/SYSTEMS.md`, "The docs as a knowledge bundle"); the `okf` check group fails one that's missing or wrong. **One file per entry, never a shared list.** Lessons (`docs/lessons/`), roadmap items (`docs/roadmap.d/`), What's new entries (`src/updates.d/`), decision records, systems' notes and check groups each get their own file. The lists that show them (`docs/LESSONS.md`, the roadmap's Now, Next, runbook and Done, `docs/decisions/README.md`, the lists in `docs/SYSTEMS.md`, and `docs/index.md`) are joined by `node tools/join.mjs`, which `npm run build` runs: never edit between their `joined` markers. Only a release gives a version number. The "Catch up" workflow merges `main` into open PRs whenever it moves (the `steward` playbook).
 
 **The brief wins.** Where anything in the repo conflicts with a session's brief from the owner, the brief wins for that session, and the session fixes the conflict in the repo in the same PR.
 

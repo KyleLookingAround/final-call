@@ -1,3 +1,9 @@
+---
+type: Spec
+description: A quiet Ko-fi link at the foot of Settings.
+status: stable
+verified: { by: human:KyleLookingAround, at: "2026-09-27T14:37:53Z" }
+---
 # A Ko-fi link
 
 Issue: none · Status: Approved (the owner asked for this on 27 Sep 2026; approved in advance by the brief of that date, `docs/briefs/kofi-link.md`) · PRs: (added as it opens)

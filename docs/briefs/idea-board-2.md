@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: A new idea board for every part of the game
 
 The owner's brief for a second idea board (round 3 of the owner's ratings): ideas across every part of Final Call to rate and comment on, with the outcome recorded in `docs/ROADMAP.md`. No game code.

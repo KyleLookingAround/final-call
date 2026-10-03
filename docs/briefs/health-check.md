@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Weekly health check
 
 The coordinator's brief for "Weekly health check" under "Next" in `docs/ROADMAP.md`: a scheduled run of the checks and the bot on `main` that opens an issue when something drifts. No game code.

@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Multiple floors, refresh the terminal-place spec (#133, step 1)
 
 The owner, 28 Sep: "see why we don't have two floors, and raise an issue to get multiple floors… Roof should also be a floor that's accessible so people can watch planes and celebs go up there and people take photos whilst waiting. I want it to be a fully fleshed out feature overhaul." Issue #133 holds the whole plan. This session does its step 1: it refreshes the spec for the owner's approval. It builds nothing.

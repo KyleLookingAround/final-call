@@ -1,3 +1,7 @@
+---
+type: System
+description: The manager that runs transport lines by measuring what each change is worth.
+---
 # Transport manager
 
 **Transport manager** (`32-managers.js`, on with `autoLines`, for lines without `L.man`).

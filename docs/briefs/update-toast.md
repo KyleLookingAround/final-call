@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Tell players when a new version is ready
 
 ## Goal and what it may touch

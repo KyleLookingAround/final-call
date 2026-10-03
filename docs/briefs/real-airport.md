@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: "Looks like a real airport": the spec, the groundwork and the parts' briefs
 
 The coordinator's brief for bundle 2 in `docs/ROADMAP.md`. Start it as a fresh session with this file as its first message.

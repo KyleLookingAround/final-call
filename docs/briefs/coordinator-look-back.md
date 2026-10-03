@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: The coordinator's look back for release 35
 
 Overgrow's coordinator asked, at the owner's request, for Final Call's learnings from 29 Sep's release wave to be written into the repo, so a session can carry what fits into Overgrow. The coordinator that ran the wave wrote the look back, which is `docs/lessons/<pr>-coordinator-release-35.md`. This session commits it and merges it.

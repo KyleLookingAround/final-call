@@ -1,3 +1,9 @@
+---
+type: Decision
+description: A fresh reviewer that hasn't seen the work reads each diff before its PR opens.
+status: stable
+tags: [experiment]
+---
 # ADR-2026-09-27: A fresh review before each PR opens
 
 ## Status

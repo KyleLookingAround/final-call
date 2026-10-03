@@ -1,3 +1,9 @@
+---
+type: Spec
+description: "The airport looks like a real one: markings, planes, roofs, weather and vehicles."
+status: stable
+verified: { by: human:KyleLookingAround, at: "2026-09-27T11:30:45Z" }
+---
 # Looks like a real airport
 
 Issue: #37 · Status: Approved (the owner approved it in advance, in the brief of 27 Sep 2026, `docs/briefs/real-airport.md`) · Built (version 31) · PRs: groundwork #38; parts #53 markings, #50 planes, #52 roofs (and #63), #61 weather, #55 vehicles; brought together in the version 31 PR

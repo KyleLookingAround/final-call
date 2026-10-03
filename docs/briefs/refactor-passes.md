@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Refactor 7, one pass over passengers (#133, step 2b)
 
 The owner approved the refreshed `docs/specs/terminal-place.md` on 28 Sep (#139), with "refactor 7 before the parts" among its choices. This is its order of work, step 2's refactor, from `docs/specs/systems-review.md` step 7. It runs side by side with the checks refresh, which touches no file this session does. No feature session is open, so this is the quiet window a refactor needs.

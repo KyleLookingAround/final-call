@@ -1,4 +1,7 @@
-Theme: ci
+---
+type: Lesson
+theme: ci
+---
 # Runbook experiment [B]: faster CI. #46 cache Playwright's Chromium, #79 only the touched check groups on drafts · 27 Sep 2026
 
 - **Numbers:** #46 estimate $5, about $2.70 by ready; one re-run from the Actions tab to get a cache hit. #79 estimate $5, about $19 by ready, most of it CI rounds and local runs repeated after each of seven merges from `main`. #79's two real full runs (touching a workflow file, then `src/shell.html`) took 7m18s and 7m8s: 31 s of fixed setup, then about 6m40 for all 186 checks. `tools/touched.mjs` mapped both to "every group" on the first try.

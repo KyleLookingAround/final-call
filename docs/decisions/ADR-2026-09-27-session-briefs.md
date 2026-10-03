@@ -1,3 +1,9 @@
+---
+type: Decision
+description: Sessions start from a checked brief, ask the owner through needs-owner issues, keep to a cost budget, and parts are tested together.
+status: stable
+tags: [experiment]
+---
 # ADR-2026-09-27: Sessions start from a checked brief, ask the owner through issues, keep to a cost budget, and parts are tested together
 
 ## Status

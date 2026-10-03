@@ -1,5 +1,7 @@
-Theme: release
-
+---
+type: Lesson
+theme: release
+---
 # Release 36: the roof terrace and the Roadmap tab · 29 Sep 2026
 
 - **Numbers:** one default-model session, started about 20:30 UTC; cost is read from the session record at the stopping points (about $5 estimated). One PR (#182), one push before Checks, no merges from `main` needed at the time of writing.

@@ -1,3 +1,7 @@
+---
+type: System
+description: The rival airport that opens after City Airport and takes a share of shared routes.
+---
 # Lowmere
 
 **Lowmere** (`33-lowmere.js`).

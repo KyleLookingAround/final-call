@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Decor and local character (a part of "The terminal as a place", #133 step 3)
 
 The coordinator's brief for one part of `docs/specs/terminal-place.md` (approved on #139, 28 Sep 2026), refreshed on 29 Sep against `main` after windows and watchers merged (#183). Two floors in Classic (#162), refactor 7 (#145, #156), the roof terrace (#181, released in 36) and windows and watchers (#183) are in. This supersedes the 27 Sep version of this file. Each layout's own floor plan follows this part.

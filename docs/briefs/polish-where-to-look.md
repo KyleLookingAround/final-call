@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Polish: put things where players look
 
 Fix batch 2 of the launch polish audit (#104).

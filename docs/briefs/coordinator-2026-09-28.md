@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Coordinator, 28 Sep 2026 from 05:00 UTC to the morning summary
 
 A handover from `session_01ASSNZafGceJM9JYfR4AUUx` (about 340k of context and $15 by 05:00, model switched to `claude-fable-5-1` by the owner). Follow the `coordinator` playbook, with `docs/briefs/coordinator-2026-09-27e.md` (the overnight brief) and the changes below. Where they differ, this brief wins.

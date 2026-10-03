@@ -1,4 +1,7 @@
-Theme: checks
+---
+type: Lesson
+theme: checks
+---
 # The terminal as a place: the checks refresh · 28 Sep 2026
 
 - **Numbers:** estimate $10; the session's cost wasn't reported yet at opening. Started 17:53, PR #144 opened 18:30. With `TP_ALL=1`, `floors` went from 43 s to 5 s and `terrace` from 9 s to 13 s, with four new checks. Full local run: 347 passed, 34 pending.

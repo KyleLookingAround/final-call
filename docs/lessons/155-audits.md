@@ -1,4 +1,7 @@
-Theme: review
+---
+type: Lesson
+theme: review
+---
 # Audits by helper agents: the polish audit, #106 launch audit, #155 release audit · 27–28 Sep 2026
 
 - **Numbers:** polish audit (16:49, 27 Sep): estimate $6, $8.74 and 196k when the PR opened, three background agents (desktop tab by tab across four levels; phone and tablet layout and touch targets; overlays, day/night and motion) and about 170 screenshots. #106: estimate $10, $16.73 and 135k, four agents on the cheaper model, about 280 screenshots. #155: estimate $15, $19.14 and 190k, five helpers (the brain itch, bugs, polish, balance, refactors), and the bot on seeds 1–3 plus about fifteen variant and bisect runs. All docs only.

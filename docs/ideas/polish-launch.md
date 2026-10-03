@@ -1,3 +1,7 @@
+---
+type: Ideas
+description: What a first-time player arriving from a shared link notices first, found by playing and looking.
+---
 # Launch polish audit, September 2026
 
 What a first-time player arriving from a shared link notices first, found by playing and looking (brief `docs/briefs/launch-audit.md`). Four sweeps: a new game from a clean save (phone 390×844 and 320×568, desktop 1440×900: first screen, guided start, the first 30 minutes at 1× and 4×, the first level-up card); the menus at levels 3, 5 and 9 (`tools/saves/v32-L*.json`, desktop and tablet 768×1024, every tab and sub-tab, the overlays); phone looks (390×844, 320×568, 844×390 and 568×320, day and night, the bottom sheet, full screen and the camera band); and what a shared link shows, speed and console, and desktop, tablet and 1920×1080 looks. Screenshots are in the session's `build/audit/` (not committed): `newgame/`, `menus/`, `phone/` and `review/`.

@@ -1,4 +1,7 @@
-Theme: checks
+---
+type: Lesson
+theme: checks
+---
 # The terminal as a place, checks first: #90 the checks, #144 the refresh · 27–28 Sep 2026
 
 - **Numbers:** #90 estimate $10; opened 18:00 after two commits and one from the review; 190 passed, 35 pending, the new groups add about 20 s; Balance was dispatched by hand since it doesn't run for `tools/` changes (seed 1's `PLAY` and `STATE` match `main`). #144 estimate $10; opened 18:30; with `TP_ALL=1`, `floors` went from 43 s to 5 s and `terrace` from 9 s to 13 s, with four new checks; full local run 347 passed, 34 pending.

@@ -7,15 +7,17 @@
 //   node tools/join.mjs --check      fails on a malformed entry or a joined list that's out of date
 //   node tools/join.mjs lessons      the lessons, grouped by theme
 // The entries:
-//   docs/lessons/<pr>-<short-name>.md   one look back per PR; an optional first line "Theme: <theme>" groups it (the tidy
-//                                       sets it). docs/lessons/.last-tidy lists the files the last tidy saw.
-//   docs/roadmap.d/<date>-<name>.md     a roadmap item; first line "Section: now|next|runbook|done", then the item
+//   docs/lessons/<pr>-<short-name>.md   one look back per PR; an optional "theme: <theme>" in its frontmatter groups it
+//                                       (the tidy sets it). docs/lessons/.last-tidy lists the files the last tidy saw.
+//   docs/roadmap.d/<date>-<name>.md     a roadmap item; "section: now|next|runbook|done" in its frontmatter, then the item
 //   src/updates.d/<short-name>.md       a What's new entry waiting for a release (no version: the release gives it one)
 //   docs/decisions/ADR-*.md, docs/systems/*.md, tools/checks/*.mjs, src/game/*.js   read for their indexes
+//   every file in docs/                 its frontmatter, for the bundle's index, docs/index.md (tools/okf.mjs)
 // Each joined list sits between <!-- joined:<name> … --> and <!-- /joined:<name> --> in the file that shows it.
 import {readFileSync,readdirSync,writeFileSync,existsSync} from 'node:fs';
 import {dirname,join} from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {parse,indexText} from './okf.mjs';
 
 export const root=join(dirname(fileURLToPath(import.meta.url)),'..');
 const rd=p=>readFileSync(join(root,p),'utf8'),ls=d=>existsSync(join(root,d))?readdirSync(join(root,d)).sort():[];
@@ -23,15 +25,15 @@ export const TIDY_AT=8; // a tidy of the lessons runs once this many are new sin
 
 // ---- the entries ----
 export function lessons(){
-  return ls('docs/lessons').filter(f=>f.endsWith('.md')).map(f=>{const s=rd('docs/lessons/'+f),theme=(s.match(/^Theme:\s*(.+)$/m)||[])[1];
-    return {file:f,theme:theme?theme.trim():'',title:(s.match(/^# (.+)$/m)||[])[1]||f,pr:+(f.match(/^(\d+)-/)||[])[1]||0,text:s}});
+  return ls('docs/lessons').filter(f=>f.endsWith('.md')).map(f=>{const s=rd('docs/lessons/'+f),{data,body}=parse(s),theme=data&&data.theme;
+    return {file:f,theme:theme?String(theme).trim():'',title:(body.match(/^# (.+)$/m)||[])[1]||f,pr:+(f.match(/^(\d+)-/)||[])[1]||0,text:body}});
 }
 export function lastTidy(){const p='docs/lessons/.last-tidy';return existsSync(join(root,p))?rd(p).split('\n').map(l=>l.trim()).filter(Boolean):[]}
 export const newLessons=()=>{const seen=new Set(lastTidy());return lessons().filter(l=>!seen.has(l.file))};
 const SECTIONS=['now','next','runbook','done'];
 export function roadmap(){
-  return ls('docs/roadmap.d').filter(f=>f.endsWith('.md')).map(f=>{const s=rd('docs/roadmap.d/'+f),m=s.match(/^Section:\s*(\w+)\s*\n/);
-    return {file:f,section:m?m[1].toLowerCase():null,body:m?s.slice(m[0].length).trim():s.trim()}});
+  return ls('docs/roadmap.d').filter(f=>f.endsWith('.md')).map(f=>{const {data,body}=parse(rd('docs/roadmap.d/'+f));
+    return {file:f,section:data&&typeof data.section==='string'?data.section.toLowerCase():null,body:body.trim()}});
 }
 export const updates=()=>ls('src/updates.d').filter(f=>f.endsWith('.md')&&f!=='README.md').map(f=>({file:f,text:rd('src/updates.d/'+f)}));
 const comment=s=>{const out=[];for(const l of s.split('\n')){if(!l.startsWith('//'))break;out.push(l.replace(/^\/\/\s?/,''))}return out.join(' ').replace(/\s+/g,' ').trim()};
@@ -51,16 +53,17 @@ function roadmapSection(sec){
   return items.map(r=>r.body).join('\n')||'';
 }
 function decisionTable(){
-  const rows=ls('docs/decisions').filter(f=>/^ADR-.*\.md$/.test(f)).map(f=>{const s=rd('docs/decisions/'+f),t=((s.match(/^# (.+)$/m)||[])[1]||f).replace(/^ADR-[\d-]+:\s*/,'');
-    const st=((s.match(/## Status\s*\n+([^\n]+)/)||[])[1]||'');
-    const note=/^superseded in part/i.test(st)?' (superseded in part)':/^superseded/i.test(st)?' (superseded)':/experiment/i.test(st)?' (an experiment)':'';
+  // the note comes from the frontmatter, which tools/okf.mjs keeps in step with each record's Status section
+  const rows=ls('docs/decisions').filter(f=>/^ADR-.*\.md$/.test(f)).map(f=>{const {data,body}=parse(rd('docs/decisions/'+f)),d=data||{},tags=d.tags||[];
+    const t=((body.match(/^# (.+)$/m)||[])[1]||f).replace(/^ADR-[\d-]+:\s*/,'');
+    const note=tags.includes('superseded-in-part')?' (superseded in part)':d.status==='deprecated'?' (superseded)':tags.includes('experiment')?' (an experiment)':'';
     return `| [${f.slice(0,-3)}](${f}) | ${t}${note} |`});
   return ['| Record | Decision |','| --- | --- |',...rows].join('\n');
 }
 function systemList(){
-  return ls('docs/systems').filter(f=>f.endsWith('.md')).map(f=>{const s=rd('docs/systems/'+f),t=(s.match(/^# (.+)$/m)||[])[1]||f;
+  return ls('docs/systems').filter(f=>f.endsWith('.md')).map(f=>{const {data,body:s}=parse(rd('docs/systems/'+f)),t=(s.match(/^# (.+)$/m)||[])[1]||f;
     const files=[...new Set([...s.split('\n\n')[1]?.matchAll(/\b(\d\d-[\w-]+\.js)\b/g)??[]].map(m=>m[1]))];
-    return `- [${t}](systems/${f})${files.length?' ('+files.map(x=>'`'+x+'`').join(', ')+')':''}`}).join('\n');
+    return `- [${t}](systems/${f})${files.length?' ('+files.map(x=>'`'+x+'`').join(', ')+')':''}${data&&data.description?': '+data.description:''}`}).join('\n');
 }
 function checkList(){
   return ls('tools/checks').filter(f=>f.endsWith('.mjs')).map(f=>`- \`${f.slice(0,-4)}\`: ${comment(rd('tools/checks/'+f))||'(no opening comment yet)'}`).join('\n');
@@ -73,14 +76,15 @@ function fileTable(){
 }
 export const LISTS=[
   ['docs/LESSONS.md','lessons','docs/lessons/',lessonIndex],
-  ['docs/ROADMAP.md','now','docs/roadmap.d/ (Section: now)',()=>roadmapSection('now')],
-  ['docs/ROADMAP.md','next','docs/roadmap.d/ (Section: next)',()=>roadmapSection('next')],
-  ['docs/ROADMAP.md','runbook','docs/roadmap.d/ (Section: runbook)',()=>roadmapSection('runbook')],
-  ['docs/ROADMAP.md','done','docs/roadmap.d/ (Section: done)',()=>roadmapSection('done')],
+  ['docs/ROADMAP.md','now','docs/roadmap.d/ (section: now)',()=>roadmapSection('now')],
+  ['docs/ROADMAP.md','next','docs/roadmap.d/ (section: next)',()=>roadmapSection('next')],
+  ['docs/ROADMAP.md','runbook','docs/roadmap.d/ (section: runbook)',()=>roadmapSection('runbook')],
+  ['docs/ROADMAP.md','done','docs/roadmap.d/ (section: done)',()=>roadmapSection('done')],
   ['docs/decisions/README.md','decisions','the ADR files here',decisionTable],
   ['docs/SYSTEMS.md','systems','docs/systems/',systemList],
   ['docs/SYSTEMS.md','checks','tools/checks/, each file\'s opening comment',checkList],
   ['docs/SYSTEMS.md','files','src/game/, each file\'s first line',fileTable],
+  ['docs/index.md','bundle','the frontmatter of every file in docs/',indexText],
 ];
 
 // a file with each of its joined lists rebuilt; throws on a conflict marker outside them
@@ -100,7 +104,7 @@ export const joinedFiles=()=>[...new Set(LISTS.map(l=>l[0]))];
 export function stale(){return joinedFiles().filter(f=>{try{return rejoin(f)!==rd(f)}catch(e){return true}})}
 export function problems(){
   const bad=[];
-  for(const r of roadmap())if(!SECTIONS.includes(r.section))bad.push(`docs/roadmap.d/${r.file}: first line must be "Section: ${SECTIONS.join('|')}"`);
+  for(const r of roadmap())if(!SECTIONS.includes(r.section))bad.push(`docs/roadmap.d/${r.file}: its frontmatter needs "section: ${SECTIONS.join('|')}"`);
   for(const l of lessons()){if(!/^(\d+|main)-[\w-]+\.md$/.test(l.file))bad.push(`docs/lessons/${l.file}: name it <pr>-<short-name>.md`);if(!/^# /m.test(l.text))bad.push(`docs/lessons/${l.file}: no "# title · date" line`)}
   for(const u of updates()){if(/^\s*(v|version)\s*[:=]?\s*\d+/im.test(u.text))bad.push(`src/updates.d/${u.file}: no version number in a fragment; the release gives it one`);
     if(!/^- /m.test(u.text))bad.push(`src/updates.d/${u.file}: needs the points players will see, as "- " lines`)}

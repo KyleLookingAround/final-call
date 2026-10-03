@@ -1,3 +1,8 @@
+---
+type: Decision
+description: Stands have their own frames and planes park nose-in; airside is convex rooms joined by doorways.
+status: stable
+---
 # ADR-2026-09-26: Stands have their own frames, and airside is rooms joined by doorways
 
 ## Status

@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: A Ko-fi link that stays out of the way
 
 The coordinator's brief for a small change the owner asked for on 27 Sep 2026: a "Buy me a Ko-fi" button linking to `https://ko-fi.com/kylemck`, "so it doesn't get in the way of the game", on the What's new page, in Settings and on the level-up card.

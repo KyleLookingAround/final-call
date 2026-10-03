@@ -1,3 +1,7 @@
+---
+type: System
+description: Invented celebrities who now and then fly from the airport from level 3, with a crowd, a busy hour and the rating at stake.
+---
 # Famous faces
 
 **Famous faces** (`64-famous-faces.js`; spec `docs/specs/famous-faces.md`). Now and then an invented celebrity flies from the airport, from level 3 (`G.level>=2`).

@@ -1,5 +1,7 @@
-Theme: release
-
+---
+type: Lesson
+theme: release
+---
 # Release 37: windows on the apron and decor · 30 Sep 2026
 
 - **Numbers:** one cheaper-model session, estimate about $5. One PR, one full `npm run check` on the release branch after merging `main`.

@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Clear roofs at the starting zoom
 
 ## Goal and what it may touch

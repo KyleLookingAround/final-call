@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: A runbook pack the owner can take to another workspace
 
 The owner wants a zip of the runbook (the way this repo runs Claude sessions: the project notes, the playbooks, briefs, checks, workflows, decisions and lessons) and anything else useful, to copy into their Apprivo workplace Claude and learn from. Nothing about the game itself.

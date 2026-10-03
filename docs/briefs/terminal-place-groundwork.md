@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: The terminal as a place: groundwork, with refactor 9
 
 Step 2 of "Order of work" in `docs/specs/terminal-place.md` (approved), with the systems review's refactor 9 (`12-drawing.js` as layers) as its first commit.

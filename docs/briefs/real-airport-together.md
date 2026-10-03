@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Real airport: bring the five parts together
 
 ## Goal and what it may touch

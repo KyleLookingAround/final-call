@@ -1,3 +1,7 @@
+---
+type: Brief
+description: "<fill: one line on what this session does>"
+---
 # Brief: <fill: item name>
 
 Copy this file to `docs/briefs/<short-name>.md` for every session or part you start, fill in each section, and run `node tools/brief.mjs docs/briefs/<short-name>.md` before starting it. It fails if a section is missing or empty, if a `<fill: …>` is left, if "Read first" has no `tools/graph.mjs` query, or if the cost budget has no estimate in dollars. Give the finished brief to the new session as its first message, and commit it in that session's PR.

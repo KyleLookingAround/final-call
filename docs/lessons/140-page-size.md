@@ -1,4 +1,7 @@
-Theme: checks
+---
+type: Lesson
+theme: checks
+---
 # A page size budget check (#140) · 28 Sep 2026
 
 - **Numbers:** estimate $3; about $5.50 by the time this was written (past twice the estimate once the fresh review and catching up with `main` twice are counted in; the check itself and its docs were done inside the first hour). About 21% of the session's context used. Started 15:44 UTC, PR opened ready for review (not draft) at 16:06, two pushes after opening plus one from the Catch-up workflow, no red CI, two merges from `main` by hand and one by the Catch-up workflow (`main` moved twice while the PR was open, once for #134's auto-merge switch and once for #141's roadmap tidy).

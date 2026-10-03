@@ -1,2 +1,5 @@
-Section: next
+---
+type: Roadmap item
+section: next
+---
 - **Merge queue, proposed** (a GitHub ruleset on `main`, the owner's to set up): replaces the Catch up workflow's merge-and-dispatch dance, and the race it can't close — two PRs, each green on its own head and merged minutes apart, can still combine into a broken game. A merge queue tests each PR's merge commit against the combined queue head before it lands, one at a time, so nothing merges that doesn't pass together with what's ahead of it. For sessions, the change is small: instead of merging their own green PR, they add it to the queue and it merges once its turn comes and it passes; everything else (branch protection, review requirements) stays as it is. Do this after launch week, once `pages.yml`'s new check-before-deploy job (`docs/briefs/launch-safety.md`) has had a week to prove itself; the two aren't a conflict, just two ways of catching the same race, and the queue is the sturdier one to keep long-term.

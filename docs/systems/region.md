@@ -1,3 +1,7 @@
+---
+type: System
+description: Bus, tram, rail, metro and high-speed lines, development sites, events and weather in the region round the airport.
+---
 # Region
 
 **Region** (`24-region-places.js` to `30-region-ui.js`). Bus, tram, rail, metro and high-speed lines, development sites, events, and weather.

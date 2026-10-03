@@ -1,3 +1,7 @@
+---
+type: System
+description: Final call, passengers who dawdle and run for it, the gate that holds or closes, and a passenger's story.
+---
 # Late runners and passengers' stories
 
 **Late runners and passengers' stories** (`61-late-runners.js`, spec `docs/specs/late-runners.md`, checks `tools/checks/late-runners.mjs`).

@@ -1,3 +1,8 @@
+---
+type: Decision
+description: The rating reflects the last day rather than a running sum, and the level baselines move with it.
+status: stable
+---
 # ADR-2026-09-27: The rating reflects the last day, and the level baselines move with it
 
 ## Status

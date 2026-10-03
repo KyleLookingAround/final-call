@@ -1,4 +1,7 @@
-Theme: releases
+---
+type: Lesson
+theme: releases
+---
 # Release audit batches: #164 P4 labels, #165 P3 small screens, #166 F1 tips, #170 terminal polish, #171 B1 pacing, #172 loose ends · 29 Sep 2026
 
 The second wave of the release audit, each batch in its own files (`159-release-fix-batches.md` has the first wave).

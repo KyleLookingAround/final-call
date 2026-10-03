@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Playbooks without Routines, auto-merge, and a longer CI limit
 
 ## Goal and what it may touch

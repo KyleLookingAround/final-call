@@ -1,4 +1,7 @@
-Theme: checks
+---
+type: Lesson
+theme: checks
+---
 # The roof terrace floor · 29 Sep 2026
 
 - **Numbers:** estimate $25; the session record showed no cost yet when the PR opened. Started 18:00, PR #181 opened as a draft at about 19:50 after four commits. `npm run check`: 425/425 with 12 pending (the other parts'). Twelve pending checks switched on. The `terrace` group takes 19 s locally, where `main`'s run of the same plays takes 18 s. No hours waiting on the owner.

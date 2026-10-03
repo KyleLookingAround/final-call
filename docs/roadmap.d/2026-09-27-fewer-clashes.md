@@ -1,4 +1,7 @@
-Section: runbook
+---
+type: Roadmap item
+section: runbook
+---
 - **Fewer clashes between sessions** (`docs/briefs/fewer-clashes.md`, `docs/decisions/ADR-2026-09-27-fewer-clashes.md`). Any number of sessions at once, none chasing `main`. Measure each on the PRs after it, against the worst so far (eight merges from `main` for one PR), and keep or remove each:
   - **Lessons as one file per PR** (`docs/lessons/`, joined into `docs/LESSONS.md` by `tools/join.mjs`). Measure: conflicts in lessons by hand (target none).
   - **Roadmap items as files** (`docs/roadmap.d/`, joined into Now, Next, the runbook and Done); history rows come from the What's new fragments at each release, so there's no `history.d`. Measure: conflicts in `docs/ROADMAP.md` by hand.

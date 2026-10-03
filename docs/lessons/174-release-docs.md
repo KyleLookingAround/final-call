@@ -1,4 +1,7 @@
-Theme: docs
+---
+type: Lesson
+theme: docs
+---
 # Release docs: README, notes and the game link (#173, #174) · 29 Sep 2026
 
 - **Numbers:** estimate $8; the session's cost wasn't reported yet when the PR opened. One docs PR, no game code, no bot run. The docs were read against the code by script (every backticked name and file path in the README, the project notes, `START-HERE.md`, `docs/SYSTEMS.md`, every `docs/systems/*.md` and the playbooks, looked up in `src/`, `tools/` and `.github/`) and by hand for the counts (62 plans, 10 levels, 9 layouts, 24 stamps, the clock order, Lowmere's levels).
