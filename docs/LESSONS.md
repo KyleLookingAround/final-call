@@ -124,5 +124,6 @@ After a PR merges, look back at the session that built it: what it cost, what sl
 
 ### Not sorted yet
 
+- [The docs as an Open Knowledge Format bundle · 3 Oct 2026](lessons/186-docs-as-okf.md)
 - [#180 A Roadmap tab on What's new · 29 Sep 2026](lessons/180-roadmap-tab.md)
 <!-- /joined:lessons -->

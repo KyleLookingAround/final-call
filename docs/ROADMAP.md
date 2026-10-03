@@ -54,6 +54,7 @@ How sessions work, not the game. Each one is small, measured and recorded in the
   - **Project notes split by topic** (a short core, `docs/systems/` one file per system, details in `docs/SYSTEMS.md` and the playbooks). Measure: PRs touching the project notes (32 of the last 100 commits before).
   - **Catch up** (`.github/workflows/catch-up.yml`): merges `main` into open PRs when it moves, comments once on a real conflict. Measure: merges from `main` per PR by hand and by the workflow (target zero or one by hand), and CI runs it starts.
   - **A tidy every 8 new lessons** (a Routine, `docs/briefs/lessons-tidy.md`, id in the `coordinator` playbook). Measure: lesson files before and after each run, and how often it fires.
+- **The docs as an Open Knowledge Format bundle** (`docs/decisions/ADR-2026-10-03-docs-as-okf.md`): frontmatter on every docs file, checked by the `okf` group; `docs/index.md` lists them in a line each; level pacing attested from the bot's receipt. Measure: whether sessions open fewer docs files before finding the one they need (the knowledge graph's measure), and how many systems `node tools/graph.mjs --stale` lists at each release.
 <!-- /joined:runbook -->
 
 ## Next

@@ -148,6 +148,7 @@ The docs are a knowledge bundle in the [Open Knowledge Format](https://github.co
 * [Release 36: the roof terrace and the Roadmap tab · 29 Sep 2026](lessons/182-release-36.md)
 * [Windows and watchers · 29 Sep 2026](lessons/183-windows.md)
 * [Decor and local character · 30 Sep 2026](lessons/184-decor.md)
+* [The docs as an Open Knowledge Format bundle · 3 Oct 2026](lessons/186-docs-as-okf.md)
 * [One session for four PRs: #28 sound, #30 level-up card, #32 knowledge graph, #33 level-up redesign · 27 Sep 2026](lessons/34-one-session-four-prs.md)
 * [The terminal built in parts: #18 halls, #19 hotel, #21 baggage, #22 departures, #23 arrivals, #24 market place, #26 together, #36 briefs · 26–27 Sep 2026](lessons/36-terminal-parts.md)
 * [#43 Description check · 27 Sep 2026](lessons/43-description-check.md)
@@ -304,4 +305,5 @@ The docs are a knowledge bundle in the [Open Knowledge Format](https://github.co
 * [2026-09-29-release-35](roadmap.d/2026-09-29-release-35.md)
 * [2026-09-29-release-36](roadmap.d/2026-09-29-release-36.md)
 * [2026-09-30-release-37](roadmap.d/2026-09-30-release-37.md)
+* [2026-10-03-docs-as-okf](roadmap.d/2026-10-03-docs-as-okf.md)
 <!-- /joined:bundle -->
