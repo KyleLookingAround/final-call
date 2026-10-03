@@ -1,3 +1,7 @@
+---
+type: History
+description: Every released version, newest first, with what changed.
+---
 # Version history
 
 Newest first. The version numbers match the published claude.ai artifact.

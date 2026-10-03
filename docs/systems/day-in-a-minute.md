@@ -1,3 +1,8 @@
+---
+type: System
+description: A time-lapse of yesterday, recorded every five game minutes and played back over the airport in about a minute.
+verified: { by: process:notes-review, at: 2026-09-28T04:45:36Z }
+---
 # Day in a minute
 
 **Day in a minute** (`63-day-in-a-minute.js`; spec `docs/specs/day-in-a-minute.md`): a time-lapse of yesterday, played back over the airport view in about a minute.

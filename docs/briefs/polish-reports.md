@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Polish: Reports and the region at night
 
 Fix batch 8 of the polish audit (#77).

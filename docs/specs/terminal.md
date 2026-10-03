@@ -1,3 +1,9 @@
+---
+type: Spec
+description: "A terminal that works like a real one: check-in, security, passport control, shops, gates and arrivals."
+status: stable
+verified: { by: human:KyleLookingAround, at: 2026-09-26T20:45:34Z }
+---
 # A terminal that works like a real one
 
 Issue: #17 · Status: Built · PRs: #18, #19, #21, #22, #23, #24, #26

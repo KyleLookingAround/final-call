@@ -1,4 +1,7 @@
-Theme: tidy
+---
+type: Lesson
+theme: tidy
+---
 # #169 Tidy the lessons · 29 Sep 2026
 
 - **Numbers:** 15 lessons new since the last tidy (#131, on 28 Sep, about a day earlier; 69 files listed in `.last-tidy`, 84 in the folder). Before: 84 lesson files. After: 50, including this one. 51 removed (2 deleted outright, #44 and #47; 49 folded into merged files) and 16 new merged files, with #34's file rewritten in place, so 50 sources became 17 files. Started 03:56 UTC; the PR opened at about 04:10 (one docs-only PR, no bot run). `get_session` reported no cost yet at that stopping point; the rate limit read `allowed_warning` (seven-day window, not overage). Estimate about $6.

@@ -1,3 +1,6 @@
+---
+type: Lesson
+---
 # #180 A Roadmap tab on What's new · 29 Sep 2026
 
 - **Numbers:** about $1.83 by `get_session` at the PR opening, against a $10 estimate; one full check, one fresh review, five sizes of screenshots. The page grew by 11,358 bytes (787,207 to 798,565), a little over the spec's 6–10 KB estimate, well inside the budget.

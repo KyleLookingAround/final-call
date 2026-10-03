@@ -1,4 +1,7 @@
-Theme: coordinator
+---
+type: Lesson
+theme: coordinator
+---
 # One session for four PRs: #28 sound, #30 level-up card, #32 knowledge graph, #33 level-up redesign · 27 Sep 2026
 
 - **Numbers:** one session built all four from 06:11 to about 07:20: $16.60, 417k of 1M context, and 45.8M tokens read back from the cache (the whole history, re-read turn after turn). #28 opened 06:33, merged 06:44; #30 merged about 06:58; #32 merged 07:07; #33 opened 07:07, merged 07:15. Every PR was green first time, except #33's stray-file push. Its cost and context read 0 until late in the session.

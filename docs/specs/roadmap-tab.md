@@ -1,3 +1,9 @@
+---
+type: Spec
+description: A Roadmap tab on the What's new card that shows players what is coming.
+status: stable
+verified: { by: human:KyleLookingAround, at: 2026-09-28T20:17:58Z }
+---
 # A Roadmap tab on What's new
 
 Issue: #137 · Status: Approved (by the owner, 28 Sep 2026, all three defaults in #143) · PRs: #142

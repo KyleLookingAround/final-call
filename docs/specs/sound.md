@@ -1,3 +1,9 @@
+---
+type: Spec
+description: Announcements, ambience and tones for the airport.
+status: stable
+verified: { by: human:KyleLookingAround, at: 2026-09-27T06:44:31Z }
+---
 # Sound
 
 Issue: #27 · PRs: #28 · Status: Built. Approved (the owner approved the specs for the next bundles in advance on 26 Sep 2026, in the brief for the terminal's finishing session)

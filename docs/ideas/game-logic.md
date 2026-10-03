@@ -1,3 +1,7 @@
+---
+type: Ideas
+description: Ideas, not agreed, to improve the simulation, economy, pacing, demand, passengers, managers and how choices matter.
+---
 # Ideas: the game logic
 
 Ideas to improve the simulation, economy, pacing, demand, passengers, managers and how choices matter. **Not agreed.** The owner picks. Nothing gets built without an issue and, for anything a player would notice, an approved spec. Written 27 Sep 2026 from `main` at version 30 (brief: `docs/briefs/game-logic-ideas.md`).

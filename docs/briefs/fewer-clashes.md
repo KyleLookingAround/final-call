@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Fewer clashes between sessions, and a regular tidy of the lessons
 
 ## Goal and what it may touch

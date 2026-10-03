@@ -1,4 +1,7 @@
-Theme: cost
+---
+type: Lesson
+theme: cost
+---
 # The overnight stall, 27–28 Sep 2026
 
 - **Numbers:** ten default-model sessions started within 45 minutes (21:00 to 22:20 UTC), which spent the account's five-hour usage allowance in about 80 minutes; every one of their turns was killed mid-way, before any could book the `send_later` its brief told it to. The coordinator's own check-in, booked for 22:19 UTC, wasn't delivered until 03:56 UTC. The stall ran from 22:20 to 03:56, about five and a half of the twelve hours the sessions had to work.

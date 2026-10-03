@@ -1,3 +1,8 @@
+---
+type: System
+description: Planters, benches, art and local names in the terminal's halls, worked out from the layout and only drawn.
+verified: { by: process:notes-review, at: 2026-09-30T00:42:06Z }
+---
 # Decor and local names
 
 **Decor and local character** (`69-decor.js`; spec `docs/specs/terminal-place.md`, step 4 of its order of work; check group `decor`). Planters, benches, art and a grand departures board in the terminal's halls, and shops, a café and murals named after the region's places. Drawing only: the player places nothing, nothing is saved, the rating never sees it, it draws no `rnd()`, and nothing reachable from `update()` calls it, so `PLAY` and `STATE` are unchanged.

@@ -1,3 +1,8 @@
+---
+type: System
+description: The card that opens on each level-up and lists what it unlocks.
+verified: { by: process:notes-review, at: 2026-09-29T00:51:14Z }
+---
 # Level-up card
 
 **Level-up card** (`49-levelup.js`, spec `docs/specs/level-up.md`). `checkLevel` hands each level-up to `lvlUp`, which keeps `R.lvlCard` ({from, to}); `lvlTick` opens it from the frame loop once no other card is open, so levels reached together share one. `lvlUnlocks(from,to)` lists what's new from the data the game gates on: `STAND[i].lvl` and `PIER.lvl`, upgrade caps (`capAt`), `TECH` tiers (a plan's contents show only as that plan's line until it's approved), `tabOpen`'s level 1, `RIV_LV`, level 4's consultants and `RIV_BUY_LV`. `renderLvl` lists at most 5 plans, with "and N more in the Masterplan" past that, and one chip a tab under "Upgrades can go higher" (its count) rather than one a upgrade, so a level with a dozen upgrades still fits a phone. Links use `goTo`, `setTab` and `openPlan`, and close the card. Opening pauses (`R.lvlPrev`), closing puts the speed back. Off in `R.sim` and with `lvlCard` off: then the level-up toast, as before. `lvlUp` still queues a card reached during the guided start (never the toast); `lvlTick` holds it shut until the tour is done, and `tourNext` (`36-guided-start.js`), on the step that ends or skips the tour, calls `lvlTick` itself so a newcomer's first level-up opens the moment the tour lets go, rather than waiting for the next UI tick. The Ko-fi link (`docs/specs/kofi-link.md`) sits after the unlocks, inside the scrolling list, so it never changes the pausing, speed restore or the fixed Masterplan/Play footer.

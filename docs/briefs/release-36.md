@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Release version 36, the roof terrace and the Roadmap tab
 
 Cut release 36 with the `release` playbook, in one PR on `feature/release-36`. The roof terrace (#181, #133 step 4) and the Roadmap tab on What's new (#180, #137) have merged. The owner parked the public launch on 29 Sep, so the launch week's one-release-a-day rule doesn't hold.

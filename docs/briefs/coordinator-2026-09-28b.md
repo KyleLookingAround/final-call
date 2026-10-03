@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Coordinator, 28 Sep 2026 from 10:15 UTC
 
 A handover from `session_01NXW14vbEUuuKJ7Afzmici2` (420k of context and $19 by 10:10, past its 330k line). Follow the `coordinator` playbook and `docs/briefs/coordinator-2026-09-28.md` (on `main`), with the changes below. Where they differ, this brief wins.

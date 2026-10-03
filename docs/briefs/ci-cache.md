@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Cache Playwright's Chromium in CI (the first half of runbook experiment [B])
 
 The coordinator's brief for a CI speed-up the owner chose on 27 Sep 2026, brought forward because about ten sessions are pushing at once. It makes CI faster without changing what it checks. No game code.

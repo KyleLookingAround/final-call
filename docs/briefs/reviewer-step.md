@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: A fresh review before each PR opens (runbook experiment [E])
 
 The coordinator's brief for a runbook experiment the owner chose on 27 Sep 2026. Before a session opens a PR, a helper that hasn't seen the work reviews it. Sessions already have the tool for starting helper agents (`Agent`), and the `code-review` skill. No game code.

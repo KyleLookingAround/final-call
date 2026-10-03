@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Watchdog (retired)
 
 Retired: this organisation can't attach connectors to a Routine made from a session, so a Routine that started a fresh session each hour could never have reached GitHub or the session tools to re-wake anything. It's replaced by an hourly heartbeat bound to the coordinator's own session (`coordinator` playbook, §11), which needs no connectors of its own. This brief is kept for the record and is no longer anyone's prompt.

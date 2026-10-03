@@ -1,3 +1,8 @@
+---
+type: System
+description: The six-step tour for new games, which can be skipped or replayed from Help.
+verified: { by: process:notes-review, at: 2026-09-29T00:51:14Z }
+---
 # Guided start
 
 **Guided start** (`36-guided-start.js`). A 6-step tour (`TOUR`) runs on new games only and can be skipped or replayed from Help. It turns itself off on any save with progress.

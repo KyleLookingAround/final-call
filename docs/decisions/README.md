@@ -1,3 +1,7 @@
+---
+type: Guide
+description: "The decision records: each one's context, the options weighed, the decision and its consequences, with the index of them all."
+---
 # Decision records
 
 Short records of decisions that shape the code, so later changes know what they must keep and why.
@@ -22,7 +26,7 @@ The list is joined from the files here by `node tools/join.mjs` (`npm run build`
 | [ADR-2026-09-26-terminal-halls-and-parts](ADR-2026-09-26-terminal-halls-and-parts.md) | The terminal is halls, and its parts plug in |
 | [ADR-2026-09-27-ci-minutes](ADR-2026-09-27-ci-minutes.md) | A public repo, and CI that cancels superseded runs (superseded) |
 | [ADR-2026-09-27-ci-only-when-needed](ADR-2026-09-27-ci-only-when-needed.md) | Run each workflow only when its result can change |
-| [ADR-2026-09-27-fewer-clashes](ADR-2026-09-27-fewer-clashes.md) | One file per entry, lists joined from them, and PRs kept up to date with main (an experiment) |
+| [ADR-2026-09-27-fewer-clashes](ADR-2026-09-27-fewer-clashes.md) | One file per entry, lists joined from them, and PRs kept up to date with main (superseded in part) |
 | [ADR-2026-09-27-knowledge-graph](ADR-2026-09-27-knowledge-graph.md) | A map of the code and docs, generated from the source (an experiment) |
 | [ADR-2026-09-27-rating-last-day](ADR-2026-09-27-rating-last-day.md) | The rating reflects the last day, and the level baselines move with it |
 | [ADR-2026-09-27-reviewer-step](ADR-2026-09-27-reviewer-step.md) | A fresh review before each PR opens (an experiment) |
@@ -30,4 +34,5 @@ The list is joined from the files here by `node tools/join.mjs` (`npm run build`
 | [ADR-2026-09-27-session-briefs](ADR-2026-09-27-session-briefs.md) | Sessions start from a checked brief, ask the owner through issues, keep to a cost budget, and parts are tested together (an experiment) |
 | [ADR-2026-09-28-early-first-level](ADR-2026-09-28-early-first-level.md) | The first level-up comes in the first morning, and level 1's baseline moves with it |
 | [ADR-2026-09-28-page-size-budget](ADR-2026-09-28-page-size-budget.md) | A byte budget on the built page |
+| [ADR-2026-10-03-docs-as-okf](ADR-2026-10-03-docs-as-okf.md) | The docs are a knowledge bundle in the Open Knowledge Format |
 <!-- /joined:decisions -->

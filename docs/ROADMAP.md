@@ -1,6 +1,10 @@
+---
+type: Roadmap
+description: What's being worked on, what's next, the runbook, what's done, and ideas not yet agreed.
+---
 # Roadmap
 
-What's being worked on, what's next, and ideas not yet agreed. Now, Next, the runbook and Done are joined from `docs/roadmap.d/`, one file per item: add or move an item by adding or editing its own file (first line `Section: now`, `next`, `runbook` or `done`), never these lists. The owner's order and the ideas are edited here, by hand. Anything here gets an issue before work starts; features also get a spec (`docs/specs/TEMPLATE.md`). The owner decides what moves up.
+What's being worked on, what's next, and ideas not yet agreed. Now, Next, the runbook and Done are joined from `docs/roadmap.d/`, one file per item: add or move an item by adding or editing its own file (`section: now`, `next`, `runbook` or `done` in its frontmatter), never these lists. The owner's order and the ideas are edited here, by hand. Anything here gets an issue before work starts; features also get a spec (`docs/specs/TEMPLATE.md`). The owner decides what moves up.
 
 ## Now
 

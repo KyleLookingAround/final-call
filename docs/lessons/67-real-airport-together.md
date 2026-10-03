@@ -1,4 +1,7 @@
-Theme: drawing
+---
+type: Lesson
+theme: drawing
+---
 # Version 31: the real airport brought together · 27 Sep 2026
 
 - **Numbers:** session `session_01TkZWm4yFBrrCU3XqvBNYHK`, estimate $10: cost not yet reported by `get_session` when the PR opened, 74k of 1M context. Started 14:08, a few minutes after weather (#61) merged. Rate limit `allowed` throughout.

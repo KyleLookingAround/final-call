@@ -1,4 +1,7 @@
-Theme: docs
+---
+type: Lesson
+theme: docs
+---
 # Docs clean-ups: #20 slimmer notes, #39 saves on the device, #97 rebuild figures, #141 roadmap tidy · 26–28 Sep 2026
 
 - **Numbers:** #20 written by the coordinating session, one push after opening. #39 done by the terminal's finishing session between features, opened 11:25, merged 11:32, bot `STATE` identical to `main` on seeds 1–3. #97 estimate $3, one commit, docs only. #141 estimate $2, $3.61 when the PR opened (past the estimate, under twice it), one commit and one hand merge (#134); `npm run check` 346/346 locally before pushing.

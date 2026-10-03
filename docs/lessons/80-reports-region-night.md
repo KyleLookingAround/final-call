@@ -1,4 +1,7 @@
-Theme: checks
+---
+type: Lesson
+theme: checks
+---
 # Polish: Reports and the region at night · 27 Sep 2026
 
 - **Numbers:** session `session_01UoKaSoLbGh82GdZThynNpy`, estimate $7: $3.19 and 185k of 1M context at the CI check-in, under the estimate. Started 17:20 UTC, PR #80 opened 17:32; one push after opening (this merge of `main`, with this entry). Checks, Balance and Description green on the first head; the only red run was the Description check on the auto-appended footer, green again once it was stripped.

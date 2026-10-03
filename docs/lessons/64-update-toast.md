@@ -1,4 +1,7 @@
-Theme: checks
+---
+type: Lesson
+theme: checks
+---
 # Tell players when a new version is ready · 27 Sep 2026
 
 - **Numbers:** session `session_01EdqgFSmkJTE7ekGc9YfeQz`, estimate $6: $13.55 and 441k of 1M context by the merge, over twice the estimate. Started 13:22, PR opened 13:47 (the feature itself: spec, code and checks, all green first time bar the `update` group's own local debugging); merged 15:44, so about two hours end to end. Started from a checked brief with no questions for the owner.

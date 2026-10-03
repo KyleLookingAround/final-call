@@ -1,4 +1,7 @@
-Theme: specs
+---
+type: Lesson
+theme: specs
+---
 # #142 A Roadmap tab on What's new: the spec · 28 Sep 2026
 
 - **Numbers:** session `session_01WDcVbbYvBrM1aeue8tnxfE`, estimate $6: $3.22 and 236k of 1M context at approval. Started 17:05, PR opened 17:12, the owner approved all three defaults through the coordinator's conversation at about 19:30 (under 2½ hours after the question opened, so no default was taken). Five catch-up merges of `main` while it waited (other sessions' PRs landing), each re-dispatched and green.

@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Two floors in Classic (#133, step 3)
 
 The owner approved the refreshed `docs/specs/terminal-place.md` on 28 Sep (#139). The checks refresh (#144) and refactor 7 (#145 and #156) have merged. This is the spec's order of work, step 3. It is the last feature before the release: the owner wants two floors in, then a refactor, fix, balance and polish sweep, then a public release. So it must ship polished, not as a part waiting for others.

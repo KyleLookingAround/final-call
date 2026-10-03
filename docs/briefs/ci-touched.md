@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Faster CI, second half: only the touched check groups on drafts
 
 Runbook experiment [B]'s second half (`docs/ROADMAP.md`). The first half (cached Chromium, #46) merged; its look back in `docs/LESSONS.md` found the cache alone saves little.

@@ -1,5 +1,7 @@
-Theme: checks
-
+---
+type: Lesson
+theme: checks
+---
 # Decor and local character · 30 Sep 2026
 
 - **Numbers:**

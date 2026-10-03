@@ -1,4 +1,7 @@
-Theme: coordinator
+---
+type: Lesson
+theme: coordinator
+---
 # Messages that say "the owner said": #118, #122, #126, #141 · 28 Sep 2026
 
 Four sessions received an automated message (a scheduled trigger or notification) relaying an owner decision they couldn't verify.

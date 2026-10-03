@@ -1,3 +1,8 @@
+---
+type: System
+description: The terminal's halls in the order real airports use them, each layout's own plan, and how passengers move through it.
+verified: { by: process:notes-review, at: 2026-09-30T00:42:06Z }
+---
 # The terminal
 
 **The terminal** (`42-terminal.js` to `47-hotel.js`, spec `docs/specs/terminal.md`). Its halls are rooms like the airside ones, in the order real airports use them. Each layout lists its own terminal, `L.term` (`{halls, doors}`), merged into its rooms and doorways by `applyLayout`. Classic's (`classicTerm()`) stands on two floors; every other layout has a copy of Classic's plan before it had two (`flatTerm()`), until the floor plans part of `docs/specs/terminal-place.md` gives each its own.

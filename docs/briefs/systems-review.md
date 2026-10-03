@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Systems review, for code and game design
 
 ## Goal and what it may touch

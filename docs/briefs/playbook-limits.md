@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Playbooks: the usage limit, the watchdog, and fewer wasted rounds
 
 What the night of 27–28 Sep 2026 taught, written into the playbooks. Docs and one workflow; no game code.

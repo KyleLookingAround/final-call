@@ -1,3 +1,9 @@
+---
+type: Spec
+description: A time-lapse of yesterday, played back over the airport in about a minute.
+status: stable
+verified: { by: human:KyleLookingAround, at: 2026-09-28T04:45:36Z }
+---
 # Day in a minute
 
 Issue: none (the owner's idea board, `docs/ideas/board-2026-09.md`) · Status: Approved (rated Love it on the owner's board, third in their order; the brief of 27 Sep 2026 stands in for approval) · PRs: (added as they open)

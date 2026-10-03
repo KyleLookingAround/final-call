@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Systems refactor 3: one effects ledger
 
 Step 3 of Part 3 of the approved systems review (`docs/specs/systems-review.md`).

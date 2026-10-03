@@ -33,7 +33,7 @@ Make the change, rebuild, and run the same three seeds into `build/after-$s.log`
 - Put before and after side by side per level: each seed, and the mean. A level the run never reached reads `off` once the run passes its upper bound (the 1,200-hour run passes level 9's 1,110); "not run long enough" means a shorter run.
 - Against `tools/baseline.json`: `ok` is inside the range, `near` is within 15% of it, `off` is beyond. Aim for `ok`; `near` needs a reason; `off` needs the owner's agreement.
 - `ERR` must be empty on every seed.
-- Report the table in the PR description.
+- Report the table in the PR description. For the final code, quote the `ATTESTED` lines of `node tools/attest-pacing.mjs 1 2 3` (or the Balance workflow's summary, which attests each keep-Classic run) rather than a table typed from the logs: level pacing has one sanctioned computation (`docs/computations/bot-pacing.md`), and a `REFUSED` line says why a run isn't it (bot options, another build, a short run). Rebuild before attesting receipts made elsewhere.
 
 ## 4. When the owner wants the pacing to change
 

@@ -1,3 +1,8 @@
+---
+type: Decision
+description: The roof is a floor the player picks with the Roof button, not something zoom fades in and out.
+status: stable
+---
 # ADR-2026-09-27: The roof is a floor the player picks, not a zoom
 
 ## Status

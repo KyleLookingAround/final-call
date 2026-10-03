@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Systems refactor 5: save migration as a table
 
 Step 5 of Part 3 of the approved systems review (`docs/specs/systems-review.md`).

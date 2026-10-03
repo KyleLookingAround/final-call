@@ -1,4 +1,7 @@
-Theme: ui
+---
+type: Lesson
+theme: ui
+---
 # #51 Clear roofs at the starting zoom · 27 Sep 2026
 
 - **Numbers:** session `session_01DNpd2NAxxaMbr4nBX4SbvS`, estimate $3: `usage.cost_usd` still missing from `get_session` at the first stopping point (the pattern the game logic ideas session hit already), rate limit status stayed `allowed` throughout. Created 13:18, code plus checks plus screenshots plus the preview image done by 13:26.

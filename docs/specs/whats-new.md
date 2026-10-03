@@ -1,3 +1,9 @@
+---
+type: Spec
+description: A What's new card that shows each version's changes once, and on demand.
+status: stable
+verified: { by: human:KyleLookingAround, at: 2026-09-26T17:30:20Z }
+---
 # What's new
 
 Issue: #8, #128 · Status: Built (#8); Approved (#128, by the owner on 28 Sep) · PRs: #9, #129

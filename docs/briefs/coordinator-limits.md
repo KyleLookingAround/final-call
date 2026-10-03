@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Coordinator playbook, limits by plan and helper agents
 
 ## Goal and what it may touch

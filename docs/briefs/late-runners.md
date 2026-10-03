@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Late runners, and a passenger's story
 
 The owner starts sharing the game on 28 Sep and asked overnight for "some cool updates when I wake up", and not to wait on them. This idea is from the owner's ranked idea board (`docs/ideas/board-2026-09.md`, "The owner's order"), where they rated it Love it (first in their order). Their rating, and tonight's instruction, stand in for the spec's approval: write the one-page spec from `docs/specs/TEMPLATE.md` first as `docs/specs/late-runners.md`, commit it, then build it in the same PR.

@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Polish: phone chrome and touch targets
 
 Fix batches 1–4 of the polish audit (#77) in one PR, because all four edit the same shared button and chip rules in `src/shell.html`.

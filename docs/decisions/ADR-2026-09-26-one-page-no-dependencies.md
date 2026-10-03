@@ -1,3 +1,8 @@
+---
+type: Decision
+description: The game is one self-contained HTML page with no runtime dependencies; development tools never ship.
+status: stable
+---
 # ADR-2026-09-26: The game ships as one HTML page with no runtime dependencies
 
 ## Status

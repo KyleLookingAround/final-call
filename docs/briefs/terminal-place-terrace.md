@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: The roof terrace floor (a part of "The terminal as a place", #133 step 4)
 
 The coordinator's brief for step 5 of `docs/specs/terminal-place.md`'s order of work (spec approved on #139, 28 Sep 2026). Two floors in Classic (#162) and refactor 7 (#145, #156) have merged. The owner parked the public launch on 29 Sep, so the launch week's 48-hour hold doesn't apply, and moved the terrace ahead of windows and decor: "the owner cares most about it".

@@ -1,3 +1,9 @@
+---
+type: Decision
+description: A map of the code and docs is built from the source on every query, and the docs keep only the why as short link lines.
+status: stable
+tags: [experiment]
+---
 # ADR-2026-09-27: A map of the code and docs, generated from the source
 
 ## Status

@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Coordinator, 29 Sep 2026 from about 01:00 UTC, to the public release
 
 A handover from `session_01JtaiFWY7povechZrZ8WqD8` (465k of context by 00:30, past the 330k line; this is the state at 03:00 UTC on 29 Sep). Follow the `coordinator` playbook, with the changes below. Where they differ, this brief wins.

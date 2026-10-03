@@ -1,3 +1,9 @@
+---
+type: Spec
+description: The first level-up comes in the first morning, so newcomers get a real moment early.
+status: stable
+verified: { by: human:KyleLookingAround, at: 2026-09-28T09:21:11Z }
+---
 # The first level-up in the first morning
 
 Issue: #105 · Status: Approved (the owner's decision of 28 Sep 2026 in the brief `docs/briefs/early-first-level.md` stands in for a spec review) · PRs: #117

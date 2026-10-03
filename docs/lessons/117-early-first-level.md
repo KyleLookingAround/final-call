@@ -1,4 +1,7 @@
-Theme: balance
+---
+type: Lesson
+theme: balance
+---
 # The first level-up in the first morning (#117) · 28 Sep 2026
 
 - **Numbers:** estimate $12; about $8.40 at the PR's opening, with the six baseline runs, three rebuild runs, a three-seed experiment and a fresh review inside that. Started 04:46 UTC, PR open as a draft at 05:07 and ready at 05:08, well inside the 06:30 cut-off.

@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Launch-day triage
 
 This brief is the coordinator's first message when it starts launch-day triage by hand (`coordinator` playbook, §12): a Routine can't do this, since this organisation can't attach connectors to a Routine made from a session, so it can't reach GitHub or the session tools. During launch week the coordinator starts a fresh session with this brief every two hours, on the cheaper model, until launch week is over.

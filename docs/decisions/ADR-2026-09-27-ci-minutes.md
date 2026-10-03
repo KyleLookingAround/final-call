@@ -1,3 +1,8 @@
+---
+type: Decision
+description: The repo went public, and Checks and Balance cancel a run when a newer push to the same PR arrives.
+status: deprecated
+---
 # ADR-2026-09-27: A public repo, and CI that cancels superseded runs
 
 ## Status

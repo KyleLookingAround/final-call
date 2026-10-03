@@ -1,3 +1,8 @@
+---
+type: System
+description: "Weather cells crossing the region, and the flags that say what's on now: weather, terminal events, fuel prices and disruptions."
+verified: { by: process:notes-review, at: 2026-09-29T05:24:08Z }
+---
 # Weather and events
 
 **Weather and events** (`28-region-weather.js`, `10-events-toasts.js`; drawn in `54-weather.js`, check `weather-fx`). The weather cells that cross the region, and the flags in `R.fx` that say what's on now: the weather (fog, snow, rain, storm), the terminal's events (rush, sick, strike), fuel prices (hedge, fuelUp, fuelDown) and the region's disruptions (leaves, roadworks, and per line a fault and its replacement buses).

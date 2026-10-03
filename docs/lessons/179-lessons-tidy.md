@@ -1,4 +1,7 @@
-Theme: tidy
+---
+type: Lesson
+theme: tidy
+---
 # #179 Tidy the lessons · 29 Sep 2026
 
 - **Numbers:** 11 lessons new since the last tidy (#169, earlier the same day; the last one ran 03:56 UTC, this one started 18:49, so about 15 hours). Before: 61 lesson files (50 listed in `.last-tidy`). After: 54, including this one. 10 removed: 2 deleted outright (`159-release-p2-moments`, `167-balance-compare`) and 8 merged, #126 and #175 into `175-releases.md` and #164, #165, #166, #170, #171 and #172 into `172-release-audit-batches.md`, so 8 sources became 2 files. Started 18:49 UTC; the PR opened at about 18:55 (docs only, one small check added, no bot run). `get_session` reported no cost yet at that stopping point; the rate limit read `allowed`. Estimate about $6.

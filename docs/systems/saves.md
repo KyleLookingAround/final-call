@@ -1,3 +1,8 @@
+---
+type: System
+description: Saves on the device, save codes between devices, loading older saves, and never losing one.
+verified: { by: process:notes-review, at: 2026-09-29T03:59:34Z }
+---
 # Saves
 
 **Saves** stay on the device (`localStorage`). The game is published only on GitHub Pages; Office › Settings › Save copies and pastes a save code to move an airport between devices. Saves across devices through the old hosting page were removed; `22-save.js` clears their old keys once on load. A quiet Ko-fi link sits at the foot of Settings, under Your save (`docs/specs/kofi-link.md`).

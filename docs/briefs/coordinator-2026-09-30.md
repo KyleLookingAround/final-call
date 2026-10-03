@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Coordinator, from decor through the floor plans and bringing the terminal together
 
 A handover from `session_01GnLSn9mHsUYxPjZiqbmLpC`, the coordinator that ran from 17:46 on 29 Sep to about 00:00 on 30 Sep. It handed over at 425k of context and about $11. This is the state at 01:20 UTC on 30 Sep. Follow the `coordinator` playbook, with the changes below; where they differ, this brief wins.

@@ -1,4 +1,7 @@
-Theme: releases
+---
+type: Lesson
+theme: releases
+---
 # Cutting releases: version 32, #118 release 33, #126 release 34, #175 release 35 · 27–29 Sep 2026
 
 - **Numbers:** version 32: estimate $4, about $5.25 at the first stopping point, entirely from the fixture bug below; docs and What's new written within six minutes. #118: estimate $6 for two small releases, about $2 at PR open; claimed the version at 04:00 UTC, opened the PR at 05:19, just past the 05:00 target. #126 (the same session): $7.79 when #118 merged, $13.37 by the time #126 merged and its Pages publish was confirmed (past twice the estimate), almost all of it the multi-hour rate-limit stall and CI status polling while repo-wide contention made each check run 10+ minutes.

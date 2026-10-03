@@ -9,10 +9,12 @@
 // The same seed and the same code always give the same run, so a difference between two
 // versions is the code's doing. Compare a few seeds before calling a balance change good.
 // Prints one JSON line per 6 game hours, then LVLAT {level: hour reached}, STATE <fingerprint>, PLAY <fingerprint without settings>, ERR [...], and a
-// table against tools/baseline.json. Writes build/bot-<seed>.json (-layouts, -recs and -pol added for those options), and
+// table against tools/baseline.json. Writes build/bot-<seed>.json (-layouts, -recs and -pol added for those options): the run's receipt, with
+// the commit, a hash of the build/test.html it played and of the baseline it was judged on, so tools/attest-pacing.mjs can check it, and
 // saves reached at each level to build/saves/L<n>.json for checks and screenshots (not with any of them).
 import {chromium} from 'playwright';
 import {appendFileSync,mkdirSync,readFileSync,writeFileSync} from 'node:fs';
+import {execSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {dirname,join} from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
@@ -35,6 +37,8 @@ const ctx=await b.newContext({viewport:{width:1200,height:800}});
 await ctx.addInitScript(([s,rd])=>{window.__seed=s;window.requestAnimationFrame=()=>0;if(rd!=null)window.__rateDay=rd},[seed,rateDay]);
 const m=await ctx.newPage();
 const errs=[];m.on('pageerror',e=>errs.push(e.message+' '+(e.stack||'').split('\n').slice(1,3).join('|')));
+// the page played, hashed before it loads, for the receipt
+const hash=p=>createHash('sha256').update(readFileSync(join(root,p))).digest('hex').slice(0,16),buildHash=hash('build/test.html');
 await m.goto(pathToFileURL(join(root,'build/test.html')).href);await m.waitForTimeout(500);
 await m.addScriptTag({path:join(root,'tools/bot.js')});
 await m.evaluate(([o,p])=>{__sim.R.sim=true;__sim.R.speed=0;if(p)__sim.G.pol=Object.assign(__sim.G.pol||{},p);window.B=BOT(o)},[opts,pols]);
@@ -83,7 +87,9 @@ const table=[`Bot, seed ${seed}, ${hours} game hours${opts.layouts?', rebuilding
   ...rows.map(r=>`| ${r.lv} | ${r.h??'—'} | ${r.lo}–${r.hi} | ${r.status}${r.dev?` (${r.dev}% outside)`:''} |`)].join('\n');
 console.log('\n'+table);
 mkdirSync(join(root,'build'),{recursive:true});
-writeFileSync(join(root,`build/bot-${tag}.json`),JSON.stringify({seed,hours,lvlAt:fin.lvlAt,state,errs,rows},null,1));
+let commit=null;try{commit=execSync('git rev-parse HEAD',{cwd:root,stdio:['ignore','pipe','ignore']}).toString().trim()}catch(e){}
+writeFileSync(join(root,`build/bot-${tag}.json`),JSON.stringify({seed,hours,lvlAt:fin.lvlAt,state,play,errs,rows,
+  commit,build:buildHash,baseline:hash('tools/baseline.json'),opts,rateDay,pols},null,1));
 if(process.env.GITHUB_STEP_SUMMARY)appendFileSync(process.env.GITHUB_STEP_SUMMARY,table+'\n');
 for(const r of rows)if(r.status==='off'&&process.env.GITHUB_ACTIONS)console.log(`::warning::Level ${r.lv} reached at hour ${r.h??'never'}, baseline ${r.lo}–${r.hi} (seed ${seed}${opts.layouts?', rebuilding':''})`);
 process.exit(errs.length?1:0);

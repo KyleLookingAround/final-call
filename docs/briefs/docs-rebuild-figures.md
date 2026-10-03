@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Rebuild figures and the moving walkways follow-up
 
 A small docs session, from #89's look back (`docs/lessons/89-pax-movement.md`).

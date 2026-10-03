@@ -56,6 +56,10 @@ jobs:
         if: steps.pw-cache.outputs.cache-hit == 'true'
       # the table lands in the run's summary, and a level far off its baseline becomes a warning
       - run: npm run bot -- 1200 '{"layouts":${{ matrix.layouts }}}' --seed ${{ matrix.seed }}
+      # a keep-Classic run is level pacing's sanctioned computation (docs/computations/bot-pacing.md): attest its receipt and
+      # put the ATTESTED or REFUSED line in the summary, for the PR to quote
+      - if: ${{ !matrix.layouts }}
+        run: node tools/attest-pacing.mjs ${{ matrix.seed }}
 
   # the branch's PLAY and STATE beside its merge base's, on seeds 1-3 keeping Classic; a change meant to leave play as it
   # is (a refactor, a UI change) must match on every seed, and a balance change shows where it moved. Never fails the PR.

@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Release version 32
 
 ## Goal and what it may touch

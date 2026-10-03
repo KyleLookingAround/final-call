@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Roadmap tidy, move what has shipped out of Now
 
 ## Goal and what it may touch

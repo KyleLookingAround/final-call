@@ -1,3 +1,8 @@
+---
+type: Decision
+description: The first level-up comes in the first morning, and level 1's baseline moves to 3-6 hours with it.
+status: stable
+---
 # ADR-2026-09-28: The first level-up comes in the first morning, and level 1's baseline moves with it
 
 ## Status

@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Polish: less noise
 
 Fix batch 7 of the polish audit (#77).

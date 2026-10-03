@@ -1,3 +1,9 @@
+---
+type: Decision
+description: A layout is a table of stands, units and speed-ups over one stand model, with effects from what the game already simulates.
+status: stable
+tags: [superseded-in-part]
+---
 # ADR-2026-09-26: Airport layouts are data over one stand model
 
 ## Status

@@ -1,4 +1,7 @@
-Theme: checks
+---
+type: Lesson
+theme: checks
+---
 # Release fix batches: #149 F2 goals, #150 P1 first level-up, #158 R1 saves, #159 P2 moments · 28 Sep 2026
 
 Batches from the release audit, each in its own files ("no other game file: other batches own them").

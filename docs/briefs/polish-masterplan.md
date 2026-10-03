@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Polish: the Masterplan on a small phone
 
 Fix batch 5 of the polish audit (#77).

@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Tidy the lessons
 
 This brief is the coordinator's first message when it starts the tidy (`coordinator` playbook, §10): a Routine can't do this, since this organisation can't attach connectors to a Routine made from a session, so it can't reach GitHub or the repo. The coordinator starts a session with this brief when a look back leaves 8 or more lessons new since the last tidy (the `steward` playbook); nobody runs it on a schedule.
@@ -7,10 +10,10 @@ This brief is the coordinator's first message when it starts the tidy (`coordina
 - Read every lesson in `docs/lessons/` and open one PR that leaves fewer, clearer lessons, grouped by theme, with anything learnt three times turned into a change. The repo is `kylelookingaround/final-call`: if it isn't checked out, clone it. Branch `feature/lessons-tidy-<date>` from `main`, one PR. If a `feature/lessons-tidy-*` PR is already open, stop: the last tidy hasn't finished.
 - In that PR:
   - **Merge** lessons that say the same thing into one file, keeping each source's PR number in its title or Numbers line; name the merged file after the newest source PR.
-  - **Group** every remaining lesson under a theme: a first line `Theme: <theme>` in its file. Use short lower-case themes, reusing the ones already there before adding one (for example merge-chasing, checks, cost, tools, saves, specs, drawing, balance, parts). `docs/LESSONS.md` groups its index by them.
+  - **Group** every remaining lesson under a theme: `theme: <theme>` in its file's frontmatter, under `type: Lesson`. Use short lower-case themes, reusing the ones already there before adding one (for example merge-chasing, checks, cost, tools, saves, specs, drawing, balance, parts). `docs/LESSONS.md` groups its index by them.
   - **Delete** lessons that are out of date (the tool, file or rule they describe is gone) or already written into a playbook, the project notes or a check. Name in the PR description, for each, where it now lives or why it's gone.
   - **Act** on a lesson seen three or more times without a →: propose the playbook or check change in this PR (and mark the lesson →), or, if it's a rule change the owner should decide, open an issue labelled `needs-owner` with the default you'd take, and link it.
-  - **Record the tidy**: rewrite `docs/lessons/.last-tidy` to list every lesson file left, one per line, sorted; and add this tidy's own look back as `docs/lessons/<pr>-lessons-tidy.md` (Theme: tidy) with the lesson files before and after, how many were new, and how long since the last tidy. List it in `.last-tidy` too.
+  - **Record the tidy**: rewrite `docs/lessons/.last-tidy` to list every lesson file left, one per line, sorted; and add this tidy's own look back as `docs/lessons/<pr>-lessons-tidy.md` (`theme: tidy`) with the lesson files before and after, how many were new, and how long since the last tidy. List it in `.last-tidy` too.
 - Files it may touch: `docs/lessons/`, `.claude/skills/` (the playbook changes it proposes), `tools/checks/` (a check it proposes), and the roadmap item files in `docs/roadmap.d/` it affects. Nothing in `src/`, and no other file. `npm run build` rejoins `docs/LESSONS.md`; never edit between its markers by hand.
 
 ## Read first

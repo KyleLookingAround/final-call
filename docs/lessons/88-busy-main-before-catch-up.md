@@ -1,4 +1,7 @@
-Theme: merge-chasing
+---
+type: Lesson
+theme: merge-chasing
+---
 # A busy `main` before one file per entry: #54, #83, #88, and the merges other PRs needed · 27 Sep 2026
 
 On 27 Sep about a dozen sessions all wrote the top of `docs/LESSONS.md` and the one-line check list in `docs/SYSTEMS.md`, so nearly every push conflicted, and a conflicted PR got no CI at all. #94 fixed it (one file per entry, the Catch up workflow, `docs/decisions/ADR-2026-09-27-fewer-clashes.md`). This is the record of what it cost.

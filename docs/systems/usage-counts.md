@@ -1,3 +1,8 @@
+---
+type: System
+description: A cookie-free page counter, so the owner can see whether anyone came from the launch posts.
+verified: { by: process:notes-review, at: 2026-09-29T06:17:07Z }
+---
 # Usage counts
 
 **Usage counts** (`65-usage-counts.js`). A cookie-free page counter, GoatCounter, so the owner can see whether anyone

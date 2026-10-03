@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Measure a rating that reflects the last day, and spec a network you have to keep
 
 Answers #96. The owner asked on 27 Sep evening for overnight balancing before they start sharing the game on 28 Sep. The rating sits at 100 from about day 2, so it tells the player nothing (polish audit row 4). Most departures go to one city (row 5). Both fixes change pacing, and new baselines are the owner's to set. So this session measures, and puts the numbers and a spec in front of the owner in the morning. Nothing changes for players until they choose.

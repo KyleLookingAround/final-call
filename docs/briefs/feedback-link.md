@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: A feedback link in Help
 
 The coordinator's brief for "Feedback from players" under "Next" in `docs/ROADMAP.md`: a "Send feedback" link in Help that opens a prefilled GitHub issue. No tracking. A small change the owner allowed on 27 Sep 2026.

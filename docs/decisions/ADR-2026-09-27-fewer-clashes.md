@@ -1,8 +1,14 @@
+---
+type: Decision
+description: Lists every session adds to are one file per entry, joined into the lists that show them, and open PRs are kept up to date with main.
+status: stable
+tags: [superseded-in-part, experiment]
+---
 # ADR-2026-09-27: One file per entry, lists joined from them, and PRs kept up to date with main
 
 ## Status
 
-Accepted as an experiment (runbook, `docs/briefs/fewer-clashes.md`). Measured by the merges from `main` each PR needs; kept only if it clearly helps.
+Superseded in part by [ADR-2026-10-03-docs-as-okf](ADR-2026-10-03-docs-as-okf.md): a roadmap item's section and a lesson's theme are in its frontmatter now, not a first line. Accepted as an experiment (runbook, `docs/briefs/fewer-clashes.md`). Measured by the merges from `main` each PR needs; kept only if it clearly helps.
 
 Supersedes in part [ADR-2026-09-27-knowledge-graph](ADR-2026-09-27-knowledge-graph.md) (systems are now files in `docs/systems/`, not sections of `docs/SYSTEMS.md`) and [ADR-2026-09-27-session-briefs](ADR-2026-09-27-session-briefs.md) (a session past twice its estimate says why in its lesson file in `docs/lessons/`, not in `docs/LESSONS.md`).
 

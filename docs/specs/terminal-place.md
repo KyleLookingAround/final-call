@@ -1,3 +1,9 @@
+---
+type: Spec
+description: "The terminal as a place: two floors, a roof terrace, windows on the apron, decor and local character."
+status: stable
+verified: { by: human:KyleLookingAround, at: 2026-09-27T13:39:54Z }
+---
 # The terminal as a place
 
 Issue: #48, refreshed for #133 · Status: Approved (the owner re-approved the refresh on 28 Sep 2026, #139: all five choices at their defaults, and every suggestion but one; spotters no longer crowd for rare arrivals) · PRs: #49 (the first spec), #113 (groundwork), this refresh; the rest added as they open

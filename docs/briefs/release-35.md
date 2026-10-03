@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Release version 35, the public release
 
 The owner, 28 Sep: finish two floors, then the release sweeps, "basically the game actual release at that point. Make it very polished… I'll wait for you to finish before I start sharing with the wider public. Current feedback is that it 'really scratched a brain itch' so that's the aim." Everything for it has merged: two floors in Classic (#162), the release audit's batches (#157–#160, #164–#166, #170, #171), the loose ends (#172) and the docs and README (#174). This release is what the wider public will see first.

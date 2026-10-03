@@ -1,4 +1,7 @@
-Theme: coordinator
+---
+type: Lesson
+theme: coordinator
+---
 # The coordinator playbook and its later edits: #42 the playbook, #59 limits by plan, #134 no Routines, auto-merge, CI time limit · 27–28 Sep 2026
 
 - **Numbers:** #42 estimate $4, cost and context read 0 while building (the usual early reading), one PR; the retired coordinator had cost $176 and 642k of 1M over 25 hours (26 Sep 10:18 to 27 Sep 11:11). #59 (limits by plan): estimate $3, one PR. #134: about $2.85 against a $4 estimate, about 30 minutes, 162k of context; one commit, opened as a draft straight off `main`. Its Description check failed once, then passed on an edit with no push.

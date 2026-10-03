@@ -1,3 +1,9 @@
+---
+type: Spec
+description: Passengers who dawdle and run for final call, and a tap on one to read their story.
+status: stable
+verified: { by: human:KyleLookingAround, at: 2026-09-28T10:22:57Z }
+---
 # Late runners, and a passenger's story
 
 Issue: #99, from the owner's idea board (`docs/ideas/board-2026-09.md`, first in their order) · Status: Approved (the owner rated it Love it and the brief `docs/briefs/late-runners.md` approves this spec in advance) · PRs: see `docs/systems/late-runners.md`

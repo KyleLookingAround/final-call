@@ -1,3 +1,8 @@
+---
+type: Decision
+description: "Every older save keeps loading: new state gets a default, saved fields are never renamed or removed, and real saves are checked."
+status: stable
+---
 # ADR-2026-09-26: Every older save keeps loading, forever
 
 ## Status

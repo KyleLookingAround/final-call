@@ -1,4 +1,7 @@
-Theme: ui
+---
+type: Lesson
+theme: ui
+---
 # What's new, easier to read and act on · 28 Sep 2026
 
 - **Numbers:** estimate $10; about $4.40 by the time the build, reveal and review fixes were in. The spec and draft PR went up within about five minutes, and the owner approved it while the build ran.

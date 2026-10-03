@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Systems refactor 8: weather in one place
 
 Step 8 of Part 3 of the approved systems review (`docs/specs/systems-review.md`). Its blocker, the weather you can see (#61), merged with the real airport.

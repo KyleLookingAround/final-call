@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Release batch F2, goals and levels that lead (#149)
 
 The owner, 28 Sep: finish two floors, then "a final refactor sweep, any fixes or balance fixes sweep, any easy wins, basically the game actual release at that point. Make it very polished, you can change anything to get to that point… Current feedback is that it 'really scratched a brain itch' so that's the aim." The release audit (`docs/ideas/release-audit.md`, #155) found the work and grouped it into batches that share no file. This is batch F2.

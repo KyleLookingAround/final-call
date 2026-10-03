@@ -1,5 +1,7 @@
-Theme: parts
-
+---
+type: Lesson
+theme: parts
+---
 # The coordinator's look back: two floors to release 35 · 29 Sep 2026
 
 - **Numbers:** one coordinator (03:15–10:00 UTC, $12.48 of a $12 estimate, 457k of context) ran ten sessions: F1 $12.87/$15, B1 $12.57/$15, the terminal pass $11.87/$18, the lessons tidy $5.69/$6, P3 $5.39/$12, loose ends $4.65/$6, docs $2.95/$8, P4 $2.70/$10, release 35 $2.21/$10. About $73 in all, from two floors merged (#162) to release 35 live (#175) in six and a half hours. The five-hour usage limit stopped one session once (B1, 05:14; woken at 05:23 after the reset).

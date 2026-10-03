@@ -1,4 +1,7 @@
-Theme: merge-chasing
+---
+type: Lesson
+theme: merge-chasing
+---
 # #122 Anonymous usage counts for launch week · 28 Sep 2026
 
 - **Numbers:** session `session_011MAdNbrtxzdDXk4NYnKc2N`, estimate $5: about $21 by merge, over four times the estimate. Started 04:46 UTC, PR opened 05:30, merged 10:03 — nearly four and a half hours, almost all of it CI and merge-chasing rather than building the feature (the code, checks and docs were done and green well before 06:00). `PLAY`/`STATE` differ from `main` only by the two new fields (`G.usageSent`, `G.set.usage`), as expected for any new saved field; the bot's own sanity run (seed 1, 48 hours) matched the level 1 baseline with no errors, and the Balance workflow's six jobs (three seeds, both layout options) all came back green once started.

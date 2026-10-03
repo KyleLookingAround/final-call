@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Release docs, the README and a working link to the game (#173)
 
 The owner, 29 Sep: "make sure the read me and documentation is up to date and the link is correct to the game from the readme". This is part of the release: the owner will share the repo and the game with the wider public once release 35 is out, so the README is the first thing a visitor reads.

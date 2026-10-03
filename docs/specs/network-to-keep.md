@@ -1,3 +1,9 @@
+---
+type: Spec
+description: A transport network the player has to keep up, rather than build once and forget.
+status: stable
+verified: { by: human:KyleLookingAround, at: 2026-09-28T11:15:16Z }
+---
 # A network you have to keep
 
 Issue: #96 · Status: Built · PRs: #101 (spec), #116 (build)

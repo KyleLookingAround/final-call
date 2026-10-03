@@ -1,4 +1,7 @@
-Theme: merge-chasing
+---
+type: Lesson
+theme: merge-chasing
+---
 # #94 Fewer clashes between sessions · 27 Sep 2026
 
 - **Numbers:** session `session_01745f1gBFh2e9xzRF7p4p3q`, estimate $20: $14.62 and 359k of 1M context at the merge. Started 18:16 UTC, PR opened 18:56, merged 20:02. Five merges from `main` by hand while it was open (#90, #91 with #80, #89, #81, #85 with #86), each carrying another session's new lesson, systems note or check into the new per-file folders; it was the last PR that had to. One red run: the Description check, on the footer the PR tool adds to a description (removed, no push). Checks and Balance green on every pushed head. The coordinator was asked to hold merges; `main` still moved once more before the merge. This is the baseline for the measure (merges from `main` per PR, by hand and by Catch up; the worst before was eight). Catch up's first run, on the merge, found five open PRs from before the change and commented once on each, naming the moved files (`CLAUDE.md`, `tools/build.mjs`, `docs/LESSONS.md`, `docs/SYSTEMS.md`): a one-off cost of the move, not the steady state. The tidy hasn't run yet: 45 lesson files, 44 counted as seen (the moved ones).

@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Coordinator, from 27 Sep 2026 17:00 UTC
 
 The handover brief for a fresh coordinator. The previous coordinator (`session_01D3SaEzco2RvbabJbz7WpR9`) hands over at 345k of context and $9.30. Follow the `coordinator` playbook (`.claude/skills/coordinator/SKILL.md`) with the changes below. The brief wins where they differ.

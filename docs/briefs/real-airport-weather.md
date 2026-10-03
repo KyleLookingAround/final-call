@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Weather you can see (a part of "Looks like a real airport")
 
 The coordinator's brief for one part of `docs/specs/real-airport.md`, in the second batch, with the other of weather and vehicles, after the first batch has merged. It runs at the cheaper model (`create_session` with `model: "claude-sonnet-5"`), as experiment [C]. Start it as a fresh session with this file as its first message.

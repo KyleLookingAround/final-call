@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: What's new, easier to read and act on
 
 Issue #128, raised by the owner on 28 Sep 2026. Release 35 (six merged changes, the biggest card yet) starts no earlier than 29 Sep 09:00 UTC, so this should merge before then.

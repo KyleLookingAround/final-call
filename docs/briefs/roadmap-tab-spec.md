@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: A Roadmap tab on What's new, the spec (#137)
 
 The owner, 28 Sep: "add the roadmap to the roadmap to show it on a tab of the what's new page." This session writes the spec for the owner to approve, and adds the roadmap item. It builds nothing.

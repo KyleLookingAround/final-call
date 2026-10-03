@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: The phone's top bar back on one row
 
 The owner, 27 Sep 21:40, with a screenshot from a phone in full screen on the Region: "I don't like how the buttons at the top go over 2 rows on mobile. it looked better earlier". The bar holds help, pause, 1×/2×/4×/8×, the airport/Region/world views, the transport button with its badge, full screen and sound. Today the last two wrap onto a second row, and the bar eats a band of the map. The owner starts sharing the game on 28 Sep, so this goes first.

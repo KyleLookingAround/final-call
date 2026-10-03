@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Polish audit
 
 ## Goal and what it may touch

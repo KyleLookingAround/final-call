@@ -1,3 +1,8 @@
+---
+type: Decision
+description: Each workflow runs only when its result can change, keeping the cancelling of superseded runs.
+status: stable
+---
 # ADR-2026-09-27: Run each workflow only when its result can change
 
 ## Status

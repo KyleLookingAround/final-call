@@ -1,5 +1,7 @@
-Theme: checks
-
+---
+type: Lesson
+theme: checks
+---
 # Windows and watchers · 29 Sep 2026
 
 - **Numbers:**

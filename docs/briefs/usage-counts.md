@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Anonymous usage counts for launch week
 
 The owner asked on 28 Sep 2026 for a way to know whether anyone came from the launch posts. The page has no analytics today.

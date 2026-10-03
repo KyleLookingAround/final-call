@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: "The terminal as a place": the spec, with its checks planned first
 
 The coordinator's brief for bundle 3 in `docs/ROADMAP.md`. This session writes the spec for the owner to approve. It builds nothing.

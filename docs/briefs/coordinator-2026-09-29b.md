@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Coordinator, from release 35 through launch week and the terrace
 
 A handover from `session_015T9o1ovutWffunu6oYS7ui`, the coordinator that took the game to release 35 on 29 Sep. This is the state at 10:00 UTC on 29 Sep. Follow the `coordinator` playbook, with the changes below; where they differ, this brief wins.

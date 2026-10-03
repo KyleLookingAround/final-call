@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: Passengers who suddenly speed down the piers
 
 The owner saw passengers walk to a spot and then move very fast down the terminal. A fix to how movement looks and feels, and to where it's wrong.

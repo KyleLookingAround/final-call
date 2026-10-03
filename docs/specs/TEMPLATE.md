@@ -1,8 +1,13 @@
+---
+type: Spec
+description: "<one line: what the player gets>"
+status: draft
+---
 # <Feature name>
 
 Issue: #<number> · Status: Proposed | Approved | Built · PRs: #<number>, … (added as they open)
 
-Copy this file to `docs/specs/<short-name>.md`. Keep it to a page. The owner approves it before building starts.
+Copy this file to `docs/specs/<short-name>.md`. Keep it to a page. The owner approves it before building starts. Fill in the frontmatter's description; `status` stays `draft` until the owner approves, then becomes `stable` with `verified: { by: human:KyleLookingAround, at: <the time they approved> }`.
 
 ## What the player gets
 

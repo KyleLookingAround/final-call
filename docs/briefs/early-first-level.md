@@ -1,3 +1,6 @@
+---
+type: Brief
+---
 # Brief: The first level-up within about five real minutes
 
 Answers #105 the other way. The owner decided on 28 Sep 2026 (about 04:40 UTC): bring the first real moment forward for newcomers arriving from a shared link, rather than only nudging them to 4×.

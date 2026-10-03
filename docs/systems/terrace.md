@@ -1,3 +1,8 @@
+---
+type: System
+description: "The roof terrace upgrade: a deck over the concourse where passengers and spotters watch the planes while it's dry."
+verified: { by: process:notes-review, at: 2026-09-29T20:36:46Z }
+---
 # The roof terrace
 
 **The roof terrace** (`67-terrace.js`; spec `docs/specs/terminal-place.md`, step 5 of its order of work). A Terminal upgrade from level 3 (`G.lv.terrace`, `G.level>=2`), hidden before, in the layouts whose terminal has one: Classic for now, until the floor plans part gives each layout its own.
